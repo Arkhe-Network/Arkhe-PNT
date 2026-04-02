@@ -5,8 +5,19 @@ import { motion } from 'motion/react';
 export default function AquiferSpectrogramPanel({ onClose }: { onClose?: () => void }) {
   const [coherence, setCoherence] = useState(0.85);
   const [purity, setPurity] = useState(0.92);
+  const [waterLevel, setWaterLevel] = useState(72.3);
+  const [rechargeRate, setRechargeRate] = useState(0.32);
   const [isPlaying, setIsPlaying] = useState(false);
+
+  const canvasRef = useRef<HTMLCanvasElement>(null);
   const audioCtxRef = useRef<AudioContext | null>(null);
+  const analyserRef = useRef<AnalyserNode | null>(null);
+  const animationIdRef = useRef<number | null>(null);
+  const frequencyHistoryRef = useRef<number[][]>([]);
+
+  const HISTORY_SIZE = 100;
+  const FREQ_BINS = 64;
+
   const leftOscRef = useRef<OscillatorNode | null>(null);
   const rightOscRef = useRef<OscillatorNode | null>(null);
   const noiseNodeRef = useRef<AudioBufferSourceNode | null>(null);
@@ -16,6 +27,8 @@ export default function AquiferSpectrogramPanel({ onClose }: { onClose?: () => v
     const interval = setInterval(() => {
       setCoherence(prev => Math.max(0, Math.min(1, prev + (Math.random() - 0.5) * 0.05)));
       setPurity(prev => Math.max(0, Math.min(1, prev + (Math.random() - 0.5) * 0.02)));
+      setWaterLevel(prev => Math.max(0, Math.min(100, prev + (Math.random() - 0.5))));
+      setRechargeRate(prev => Math.max(0, prev + (Math.random() - 0.5) * 0.05));
     }, 2000);
     return () => clearInterval(interval);
   }, []);
@@ -23,6 +36,10 @@ export default function AquiferSpectrogramPanel({ onClose }: { onClose?: () => v
   const initAudio = () => {
     if (!audioCtxRef.current) {
       audioCtxRef.current = new (window.AudioContext || (window as any).webkitAudioContext)();
+    }
+    if (!analyserRef.current && audioCtxRef.current) {
+      analyserRef.current = audioCtxRef.current.createAnalyser();
+      analyserRef.current.fftSize = 256;
     }
   };
 
@@ -37,14 +54,16 @@ export default function AquiferSpectrogramPanel({ onClose }: { onClose?: () => v
   const startAudio = () => {
     initAudio();
     const ctx = audioCtxRef.current!;
+    const analyser = analyserRef.current!;
     
     gainNodeRef.current = ctx.createGain();
     gainNodeRef.current.gain.value = 0.3;
-    gainNodeRef.current.connect(ctx.destination);
+    gainNodeRef.current.connect(analyser);
+    analyser.connect(ctx.destination);
 
     // Binaural Beats (Delta/Theta based on coherence)
-    const baseFreq = 100;
-    const beatFreq = coherence > 0.8 ? 4 : 8; // 4Hz (Delta) if coherent, 8Hz (Theta) if less coherent
+    const baseFreq = 200 + coherence * 800;
+    const beatFreq = coherence > 0.8 ? 4 : 8;
 
     leftOscRef.current = ctx.createOscillator();
     leftOscRef.current.type = 'sine';
@@ -77,10 +96,10 @@ export default function AquiferSpectrogramPanel({ onClose }: { onClose?: () => v
     
     const noiseFilter = ctx.createBiquadFilter();
     noiseFilter.type = 'lowpass';
-    noiseFilter.frequency.value = 400 + (1 - purity) * 2000; // Higher cutoff if less pure
+    noiseFilter.frequency.value = 400 + (1 - purity) * 2000;
     
     const noiseGain = ctx.createGain();
-    noiseGain.gain.value = (1 - purity) * 0.2; // Louder noise if less pure
+    noiseGain.gain.value = (1 - purity) * 0.2;
 
     noiseNodeRef.current.connect(noiseFilter);
     noiseFilter.connect(noiseGain);
@@ -91,19 +110,69 @@ export default function AquiferSpectrogramPanel({ onClose }: { onClose?: () => v
     noiseNodeRef.current.start();
     
     setIsPlaying(true);
+    startSpectrogramLoop();
   };
 
   const stopAudio = () => {
-    if (leftOscRef.current) leftOscRef.current.stop();
-    if (rightOscRef.current) rightOscRef.current.stop();
-    if (noiseNodeRef.current) noiseNodeRef.current.stop();
+    if (leftOscRef.current) try { leftOscRef.current.stop(); } catch(e) {}
+    if (rightOscRef.current) try { rightOscRef.current.stop(); } catch(e) {}
+    if (noiseNodeRef.current) try { noiseNodeRef.current.stop(); } catch(e) {}
+    if (animationIdRef.current) cancelAnimationFrame(animationIdRef.current);
     setIsPlaying(false);
   };
 
+  const startSpectrogramLoop = () => {
+    const draw = () => {
+      if (!analyserRef.current || !canvasRef.current) return;
+      const dataArray = new Uint8Array(analyserRef.current.frequencyBinCount);
+      analyserRef.current.getByteFrequencyData(dataArray);
+      const currentSlice = Array.from(dataArray.slice(0, FREQ_BINS));
+      frequencyHistoryRef.current.unshift(currentSlice);
+      if (frequencyHistoryRef.current.length > HISTORY_SIZE) frequencyHistoryRef.current.pop();
+      drawSpectrogram();
+      animationIdRef.current = requestAnimationFrame(draw);
+    };
+    animationIdRef.current = requestAnimationFrame(draw);
+  };
+
+  const drawSpectrogram = () => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
+    const w = canvas.width, h = canvas.height;
+    ctx.fillStyle = '#0a0a1a';
+    ctx.fillRect(0, 0, w, h);
+    const cellW = w / FREQ_BINS;
+    const cellH = h / HISTORY_SIZE;
+
+    for (let t = 0; t < frequencyHistoryRef.current.length; t++) {
+      const slice = frequencyHistoryRef.current[t];
+      if (!slice) continue;
+      for (let f = 0; f < FREQ_BINS; f++) {
+        const intensity = slice[f] / 255;
+        const r = Math.min(255, intensity * 255 * (coherence + 0.2));
+        const g = Math.min(255, intensity * 255 * (0.5 + coherence * 0.5));
+        const b = Math.min(255, intensity * 255 * (1 - coherence * 0.5));
+        ctx.fillStyle = `rgb(${Math.floor(r)}, ${Math.floor(g)}, ${Math.floor(b)})`;
+        ctx.fillRect(f * cellW, t * cellH, cellW, cellH);
+      }
+    }
+
+    if (coherence < 0.618) {
+      ctx.strokeStyle = '#ff3366';
+      ctx.lineWidth = 2;
+      ctx.setLineDash([5, 5]);
+      ctx.strokeRect(0, 0, w, h);
+    }
+  };
+
   useEffect(() => {
-    if (isPlaying && audioCtxRef.current && rightOscRef.current) {
+    if (isPlaying && audioCtxRef.current && rightOscRef.current && leftOscRef.current) {
+      const baseFreq = 200 + coherence * 800;
       const beatFreq = coherence > 0.8 ? 4 : 8;
-      rightOscRef.current.frequency.setTargetAtTime(100 + beatFreq, audioCtxRef.current.currentTime, 0.5);
+      leftOscRef.current.frequency.setTargetAtTime(baseFreq, audioCtxRef.current.currentTime, 0.5);
+      rightOscRef.current.frequency.setTargetAtTime(baseFreq + beatFreq, audioCtxRef.current.currentTime, 0.5);
     }
   }, [coherence, isPlaying]);
 
@@ -115,10 +184,10 @@ export default function AquiferSpectrogramPanel({ onClose }: { onClose?: () => v
       await ctx.audioWorklet.addModule('/archimedes-processor.js');
       const rfNode = new AudioWorkletNode(ctx, 'archimedes-processor');
       
-      // Simulate qhttp payload
       const payload = JSON.stringify({
         coherence: coherence.toFixed(4),
         purity: purity.toFixed(4),
+        waterLevel: waterLevel.toFixed(1),
         timestamp: Date.now()
       });
       
@@ -126,11 +195,17 @@ export default function AquiferSpectrogramPanel({ onClose }: { onClose?: () => v
       rfNode.connect(ctx.destination);
       
       console.log('VLF Transmission started:', payload);
-      // In a real scenario, this would connect to an SDR sink
     } catch (error) {
       console.error('Failed to load AudioWorklet:', error);
     }
   };
+
+  useEffect(() => {
+    return () => {
+      if (animationIdRef.current) cancelAnimationFrame(animationIdRef.current);
+      if (audioCtxRef.current) audioCtxRef.current.close();
+    };
+  }, []);
 
   return (
     <div className="bg-[#0a0a0c] border border-cyan-500/30 rounded-xl p-4 flex flex-col gap-4 relative overflow-hidden">
@@ -150,6 +225,9 @@ export default function AquiferSpectrogramPanel({ onClose }: { onClose?: () => v
             </div>
           </div>
         </div>
+        <div className="text-xs font-mono text-cyan-400">
+          λ₂: {coherence.toFixed(3)} | Nível: {waterLevel.toFixed(1)}%
+        </div>
         {onClose && (
           <button onClick={onClose} className="text-arkhe-muted hover:text-white font-mono text-xs">
             [X] CLOSE
@@ -157,8 +235,16 @@ export default function AquiferSpectrogramPanel({ onClose }: { onClose?: () => v
         )}
       </div>
 
+      <div className="relative z-10">
+        <canvas
+          ref={canvasRef}
+          width={800}
+          height={400}
+          className="w-full h-64 bg-black/50 rounded-lg border border-cyan-500/20"
+        />
+      </div>
+
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4 relative z-10">
-        {/* Telemetry */}
         <div className="space-y-4">
           <div className="bg-black/40 border border-cyan-500/20 rounded-lg p-3">
             <div className="flex justify-between items-center mb-2">
@@ -193,27 +279,8 @@ export default function AquiferSpectrogramPanel({ onClose }: { onClose?: () => v
               />
             </div>
           </div>
-
-          <div className="bg-black/40 border border-purple-500/20 rounded-lg p-3">
-            <div className="flex justify-between items-center mb-2">
-              <span className="font-mono text-[10px] text-arkhe-muted uppercase flex items-center gap-2">
-                <Radio className="w-3 h-3 text-purple-400" />
-                Binaural Aquifer Beats
-              </span>
-              <button 
-                onClick={toggleAudio}
-                className={`px-3 py-1 text-[10px] font-mono uppercase rounded border ${isPlaying ? 'bg-purple-500/20 border-purple-500/50 text-purple-400' : 'bg-transparent border-arkhe-border text-arkhe-muted hover:text-white'}`}
-              >
-                {isPlaying ? 'STOP AUDIO' : 'LISTEN'}
-              </button>
-            </div>
-            <div className="text-[9px] font-mono text-arkhe-muted mt-2">
-              {coherence > 0.8 ? 'Delta Waves (4Hz) - Deep Aquifer Resonance' : 'Theta Waves (8Hz) - Surface Recharge Turbulence'}
-            </div>
-          </div>
         </div>
 
-        {/* ZK Proof & Actions */}
         <div className="space-y-4">
           <div className="bg-black/40 border border-amber-500/20 rounded-lg p-3 h-full flex flex-col">
             <h3 className="font-mono text-[10px] text-amber-400 uppercase mb-2 flex items-center gap-2">
@@ -227,18 +294,18 @@ export default function AquiferSpectrogramPanel({ onClose }: { onClose?: () => v
               </div>
               <div className="flex justify-between text-[10px] font-mono">
                 <span className="text-arkhe-muted">Recharge Rate:</span>
-                <span className="text-emerald-400">15.8 L/s</span>
+                <span className="text-emerald-400">{rechargeRate.toFixed(2)} m³/s</span>
               </div>
               <div className="flex justify-between text-[10px] font-mono">
                 <span className="text-arkhe-muted">ZK Proof Status:</span>
                 <span className="text-cyan-400">VALID (Groth16)</span>
               </div>
-              <div className="mt-2 p-2 bg-amber-500/10 border border-amber-500/30 rounded text-[9px] font-mono text-amber-500/70 break-all">
-                Proof: 0x042a...8f9b | Nullifier: 0x77c1...3a2e
-              </div>
             </div>
             <div className="flex gap-2 mt-3">
-              <button className="flex-1 py-1.5 bg-amber-500/10 hover:bg-amber-500/20 border border-amber-500/30 text-amber-400 text-[10px] font-mono uppercase rounded transition-colors">
+              <button
+                onClick={() => alert('Prova ZK enviada')}
+                className="flex-1 py-1.5 bg-amber-500/10 hover:bg-amber-500/20 border border-amber-500/30 text-amber-400 text-[10px] font-mono uppercase rounded transition-colors"
+              >
                 Generate ZK Proof
               </button>
               <button onClick={exportToVLF} className="flex-1 py-1.5 bg-cyan-500/10 hover:bg-cyan-500/20 border border-cyan-500/30 text-cyan-400 text-[10px] font-mono uppercase rounded transition-colors">
@@ -247,6 +314,16 @@ export default function AquiferSpectrogramPanel({ onClose }: { onClose?: () => v
             </div>
           </div>
         </div>
+      </div>
+
+      <div className="flex gap-4 justify-between mt-auto relative z-10 border-t border-cyan-500/10 pt-3">
+        <button
+          onClick={toggleAudio}
+          className={`flex-1 py-2 font-mono text-xs uppercase rounded border flex items-center justify-center gap-2 transition-all ${isPlaying ? 'bg-purple-500/20 border-purple-500/50 text-purple-400 shadow-[0_0_10px_rgba(168,85,247,0.2)]' : 'bg-transparent border-cyan-500/30 text-cyan-400 hover:bg-cyan-500/10'}`}
+        >
+          <Radio className={`w-4 h-4 ${isPlaying ? 'animate-pulse' : ''}`} />
+          {isPlaying ? 'STOP AQUIFER AUDIO' : '🎧 LISTEN TO AQUIFER'}
+        </button>
       </div>
     </div>
   );
