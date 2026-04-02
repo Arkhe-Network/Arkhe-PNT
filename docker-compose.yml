@@ -94,6 +94,17 @@ services:
     networks:
       - arkhe-net
 
+  mesh-node:
+    build:
+      context: .
+      dockerfile: Dockerfile.mesh-node
+    environment:
+      - MESH_LLM_JOIN_TOKEN=${MESH_LLM_JOIN_TOKEN:-eyJpZCI6IjhkNjkzYjg5ZmE2MzliYTEzZWVkYmIyYmE3NTc2ZDYwMWVkY2EzY2JkODEwZDk3NTE3ZDdkYTlkYzlkMzllOWUiLCJhZGRycyI6W3siUmVsYXkiOiJodHRwczovL21lc2gtbGxtLXJlbGF5LmZseS5kZXYuLyJ9LHsiSXAiOiIxNzIuMTkuMTIuNTg6NTQxMTMifSx7IklwIjoiMTcyLjE5LjEyLjU5OjU0MTEzIn0seyJJcCI6IlsyNjA1OjRjNDA6MzM6MTQ1ODowOjk1MzE6YzNkYToxXTo0OTY0MCJ9XX0}
+    ports:
+      - "9337:9337"
+    networks:
+      - arkhe-net
+
 networks:
   arkhe-net:
     driver: bridge
