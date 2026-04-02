@@ -604,6 +604,22 @@ export function setupRoutes(app: express.Express, broadcastState: () => void, cl
   });
 
   // API to update parameters
+  app.post("/api/mcp/connect-plurality", (req, res) => {
+    const url = "https://app.plurality.network/mcp";
+    if (!state.edge.mcpConnections.includes(url)) {
+      state.edge.mcpConnections.push(url);
+    }
+
+    // Broadcast state to all SSE clients
+    broadcastState();
+
+    res.json({
+      success: true,
+      url,
+      connections: state.edge.mcpConnections
+    });
+  });
+
   app.post("/api/parameters", (req, res) => {
     const { autoMitigate, couplingStrength, lambdaThreshold } = req.body;
     if (autoMitigate !== undefined) state.parameters.autoMitigate = autoMitigate;

@@ -59,6 +59,7 @@ import CollectiveIntelligencePanel from './components/CollectiveIntelligencePane
 import AgentManagementPanel from './components/AgentManagementPanel';
 import AquiferSpectrogramPanel from './components/AquiferSpectrogramPanel';
 import UnifiedOntologyPanel from './components/UnifiedOntologyPanel';
+import PluralityMCPPanel from './components/PluralityMCPPanel';
 import { ConsensusMeter } from './components/ConsensusMeter';
 import { CommandCenter } from './components/CommandCenter';
 import { useArkheSimulation } from './hooks/useArkheSimulation';
@@ -109,6 +110,7 @@ export function Dashboard() {
   const [showAgentManagement, setShowAgentManagement] = useState(false);
   const [showAquiferSpectrogram, setShowAquiferSpectrogram] = useState(false);
   const [showUnifiedOntology, setShowUnifiedOntology] = useState(false);
+  const [showPluralityMCP, setShowPluralityMCP] = useState(false);
   const attackTypes = ['Jamming', 'Time Shift', 'Data Spoofing', 'BGP Jitter', 'Quantum Shor', 'SEU Radiation'];
   const [timeToGenesis, setTimeToGenesis] = useState('');
 
@@ -297,6 +299,7 @@ export function Dashboard() {
             setShowAgentManagement={setShowAgentManagement}
             setShowAquiferSpectrogram={setShowAquiferSpectrogram}
             setShowUnifiedOntology={setShowUnifiedOntology}
+            setShowPluralityMCP={setShowPluralityMCP}
             parameters={state.parameters}
           />
         </div>
@@ -378,6 +381,9 @@ export function Dashboard() {
             <DysonSphereTelemetry />
           </div>
         </div>
+      )}
+      {showPluralityMCP && (
+        <PluralityMCPPanel onClose={() => setShowPluralityMCP(false)} />
       )}
     </div>
   );
