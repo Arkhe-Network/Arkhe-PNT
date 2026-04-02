@@ -1,0 +1,19 @@
+FROM python:3.11-slim
+
+# Install system dependencies
+RUN apt-get update && apt-get install -y \
+    curl \
+    ca-certificates \
+    && rm -rf /var/lib/apt/lists/*
+
+# Install mesh-llm non-interactively
+ENV MESH_LLM_INSTALL_FLAVOR=cpu
+RUN curl -fsSL https://raw.githubusercontent.com/michaelneale/mesh-llm/main/install.sh | bash
+
+WORKDIR /app
+COPY . .
+
+ENV MESH_LLM_BIN=/usr/local/bin/mesh-llm
+ENV PYTHONPATH=/app
+
+CMD ["python3", "src/lib/mesh_llm_manager.py"]
