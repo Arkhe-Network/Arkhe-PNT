@@ -23,7 +23,7 @@
     "@opentelemetry/resources": "^2.6.1",
     "@opentelemetry/sdk-logs": "^0.214.0",
     "@opentelemetry/semantic-conventions": "^1.40.0",
-    "@tailwindcss/vite": "^4.2.1",
+    "@tailwindcss/vite": "^4.2.2",
     "@vitejs/plugin-react": "^6.0.1",
     "better-sqlite3": "^12.8.0",
     "bitcoinjs-lib": "^7.0.1",
