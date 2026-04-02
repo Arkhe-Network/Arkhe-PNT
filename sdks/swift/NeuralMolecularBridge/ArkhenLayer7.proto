@@ -1,0 +1,29 @@
+syntax = "proto3";
+
+package arkhen.layer7;
+
+option swift_prefix = "Arkhen_";
+
+// The ConsciousnessPayload represents the translation of raw biological 
+// stochasticity into the ℂ × ℤ → ℝ⁴ ontology.
+message ConsciousnessPayload {
+  string node_id = 1;              // Unique identifier for the biological node (human)
+  double heart_rate = 2;           // BPM (Beats Per Minute)
+  double hrv_sdnn = 3;             // Heart Rate Variability (Stochastic noise)
+  double coherence_index = 4;      // Derived coherence (0.0 to 1.0) mapping to λ₂
+  int64 timestamp = 5;             // Unix timestamp in milliseconds
+  bytes raw_entropy = 6;           // Raw biometric noise for quantum seeding
+}
+
+message IngestionResponse {
+  bool acknowledged = 1;
+  double lambda_adjustment = 2;    // Feedback from the Arkhe(n) system to the bio-node
+  string phase_state = 3;          // Current phase state of the MultiverseManager
+}
+
+// The MultiverseManager acts as the receiver for Layer 7 biological inputs
+service MultiverseManager {
+  // Bidirectional stream: Bio-node streams consciousness payloads, 
+  // Arkhe(n) streams back lambda adjustments and phase states.
+  rpc StreamConsciousness(stream ConsciousnessPayload) returns (stream IngestionResponse);
+}

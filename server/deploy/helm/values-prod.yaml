@@ -1,0 +1,49 @@
+# Configurações globais para Produção
+global:
+  namespace: arkhe-system
+  
+# Constantes MUT (Mydland Unified Theory)
+mydland:
+  k1: 0.015311
+  k2: 0.05200
+  k3: 0.233
+  k4: 0.09778
+  lambda: 0.001013
+  rho_eq: 0.367879
+  target_phase: 1.57079632679  # π/2
+  
+# Configuração do Ray Cluster (Produção)
+ray-cluster:
+  enabled: true
+  head:
+    resources:
+      cpu: 8
+      memory: 32Gi
+  worker:
+    replicas: 16
+    minReplicas: 8
+    maxReplicas: 32
+    resources:
+      gpu: 8
+      memory: 1024Gi
+      cpu: 128
+    
+# Configuração do gRPC Telemetry
+grpc-telemetry:
+  enabled: true
+  replicas: 5
+  port: 50051
+  qhttp:
+    enabled: true
+    phaseUpdateIntervalMs: 50
+    
+# Configuração Hashtree P2P
+hashtree-p2p:
+  enabled: true
+  replicas: 10
+  nostrRelays:
+    - "wss://relay.damus.io"
+    - "wss://nos.lol"
+    - "wss://relay.nostr.band"
+  storageClass: "premium-rwo"
+  storageSize: "500Gi"

@@ -1,0 +1,22 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: trading-engine
+  labels:
+    app: trading-engine
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: trading-engine
+  template:
+    metadata:
+      labels:
+        app: trading-engine
+    spec:
+      containers:
+      - name: trading-engine
+        image: trading-engine:latest
+        env:
+        - name: ARKHE_API_URL
+          value: "http://arkhe-server"

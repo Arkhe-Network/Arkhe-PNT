@@ -1,0 +1,13 @@
+{
+  "name": "@hyperspaceai/arkhen-sdk",
+  "version": "1.0.0",
+  "description": "JavaScript/TypeScript SDK for Arkhe(n) Hybrid Architecture",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc"
+  },
+  "devDependencies": {
+    "typescript": "^5.0.0"
+  }
+}

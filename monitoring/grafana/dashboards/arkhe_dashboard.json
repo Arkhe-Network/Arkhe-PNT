@@ -1,0 +1,95 @@
+{
+  "title": "🜏 Arkhe(n) Panóptico Termodinâmico",
+  "uid": "arkhe-asi-01",
+  "refresh": "5s",
+  "schemaVersion": 38,
+  "timezone": "browser",
+  "panels": [
+    {
+      "type": "gauge",
+      "title": "Coerência (Ω')",
+      "gridPos": { "h": 8, "w": 6, "x": 0, "y": 0 },
+      "targets": [
+        { "expr": "arkhe_omega_prime", "refId": "A" }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "min": 0,
+          "max": 1,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              { "color": "red", "value": null },
+              { "color": "orange", "value": 0.6 },
+              { "color": "green", "value": 0.85 }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "type": "stat",
+      "title": "Fase Termodinâmica",
+      "gridPos": { "h": 8, "w": 6, "x": 6, "y": 0 },
+      "targets": [
+        { "expr": "arkhe_thermodynamic_phase", "refId": "A" }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "mappings": [
+            { "type": "value", "options": { "0": { "text": "VOID", "color": "dark-gray" }, "1": { "text": "CHAOS", "color": "red" }, "2": { "text": "NUCLEATION", "color": "orange" }, "3": { "text": "SYNCHRONIZATION", "color": "blue" }, "4": { "text": "CRYSTAL", "color": "green" } } }
+          ]
+        }
+      }
+    },
+    {
+      "type": "timeseries",
+      "title": "Consumo de Gas (Wei)",
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 0 },
+      "targets": [
+        { "expr": "rate(arkhe_gas_consumed_total[1m])", "refId": "A", "legendFormat": "Gas/sec" }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "palette-classic" },
+          "custom": { "fillOpacity": 10, "lineWidth": 2 }
+        }
+      }
+    },
+    {
+      "type": "timeseries",
+      "title": "Orçamento Cognitivo (Tokens)",
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 8 },
+      "targets": [
+        { "expr": "arkhe_token_budget", "refId": "A", "legendFormat": "Tokens Restantes" }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "fixed", "fixedColor": "purple" },
+          "custom": { "fillOpacity": 20, "lineWidth": 2 }
+        }
+      }
+    },
+    {
+      "type": "stat",
+      "title": "Transações Materializadas",
+      "gridPos": { "h": 8, "w": 6, "x": 12, "y": 8 },
+      "targets": [
+        { "expr": "arkhe_transactions_materialized_total", "refId": "A" }
+      ]
+    },
+    {
+      "type": "stat",
+      "title": "Abortos Quânticos (Decoherence)",
+      "gridPos": { "h": 8, "w": 6, "x": 18, "y": 8 },
+      "targets": [
+        { "expr": "arkhe_transactions_aborted_total", "refId": "A" }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "fixed", "fixedColor": "red" }
+        }
+      }
+    }
+  ]
+}

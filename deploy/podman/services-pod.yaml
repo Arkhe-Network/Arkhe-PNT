@@ -1,0 +1,73 @@
+# ============================================================================
+# SERVICES POD - PYTHON MICROSERVICES
+# ============================================================================
+
+apiVersion: v1
+kind: Pod
+metadata:
+  name: arkhe-services
+  labels:
+    app: arkhe
+    component: services
+spec:
+  hostname: arkhe-services
+  restartPolicy: Always
+  
+  containers:
+  
+  # PAYMENTS SERVICE
+  - name: payments
+    image: localhost/arkhe-payments:latest
+    ports:
+    - containerPort: 8001
+      hostPort: 8001
+    
+    env:
+    - name: DATABASE_URL
+      value: postgres://arkhe:arkhe@arkhe-main:5432/arkhe
+    - name: WEB3_PROVIDER_URL
+      valueFrom:
+        secretKeyRef:
+          name: arkhe-secrets
+          key: web3-provider
+    - name: CONTRACT_ADDRESS
+      valueFrom:
+        secretKeyRef:
+          name: arkhe-secrets
+          key: contract-address
+    
+    securityContext:
+      runAsNonRoot: true
+      runAsUser: 1000
+  
+  # NOTIFICATIONS SERVICE
+  - name: notifications
+    image: localhost/arkhe-notifications:latest
+    ports:
+    - containerPort: 8002
+      hostPort: 8002
+    
+    env:
+    - name: DATABASE_URL
+      value: postgres://arkhe:arkhe@arkhe-main:5432/arkhe
+    - name: REDIS_URL
+      value: redis://arkhe-main:6379
+    
+    securityContext:
+      runAsNonRoot: true
+      runAsUser: 1000
+  
+  # ANALYTICS SERVICE
+  - name: analytics
+    image: localhost/arkhe-analytics:latest
+    ports:
+    - containerPort: 8003
+      hostPort: 8003
+    
+    env:
+    - name: DATABASE_URL
+      value: postgres://arkhe:arkhe@arkhe-main:5432/arkhe
+    
+    securityContext:
+      runAsNonRoot: true
+      runAsUser: 1000

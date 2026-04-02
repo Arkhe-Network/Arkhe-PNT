@@ -1,0 +1,42 @@
+# Usa uma imagem base Python leve e segura
+FROM python:3.11-slim-bullseye
+
+# Define o diretório de trabalho
+WORKDIR /app
+
+# Instala dependências do sistema necessárias para compilar bibliotecas criptográficas
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    gcc \
+    libffi-dev \
+    libssl-dev \
+    && rm -rf /var/lib/apt/lists/*
+
+# Cria um usuário não-root para executar o relayer
+RUN useradd -m -s /bin/bash relayeruser
+
+# Copia os requisitos e instala as dependências Python
+# (Assumindo que você tem um requirements.txt ou similar para o relayer)
+# COPY src/execution/requirements.txt .
+# RUN pip install --no-cache-dir -r requirements.txt
+# Para este exemplo, instalamos as dependências chave diretamente:
+RUN pip install --no-cache-dir web3 eth-account pydantic
+
+# Copia o código do relayer
+COPY src/execution/ /app/src/execution/
+COPY src/homeostasis/ /app/src/homeostasis/
+COPY src/quantum/ /app/src/quantum/
+COPY src/cognitive/ /app/src/cognitive/
+
+# Ajusta as permissões
+RUN chown -R relayeruser:relayeruser /app
+
+# Muda para o usuário não-root
+USER relayeruser
+
+# Define variáveis de ambiente padrão (podem ser sobrescritas no docker-compose)
+ENV PYTHONPATH=/app/src
+ENV PYTHONUNBUFFERED=1
+
+# Comando para iniciar o relayer (ajuste conforme o seu entrypoint)
+# Se for um script que fica em loop ouvindo uma fila/API:
+CMD ["python", "-m", "execution.quantum_relayer"]

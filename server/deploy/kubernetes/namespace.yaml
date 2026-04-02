@@ -1,0 +1,8 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: arkhe-system
+  labels:
+    name: arkhe-system
+    teknet.io/layer: "13"
+    teknet.io/coherence: "omega-prime"

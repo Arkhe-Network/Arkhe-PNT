@@ -1,0 +1,72 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: arkhen-core
+  namespace: arkhen-system
+  labels:
+    app: arkhen-core
+    domain: hybrid-compute
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: arkhen-core
+  template:
+    metadata:
+      labels:
+        app: arkhen-core
+        tier: tzinor-gate
+    spec:
+      containers:
+      - name: arkhen-node
+        image: hyperspaceai/arkhen:latest
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 3000
+          name: http-web
+        env:
+        - name: NODE_ENV
+          value: "production"
+        - name: TZINOR_GATE_ENABLED
+          value: "true"
+        - name: WASM_CORE_MEMORY_MB
+          value: "1024"
+        resources:
+          requests:
+            cpu: "2"
+            memory: "4Gi"
+          limits:
+            cpu: "8"
+            memory: "16Gi"
+        livenessProbe:
+          httpGet:
+            path: /api/health
+            port: 3000
+          initialDelaySeconds: 15
+          periodSeconds: 20
+        readinessProbe:
+          httpGet:
+            path: /api/health
+            port: 3000
+          initialDelaySeconds: 5
+          periodSeconds: 10
+---
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: arkhen-core-hpa
+  namespace: arkhen-system
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: arkhen-core
+  minReplicas: 3
+  maxReplicas: 100
+  metrics:
+  - type: Resource
+    resource:
+      name: cpu
+      target:
+        type: Utilization
+        averageUtilization: 75

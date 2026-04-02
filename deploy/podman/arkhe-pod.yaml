@@ -1,0 +1,226 @@
+# ============================================================================
+# ARKHE(N) KUBERNETES-STYLE POD DEFINITION FOR PODMAN
+# ============================================================================
+
+apiVersion: v1
+kind: Pod
+metadata:
+  name: arkhe-main
+  labels:
+    app: arkhe
+    component: main
+    coherence: "high"
+spec:
+  # Shared resources
+  hostname: arkhe-node
+  restartPolicy: Always
+  
+  # Shared volumes
+  volumes:
+  - name: phase-data
+    hostPath:
+      path: /var/lib/arkhe/phase
+      type: DirectoryOrCreate
+  - name: tor-data
+    hostPath:
+      path: /var/lib/arkhe/tor
+      type: DirectoryOrCreate
+  - name: postgres-data
+    hostPath:
+      path: /var/lib/arkhe/postgres
+      type: DirectoryOrCreate
+  - name: redis-data
+    hostPath:
+      path: /var/lib/arkhe/redis
+      type: DirectoryOrCreate
+  - name: config
+    hostPath:
+      path: /etc/arkhe
+      type: Directory
+  
+  # Container definitions
+  containers:
+  
+  # ==========================================================================
+  # CORE SERVICE (Rust)
+  # ==========================================================================
+  - name: arkhe-core
+    image: localhost/arkhe-core:latest
+    ports:
+    - containerPort: 8080
+      hostPort: 8080
+    - containerPort: 9090
+      hostPort: 9090
+    
+    env:
+    - name: RUST_LOG
+      value: info
+    - name: PHI
+      value: "1.618033988749895"
+    - name: DATABASE_URL
+      value: postgres://arkhe:arkhe@localhost:5432/arkhe
+    - name: REDIS_URL
+      value: redis://localhost:6379
+    
+    volumeMounts:
+    - name: phase-data
+      mountPath: /var/lib/arkhe/phase
+    - name: config
+      mountPath: /etc/arkhe:ro
+    
+    resources:
+      limits:
+        memory: 512Mi
+        cpu: 500m
+      requests:
+        memory: 256Mi
+        cpu: 250m
+    
+    securityContext:
+      runAsNonRoot: true
+      runAsUser: 1000
+      readOnlyRootFilesystem: true
+    
+    livenessProbe:
+      httpGet:
+        path: /health
+        port: 8080
+      initialDelaySeconds: 10
+      periodSeconds: 10
+    
+    readinessProbe:
+      httpGet:
+        path: /ready
+        port: 8080
+      initialDelaySeconds: 5
+      periodSeconds: 5
+  
+  # ==========================================================================
+  # API SERVICE (Go)
+  # ==========================================================================
+  - name: arkhe-api
+    image: localhost/arkhe-api:latest
+    ports:
+    - containerPort: 8081
+      hostPort: 8081
+    - containerPort: 8443
+      hostPort: 8443
+    
+    env:
+    - name: GIN_MODE
+      value: release
+    - name: DATABASE_URL
+      value: postgres://arkhe:arkhe@localhost:5432/arkhe
+    - name: REDIS_URL
+      value: redis://localhost:6379
+    - name: TZINOR_ENABLED
+      value: "true"
+    
+    resources:
+      limits:
+        memory: 256Mi
+        cpu: 500m
+      requests:
+        memory: 128Mi
+        cpu: 100m
+    
+    securityContext:
+      runAsNonRoot: true
+      runAsUser: 1000
+  
+  # ==========================================================================
+  # FRONTEND (nginx)
+  # ==========================================================================
+  - name: arkhe-frontend
+    image: localhost/arkhe-frontend:latest
+    ports:
+    - containerPort: 80
+      hostPort: 80
+    
+    resources:
+      limits:
+        memory: 128Mi
+        cpu: 100m
+    
+    securityContext:
+      runAsNonRoot: true
+      runAsUser: 101  # nginx user
+  
+  # ==========================================================================
+  # POSTGRES DATABASE
+  # ==========================================================================
+  - name: postgres
+    image: docker.io/postgres:15-alpine
+    ports:
+    - containerPort: 5432
+      hostPort: 5432
+    
+    env:
+    - name: POSTGRES_USER
+      value: arkhe
+    - name: POSTGRES_PASSWORD
+      valueFrom:
+        secretKeyRef:
+          name: arkhe-secrets
+          key: db-password
+    
+    volumeMounts:
+    - name: postgres-data
+      mountPath: /var/lib/postgresql/data
+    
+    resources:
+      limits:
+        memory: 512Mi
+        cpu: 500m
+    
+    securityContext:
+      runAsNonRoot: true
+      runAsUser: 999  # postgres user
+  
+  # ==========================================================================
+  # REDIS CACHE
+  # ==========================================================================
+  - name: redis
+    image: docker.io/redis:7-alpine
+    ports:
+    - containerPort: 6379
+      hostPort: 6379
+    
+    volumeMounts:
+    - name: redis-data
+      mountPath: /data
+    
+    resources:
+      limits:
+        memory: 128Mi
+        cpu: 100m
+    
+    securityContext:
+      runAsNonRoot: true
+      runAsUser: 999
+  
+  # ==========================================================================
+  # TOR HIDDEN SERVICE
+  # ==========================================================================
+  - name: tor
+    image: docker.io/gold/tor:latest
+    ports:
+    - containerPort: 9050
+      hostPort: 9050
+    - containerPort: 9051
+      hostPort: 9051
+    
+    volumeMounts:
+    - name: tor-data
+      mountPath: /var/lib/tor
+    - name: config
+      mountPath: /etc/tor:ro
+    
+    resources:
+      limits:
+        memory: 128Mi
+        cpu: 100m
+    
+    securityContext:
+      runAsNonRoot: true
+      runAsUser: 100

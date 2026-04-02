@@ -1,0 +1,101 @@
+apiVersion: ray.io/v1
+kind: RayCluster
+metadata:
+  name: arkhe-resonance-cluster
+  namespace: arkhe-system
+  labels:
+    ray.io/cluster: arkhe-resonance
+    teknet.io/phase-monitor: "enabled"
+spec:
+  rayVersion: '2.9.0'
+  enableInTreeAutoscaling: true
+  autoscalerOptions:
+    upscalingMode: Default
+    idleTimeoutSeconds: 300
+    resources:
+      limits:
+        nvidia.com/gpu: "8"
+      requests:
+        nvidia.com/gpu: "8"
+  headGroupSpec:
+    serviceType: ClusterIP
+    replicas: 1
+    rayStartParams:
+      dashboard-host: '0.0.0.0'
+      num-cpus: '0'
+    template:
+      spec:
+        containers:
+        - name: ray-head
+          image: tzinor/arkhe-ray:2.9.0-cuda12
+          ports:
+          - containerPort: 6379
+            name: gcs
+          - containerPort: 8265
+            name: dashboard
+          - containerPort: 10001
+            name: client
+          resources:
+            limits:
+              cpu: "4"
+              memory: "16Gi"
+          env:
+          - name: RAY_head_node_port
+            value: "6379"
+          - name: ARKHE_RESONANCE_TARGET
+            value: "1.57079632679"  # π/2
+          - name: MYDLAND_K1
+            value: "0.015311"
+          - name: MYDLAND_K2
+            value: "0.05200"
+          volumeMounts:
+          - name: shared-memory
+            mountPath: /dev/shm
+        volumes:
+        - name: shared-memory
+          emptyDir:
+            medium: Memory
+            sizeLimit: "8Gi"
+  workerGroupSpecs:
+  - replicas: 7
+    minReplicas: 3
+    maxReplicas: 15
+    groupName: gpu-worker
+    rayStartParams:
+      num-gpus: "8"
+    template:
+      spec:
+        containers:
+        - name: ray-worker
+          image: tzinor/arkhe-ray:2.9.0-cuda12
+          resources:
+            limits:
+              nvidia.com/gpu: "8"
+              memory: "512Gi"
+              cpu: "96"
+            requests:
+              nvidia.com/gpu: "8"
+              memory: "512Gi"
+              cpu: "96"
+          env:
+          - name: NCCL_DEBUG
+            value: "WARN"
+          - name: NCCL_IB_DISABLE
+            value: "0"
+          - name: NCCL_SOCKET_IFNAME
+            value: "^docker0,lo"
+          - name: ARKHE_RESONANCE_ENABLED
+            value: "true"
+          volumeMounts:
+          - name: shared-memory
+            mountPath: /dev/shm
+          - name: model-cache
+            mountPath: /models
+        volumes:
+        - name: shared-memory
+          emptyDir:
+            medium: Memory
+            sizeLimit: "64Gi"
+        - name: model-cache
+          persistentVolumeClaim:
+            claimName: arkhe-model-pvc

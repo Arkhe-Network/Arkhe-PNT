@@ -1,0 +1,51 @@
+syntax = "proto3";
+
+package arkhe.agents;
+
+service AgentManagement {
+    // Registra um novo agente na rede Arkhe(n)
+    rpc RegisterAgent (AgentRegistrationRequest) returns (AgentRegistrationResponse);
+    
+    // Stream bidirecional para receber tarefas e reportar progresso
+    rpc TaskStream (stream AgentStatusReport) returns (stream Task);
+}
+
+message AgentRegistrationRequest {
+    string agent_id = 1;
+    string agent_type = 2; // "research", "inference", "orchestration", "validation"
+    repeated string capabilities = 3;
+    string pubkey = 4;
+}
+
+message AgentRegistrationResponse {
+    bool success = 1;
+    string session_token = 2;
+    double initial_coherence = 3;
+    string message = 4;
+}
+
+message Task {
+    string task_id = 1;
+    string task_type = 2;
+    bytes payload = 3;
+    double required_coherence = 4;
+    uint64 deadline_ns = 5;
+}
+
+message AgentStatusReport {
+    string agent_id = 1;
+    string session_token = 2;
+    string current_task_id = 3;
+    TaskStatus status = 4;
+    double coherence = 5;
+    string logs = 6;
+    bytes result_payload = 7;
+}
+
+enum TaskStatus {
+    TASK_UNKNOWN = 0;
+    TASK_IDLE = 1;
+    TASK_IN_PROGRESS = 2;
+    TASK_COMPLETED = 3;
+    TASK_FAILED = 4;
+}

@@ -1,0 +1,36 @@
+apiVersion: admissionregistration.k8s.io/v1
+kind: ValidatingWebhookConfiguration
+metadata:
+  name: sintet-secure-boot-webhook
+  labels:
+    app: arkhe-sintet
+    component: secure-boot
+spec:
+  webhooks:
+    - name: secure-boot.sintet.arkhe.network
+      clientConfig:
+        service:
+          name: arkhe-server
+          namespace: arkhe-system
+          path: "/api/sintet/secure-boot/validate"
+          port: 3000
+        caBundle: "Cg==" # Substituído em tempo de deploy pelo CA do cluster
+      rules:
+        - operations: ["CREATE", "UPDATE"]
+          apiGroups: [""]
+          apiVersions: ["v1"]
+          resources: ["pods"]
+      failurePolicy: Fail # Impede a execução se o webhook falhar ou a assinatura for inválida
+      sideEffects: None
+      admissionReviewVersions: ["v1", "v1beta1"]
+      namespaceSelector:
+        matchLabels:
+          sintet-secure-boot: "enabled"
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: sintet-cluster
+  labels:
+    sintet-secure-boot: "enabled"
+    arkhe-coherence: "strict"

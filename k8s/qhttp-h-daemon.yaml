@@ -1,0 +1,22 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: qhttp-h-daemon
+  labels:
+    app: qhttp-h-daemon
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: qhttp-h-daemon
+  template:
+    metadata:
+      labels:
+        app: qhttp-h-daemon
+    spec:
+      containers:
+      - name: qhttp-h-daemon
+        image: qhttp-h-daemon:latest
+        env:
+        - name: ARKHE_ORACLE_URL
+          value: "http://arkhe-server/api/consensus"

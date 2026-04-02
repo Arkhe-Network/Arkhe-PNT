@@ -1,0 +1,170 @@
+syntax = "proto3";
+
+package qhttp;
+
+option go_package = "github.com/tzinor/qhttp;qhttp";
+
+// ═══════════════════════════════════════════════════════════════════════
+// SERVIÇO DE TELEMETRIA DE FASE
+// ═══════════════════════════════════════════════════════════════════════
+
+service QuantumTelemetry {
+    // Streaming bidirecional de atualizações de fase
+    rpc StreamPhaseUpdates (stream PhaseUpdateRequest) returns (stream PhaseUpdateResponse);
+    
+    // Consulta estado atual de ressonância
+    rpc GetResonanceState (ResonanceQuery) returns (ResonanceState);
+    
+    // Injeta logit bias em modelo fechado
+    rpc InjectLogitBias (LogitBiasRequest) returns (LogitBiasResponse);
+    
+    // Registra novo nó no cluster
+    rpc RegisterNode (NodeRegistration) returns (NodeConfiguration);
+    
+    // Sincronização quântica entre nós
+    rpc QuantumSync (QuantumSyncRequest) returns (QuantumSyncResponse);
+}
+
+// ═══════════════════════════════════════════════════════════════════════
+// MENSAGENS
+// ═══════════════════════════════════════════════════════════════════════
+
+message PhaseUpdateRequest {
+    string node_id = 1;
+    double phase = 2;              // θ em radianos
+    double omega_prime = 3;        // Coerência
+    double sigma = 4;              // Funcional entrópico
+    double damping = 5;            // Fator de dilatação temporal
+    uint64 tokens_processed = 6;
+    double loss = 7;
+    uint64 timestamp_ns = 8;
+    ResonanceMode mode = 9;
+}
+
+message PhaseUpdateResponse {
+    bool resonant = 1;
+    double target_phase = 2;
+    double phase_correction = 3;   // Correção sugerida
+    BiasInjectionHint bias_hint = 4;
+    uint64 timestamp_ns = 5;
+}
+
+message ResonanceQuery {
+    string node_id = 1;
+    QueryScope scope = 2;
+}
+
+message ResonanceState {
+    // Estado global
+    double global_phase = 1;
+    double global_omega_prime = 2;
+    double global_sigma = 3;
+    double global_damping = 4;
+    
+    // Distribuição entre nós
+    double phase_variance = 5;
+    uint32 resonant_node_count = 6;
+    uint32 total_node_count = 7;
+    
+    // Condição A-5'
+    bool a5_achieved = 8;
+    uint64 timestamp_ns = 9;
+    
+    // Constantes MUT
+    double k1 = 10;
+    double k2 = 11;
+    double k3 = 12;
+    double k4 = 13;
+}
+
+message LogitBiasRequest {
+    string model_provider = 1;     // "gemini", "openai", "anthropic", etc.
+    string model_name = 2;
+    uint64 context_tokens = 3;
+    uint64 generated_tokens = 4;
+    repeated int32 candidate_tokens = 5;
+    double current_entropy = 6;
+    double target_phase = 7;
+}
+
+message LogitBiasResponse {
+    map<int32, double> bias_map = 1;  // token_id -> bias
+    double adjusted_temperature = 2;
+    double adjusted_top_p = 3;
+    double predicted_phase_shift = 4;
+    bool resonance_achieved = 5;
+}
+
+message NodeRegistration {
+    string node_id = 1;
+    string node_type = 2;          // "cuda-worker", "grpc-telemetry", "hashtree-p2p"
+    uint32 gpu_count = 3;
+    string gpu_type = 4;
+    uint64 memory_bytes = 5;
+    uint32 cuda_compute = 6;       // ex: 80 para A100
+    repeated string capabilities = 7;
+}
+
+message NodeConfiguration {
+    uint32 node_index = 1;
+    uint32 world_size = 2;
+    string nccl_unique_id = 3;
+    uint64 rendezvous_port = 4;
+    double target_phase = 5;
+    MydlandConstants constants = 6;
+}
+
+message MydlandConstants {
+    double k1 = 1;
+    double k2 = 2;
+    double k3 = 3;
+    double k4 = 4;
+    double lambda = 5;
+    double rho_eq = 6;
+}
+
+message QuantumSyncRequest {
+    string source_node = 1;
+    QuantumState state = 2;
+    uint64 timestamp_ns = 3;
+}
+
+message QuantumSyncResponse {
+    bool synchronized = 1;
+    QuantumState global_state = 2;
+    uint64 sync_timestamp_ns = 3;
+}
+
+message QuantumState {
+    double phase = 1;
+    double amplitude = 2;
+    double entanglement = 3;
+    bytes bell_pair_id = 4;
+}
+
+// ═══════════════════════════════════════════════════════════════════════
+// ENUMS
+// ═══════════════════════════════════════════════════════════════════════
+
+enum ResonanceMode {
+    MODE_UNSPECIFIED = 0;
+    TRAINING = 1;
+    INFERENCE = 2;
+    EXPLORATION = 3;
+    COLLAPSE_PREVENTION = 4;
+}
+
+enum QueryScope {
+    SCOPE_UNSPECIFIED = 0;
+    LOCAL = 1;
+    GLOBAL = 2;
+    FULL_CLUSTER = 3;
+}
+
+enum BiasInjectionHint {
+    HINT_UNSPECIFIED = 0;
+    NO_INJECTION = 1;
+    BOOST_COHERENCE = 2;
+    PENALIZE_COLLAPSE = 3;
+    EMERGENCY_STABILIZE = 4;
+}

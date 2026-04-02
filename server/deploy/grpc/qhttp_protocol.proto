@@ -1,0 +1,24 @@
+syntax = "proto3";
+
+package arkhen.qhttp;
+
+service QuantumOrchestrator {
+  // Fluxo bidirecional: envia telemetria e recebe ajustes de injeção (Logit Bias)
+  rpc SyncResonanceStream (stream TelemetryEvent) returns (stream InjectionCommand) {}
+}
+
+message TelemetryEvent {
+  string node_id = 1;
+  float current_phase = 2;       // θ
+  float current_damping = 3;     // e^(-ρ_eq·σ)
+  float omega_prime = 4;         // Ω'
+  uint64 tokens_processed = 5;
+  string hashtree_cid = 6;       // Hash de conteúdo para o estado do modelo local
+}
+
+message InjectionCommand {
+  float target_phase = 1;
+  map<int32, float> logit_bias_map = 2; // Para inferência fechada (Layer 8)
+  float learning_rate_multiplier = 3;   // Para treinamento (Layer 12)
+  string command_signature = 4;
+}

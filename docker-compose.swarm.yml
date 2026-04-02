@@ -1,0 +1,133 @@
+version: '3.8'
+
+services:
+  arkhe-core:
+    image: ghcr.io/${GITHUB_REPOSITORY_OWNER}/arkhe-core:latest
+    deploy:
+      replicas: 3
+      update_config:
+        parallelism: 1
+        delay: 10s
+        order: start-first
+      restart_policy:
+        condition: on-failure
+        delay: 5s
+        max_attempts: 3
+        window: 120s
+      placement:
+        constraints:
+          - node.role == worker
+    ports:
+      - "8000:8000"
+    environment:
+      - ETH_RPC_URL=${ETH_RPC_URL}
+      - STRIPE_SECRET_KEY=${STRIPE_SECRET_KEY}
+      - STRIPE_WEBHOOK_SECRET=${STRIPE_WEBHOOK_SECRET}
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+      - RELAYER_INTERNAL_URL=http://arkhe-relayer:9000
+    networks:
+      - arkhe-public
+      - arkhe-secure
+
+  arkhe-relayer:
+    image: ghcr.io/${GITHUB_REPOSITORY_OWNER}/arkhe-relayer:latest
+    deploy:
+      replicas: 1 # O relayer deve ser singleton para evitar nonces duplicados
+      update_config:
+        parallelism: 1
+        delay: 10s
+        order: stop-first # Parar o antigo antes de iniciar o novo
+      restart_policy:
+        condition: on-failure
+        delay: 5s
+        max_attempts: 5
+        window: 120s
+      placement:
+        constraints:
+          - node.role == manager # Relayer no manager para acesso mais restrito
+    environment:
+      - ETH_RPC_URL=${ETH_RPC_URL}
+      - KMS_PROVIDER=${KMS_PROVIDER:-aws}
+      - AWS_REGION=${AWS_REGION}
+      - AWS_KMS_KEY_ID=${AWS_KMS_KEY_ID}
+    networks:
+      - arkhe-secure
+    secrets:
+      - source: treasury_key
+        target: /run/secrets/treasury_pk
+        mode: 0400
+
+  prometheus:
+    image: prom/prometheus:v2.51.0
+    deploy:
+      replicas: 1
+      placement:
+        constraints:
+          - node.role == manager
+    volumes:
+      - ./monitoring/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - prometheus_data:/prometheus
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--web.console.libraries=/etc/prometheus/console_libraries'
+      - '--web.console.templates=/etc/prometheus/consoles'
+    networks:
+      - arkhe-secure
+
+  grafana:
+    image: grafana/grafana:10.4.0
+    deploy:
+      replicas: 1
+      placement:
+        constraints:
+          - node.role == manager
+    ports:
+      - "3001:3000"
+    volumes:
+      - ./monitoring/grafana/provisioning/datasources:/etc/grafana/provisioning/datasources:ro
+      - ./monitoring/grafana/provisioning/dashboards:/etc/grafana/provisioning/dashboards:ro
+      - ./monitoring/grafana/dashboards:/var/lib/grafana/dashboards:ro
+      - grafana_data:/var/lib/grafana
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=${GRAFANA_PASSWORD:-arkhe_admin}
+      - GF_USERS_ALLOW_SIGN_UP=false
+      - GF_DASHBOARDS_DEFAULT_HOME_DASHBOARD_PATH=/var/lib/grafana/dashboards/arkhe_dashboard.json
+    networks:
+      - arkhe-secure
+      - arkhe-public
+
+  otel-collector:
+    image: otel/opentelemetry-collector-contrib:0.98.0
+    deploy:
+      replicas: 1
+      placement:
+        constraints:
+          - node.role == manager
+    command: ["--config=/etc/otelcol-contrib/config.yaml"]
+    volumes:
+      - ./otel-collector-config.yaml:/etc/otelcol-contrib/config.yaml:ro
+      - ./certs/ca.pem:/certs/ca.pem:ro
+      - ./certs/client.crt:/certs/client.crt:ro
+      - ./certs/client.key:/certs/client.key:ro
+    environment:
+      - PARSEABLE_AUTH_TOKEN=${PARSEABLE_AUTH_TOKEN}
+      - PARSEABLE_TENANT=${PARSEABLE_TENANT}
+    networks:
+      - arkhe-secure
+      - arkhe-public
+
+networks:
+  arkhe-public:
+    driver: overlay
+  arkhe-secure:
+    driver: overlay
+    internal: true
+
+volumes:
+  prometheus_data:
+  grafana_data:
+
+secrets:
+  treasury_key:
+    external: true

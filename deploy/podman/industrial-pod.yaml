@@ -1,0 +1,53 @@
+# ============================================================================
+# INDUSTRIAL POD - MODBUS & KONA
+# ============================================================================
+
+apiVersion: v1
+kind: Pod
+metadata:
+  name: arkhe-industrial
+  labels:
+    app: arkhe
+    component: industrial
+spec:
+  hostname: arkhe-industrial
+  restartPolicy: Always
+  
+  containers:
+  
+  # MODBUS BRIDGE
+  - name: modbus-bridge
+    image: localhost/arkhe-modbus:latest
+    ports:
+    - containerPort: 5020
+      hostPort: 5020
+    
+    env:
+    - name: MODBUS_DEVICES
+      value: "sensor-array:502,plc-main:502"
+    - name: TZINOR_ENDPOINT
+      value: http://arkhe-main:8080/api/phase/industrial
+    - name: POLL_INTERVAL
+      value: 5s
+    
+    securityContext:
+      runAsNonRoot: true
+      runAsUser: 1000
+  
+  # KONA STABILIZER
+  - name: kona-stabilizer
+    image: localhost/arkhe-kona:latest
+    
+    env:
+    - name: TARGET_LAMBDA_2
+      value: "1.618033988749895"
+    - name: MAX_ITERATIONS
+      value: "10000"
+    - name: LEARNING_RATE
+      value: "0.01"
+    - name: CORE_ENDPOINT
+      value: http://arkhe-main:8080
+    
+    securityContext:
+      runAsNonRoot: true
+      runAsUser: 1000

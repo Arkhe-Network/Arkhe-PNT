@@ -1,0 +1,16 @@
+apiVersion: v2
+name: arkhe-cluster
+description: Arkhe(n) Resonance Cluster - Distributed Training with Quantum Protocol
+type: application
+version: 1.0.0
+appVersion: "1.0.0"
+dependencies:
+- name: ray-cluster
+  version: "1.0.0"
+  repository: "file://charts/ray-cluster"
+- name: grpc-telemetry
+  version: "1.0.0"
+  repository: "file://charts/grpc-telemetry"
+- name: hashtree-p2p
+  version: "1.0.0"
+  repository: "file://charts/hashtree-p2p"

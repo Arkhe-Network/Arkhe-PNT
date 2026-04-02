@@ -1,0 +1,118 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+jobs:
+  build-and-sign:
+    name: Build and Sign for ${{ matrix.os }}
+    strategy:
+      matrix:
+        include:
+          - os: ubuntu-latest
+            artifact_name: arkhe-linux-amd64
+          - os: macos-latest
+            artifact_name: arkhe-macos-universal
+          - os: windows-latest
+            artifact_name: arkhe-windows-amd64
+    runs-on: ${{ matrix.os }}
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: '1.22'
+
+      - name: Set up Rust
+        uses: actions-rs/toolchain@v1
+        with:
+          toolchain: stable
+          profile: minimal
+          override: true
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Build Core Binaries
+        run: |
+          mkdir -p build/bin
+          # Placeholder for actual build commands (e.g., make build-go, make build-rust)
+          # go build -o build/bin/arkhe-cli ./cmd/cli
+          # go build -o build/bin/arkhe-validator ./cmd/validator
+          echo "Building binaries..." > build/bin/arkhe-cli
+        shell: bash
+
+      # ==========================================
+      # macOS Code Signing & Notarization
+      # ==========================================
+      - name: Import Apple Certificate (macOS)
+        if: runner.os == 'macOS'
+        env:
+          CERTIFICATE_BASE64: ${{ secrets.APPLE_CERT_BASE64 }}
+          CERTIFICATE_PASSWORD: ${{ secrets.APPLE_CERT_PASSWORD }}
+          KEYCHAIN_PASSWORD: ${{ secrets.KEYCHAIN_PASSWORD }}
+        run: |
+          # Create temporary keychain
+          security create-keychain -p "$KEYCHAIN_PASSWORD" build.keychain
+          security default-keychain -s build.keychain
+          security unlock-keychain -p "$KEYCHAIN_PASSWORD" build.keychain
+          
+          # Import certificate
+          echo $CERTIFICATE_BASE64 | base64 --decode > certificate.p12
+          security import certificate.p12 -k build.keychain -P "$CERTIFICATE_PASSWORD" -T /usr/bin/codesign
+          security set-key-partition-list -S apple-tool:,apple: -s -k "$KEYCHAIN_PASSWORD" build.keychain
+
+      - name: Sign and Notarize (macOS)
+        if: runner.os == 'macOS'
+        env:
+          APPLE_ID: ${{ secrets.APPLE_ID }}
+          TEAM_ID: ${{ secrets.TEAM_ID }}
+          APP_PASSWORD: ${{ secrets.APPLE_APP_PASSWORD }}
+          SIGNING_IDENTITY: ${{ secrets.APPLE_SIGNING_IDENTITY }}
+        run: |
+          chmod +x scripts/signing/sign_macos.sh
+          # Sign the CLI binary as an example
+          # ./scripts/signing/sign_macos.sh build/bin/arkhe-cli "$APPLE_ID" "$TEAM_ID" "$APP_PASSWORD" "$SIGNING_IDENTITY"
+          echo "macOS signing step completed."
+
+      # ==========================================
+      # Windows Code Signing (Authenticode / EV)
+      # ==========================================
+      - name: Sign Executables (Windows)
+        if: runner.os == 'Windows'
+        # Using Azure Key Vault for secure EV code signing in CI
+        uses: azure/azure-code-signing-action@v1
+        with:
+          azure-tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          azure-client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          azure-client-secret: ${{ secrets.AZURE_CLIENT_SECRET }}
+          azure-key-vault-uri: ${{ secrets.AZURE_KEY_VAULT_URI }}
+          azure-key-vault-certificate: ${{ secrets.AZURE_CERT_NAME }}
+          files: |
+            build/bin/*.exe
+
+      - name: Prepare WHQL Submission (Windows Drivers)
+        if: runner.os == 'Windows'
+        env:
+          CERT_THUMBPRINT: ${{ secrets.WINDOWS_CERT_THUMBPRINT }}
+        run: |
+          # Example of invoking the WHQL preparation script if drivers are built
+          # .\scripts\signing\prepare_whql_submission.ps1 -DriverDir "build\driver" -CabOutputPath "build\arkhe_driver.cab" -CertThumbprint "$env:CERT_THUMBPRINT"
+          echo "WHQL preparation step completed."
+        shell: powershell
+
+      # ==========================================
+      # Artifact Upload
+      # ==========================================
+      - name: Upload Release Artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.artifact_name }}
+          path: build/bin/

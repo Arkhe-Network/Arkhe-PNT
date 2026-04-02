@@ -1,0 +1,57 @@
+syntax = "proto3";
+
+package arkhe.quantum;
+
+service QuantumResonance {
+    // Stream bidirecional: telemetria do cluster + injeção de bias
+    rpc ResonanceChannel(stream TelemetryPacket) returns (stream ControlPacket);
+    
+    // Unary para consulta de estado quântico
+    rpc GetPhase(PhaseRequest) returns (PhaseResponse);
+}
+
+message TelemetryPacket {
+    string node_id = 1;
+    double theta = 2;           // Fase em radianos
+    double omega_prime = 3;     // Coerência
+    double damping = 4;         // Fator de dilatação
+    double rho_1_global = 5;    // Massa paramétrica agregada
+    int64 timestamp_ns = 6;
+    bool is_resonant = 7;       // |θ - π/2| < ε
+    bytes quantum_signature = 8; // Hash do estado para verificação
+}
+
+message ControlPacket {
+    oneof command {
+        LogitBiasInjection bias_inject = 1;
+        PhaseCorrection phase_correct = 2;
+        EmergencyStop emergency = 3;
+    }
+}
+
+message LogitBiasInjection {
+    map<int32, float> token_bias = 1;  // token_id -> bias
+    double target_temperature = 2;
+    string model_target = 3;  // "gemini", "gpt-4", etc.
+}
+
+message PhaseCorrection {
+    double delta_k1 = 1;  // Ajuste dinâmico na constante gravitacional
+    double delta_k2 = 2;  // Ajuste no eletromagnetismo
+    string correction_id = 3;
+}
+
+message EmergencyStop {
+    string reason = 1;
+    double collapse_threshold = 2;  // θ colapsou para < 0.1
+}
+
+message PhaseRequest {
+    string cluster_id = 1;
+}
+
+message PhaseResponse {
+    double current_phase = 1;
+    double variance_across_nodes = 2;  // Desvio padrão de θ no cluster
+    string status = 3;  // "RESONANT", "CONVERGING", "DIVERGENT"
+}

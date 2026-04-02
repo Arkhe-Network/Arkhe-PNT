@@ -1,0 +1,37 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: arkhe-server
+  labels:
+    app: arkhe-server
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: arkhe-server
+  template:
+    metadata:
+      labels:
+        app: arkhe-server
+    spec:
+      containers:
+      - name: arkhe-server
+        image: arkhe-server:latest
+        ports:
+        - containerPort: 3000
+        env:
+        - name: NODE_ENV
+          value: "production"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: arkhe-server
+spec:
+  selector:
+    app: arkhe-server
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 3000
+  type: LoadBalancer

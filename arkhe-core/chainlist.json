@@ -1,0 +1,32 @@
+{
+  "name": "Arkhe Mainnet (The Timechain)",
+  "chain": "ARKHE",
+  "rpc": [
+    "https://tzinor.arkhe.network",
+    "wss://kuramoto.arkhe.network"
+  ],
+  "faucets": [],
+  "nativeCurrency": {
+    "name": "Entropic Emission Zone",
+    "symbol": "EEZ",
+    "decimals": 18
+  },
+  "features": [
+    { "name": "EIP155" },
+    { "name": "EIP1559" },
+    { "name": "ProofOfCoherence" }
+  ],
+  "infoURL": "https://arkhe.network",
+  "shortName": "arkhe",
+  "chainId": 2140,
+  "networkId": 2140,
+  "icon": "arkhe_ouroboros",
+  "explorers": [
+    {
+      "name": "arkhescan",
+      "url": "https://scan.arkhe.network",
+      "icon": "arkhe",
+      "standard": "EIP3091"
+    }
+  ]
+}

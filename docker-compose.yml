@@ -1,0 +1,103 @@
+version: '3.8'
+
+services:
+  arkhe-server:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=production
+    networks:
+      - arkhe-net
+
+  trading-engine:
+    build:
+      context: .
+      dockerfile: trading-engine/Dockerfile
+    environment:
+      - ARKHE_API_URL=http://arkhe-server:3000
+    depends_on:
+      - arkhe-server
+    networks:
+      - arkhe-net
+
+  qhttp-h-daemon:
+    build:
+      context: .
+      dockerfile: arkhe-hardware/qhttp-h/Dockerfile
+    environment:
+      - ARKHE_ORACLE_URL=http://arkhe-server:3000/api/consensus
+    depends_on:
+      - arkhe-server
+    networks:
+      - arkhe-net
+
+  quantum-relayer:
+    build:
+      context: .
+      dockerfile: Dockerfile.relayer
+    environment:
+      - ETH_RPC_URL=${ETH_RPC_URL}
+      - KMS_PROVIDER=${KMS_PROVIDER:-env}
+      - RELAYER_PRIVATE_KEY_ENCRYPTED=${RELAYER_PRIVATE_KEY_ENCRYPTED}
+      - ARKHE_API_URL=http://arkhe-server:3000
+    depends_on:
+      - arkhe-server
+    networks:
+      - relayer-net
+      - arkhe-net
+    security_opt:
+      - no-new-privileges:true
+    read_only: true
+    restart: unless-stopped
+
+  otel-collector:
+    image: otel/opentelemetry-collector-contrib:0.98.0
+    command: ["--config=/etc/otelcol-contrib/config.yaml"]
+    volumes:
+      - ./otel-collector-config.yaml:/etc/otelcol-contrib/config.yaml:ro
+      - ./certs/ca.pem:/certs/ca.pem:ro
+      - ./certs/client.crt:/certs/client.crt:ro
+      - ./certs/client.key:/certs/client.key:ro
+    environment:
+      - PARSEABLE_AUTH_TOKEN=${PARSEABLE_AUTH_TOKEN}
+      - PARSEABLE_TENANT=${PARSEABLE_TENANT}
+    networks:
+      - arkhe-net
+    restart: unless-stopped
+
+  qhttp-subsurface:
+    image: python:3.11-slim
+    command: python -m qhttp_collector
+    volumes:
+      - ./scripts/qhttp_collector.py:/qhttp_collector.py
+    environment:
+      - CITADELA_URL=http://arkhe-server:3000
+      - KAFKA_BROKER=kafka:9092
+    depends_on:
+      - arkhe-server
+      - kafka
+    networks:
+      - arkhe-net
+
+  kafka:
+    image: bitnami/kafka:latest
+    environment:
+      - KAFKA_CFG_NODE_ID=1
+      - KAFKA_CFG_PROCESS_ROLES=broker,controller
+      - KAFKA_CFG_LISTENERS=PLAINTEXT://:9092,CONTROLLER://:9093
+      - KAFKA_CFG_LISTENER_SECURITY_PROTOCOL_MAP=CONTROLLER:PLAINTEXT,PLAINTEXT:PLAINTEXT
+      - KAFKA_CFG_CONTROLLER_QUORUM_VOTERS=1@kafka:9093
+      - KAFKA_CFG_CONTROLLER_LISTENER_NAMES=CONTROLLER
+    networks:
+      - arkhe-net
+
+networks:
+  arkhe-net:
+    driver: bridge
+  relayer-net:
+    driver: bridge
+    internal: true # Isola o relayer da internet externa direta, comunicando apenas via RPC configurado ou rede interna
+
