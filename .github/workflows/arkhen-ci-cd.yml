@@ -16,20 +16,36 @@ jobs:
     steps:
     - uses: actions/checkout@v4
     
-    - name: Setup Node.js
+    - name: Setup Environment
       uses: actions/setup-node@v4
       with:
         node-version: '22.x'
         cache: 'npm'
+
+    - name: Setup Go
+      uses: actions/setup-go@v5
+      with:
+        go-version: '1.22'
+
+    - name: Setup Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.12'
         
-    - name: Install Dependencies
-      run: npm ci
+    - name: Subagent Techne: Orchestrate Build
+      run: make build
       
-    - name: Verify Types & Lint
-      run: npm run lint
+    - name: Subagent Aletheia: Verify Integrity
+      run: make verify-integrity
       
-    - name: Build Arkhe(n) Dashboard
-      run: npm run build
+    - name: Subagent Kairos: Performance & Coherence Tests
+      run: make test
+
+    - name: Subagent Ananke: ZK-Recursive Proof Aggregation
+      run: make test-zk-aggregation
+
+    - name: Subagent Stochasis: QRB + VDF Selection Verification
+      run: make test-vdf-selection
 
   docker-publish:
     needs: build-and-verify
@@ -43,24 +59,33 @@ jobs:
         # docker build -t $DOCKER_IMAGE:${{ github.sha }} .
         # docker push $DOCKER_IMAGE:${{ github.sha }}
 
-  deploy-aws-eks:
+  deploy-subagents:
     needs: docker-publish
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main'
+    steps:
+    - uses: actions/checkout@v4
+    - name: Subagent Skopos: Coordinate Deployment & Distribution
+      run: python3 scripts/subagent_deploy.py --target production --distribute
+
+  deploy-aws-eks:
+    needs: deploy-subagents
     runs-on: ubuntu-latest
     environment: production-aws
     steps:
     - name: Deploy to AWS EKS (Primary Tzinor Node)
       run: |
         echo "Applying manifests to AWS EKS..."
-        echo "kubectl apply -f k8s/arkhen-deployment.yaml"
-        echo "kubectl apply -f k8s/arkhen-network.yaml"
+        # kubectl apply -f k8s/arkhen-deployment.yaml
+        # kubectl apply -f k8s/arkhen-network.yaml
 
   deploy-gcp-gke:
-    needs: docker-publish
+    needs: deploy-subagents
     runs-on: ubuntu-latest
     environment: production-gcp
     steps:
     - name: Deploy to GCP GKE (Secondary Tzinor Node)
       run: |
         echo "Applying manifests to GCP GKE..."
-        echo "kubectl apply -f k8s/arkhen-deployment.yaml"
-        echo "kubectl apply -f k8s/arkhen-network.yaml"
+        # kubectl apply -f k8s/arkhen-deployment.yaml
+        # kubectl apply -f k8s/arkhen-network.yaml

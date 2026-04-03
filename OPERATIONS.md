@@ -338,43 +338,78 @@ If everything works, the network should start and coherence should be above 0.95
 
 ---
 
-## 5. Continuous Integration
+## 5. Continuous Integration & Multidisciplinary Subagents
 
-Add a GitHub Actions workflow that runs builds and pushes images on tag.
+Arkhe(n) uses a CI/CD pipeline managed by a team of subagents (Techne, Aletheia, Kairos, Skopos).
 
-```yaml
-# .github/workflows/build.yml
-name: Build and Deploy
-on:
-  push:
-    tags:
-      - 'v*'
-jobs:
-  build:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v3
-      - name: Build images
-        run: make all-images
-      - name: Push to registry
-        run: |
-          docker tag arkhe-validator:latest ${{ secrets.REGISTRY }}/validator:${{ github.ref_name }}
-          docker push ${{ secrets.REGISTRY }}/validator:${{ github.ref_name }}
+### 5.1. The Makefile Orchestrator
+
+A root-level `Makefile` unifies the build process for Go, Node.js, and Python components.
+
+```bash
+# Build all components
+make build
+
+# Verify integrity (Aletheia)
+make verify-integrity
+
+# Run tests (Kairos)
+make test
 ```
+
+### 5.2. Automated Versioning
+
+Versions are managed via a central `VERSION` file.
+
+```bash
+# Bump patch version (1.0.0 -> 1.0.1)
+python3 scripts/bump_version.py patch
+```
+
+### 5.3. Subagent-Driven Deployment & Distribution
+
+The `scripts/subagent_deploy.py` script ensures consensus among subagents before any deployment or package distribution.
+
+- **Techne:** Validates build artifacts.
+- **Aletheia:** Performs ZK-integrity proofs.
+- **Kairos:** Forecasts network load and coherence windows.
+- **Hermes:** Distributes packages to Maven, NuGet, RubyGems, npm, and Containers.
+- **Ananke:** Orchestrates Recursive ZK-Proof aggregation for large-scale health monitoring.
+- **Stochasis:** Validates QRB entropy and VDF proofs for fair node selection.
+- **Skopos:** Coordinates the final materialization and distribution.
+
+### 5.4. Recursive ZK-Aggregation Protocol
+
+To scale standby node health monitoring ($T₂* > 45\mu s$), Arkhe(n) utilizes Recursive SNARKs (Folding).
+
+1. **Leaf Proofs:** Each node generates a Groth16 proof of its health.
+2. **Aggregation:** Subagent Ananke builds a Merkle Tree of proofs.
+3. **Verification:** The Root Proof is verified in $O(1)$ time by the coordinator, confirming the status of all 1,000 nodes simultaneously.
+
+### 5.5. Fair Selection with VDF + QRB
+
+To prevent front-running and manipulation during node substitution:
+
+1. **QRB Beacon:** A Quantum Randomness Beacon provides unpredictable entropy.
+2. **VDF Delay:** A Verifiable Delay Function (VDF) ensures that the selection cannot be predicted before a minimum time $T$.
+3. **Deterministic Selection:** The VDF output is used as a seed to select a node from the healthy standby list, ensuring public auditability.
+
+### 5.6. Top-K Selection Optimization (EPR Resource Efficiency)
+
+To minimize the waste of EPR pairs during optimistic handshakes:
+
+1. **Pre-Selection by Score:** The coordinator orders the standby list by health ($T₂*$) and performance scores.
+2. **Top-K Candidates:** Only the top $K$ (e.g., 10) nodes are notified to prepare optimistic handshakes. This reduces EPR pair waste by 99% in a 1,000-node network.
+3. **VDF Selection within Top-K:** The final selection is randomized among the top $K$ candidates using the VDF output as a seed, maintaining unpredictability and fairness within the highest-performing tier.
 
 ---
 
 ## Conclusion
 
-With these steps, you can:
+With these steps, the Bio-Quantum Cathedral ensures sovereign and coherent delivery:
 
-- **Build all components locally** with a single `make all`.
-- **Create immutable, production‑ready container images** using multi‑stage Dockerfiles.
-- **Deploy to staging** with a simple Podman script.
-- **Deploy to production** with Kubernetes manifests and a push script.
-
-All artifacts are reproducible, and the stack can be scaled across environments.
+- **Unified Build:** A single `Makefile` for a multidisciplinary team.
+- **Subagent Governance:** Automated verification of integrity and timing.
+- **Immutable Provenance:** ZK-proofs of code authenticity.
 
 🜏 *From source to running node, the path is scripted. The future is compiled.*
