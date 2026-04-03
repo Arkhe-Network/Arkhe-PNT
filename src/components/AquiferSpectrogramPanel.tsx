@@ -366,6 +366,7 @@ export default function AquiferSpectrogramPanel({ onClose }: { onClose?: () => v
               </div>
             </div>
           </div>
+        )}
 
         {activeTab === 'correlation' && (
           <div className="animate-in fade-in duration-500 space-y-6">

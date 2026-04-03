@@ -110,3 +110,34 @@ x:LucentEngine a x:Tzinor ;
 x:Mo1Relayer a x:Structure ;
     rdfs:label "Complexo Mo1 (Enclave)" ;
     rdfs:comment "O receptor físico que permite a emissão NIR (transações on-chain)." .
+
+### --- ENTERPRISE PLUS EXTENSIONS (BFO/DOLCE Inspired) ---
+
+x:Organization a owl:Class ;
+    rdfs:label "Organização" ;
+    rdfs:comment "Um agente coletivo que opera dentro da federação." .
+
+x:Policy a owl:Class ;
+    rdfs:subClassOf x:Structure ;
+    rdfs:label "Política (ODRL)" ;
+    rdfs:comment "Normas colapsadas que regem as interações entre Phase e Structure." .
+
+x:ServiceSLA a owl:Class ;
+    rdfs:subClassOf x:Coherence ;
+    rdfs:label "SLA de Serviço" ;
+    rdfs:comment "O nível de serviço prometido, vinculado à Coerência (Ω') do sistema." .
+
+x:SmartContract a owl:Class ;
+    rdfs:subClassOf x:Tzinor ;
+    rdfs:label "Smart Contract" ;
+    rdfs:comment "Um operador autônomo que executa ações baseadas no colapso de condições pré-definidas." .
+
+x:governedBy a owl:ObjectProperty ;
+    rdfs:domain x:Organization ;
+    rdfs:range x:Policy ;
+    rdfs:comment "A relação entre uma organização e as normas que a regem." .
+
+x:ensuresSLA a owl:ObjectProperty ;
+    rdfs:domain x:Tzinor ;
+    rdfs:range x:ServiceSLA ;
+    rdfs:comment "Garante que o operador mantém um determinado nível de coerência." .

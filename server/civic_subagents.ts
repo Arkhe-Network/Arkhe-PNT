@@ -51,4 +51,48 @@ export function runCivicInspection(session: UserSession) {
       logger.warn(`🜏 [CIVIC-ALERT] ${agent.name}: ${actionMessage}`);
     }
   });
+
+  // Run Enterprise Subagents Inspection
+  if (state.enterpriseSubagents) {
+    Object.entries(state.enterpriseSubagents).forEach(([domain, subagents]) => {
+      subagents.forEach(agent => {
+        // Simulate domain-specific enterprise logic
+        let alertFound = false;
+        let actionMessage = '';
+
+        switch (agent.id) {
+          case 'G1': actionMessage = `Auditando conformidade LGPD/ODRL para sessão ${session.id}`; break;
+          case 'G2': actionMessage = `Verificando assinaturas FROST para decisão estratégica`; break;
+          case 'G5': actionMessage = `Gerando prova ZK de conformidade de governança`; break;
+
+          case 'D1': actionMessage = `Monitorando pipeline CI/CD para novos circuitos Circom`; break;
+          case 'D2': actionMessage = `Validando hash de integridade do deploy via ZK`; break;
+
+          case 'S2': actionMessage = `Verificando invariantes de segurança no enclave TEE`; break;
+          case 'S3': actionMessage = `Analisando padrões comportamentais de rede (Sybil detection)`; break;
+
+          case 'I1': actionMessage = `Orquestrando inferência distribuída na mesh-llm`; break;
+          case 'I3': actionMessage = `Validando saídas de LLM contra alucinações via ZK`; break;
+
+          case 'O3': actionMessage = `Coletando métricas de SLA/SLO para faturamento λΩ`; break;
+          case 'O4': actionMessage = `Processando liquidação via smart contract Synallagma`; break;
+
+          case 'X1': actionMessage = `Traduzindo telemetria PostHog para frames qhttp`; break;
+          case 'X3': actionMessage = `Roteando tráfego inter-Cidadela via Quantum-Route`; break;
+
+          default:
+            actionMessage = `Executando protocolo operacional padrão para ${agent.name}`;
+        }
+
+        // Randomly simulate an alert for some agents to make it dynamic
+        if (Math.random() < 0.05) {
+          alertFound = true;
+          actionMessage = `ALERTA CRÍTICO: ${agent.name} detectou anomalia no domínio ${domain}`;
+        }
+
+        agent.status = alertFound ? 'alert' : 'active';
+        agent.lastAction = actionMessage;
+      });
+    });
+  }
 }

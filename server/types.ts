@@ -265,6 +265,14 @@ export interface SimulationState {
     zkAlertsCount: number;
   };
   civicSubagents: CivicSubagentState[];
+  enterpriseSubagents: {
+    governance: EnterpriseSubagentState[];
+    devops: EnterpriseSubagentState[];
+    security: EnterpriseSubagentState[];
+    ia: EnterpriseSubagentState[];
+    operations: EnterpriseSubagentState[];
+    interoperability: EnterpriseSubagentState[];
+  };
 }
 
 export interface NeighborhoodCoherence {
@@ -279,6 +287,16 @@ export interface CivicSubagentState {
   name: string;
   adaptation: string;
   function: string;
+  status: 'active' | 'idle' | 'alert';
+  lastAction: string;
+}
+
+export interface EnterpriseSubagentState {
+  id: string;
+  name: string;
+  theory: string;
+  function: string;
+  metric: string;
   status: 'active' | 'idle' | 'alert';
   lastAction: string;
 }
