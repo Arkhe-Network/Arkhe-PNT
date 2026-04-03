@@ -366,51 +366,14 @@ Versions are managed via a central `VERSION` file.
 python3 scripts/bump_version.py patch
 ```
 
-### 5.3. Subagent-Driven Deployment & Distribution
+### 5.3. Subagent-Driven Deployment
 
-The `scripts/subagent_deploy.py` script ensures consensus among subagents before any deployment or package distribution.
+The `scripts/subagent_deploy.py` script ensures consensus among subagents before any deployment.
 
 - **Techne:** Validates build artifacts.
 - **Aletheia:** Performs ZK-integrity proofs.
 - **Kairos:** Forecasts network load and coherence windows.
-- **Hermes:** Distributes packages to Maven, NuGet, RubyGems, npm, and Containers.
-- **Ananke:** Orchestrates Recursive ZK-Proof aggregation for large-scale health monitoring.
-- **Stochasis:** Validates QRB entropy and VDF proofs for fair node selection.
-- **Nomos:** Oversees Quantum Handover governance and identity/stake transfer on-chain.
-- **Skopos:** Coordinates the final materialization and distribution.
-
-### 5.4. Recursive ZK-Aggregation Protocol
-
-To scale standby node health monitoring ($T₂* > 45\mu s$), Arkhe(n) utilizes Recursive SNARKs (Folding).
-
-1. **Leaf Proofs:** Each node generates a Groth16 proof of its health.
-2. **Aggregation:** Subagent Ananke builds a Merkle Tree of proofs.
-3. **Verification:** The Root Proof is verified in $O(1)$ time by the coordinator, confirming the status of all 1,000 nodes simultaneously.
-
-### 5.5. Fair Selection with VDF + QRB
-
-To prevent front-running and manipulation during node substitution:
-
-1. **QRB Beacon:** A Quantum Randomness Beacon provides unpredictable entropy.
-2. **VDF Delay:** A Verifiable Delay Function (VDF) ensures that the selection cannot be predicted before a minimum time $T$.
-3. **Deterministic Selection:** The VDF output is used as a seed to select a node from the healthy standby list, ensuring public auditability.
-
-### 5.6. Quantum Handover & Identity Teleportation
-
-When a node is replaced, its state and identity are transferred via a secure handover protocol:
-
-1. **EPR Pair Establishment:** The retiring node and the successor establish a dedicated EPR pair.
-2. **Quantum Teleportation:** Volatile states (session keys, memory) are teletransported via Bell measurements, preserving coherence without cloning.
-3. **Identity Handover (On-Chain):** Stake, reputation, and identity are transferred via the `IdentityHandover.sol` contract, requiring a 6/9 MuSig2 council quórum.
-4. **Dual-Routing Coexistence:** Both nodes operate for 24h to ensure a vacuum-free transition.
-
-### 5.7. Top-K Selection Optimization (EPR Resource Efficiency)
-
-To minimize the waste of EPR pairs during optimistic handshakes:
-
-1. **Pre-Selection by Score:** The coordinator orders the standby list by health ($T₂*$) and performance scores.
-2. **Top-K Candidates:** Only the top $K$ (e.g., 10) nodes are notified to prepare optimistic handshakes. This reduces EPR pair waste by 99% in a 1,000-node network.
-3. **VDF Selection within Top-K:** The final selection is randomized among the top $K$ candidates using the VDF output as a seed, maintaining unpredictability and fairness within the highest-performing tier.
+- **Skopos:** Coordinates the final materialization.
 
 ---
 

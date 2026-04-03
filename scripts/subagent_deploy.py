@@ -28,14 +28,7 @@ def kairos_forecast():
         print("🜏 [Kairos] Instabilidade detectada. Aguardando fase harmônica.")
         return False
 
-def hermes_distribute():
-    print("🜏 [Hermes] Iniciando distribuição multidisciplinar de pacotes...")
-    time.sleep(1)
-    from subprocess import run
-    result = run(["make", "publish-all"])
-    return result.returncode == 0
-
-def skopos_deploy(target, distribute=False):
+def skopos_deploy(target):
     print(f"🜏 [Skopos] Coordenando materialização para o ambiente: {target}")
 
     if not techne_check():
@@ -45,10 +38,6 @@ def skopos_deploy(target, distribute=False):
     if not kairos_forecast():
         return False
 
-    if distribute:
-        if not hermes_distribute():
-            return False
-
     print(f"🜏 [Skopos] Todos os subagentes em consenso. Iniciando deploy em {target}...")
     time.sleep(2)
     print(f"🜏 [Skopos] Materialização concluída com sucesso no ambiente {target}.")
@@ -57,10 +46,9 @@ def skopos_deploy(target, distribute=False):
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Arkhe(n) Subagent Deployment Orchestrator")
     parser.add_argument("--target", type=str, default="staging", help="Target environment (staging/production)")
-    parser.add_argument("--distribute", action="store_true", help="Publish packages to registries (npm, Maven, etc.)")
     args = parser.parse_args()
 
-    success = skopos_deploy(args.target, args.distribute)
+    success = skopos_deploy(args.target)
     if not success:
         print("🜏 [Skopos] Abortando deploy devido a falta de consenso dos subagentes.")
         sys.exit(1)
