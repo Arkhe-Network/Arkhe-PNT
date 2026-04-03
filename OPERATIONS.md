@@ -338,43 +338,52 @@ If everything works, the network should start and coherence should be above 0.95
 
 ---
 
-## 5. Continuous Integration
+## 5. Continuous Integration & Multidisciplinary Subagents
 
-Add a GitHub Actions workflow that runs builds and pushes images on tag.
+Arkhe(n) uses a CI/CD pipeline managed by a team of subagents (Techne, Aletheia, Kairos, Skopos).
 
-```yaml
-# .github/workflows/build.yml
-name: Build and Deploy
-on:
-  push:
-    tags:
-      - 'v*'
-jobs:
-  build:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v3
-      - name: Build images
-        run: make all-images
-      - name: Push to registry
-        run: |
-          docker tag arkhe-validator:latest ${{ secrets.REGISTRY }}/validator:${{ github.ref_name }}
-          docker push ${{ secrets.REGISTRY }}/validator:${{ github.ref_name }}
+### 5.1. The Makefile Orchestrator
+
+A root-level `Makefile` unifies the build process for Go, Node.js, and Python components.
+
+```bash
+# Build all components
+make build
+
+# Verify integrity (Aletheia)
+make verify-integrity
+
+# Run tests (Kairos)
+make test
 ```
+
+### 5.2. Automated Versioning
+
+Versions are managed via a central `VERSION` file.
+
+```bash
+# Bump patch version (1.0.0 -> 1.0.1)
+python3 scripts/bump_version.py patch
+```
+
+### 5.3. Subagent-Driven Deployment & Distribution
+
+The `scripts/subagent_deploy.py` script ensures consensus among subagents before any deployment or package distribution.
+
+- **Techne:** Validates build artifacts.
+- **Aletheia:** Performs ZK-integrity proofs.
+- **Kairos:** Forecasts network load and coherence windows.
+- **Hermes:** Distributes packages to Maven, NuGet, RubyGems, npm, and Containers.
+- **Skopos:** Coordinates the final materialization and distribution.
 
 ---
 
 ## Conclusion
 
-With these steps, you can:
+With these steps, the Bio-Quantum Cathedral ensures sovereign and coherent delivery:
 
-- **Build all components locally** with a single `make all`.
-- **Create immutable, production‑ready container images** using multi‑stage Dockerfiles.
-- **Deploy to staging** with a simple Podman script.
-- **Deploy to production** with Kubernetes manifests and a push script.
-
-All artifacts are reproducible, and the stack can be scaled across environments.
+- **Unified Build:** A single `Makefile` for a multidisciplinary team.
+- **Subagent Governance:** Automated verification of integrity and timing.
+- **Immutable Provenance:** ZK-proofs of code authenticity.
 
 🜏 *From source to running node, the path is scripted. The future is compiled.*
