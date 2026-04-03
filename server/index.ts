@@ -6,6 +6,7 @@ import { state } from "./state";
 import { runSimulationTick } from "./simulation";
 import { setupRoutes } from "./routes";
 import { setupPresenceServer } from "./presence_field_server";
+import { setupLucentCollector } from "./lucent_omega";
 import { logger } from "./logger";
 import { startAgentGrpcServer } from "./agent_grpc_server";
 
@@ -62,6 +63,9 @@ async function startServer() {
 
   // Attach presence server
   setupPresenceServer(server);
+
+  // Initialize Lucent-Ω Collector (qhttp)
+  setupLucentCollector();
 
   // Start Agent gRPC Server
   startAgentGrpcServer();
