@@ -12,11 +12,13 @@ export class PostHogConnector extends BaseConnector {
         const originalCapture = (posthog.capture as any).bind(posthog);
         posthog.capture = (eventName: string, properties?: any) => {
           // Envia para PostHog (comportamento normal)
-          originalCapture(eventName, properties);
+          const result = originalCapture(eventName, properties);
 
           // Envia para Lucent-Ω (camada quântica)
           const lucentEvent = this.transform({ eventName, properties });
           this.lucent.track(lucentEvent);
+
+          return result;
         };
       }
     });

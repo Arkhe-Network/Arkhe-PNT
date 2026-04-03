@@ -936,4 +936,59 @@ export function setupRoutes(app: express.Express, broadcastState: () => void, cl
     broadcastState();
     res.json({ success: true, root: state.securityAdvanced.l4.merkleDagRoot });
   });
+
+  // Enterprise qhttp Standardized API (Simulated)
+  // Supports methods: SUPERPOSITION (GET), COLLAPSE (POST), ENTANGLE (PUT/POST)
+  app.all("/api/subagent/:id/:action", (req, res) => {
+    const { id, action } = req.params;
+    const method = req.method; // We'll map this to the qhttp concept
+
+    // Find the subagent across domains
+    let subagent: any = null;
+    let foundDomain = '';
+
+    if (state.enterpriseSubagents) {
+      for (const [domain, agents] of Object.entries(state.enterpriseSubagents)) {
+        const found = agents.find(a => a.id.toLowerCase() === id.toLowerCase());
+        if (found) {
+          subagent = found;
+          foundDomain = domain;
+          break;
+        }
+      }
+    }
+
+    if (!subagent) {
+      return res.status(404).json({ error: `Subagent ${id} not found` });
+    }
+
+    // Determine qhttp method equivalent
+    let qhttpMethod = 'SUPERPOSITION';
+    if (method === 'POST') qhttpMethod = 'COLLAPSE';
+    if (method === 'PUT') qhttpMethod = 'ENTANGLE';
+
+    const xKuramotoPhase = req.headers['x-kuramoto-phase'] || '1.0';
+    const xZkProof = req.headers['x-zk-proof'] || null;
+
+    logger.info(`🜏 [qhttp] ${qhttpMethod} ${action} for subagent ${subagent.name} (${id})`);
+
+    // Simulated response
+    const response = {
+      valid: true,
+      subagent: subagent.name,
+      domain: foundDomain,
+      qhttpMethod,
+      action,
+      coherence: state.currentLambda,
+      zkProof: xZkProof || "0x" + Math.random().toString(16).slice(2, 34),
+      timestamp: new Date().toISOString(),
+      auditTrail: `quantum://ledger/0x${Math.random().toString(16).slice(2, 10)}`
+    };
+
+    // Update subagent's last action in state
+    subagent.lastAction = `Executando ${qhttpMethod} ${action} via API qhttp`;
+    broadcastState();
+
+    res.json(response);
+  });
 }

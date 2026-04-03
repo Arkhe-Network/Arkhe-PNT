@@ -48,6 +48,7 @@ interface CommandCenterProps {
   setShowUnifiedOntology: (show: boolean) => void;
   setShowSecurityAdvanced: (show: boolean) => void;
   setShowPluralityMCP: (show: boolean) => void;
+  setShowEnterprisePlus?: (show: boolean) => void;
   parameters: any;
 }
 
@@ -99,6 +100,7 @@ export function CommandCenter({
   setShowUnifiedOntology,
   setShowSecurityAdvanced,
   setShowPluralityMCP,
+  setShowEnterprisePlus,
   parameters,
 }: CommandCenterProps) {
   const [activeCommandTab, setActiveCommandTab] = useState('operations');
@@ -226,6 +228,12 @@ export function CommandCenter({
               className="w-full py-2 border border-purple-500/50 text-purple-500 hover:bg-purple-500/10 rounded transition-colors uppercase tracking-widest font-bold shadow-[0_0_10px_rgba(168,85,247,0.2)] animate-pulse"
             >
               Dyson Sphere Telemetry
+            </button>
+            <button
+              onClick={() => setShowEnterprisePlus && setShowEnterprisePlus(true)}
+              className="w-full py-2 border border-arkhe-cyan/50 text-arkhe-cyan hover:bg-arkhe-cyan/10 rounded transition-colors uppercase tracking-widest font-bold shadow-[0_0_15px_rgba(0,255,170,0.4)] animate-pulse"
+            >
+              Arkhe(n) Enterprise Plus (25 Agents)
             </button>
           </div>
         )}

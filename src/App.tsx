@@ -61,6 +61,7 @@ import AquiferSpectrogramPanel from './components/AquiferSpectrogramPanel';
 import UnifiedOntologyPanel from './components/UnifiedOntologyPanel';
 import SecurityAdvancedPanel from './components/SecurityAdvancedPanel';
 import PluralityMCPPanel from './components/PluralityMCPPanel';
+import { EnterprisePlusPanel } from './components/EnterprisePlusPanel';
 import { ConsensusMeter } from './components/ConsensusMeter';
 import { CommandCenter } from './components/CommandCenter';
 import { useArkheSimulation } from './hooks/useArkheSimulation';
@@ -113,6 +114,7 @@ export function Dashboard() {
   const [showUnifiedOntology, setShowUnifiedOntology] = useState(false);
   const [showSecurityAdvanced, setShowSecurityAdvanced] = useState(false);
   const [showPluralityMCP, setShowPluralityMCP] = useState(false);
+  const [showEnterprisePlus, setShowEnterprisePlus] = useState(false);
   const attackTypes = ['Jamming', 'Time Shift', 'Data Spoofing', 'BGP Jitter', 'Quantum Shor', 'SEU Radiation'];
   const [timeToGenesis, setTimeToGenesis] = useState('');
 
@@ -303,6 +305,7 @@ export function Dashboard() {
             setShowUnifiedOntology={setShowUnifiedOntology}
             setShowSecurityAdvanced={setShowSecurityAdvanced}
             setShowPluralityMCP={setShowPluralityMCP}
+            setShowEnterprisePlus={setShowEnterprisePlus}
             parameters={state.parameters}
           />
         </div>
@@ -394,6 +397,9 @@ export function Dashboard() {
       )}
       {showPluralityMCP && (
         <PluralityMCPPanel onClose={() => setShowPluralityMCP(false)} />
+      )}
+      {showEnterprisePlus && (
+        <EnterprisePlusPanel onClose={() => setShowEnterprisePlus(false)} />
       )}
     </div>
   );
