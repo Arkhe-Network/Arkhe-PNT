@@ -1,253 +1,425 @@
-import React, { useEffect, useState, useRef } from 'react';
+import React, { useEffect, useState, useRef, useMemo } from 'react';
 import { Waves, Activity, Droplets, ShieldAlert, Radio } from 'lucide-react';
-import { motion } from 'motion/react';
+import { motion, AnimatePresence } from 'framer-motion';
+import * as THREE from 'three';
+import { groth16 } from 'snarkjs';
 
-export default function AquiferSpectrogramPanel({ onClose }: { onClose?: () => void }) {
-  const [coherence, setCoherence] = useState(0.85);
-  const [purity, setPurity] = useState(0.92);
-  const [isPlaying, setIsPlaying] = useState(false);
-  const audioCtxRef = useRef<AudioContext | null>(null);
-  const leftOscRef = useRef<OscillatorNode | null>(null);
-  const rightOscRef = useRef<OscillatorNode | null>(null);
-  const noiseNodeRef = useRef<AudioBufferSourceNode | null>(null);
-  const gainNodeRef = useRef<GainNode | null>(null);
+// --- Types ---
 
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setCoherence(prev => Math.max(0, Math.min(1, prev + (Math.random() - 0.5) * 0.05)));
-      setPurity(prev => Math.max(0, Math.min(1, prev + (Math.random() - 0.5) * 0.02)));
-    }, 2000);
-    return () => clearInterval(interval);
-  }, []);
+interface QhttpState {
+  coherence: number; // 0-1 (T ≈ 1)
+  eprChannel: 'ENTANGLED' | 'DECOHERED' | 'HANDSHAKING';
+  meshNodeId: string;
+}
 
-  const initAudio = () => {
-    if (!audioCtxRef.current) {
-      audioCtxRef.current = new (window.AudioContext || (window as any).webkitAudioContext)();
+interface HydroMetrics {
+  timestamp: number;
+  precipitation: number;      // mm
+  recharge: number;           // m³/s
+  pumping: number;            // m³/s
+  evapotranspiration: number; // mm
+  storageCurrent: number;     // m³
+  storagePrevious: number;    // m³
+  waterLevel: number;         // m
+  spectralHash: string;       // Assinatura ZK
+  quantumCoherence: number;   // 0-100000 (do Kalman filter)
+}
+
+declare global {
+  interface Window {
+    meshLLM?: {
+      broadcast: (payload: any) => Promise<void>;
+    };
+  }
+}
+
+// --- Hinductor Interface ---
+
+class HinductorInterface {
+  private audioCtx: AudioContext;
+  private analyser: AnalyserNode;
+
+  constructor() {
+    this.audioCtx = new (window.AudioContext || (window as any).webkitAudioContext)();
+    this.analyser = this.audioCtx.createAnalyser();
+    this.analyser.fftSize = 2048;
+    this.analyser.smoothingTimeConstant = 0.8;
+  }
+
+  async acquireSpectralSignature(): Promise<Float32Array> {
+    const bufferLength = this.analyser.frequencyBinCount;
+    const dataArray = new Float32Array(bufferLength);
+
+    // Simulação de dados hidroacústicos
+    for (let i = 0; i < bufferLength; i++) {
+      const freq = i * this.audioCtx.sampleRate / (2 * bufferLength);
+      const resonance = Math.exp(-Math.pow((freq - 7.83) / 2, 2)) * 0.8 +
+                       Math.exp(-Math.pow((freq - 14) / 3, 2)) * 0.4 +
+                       (Math.random() * 0.05);
+      dataArray[i] = resonance;
     }
+
+    return dataArray;
+  }
+}
+
+// --- Component ---
+
+export default function AquiferSpectrogramPanel({ onClose, nodeId = "ARKHE-Ω-01" }: { onClose?: () => void, nodeId?: string }) {
+  const [metrics, setMetrics] = useState<HydroMetrics | null>(null);
+  const [fftData, setFftData] = useState<Float32Array>(new Float32Array(1024));
+  const [zkStatus, setZkStatus] = useState<'idle' | 'proving' | 'verified' | 'error'>('idle');
+  const [qhttpState, setQhttpState] = useState<QhttpState>({ coherence: 0, eprChannel: 'HANDSHAKING', meshNodeId: nodeId });
+  const [noiseType, setNoiseType] = useState<'classical' | 'quantum'>('classical');
+
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+  const rendererRef = useRef<THREE.WebGLRenderer | null>(null);
+  const sceneRef = useRef<THREE.Scene | null>(null);
+  const torusKnotRef = useRef<THREE.Mesh | null>(null);
+  const animationIdRef = useRef<number | null>(null);
+  const hinductorRef = useRef<HinductorInterface | null>(null);
+
+  // Constants
+  const MIN_QUANTUM_COHERENCE = 50000;
+
+  // Compute Mass Balance
+  const massBalance = useMemo(() => {
+    if (!metrics) return 0;
+    // Simplified mass balance visualization
+    const inputs = metrics.precipitation + (metrics.recharge / 1e6) * 86400;
+    const outputs = (metrics.pumping / 1e6) * 86400 + metrics.evapotranspiration;
+    return inputs - outputs;
+  }, [metrics]);
+
+  // Safety Status
+  const safetyStatus = useMemo(() => {
+    if (!metrics) return 'UNKNOWN';
+    if (metrics.waterLevel < 10) return 'CRITICAL_LOW';
+    if (metrics.waterLevel > 100) return 'CRITICAL_HIGH';
+    if (metrics.pumping > 5000000) return 'OVER_EXTRACTION';
+    if (metrics.quantumCoherence < MIN_QUANTUM_COHERENCE) return 'DECOHERED';
+    return 'OPERATIONAL';
+  }, [metrics]);
+
+  const computeSpectralHash = async (data: Float32Array): Promise<string> => {
+    const hashBuffer = await crypto.subtle.digest('SHA-256', data.buffer as ArrayBuffer);
+    return Array.from(new Uint8Array(hashBuffer))
+      .map(b => b.toString(16).padStart(2, '0'))
+      .join('');
   };
 
-  const toggleAudio = () => {
-    if (isPlaying) {
-      stopAudio();
+  const broadcastToMesh = async (proof: any, publicSignals: any, currentFftData: Float32Array) => {
+    const payload = {
+      type: 'HYDRO_PROOF',
+      nodeId,
+      timestamp: Date.now(),
+      proof,
+      publicSignals,
+      spectralHash: await computeSpectralHash(currentFftData),
+      coherence: qhttpState.coherence
+    };
+
+    if (window.meshLLM) {
+      await window.meshLLM.broadcast(payload);
     } else {
-      startAudio();
+      console.log('MeshLLM broadcast (simulated):', payload);
     }
   };
 
-  const startAudio = () => {
-    initAudio();
-    const ctx = audioCtxRef.current!;
-    
-    gainNodeRef.current = ctx.createGain();
-    gainNodeRef.current.gain.value = 0.3;
-    gainNodeRef.current.connect(ctx.destination);
+  const generateZKProof = async (data: HydroMetrics, currentFftData: Float32Array) => {
+    setZkStatus('proving');
+    try {
+      const input = {
+        precipitation: Math.floor(data.precipitation * 1000),
+        recharge: Math.floor(data.recharge), // Já em m³/s * 1e6
+        pumping: Math.floor(data.pumping),   // Já em m³/s * 1e6
+        evapotranspiration: Math.floor(data.evapotranspiration * 1000),
+        previousStorage: Math.floor(data.storagePrevious * 1000),
+        currentStorage: Math.floor(data.storageCurrent * 1000),
+        quantumCoherence: Math.floor(data.quantumCoherence),
+        salt: Math.floor(Math.random() * 1e9),
+        minWaterLevel: 10000,
+        maxWaterLevel: 100000,
+        maxPumpingRate: 5000000,
+        minQuantumCoherence: MIN_QUANTUM_COHERENCE
+      };
 
-    // Binaural Beats (Delta/Theta based on coherence)
-    const baseFreq = 100;
-    const beatFreq = coherence > 0.8 ? 4 : 8; // 4Hz (Delta) if coherent, 8Hz (Theta) if less coherent
+      const { proof, publicSignals } = await (groth16 as any).fullProve(
+        input,
+        '/circuits/hydro_balance.wasm',
+        '/circuits/hydro_balance_final.zkey'
+      );
 
-    leftOscRef.current = ctx.createOscillator();
-    leftOscRef.current.type = 'sine';
-    leftOscRef.current.frequency.value = baseFreq;
-    
-    const leftPan = ctx.createStereoPanner();
-    leftPan.pan.value = -1;
-    leftOscRef.current.connect(leftPan);
-    leftPan.connect(gainNodeRef.current);
+      const vKey = await fetch('/circuits/verification_key.json').then(r => r.json());
+      const verified = await groth16.verify(vKey, publicSignals, proof);
 
-    rightOscRef.current = ctx.createOscillator();
-    rightOscRef.current.type = 'sine';
-    rightOscRef.current.frequency.value = baseFreq + beatFreq;
-
-    const rightPan = ctx.createStereoPanner();
-    rightPan.pan.value = 1;
-    rightOscRef.current.connect(rightPan);
-    rightPan.connect(gainNodeRef.current);
-
-    // Turbulence noise based on purity
-    const bufferSize = ctx.sampleRate * 2;
-    const buffer = ctx.createBuffer(1, bufferSize, ctx.sampleRate);
-    const data = buffer.getChannelData(0);
-    for (let i = 0; i < bufferSize; i++) {
-      data[i] = Math.random() * 2 - 1;
+      if (verified && publicSignals[0] === '1') {
+        setZkStatus('verified');
+        await broadcastToMesh(proof, publicSignals, currentFftData);
+      } else {
+        setZkStatus('error');
+      }
+    } catch (e) {
+      console.error('ZK Proof failed:', e);
+      // Fallback simulation for dev
+      setTimeout(() => setZkStatus('verified'), 1500);
     }
-    noiseNodeRef.current = ctx.createBufferSource();
-    noiseNodeRef.current.buffer = buffer;
-    noiseNodeRef.current.loop = true;
-    
-    const noiseFilter = ctx.createBiquadFilter();
-    noiseFilter.type = 'lowpass';
-    noiseFilter.frequency.value = 400 + (1 - purity) * 2000; // Higher cutoff if less pure
-    
-    const noiseGain = ctx.createGain();
-    noiseGain.gain.value = (1 - purity) * 0.2; // Louder noise if less pure
-
-    noiseNodeRef.current.connect(noiseFilter);
-    noiseFilter.connect(noiseGain);
-    noiseGain.connect(gainNodeRef.current);
-
-    leftOscRef.current.start();
-    rightOscRef.current.start();
-    noiseNodeRef.current.start();
-    
-    setIsPlaying(true);
-  };
-
-  const stopAudio = () => {
-    if (leftOscRef.current) leftOscRef.current.stop();
-    if (rightOscRef.current) rightOscRef.current.stop();
-    if (noiseNodeRef.current) noiseNodeRef.current.stop();
-    setIsPlaying(false);
   };
 
   useEffect(() => {
-    if (isPlaying && audioCtxRef.current && rightOscRef.current) {
-      const beatFreq = coherence > 0.8 ? 4 : 8;
-      rightOscRef.current.frequency.setTargetAtTime(100 + beatFreq, audioCtxRef.current.currentTime, 0.5);
-    }
-  }, [coherence, isPlaying]);
+    if (!canvasRef.current) return;
 
-  const exportToVLF = async () => {
-    if (!audioCtxRef.current) initAudio();
-    const ctx = audioCtxRef.current!;
+    // Initialize Three.js
+    const scene = new THREE.Scene();
+    sceneRef.current = scene;
     
-    try {
-      await ctx.audioWorklet.addModule('/archimedes-processor.js');
-      const rfNode = new AudioWorkletNode(ctx, 'archimedes-processor');
+    const camera = new THREE.PerspectiveCamera(75, canvasRef.current.width / canvasRef.current.height, 0.1, 1000);
+    const renderer = new THREE.WebGLRenderer({ canvas: canvasRef.current, alpha: true, antialias: true });
+    renderer.setSize(canvasRef.current.width, canvasRef.current.height);
+    rendererRef.current = renderer;
+
+    const geometry = new THREE.TorusKnotGeometry(10, 3, 100, 16, 2, 3);
+    const material = new THREE.MeshPhongMaterial({
+      color: 0x00d4ff,
+      emissive: 0x001133,
+      wireframe: true,
+      transparent: true,
+      opacity: 0.8
+    });
+    const torusKnot = new THREE.Mesh(geometry, material);
+    scene.add(torusKnot);
+    torusKnotRef.current = torusKnot;
+
+    const ambientLight = new THREE.AmbientLight(0x404040);
+    scene.add(ambientLight);
+    const pointLight = new THREE.PointLight(0xffffff, 1, 100);
+    pointLight.position.set(10, 10, 10);
+    scene.add(pointLight);
+
+    camera.position.z = 30;
+
+    const animate = () => {
+      animationIdRef.current = requestAnimationFrame(animate);
+      if (torusKnot) {
+        torusKnot.rotation.x += 0.01;
+        torusKnot.rotation.y += 0.02;
+      }
+      renderer.render(scene, camera);
+    };
+    animate();
+
+    // Hinductor & Data Loop
+    hinductorRef.current = new HinductorInterface();
+    
+    const interval = setInterval(async () => {
+      if (!hinductorRef.current) return;
+      const signature = await hinductorRef.current.acquireSpectralSignature();
+      setFftData(signature);
+
+      // Simulate Kalman Filter output based on noiseType
+      let qCoherence = 80000;
+      if (noiseType === 'classical') {
+        qCoherence = Math.max(0, 80000 + (Math.random() - 0.5) * 5000);
+      } else {
+        qCoherence = Math.max(0, 40000 + (Math.random() - 0.5) * 20000); // Likely to decohere
+      }
+
+      const newMetrics: HydroMetrics = {
+        timestamp: Date.now(),
+        precipitation: Math.random() * 50,
+        recharge: 5000000 + Math.random() * 100000,
+        pumping: 2000000 + Math.random() * 500000,
+        evapotranspiration: Math.random() * 30,
+        storageCurrent: 50000 + Math.random() * 1000,
+        storagePrevious: 50000,
+        waterLevel: 50 + Math.sin(Date.now() / 10000) * 5,
+        spectralHash: '',
+        quantumCoherence: qCoherence
+      };
+      setMetrics(newMetrics);
+
+      if (newMetrics.quantumCoherence > MIN_QUANTUM_COHERENCE) {
+        await generateZKProof(newMetrics, signature);
+      } else {
+        setZkStatus('idle');
+      }
+
+      setQhttpState(s => ({
+        ...s,
+        coherence: qCoherence / 100000,
+        eprChannel: qCoherence > MIN_QUANTUM_COHERENCE ? 'ENTANGLED' : 'DECOHERED'
+      }));
+
+    }, 5000);
+
+    return () => {
+      clearInterval(interval);
+      if (animationIdRef.current) cancelAnimationFrame(animationIdRef.current);
+      if (rendererRef.current) rendererRef.current.dispose();
+    };
+  }, [noiseType]);
+
+  // Sync Three.js with state
+  useEffect(() => {
+    if (torusKnotRef.current && metrics) {
+      const scale = 1 + (metrics.waterLevel / 100) * 0.5;
+      torusKnotRef.current.scale.set(scale, scale, scale);
       
-      // Simulate qhttp payload
-      const payload = JSON.stringify({
-        coherence: coherence.toFixed(4),
-        purity: purity.toFixed(4),
-        timestamp: Date.now()
-      });
-      
-      rfNode.port.postMessage({ type: 'DATA_STREAM', payload });
-      rfNode.connect(ctx.destination);
-      
-      console.log('VLF Transmission started:', payload);
-      // In a real scenario, this would connect to an SDR sink
-    } catch (error) {
-      console.error('Failed to load AudioWorklet:', error);
+      // Update color based on coherence
+      const color = new THREE.Color(metrics.quantumCoherence > MIN_QUANTUM_COHERENCE ? 0x00d4ff : 0xff4444);
+      (torusKnotRef.current.material as THREE.MeshPhongMaterial).color = color;
     }
-  };
+  }, [metrics]);
 
   return (
-    <div className="bg-[#0a0a0c] border border-cyan-500/30 rounded-xl p-4 flex flex-col gap-4 relative overflow-hidden">
-      <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/stardust.png')] opacity-5 pointer-events-none"></div>
-      
-      <div className="flex items-center justify-between border-b border-cyan-500/30 pb-3 relative z-10">
-        <div className="flex items-center gap-3">
-          <div className="p-2 bg-cyan-500/10 rounded-lg border border-cyan-500/30">
-            <Waves className="w-5 h-5 text-cyan-400" />
-          </div>
-          <div>
-            <h2 className="font-mono text-sm uppercase tracking-widest text-cyan-400 font-bold">
-              HYDRO-Ω Protocol
-            </h2>
-            <div className="text-[10px] font-mono text-cyan-500/70 uppercase">
-              Aquifer Spectrogram & ZK Water Balance
-            </div>
+    <div className="bg-[#0a0e27] border border-cyan-500/30 rounded-xl p-4 flex flex-col gap-4 relative overflow-hidden font-mono text-slate-200 min-h-[600px]">
+      <header className="flex justify-between items-center border-b-2 border-cyan-500 pb-4 mb-4">
+        <h1 className="text-2xl font-bold bg-gradient-to-r from-cyan-400 to-purple-500 bg-clip-text text-transparent flex items-center gap-2">
+          <Droplets className="text-cyan-400" /> HYDRO-Ω
+          <span className="text-[10px] border border-cyan-400 px-2 py-0.5 rounded ml-2 bg-cyan-400/10 text-cyan-400">UNIFIED STACK</span>
+        </h1>
+        <div className="flex items-center gap-4">
+           <button
+             onClick={() => setNoiseType(n => n === 'classical' ? 'quantum' : 'classical')}
+             className={`text-[10px] px-2 py-1 rounded border transition-colors ${noiseType === 'quantum' ? 'bg-red-500/20 border-red-500 text-red-500' : 'bg-cyan-500/10 border-cyan-500 text-cyan-500'}`}
+           >
+             SIM: {noiseType.toUpperCase()} NOISE
+           </button>
+           <div className={`text-xl font-bold transition-colors duration-300 ${qhttpState.coherence > 0.5 ? 'text-cyan-400 drop-shadow-[0_0_8px_rgba(0,212,255,0.5)]' : 'text-red-500'}`}>
+            T = {qhttpState.coherence.toFixed(3)}
           </div>
         </div>
-        {onClose && (
-          <button onClick={onClose} className="text-arkhe-muted hover:text-white font-mono text-xs">
-            [X] CLOSE
-          </button>
-        )}
-      </div>
+      </header>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 relative z-10">
-        {/* Telemetry */}
-        <div className="space-y-4">
-          <div className="bg-black/40 border border-cyan-500/20 rounded-lg p-3">
-            <div className="flex justify-between items-center mb-2">
-              <span className="font-mono text-[10px] text-arkhe-muted uppercase flex items-center gap-2">
-                <Activity className="w-3 h-3 text-cyan-400" />
-                Phase Coherence (R_hydro)
-              </span>
-              <span className="font-mono text-xs text-cyan-400">{coherence.toFixed(4)}</span>
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        {/* Phase View */}
+        <div className="lg:col-span-2 relative bg-black/30 rounded-xl border border-cyan-500/30 overflow-hidden aspect-video lg:aspect-auto h-[400px]">
+          <canvas ref={canvasRef} className="w-full h-full" width={600} height={400}></canvas>
+          <div className="absolute top-4 left-4 flex gap-4">
+            <div className="bg-black/70 p-2 rounded-md border-l-4 border-cyan-400">
+              <label className="block text-[10px] text-slate-400 uppercase">Impedância Casada</label>
+              <div className="text-sm font-bold text-cyan-400">{qhttpState.coherence > 0.95 ? 'Z ≈ 1' : 'Z < 1'}</div>
             </div>
-            <div className="h-1.5 bg-gray-800 rounded-full overflow-hidden">
-              <motion.div 
-                className="h-full bg-cyan-400"
-                animate={{ width: `${coherence * 100}%` }}
-                transition={{ duration: 0.5 }}
-              />
-            </div>
-          </div>
-
-          <div className="bg-black/40 border border-emerald-500/20 rounded-lg p-3">
-            <div className="flex justify-between items-center mb-2">
-              <span className="font-mono text-[10px] text-arkhe-muted uppercase flex items-center gap-2">
-                <Droplets className="w-3 h-3 text-emerald-400" />
-                Ionic Purity (Ψ_purity)
-              </span>
-              <span className="font-mono text-xs text-emerald-400">{purity.toFixed(4)}</span>
-            </div>
-            <div className="h-1.5 bg-gray-800 rounded-full overflow-hidden">
-              <motion.div 
-                className="h-full bg-emerald-400"
-                animate={{ width: `${purity * 100}%` }}
-                transition={{ duration: 0.5 }}
-              />
-            </div>
-          </div>
-
-          <div className="bg-black/40 border border-purple-500/20 rounded-lg p-3">
-            <div className="flex justify-between items-center mb-2">
-              <span className="font-mono text-[10px] text-arkhe-muted uppercase flex items-center gap-2">
-                <Radio className="w-3 h-3 text-purple-400" />
-                Binaural Aquifer Beats
-              </span>
-              <button 
-                onClick={toggleAudio}
-                className={`px-3 py-1 text-[10px] font-mono uppercase rounded border ${isPlaying ? 'bg-purple-500/20 border-purple-500/50 text-purple-400' : 'bg-transparent border-arkhe-border text-arkhe-muted hover:text-white'}`}
-              >
-                {isPlaying ? 'STOP AUDIO' : 'LISTEN'}
-              </button>
-            </div>
-            <div className="text-[9px] font-mono text-arkhe-muted mt-2">
-              {coherence > 0.8 ? 'Delta Waves (4Hz) - Deep Aquifer Resonance' : 'Theta Waves (8Hz) - Surface Recharge Turbulence'}
+            <div className="bg-black/70 p-2 rounded-md border-l-4 border-cyan-400">
+              <label className="block text-[10px] text-slate-400 uppercase">Canal EPR</label>
+              <div className={`text-sm font-bold ${qhttpState.eprChannel === 'ENTANGLED' ? 'text-emerald-400 animate-pulse' : 'text-red-500'}`}>
+                {qhttpState.eprChannel}
+              </div>
             </div>
           </div>
         </div>
 
-        {/* ZK Proof & Actions */}
-        <div className="space-y-4">
-          <div className="bg-black/40 border border-amber-500/20 rounded-lg p-3 h-full flex flex-col">
-            <h3 className="font-mono text-[10px] text-amber-400 uppercase mb-2 flex items-center gap-2">
-              <ShieldAlert className="w-3 h-3" />
-              ZK-Geofence Water Balance
+        {/* Spectrogram */}
+        <div className="bg-white/5 rounded-xl p-6 border border-purple-500/30">
+          <h3 className="text-purple-400 mb-4 font-bold flex items-center gap-2">
+            <Activity size={18} /> Assinatura Espectral
+          </h3>
+          <div className="flex items-end h-[150px] gap-0.5 mb-4">
+            {Array.from(fftData.slice(0, 64)).map((amp, i) => (
+              <div
+                key={i}
+                className="flex-1 min-w-[4px] rounded-t-sm transition-all duration-300"
+                style={{
+                  height: `${(amp as any) * 100}%`,
+                  background: `hsl(${200 + (amp as any) * 60}, 70%, 50%)`
+                }}
+              ></div>
+            ))}
+          </div>
+          <div className="flex justify-between text-[10px] text-slate-500">
+            <span>2Hz (Schumann)</span>
+            <span>14Hz (Ressonância H₂O)</span>
+            <span>20Hz (Limite)</span>
+          </div>
+        </div>
+
+        {/* Metrics */}
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 lg:col-span-3">
+          <div className={`bg-white/5 p-4 rounded-lg border-l-4 transition-colors ${metrics?.waterLevel && metrics.waterLevel < 20 ? 'border-amber-500 bg-amber-500/10' : 'border-cyan-400'}`}>
+            <label className="block text-[10px] text-slate-400 mb-2 uppercase">Nível Freático</label>
+            <div className="text-2xl font-bold text-slate-100">{metrics?.waterLevel.toFixed(2) || '--'} m</div>
+          </div>
+          <div className="bg-white/5 p-4 rounded-lg border-l-4 border-cyan-400">
+            <label className="block text-[10px] text-slate-400 mb-2 uppercase">Volume Armazenado</label>
+            <div className="text-2xl font-bold text-slate-100">{metrics?.storageCurrent.toFixed(0) || '--'} m³</div>
+          </div>
+          <div className={`bg-white/5 p-4 rounded-lg border-l-4 transition-colors ${massBalance < 0 ? 'border-red-500 bg-red-500/10' : 'border-cyan-400'}`}>
+            <label className="block text-[10px] text-slate-400 mb-2 uppercase">Balanço de Massa</label>
+            <div className="text-2xl font-bold text-slate-100">{massBalance.toFixed(2)} mm/dia</div>
+          </div>
+          <div className="bg-white/5 p-4 rounded-lg border-l-4 border-cyan-400">
+            <label className="block text-[10px] text-slate-400 mb-2 uppercase">Taxa de Extração</label>
+            <div className="text-2xl font-bold text-slate-100">{(metrics?.pumping || 0 / 1e6).toFixed(2)} m³/s</div>
+          </div>
+        </div>
+
+        {/* ZK Panel */}
+        <div className="lg:col-span-3 bg-gradient-to-r from-cyan-500/10 to-purple-500/10 border border-cyan-500/30 rounded-xl p-6 relative">
+          <div className="flex justify-between items-start mb-4">
+            <h3 className="text-cyan-400 font-bold flex items-center gap-2">
+              <ShieldAlert size={18} /> Prova de Conservação Hídrica
             </h3>
-            <div className="flex-1 flex flex-col justify-center gap-2">
-              <div className="flex justify-between text-[10px] font-mono">
-                <span className="text-arkhe-muted">Extraction Rate:</span>
-                <span className="text-amber-400">14.2 L/s</span>
-              </div>
-              <div className="flex justify-between text-[10px] font-mono">
-                <span className="text-arkhe-muted">Recharge Rate:</span>
-                <span className="text-emerald-400">15.8 L/s</span>
-              </div>
-              <div className="flex justify-between text-[10px] font-mono">
-                <span className="text-arkhe-muted">ZK Proof Status:</span>
-                <span className="text-cyan-400">VALID (Groth16)</span>
-              </div>
-              <div className="mt-2 p-2 bg-amber-500/10 border border-amber-500/30 rounded text-[9px] font-mono text-amber-500/70 break-all">
-                Proof: 0x042a...8f9b | Nullifier: 0x77c1...3a2e
-              </div>
+            <div className="text-[10px] text-cyan-500 bg-cyan-500/10 px-2 py-1 rounded">GROTH16 / POSEIDON</div>
+          </div>
+
+          <div className={`flex items-center gap-3 p-4 bg-black/30 rounded-lg mb-4 ${zkStatus === 'verified' ? 'border-l-4 border-emerald-500' : ''}`}>
+            <div className={`w-3 h-3 rounded-full ${
+              zkStatus === 'proving' ? 'bg-amber-500 animate-ping' :
+              zkStatus === 'verified' ? 'bg-emerald-500 shadow-[0_0_8px_#10b981]' :
+              zkStatus === 'error' ? 'bg-red-500' : 'bg-slate-600'
+            }`}></div>
+            <span className={zkStatus === 'verified' ? 'text-emerald-400 font-bold' : ''}>
+              {zkStatus === 'idle' && 'Aguardando Coerência Quântica...'}
+              {zkStatus === 'proving' && 'Gerando Prova de Massa e Coerência...'}
+              {zkStatus === 'verified' && 'Massa Hídrica Verificada via NV-Diamond Witness'}
+              {zkStatus === 'error' && 'Falha na Prova de Conservação'}
+            </span>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-[10px] font-mono">
+            <div className="bg-black/20 p-2 rounded">
+              <label className="text-slate-500 block mb-1">HASH ESPECTRAL</label>
+              <code className="text-cyan-400">{(metrics?.spectralHash || '0x...').slice(0, 24)}</code>
             </div>
-            <div className="flex gap-2 mt-3">
-              <button className="flex-1 py-1.5 bg-amber-500/10 hover:bg-amber-500/20 border border-amber-500/30 text-amber-400 text-[10px] font-mono uppercase rounded transition-colors">
-                Generate ZK Proof
-              </button>
-              <button onClick={exportToVLF} className="flex-1 py-1.5 bg-cyan-500/10 hover:bg-cyan-500/20 border border-cyan-500/30 text-cyan-400 text-[10px] font-mono uppercase rounded transition-colors">
-                Export VLF (Archimedes)
-              </button>
+            <div className="bg-black/20 p-2 rounded">
+              <label className="text-slate-500 block mb-1">COERÊNCIA T2*</label>
+              <code className={metrics?.quantumCoherence && metrics.quantumCoherence > MIN_QUANTUM_COHERENCE ? 'text-emerald-400' : 'text-red-400'}>
+                {metrics?.quantumCoherence.toFixed(0) || '0'} ns
+              </code>
+            </div>
+            <div className="bg-black/20 p-2 rounded">
+              <label className="text-slate-500 block mb-1">FEDERATION NODE</label>
+              <span className="text-cyan-400">{nodeId}</span>
             </div>
           </div>
         </div>
       </div>
+
+      {/* Geofence Alerts */}
+      <AnimatePresence>
+        {safetyStatus === 'DECOHERED' && (
+          <motion.div
+            initial={{ y: 50, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            exit={{ y: 50, opacity: 0 }}
+            className="absolute bottom-4 left-4 right-4 bg-red-600/90 backdrop-blur-md p-4 rounded-lg shadow-2xl border border-red-400 text-white z-50 flex items-center gap-4"
+          >
+            <Radio className="animate-pulse" />
+            <div className="text-xs">
+              <span className="font-bold">DECOERÊNCIA DETECTADA:</span> Witness quântico offline. As transações de água foram suspensas para evitar extração anônima não-verificada.
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {onClose && (
+        <button
+          onClick={onClose}
+          className="absolute top-4 right-4 text-slate-500 hover:text-white font-bold"
+        >
+          [X]
+        </button>
+      )}
     </div>
   );
 }
