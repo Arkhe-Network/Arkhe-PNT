@@ -46,6 +46,7 @@ interface CommandCenterProps {
   setShowAgentManagement: (show: boolean) => void;
   setShowAquiferSpectrogram: (show: boolean) => void;
   setShowUnifiedOntology: (show: boolean) => void;
+  setShowSecurityAdvanced: (show: boolean) => void;
   setShowPluralityMCP: (show: boolean) => void;
   parameters: any;
 }
@@ -96,6 +97,7 @@ export function CommandCenter({
   setShowAgentManagement,
   setShowAquiferSpectrogram,
   setShowUnifiedOntology,
+  setShowSecurityAdvanced,
   setShowPluralityMCP,
   parameters,
 }: CommandCenterProps) {
@@ -206,6 +208,12 @@ export function CommandCenter({
               className="w-full py-2 border border-arkhe-green/50 text-arkhe-green hover:bg-arkhe-green/10 rounded transition-colors uppercase tracking-widest font-bold shadow-[0_0_10px_rgba(0,255,102,0.2)] animate-pulse"
             >
               ARKHE-SEC Telemetria Coerente
+            </button>
+            <button
+              onClick={() => setShowSecurityAdvanced(true)}
+              className="w-full py-2 border border-arkhe-cyan/50 text-arkhe-cyan hover:bg-arkhe-cyan/10 rounded transition-colors uppercase tracking-widest font-bold shadow-[0_0_10px_rgba(0,255,170,0.2)] animate-pulse"
+            >
+              Arquiteto HYDRO-Ω (Aegis)
             </button>
             <button 
               onClick={() => setShowDimOS(true)}

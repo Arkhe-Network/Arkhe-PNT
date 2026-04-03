@@ -59,6 +59,7 @@ import CollectiveIntelligencePanel from './components/CollectiveIntelligencePane
 import AgentManagementPanel from './components/AgentManagementPanel';
 import AquiferSpectrogramPanel from './components/AquiferSpectrogramPanel';
 import UnifiedOntologyPanel from './components/UnifiedOntologyPanel';
+import SecurityAdvancedPanel from './components/SecurityAdvancedPanel';
 import PluralityMCPPanel from './components/PluralityMCPPanel';
 import { ConsensusMeter } from './components/ConsensusMeter';
 import { CommandCenter } from './components/CommandCenter';
@@ -110,6 +111,7 @@ export function Dashboard() {
   const [showAgentManagement, setShowAgentManagement] = useState(false);
   const [showAquiferSpectrogram, setShowAquiferSpectrogram] = useState(false);
   const [showUnifiedOntology, setShowUnifiedOntology] = useState(false);
+  const [showSecurityAdvanced, setShowSecurityAdvanced] = useState(false);
   const [showPluralityMCP, setShowPluralityMCP] = useState(false);
   const attackTypes = ['Jamming', 'Time Shift', 'Data Spoofing', 'BGP Jitter', 'Quantum Shor', 'SEU Radiation'];
   const [timeToGenesis, setTimeToGenesis] = useState('');
@@ -299,6 +301,7 @@ export function Dashboard() {
             setShowAgentManagement={setShowAgentManagement}
             setShowAquiferSpectrogram={setShowAquiferSpectrogram}
             setShowUnifiedOntology={setShowUnifiedOntology}
+            setShowSecurityAdvanced={setShowSecurityAdvanced}
             setShowPluralityMCP={setShowPluralityMCP}
             parameters={state.parameters}
           />
@@ -352,6 +355,13 @@ export function Dashboard() {
               [X] CLOSE
             </button>
             <AgentManagementPanel />
+          </div>
+        </div>
+      )}
+      {showSecurityAdvanced && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4">
+          <div className="w-full max-w-4xl relative">
+            <SecurityAdvancedPanel onClose={() => setShowSecurityAdvanced(false)} />
           </div>
         </div>
       )}

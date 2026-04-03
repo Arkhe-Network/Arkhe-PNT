@@ -16,6 +16,7 @@ export function runSimulationTick(broadcastState: () => void) {
   let newTopology = { ...state.topology };
   let newHardware = { ...state.hardware };
   let newSecurity = { ...state.security };
+  let newSecurityAdvanced = { ...state.securityAdvanced };
 
   // Base noise
   newLambda = Math.min(1.0, Math.max(0.0, newLambda + (Math.random() - 0.5) * 0.05));
@@ -28,9 +29,18 @@ export function runSimulationTick(broadcastState: () => void) {
   newHardware.segPower = 280 + Math.random() * 10;
   newHardware.fpgaUtilization = 46 + Math.random() * 2;
 
+  // Security Advanced Base Fluctuations
+  newSecurityAdvanced.l2.qrngJitterMs = 15 + (Math.random() - 0.5) * 4;
+  newSecurityAdvanced.l3.t2StarMicroseconds = 50 + Math.random() * 5;
+  newSecurityAdvanced.l4.logosConsistency = Math.min(1.0, 0.98 + Math.random() * 0.02);
+  newSecurityAdvanced.qhttp.bellViolationS = 2.0 + Math.random() * 0.82;
+
   if (isAttack && !isOngoingAttack) {
     // Initiate attack
-    const attackTypes = ['Time Shift', 'Jamming', 'Data Spoofing', 'BGP Jitter', 'Quantum Shor', 'SEU Radiation'];
+    const attackTypes = [
+      'Time Shift', 'Jamming', 'Data Spoofing', 'BGP Jitter', 'Quantum Shor', 'SEU Radiation',
+      'Phase Spoofing', 'Ontology Injection', 'Sybil Attack', 'Replay Attack'
+    ];
     newActiveThreat = attackTypes[Math.floor(Math.random() * attackTypes.length)];
     newThreatLevel = 'critical';
     
@@ -61,6 +71,23 @@ export function runSimulationTick(broadcastState: () => void) {
     } else if (newActiveThreat === 'SEU Radiation') {
       newHardware.tmrFaultsCorrected += Math.floor(Math.random() * 5) + 1;
       newLambda = 0.7 + Math.random() * 0.1;
+    } else if (newActiveThreat === 'Phase Spoofing') {
+      newSecurityAdvanced.l2.eprHandshake = 'failed';
+      newSecurityAdvanced.l2.pneumaOutlierDetected = true;
+      newSecurityAdvanced.qhttp.bellViolationS = 1.5 + Math.random() * 0.4; // Classically explained
+      newLambda = 0.4 + Math.random() * 0.2;
+    } else if (newActiveThreat === 'Ontology Injection') {
+      newSecurityAdvanced.l4.owlSignatureValid = false;
+      newSecurityAdvanced.l4.logosConsistency = 0.4 + Math.random() * 0.2;
+      newLambda = 0.6 + Math.random() * 0.1;
+    } else if (newActiveThreat === 'Sybil Attack') {
+      newSecurityAdvanced.l2.muSig2Heartbeat = 'unverified';
+      newHardware.fpgaUtilization = 90.0 + Math.random() * 5;
+      newLambda = 0.5 + Math.random() * 0.1;
+    } else if (newActiveThreat === 'Replay Attack') {
+      newSecurityAdvanced.l3.nullifierVerified = false;
+      newSecurityAdvanced.l3.ttlValid = false;
+      newLambda = 0.55 + Math.random() * 0.1;
     } else {
       newLambda = 0.7 + Math.random() * 0.1;
     }
@@ -112,7 +139,17 @@ export function runSimulationTick(broadcastState: () => void) {
       if (Math.random() > 0.5) newSecurity.zkProofValid = true;
       newTopology.handshakeSuccessRate = Math.min(94.7, newTopology.handshakeSuccessRate + 5.0);
 
-      if (newLambda > state.parameters.lambdaThreshold && newTopology.yangBaxterValid && newSecurity.zkProofValid) {
+      // Recover Advanced Security
+      if (Math.random() > 0.5) {
+        newSecurityAdvanced.l2.eprHandshake = 'active';
+        newSecurityAdvanced.l2.pneumaOutlierDetected = false;
+        newSecurityAdvanced.l2.muSig2Heartbeat = 'verified';
+        newSecurityAdvanced.l3.nullifierVerified = true;
+        newSecurityAdvanced.l3.ttlValid = true;
+        newSecurityAdvanced.l4.owlSignatureValid = true;
+      }
+
+      if (newLambda > state.parameters.lambdaThreshold && newTopology.yangBaxterValid && newSecurity.zkProofValid && newSecurityAdvanced.l4.owlSignatureValid) {
         newThreatLevel = 'normal';
         newActiveThreat = null;
         newMitigation.nullSteeringActive = false;
@@ -161,6 +198,17 @@ export function runSimulationTick(broadcastState: () => void) {
     newSecurity.zkProofValid = true;
     newTopology.handshakeSuccessRate = 94.7 + Math.random() * 3;
     
+    // Recovery of Advanced Security if normal
+    newSecurityAdvanced.l1.teeStatus = 'secure';
+    newSecurityAdvanced.l1.intrusionSensor = 'nominal';
+    newSecurityAdvanced.l2.eprHandshake = 'active';
+    newSecurityAdvanced.l2.muSig2Heartbeat = 'verified';
+    newSecurityAdvanced.l2.pneumaOutlierDetected = false;
+    newSecurityAdvanced.l3.nullifierVerified = true;
+    newSecurityAdvanced.l3.ttlValid = true;
+    newSecurityAdvanced.l4.owlSignatureValid = true;
+    newSecurityAdvanced.l5.cspStatus = 'enforced';
+
     // Add normal log occasionally
     if (Math.random() < 0.3) {
       const newLogId = generateOrbId();
@@ -233,6 +281,7 @@ export function runSimulationTick(broadcastState: () => void) {
     topology: newTopology,
     hardware: newHardware,
     security: newSecurity,
+    securityAdvanced: newSecurityAdvanced,
     logs: newLogs,
     tzinor: tzinorStore.state,
     epoch: now / 1000,

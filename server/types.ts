@@ -84,6 +84,46 @@ export interface UserSession {
   };
 }
 
+export interface SecurityAdvancedState {
+  l1: {
+    teeStatus: 'secure' | 'compromised' | 'attesting';
+    intrusionSensor: 'nominal' | 'alert';
+    thermalDestructionArmed: boolean;
+    hsmBackupSynced: boolean;
+    lastRemoteAttestation: string;
+  };
+  l2: {
+    eprHandshake: 'active' | 'failed';
+    muSig2Heartbeat: 'verified' | 'unverified';
+    pneumaOutlierDetected: boolean;
+    qrngJitterMs: number;
+  };
+  l3: {
+    nullifierVerified: boolean;
+    timestampQRNG: string;
+    ttlValid: boolean;
+    t2StarMicroseconds: number;
+  };
+  l4: {
+    owlSignatureValid: boolean;
+    logosConsistency: number;
+    zkOntologicalProof: boolean;
+    merkleDagRoot: string;
+  };
+  l5: {
+    cspStatus: 'enforced' | 'violation';
+    sriVerified: boolean;
+    antiCsrfToken: string;
+    zkUiVerified: boolean;
+    pwaCacheSigned: boolean;
+  };
+  qhttp: {
+    pqTlsStatus: 'Kyber+ECDH' | 'Classic' | 'None';
+    xKuramotoHeader: string;
+    bellViolationS: number;
+  };
+}
+
 export interface SimulationState {
   coherenceData: { time: string; lambda: number; threshold: number }[];
   currentLambda: number;
@@ -129,6 +169,7 @@ export interface SimulationState {
     zkProofValid: boolean;
     nttLatency: number;
   };
+  securityAdvanced: SecurityAdvancedState;
   tzinor: TzinorMemoryState;
   epoch: number;
   edge: {

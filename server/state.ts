@@ -63,6 +63,45 @@ export let state: SimulationState = {
     zkProofValid: true,
     nttLatency: 10.24,
   },
+  securityAdvanced: {
+    l1: {
+      teeStatus: 'secure',
+      intrusionSensor: 'nominal',
+      thermalDestructionArmed: false,
+      hsmBackupSynced: true,
+      lastRemoteAttestation: new Date().toISOString(),
+    },
+    l2: {
+      eprHandshake: 'active',
+      muSig2Heartbeat: 'verified',
+      pneumaOutlierDetected: false,
+      qrngJitterMs: 15,
+    },
+    l3: {
+      nullifierVerified: true,
+      timestampQRNG: new Date().toISOString(),
+      ttlValid: true,
+      t2StarMicroseconds: 52.4,
+    },
+    l4: {
+      owlSignatureValid: true,
+      logosConsistency: 0.99,
+      zkOntologicalProof: true,
+      merkleDagRoot: '0x' + Math.random().toString(16).slice(2, 66),
+    },
+    l5: {
+      cspStatus: 'enforced',
+      sriVerified: true,
+      antiCsrfToken: '0x' + Math.random().toString(16).slice(2, 34),
+      zkUiVerified: true,
+      pwaCacheSigned: true,
+    },
+    qhttp: {
+      pqTlsStatus: 'Kyber+ECDH',
+      xKuramotoHeader: 'R(t)=0.98',
+      bellViolationS: 2.82, // Optimal violation
+    }
+  },
   tzinor: tzinorStore.state,
   epoch: Date.now() / 1000,
   edge: {

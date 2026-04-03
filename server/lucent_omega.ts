@@ -95,6 +95,9 @@ function analyzeSession(session: UserSession) {
   // Implement agent sub-inspection for civic and ontological integrity
   runCivicInspection(session);
 
+  // New: Advanced Security Inspection by Pneuma and Logos
+  runAdvancedSecuritySubAgents(session);
+
   // Optionally update global coherence if a critical bug is found
   if (bugDetected) {
     state.currentLambda = Math.max(0.2, state.currentLambda - 0.15);
@@ -116,4 +119,31 @@ function inspectOntologyFunctions(session: UserSession) {
       logger.warn(`🜏 [ONTOLOGY-ALERT] Function ${func} exhibits decoherence in session ${session.id}. Mapping required.`);
     }
   });
+}
+
+function runAdvancedSecuritySubAgents(session: UserSession) {
+  // Pneuma: Monitors phase coherence and Kuramoto health
+  logger.info(`🜏 [PNEUMA] Analyzing phase coherence for session ${session.id}...`);
+  if (state.currentLambda < state.parameters.lambdaThreshold) {
+    state.securityAdvanced.l2.pneumaOutlierDetected = true;
+    logger.warn(`🜏 [PNEUMA-ALERT] Phase instability detected in session ${session.id}. Current λ: ${state.currentLambda.toFixed(4)}`);
+  }
+
+  // Logos: Validates ontological integrity of session data
+  logger.info(`🜏 [LOGOS] Validating ontological consistency for session ${session.id}...`);
+  const consistency = 0.8 + Math.random() * 0.2;
+  state.securityAdvanced.l4.logosConsistency = (state.securityAdvanced.l4.logosConsistency + consistency) / 2;
+
+  if (consistency < 0.85) {
+    state.securityAdvanced.l4.owlSignatureValid = false;
+    logger.error(`🜏 [LOGOS-ERROR] Ontological violation in session ${session.id}. Consistency: ${consistency.toFixed(2)}`);
+  } else {
+    state.securityAdvanced.l4.owlSignatureValid = true;
+  }
+
+  // Sync session analysis result with ZK proof visibility
+  if (session.analysis) {
+    state.securityAdvanced.l3.nullifierVerified = true;
+    state.securityAdvanced.l5.zkUiVerified = true;
+  }
 }
