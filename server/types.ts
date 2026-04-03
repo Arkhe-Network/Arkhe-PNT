@@ -218,4 +218,26 @@ export interface SimulationState {
     };
   };
   lucentSessions: UserSession[];
+  hydro: {
+    neighborhoods: NeighborhoodCoherence[];
+    globalMassBalance: number;
+    zkAlertsCount: number;
+  };
+  civicSubagents: CivicSubagentState[];
+}
+
+export interface NeighborhoodCoherence {
+  name: string;
+  region: string;
+  coherence: number;
+  lag: number; // in hours
+  activeUsers: number;
+}
+
+export interface CivicSubagentState {
+  name: string;
+  adaptation: string;
+  function: string;
+  status: 'active' | 'idle' | 'alert';
+  lastAction: string;
 }

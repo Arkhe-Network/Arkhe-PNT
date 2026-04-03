@@ -9,6 +9,7 @@ import { setupPresenceServer } from "./presence_field_server";
 import { setupLucentCollector } from "./lucent_omega";
 import { logger } from "./logger";
 import { startAgentGrpcServer } from "./agent_grpc_server";
+import { setupConnectors } from "./connectors";
 
 // SSE Clients
 const clients: express.Response[] = [];
@@ -69,6 +70,9 @@ async function startServer() {
 
   // Start Agent gRPC Server
   startAgentGrpcServer();
+
+  // Setup Civic Data Connectors
+  setupConnectors();
 }
 
 startServer();

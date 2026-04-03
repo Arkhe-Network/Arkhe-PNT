@@ -1,7 +1,8 @@
 import React, { useEffect, useState, useRef, useMemo } from 'react';
-import { Waves, Activity, Droplets, ShieldAlert, Radio, Box } from 'lucide-react';
+import { Waves, Activity, Droplets, ShieldAlert, Radio, Box, Users, MapPin, Search } from 'lucide-react';
 import { motion } from 'framer-motion';
 import * as THREE from 'three';
+import { SimulationState } from '../../server/types';
 
 // Data types based on the protocol
 interface HydroMetrics {
@@ -24,6 +25,7 @@ interface QhttpState {
 
 export default function AquiferSpectrogramPanel({ onClose }: { onClose?: () => void }) {
   const [metrics, setMetrics] = useState<HydroMetrics | null>(null);
+  const [state, setState] = useState<SimulationState | null>(null);
   const [qhttpState, setQhttpState] = useState<QhttpState>({
     coherence: 0.85,
     eprChannel: 'HANDSHAKING',
@@ -103,6 +105,16 @@ export default function AquiferSpectrogramPanel({ onClose }: { onClose?: () => v
       renderer.dispose();
     };
   }, [qhttpState.coherence, metrics]);
+
+  // Real-time Data Sync
+  useEffect(() => {
+    const eventSource = new EventSource('/api/stream');
+    eventSource.onmessage = (event) => {
+      const newState = JSON.parse(event.data);
+      setState(newState);
+    };
+    return () => eventSource.close();
+  }, []);
 
   // Simulation Loop
   useEffect(() => {
@@ -203,7 +215,7 @@ export default function AquiferSpectrogramPanel({ onClose }: { onClose?: () => v
       </header>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Phase View (3D) */}
+        {/* Row 1: Phase View (2/3) and Neighborhood/Subagents (1/3) */}
         <div className="lg:col-span-2 relative bg-black/30 rounded-xl border border-[#00d4ff]/20 overflow-hidden">
           <canvas ref={canvas3DRef} className="w-full h-[400px]" />
           <div className="absolute top-4 left-4 flex gap-4">
@@ -220,8 +232,50 @@ export default function AquiferSpectrogramPanel({ onClose }: { onClose?: () => v
           </div>
         </div>
 
-        {/* Spectrogram Panel */}
-        <div className="bg-white/5 rounded-xl border border-[#7c3aed]/30 p-4 flex flex-col gap-4">
+        <div className="flex flex-col gap-4">
+          <div className="bg-white/5 rounded-xl border border-[#00d4ff]/30 p-4 overflow-y-auto max-h-[190px]">
+            <h3 className="text-[#00d4ff] text-xs uppercase font-bold mb-3 flex items-center gap-2">
+              <MapPin className="w-3 h-3" /> Coerência de Bairro (Ω)
+            </h3>
+            <div className="flex flex-col gap-2">
+              {state?.hydro?.neighborhoods.map((n, i) => (
+                <div key={i} className="flex justify-between items-center text-[10px] border-b border-white/5 pb-1">
+                  <div className="flex flex-col">
+                    <span className="font-bold">{n.name}</span>
+                    <span className="text-zinc-500 text-[8px] flex items-center gap-1">
+                      <Users className="w-2 h-2" /> {n.activeUsers} | Lag: {n.lag}h
+                    </span>
+                  </div>
+                  <div className={`font-bold ${n.coherence > 0.95 ? 'text-[#10b981]' : 'text-amber-500'}`}>
+                    {n.coherence.toFixed(3)}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <div className="bg-white/5 rounded-xl border border-[#7c3aed]/30 p-4 overflow-y-auto max-h-[190px]">
+            <h3 className="text-[#7c3aed] text-xs uppercase font-bold mb-3 flex items-center gap-2">
+              <Search className="w-3 h-3" /> Subagentes Cívicos
+            </h3>
+            <div className="flex flex-col gap-2">
+              {state?.civicSubagents.map((agent, i) => (
+                <div key={i} className="text-[9px] border-b border-white/5 pb-1">
+                  <div className="flex justify-between items-center mb-1">
+                    <span className="font-bold text-[#7c3aed] uppercase">{agent.name}</span>
+                    <span className={`px-1 rounded ${agent.status === 'alert' ? 'bg-red-500/20 text-red-400' : 'bg-[#10b981]/20 text-[#10b981]'}`}>
+                      {agent.status}
+                    </span>
+                  </div>
+                  <div className="text-zinc-400 italic">"{agent.lastAction}"</div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+
+        {/* Row 2: Spectrogram (2/3) and Metrics (1/3) */}
+        <div className="lg:col-span-2 bg-white/5 rounded-xl border border-[#7c3aed]/30 p-4 flex flex-col gap-4">
           <h3 className="text-[#7c3aed] text-sm uppercase font-bold flex items-center gap-2">
             <Activity className="w-4 h-4" /> Assinatura Espectral
           </h3>
@@ -244,30 +298,28 @@ export default function AquiferSpectrogramPanel({ onClose }: { onClose?: () => v
           </div>
         </div>
 
-          {/* Metrics Grid */}
-          <div className="grid grid-cols-2 gap-3 mt-auto">
-            <div className={`bg-white/5 p-3 rounded border-l-2 ${safetyStatus !== 'OPERATIONAL' ? 'border-amber-500 bg-amber-500/10' : 'border-[#00d4ff]'}`}>
-              <label className="block text-[10px] text-zinc-400">Nível Freático</label>
-              <div className="text-lg font-bold">{metrics?.waterLevel.toFixed(2) || '--'} m</div>
-            </div>
-            <div className={`bg-white/5 p-3 rounded border-l-2 ${massBalance < 0 ? 'border-red-500 bg-red-500/10' : 'border-[#00d4ff]'}`}>
-              <label className="block text-[10px] text-zinc-400">Balanço Massa</label>
-              <div className="text-lg font-bold">{massBalance.toFixed(1)} mm/d</div>
-            </div>
+        <div className="flex flex-col gap-3">
+          <div className={`bg-white/5 p-3 rounded border-l-2 ${safetyStatus !== 'OPERATIONAL' ? 'border-amber-500 bg-amber-500/10' : 'border-[#00d4ff]'}`}>
+            <label className="block text-[10px] text-zinc-400">Nível Freático</label>
+            <div className="text-lg font-bold">{metrics?.waterLevel.toFixed(2) || '--'} m</div>
+          </div>
+          <div className={`bg-white/5 p-3 rounded border-l-2 ${massBalance < 0 ? 'border-red-500 bg-red-500/10' : 'border-[#00d4ff]'}`}>
+            <label className="block text-[10px] text-zinc-400">Balanço Massa</label>
+            <div className="text-lg font-bold">{massBalance.toFixed(1)} mm/d</div>
           </div>
         </div>
 
-        {/* ZK Panel */}
+        {/* Row 3: ZK Panel (3/3) */}
         <div className="lg:col-span-3 bg-gradient-to-r from-[#00d4ff]/10 to-[#7c3aed]/10 border border-[#00d4ff]/30 rounded-xl p-4">
           <div className="flex justify-between items-center mb-4">
             <h3 className="text-[#00d4ff] text-sm uppercase font-bold flex items-center gap-2">
-              <ShieldAlert className="w-4 h-4" /> Prova de Conservação Hídrica
+              <ShieldAlert className="w-4 h-4" /> Prova de Conservação Hídrica & Geofence ZK
             </h3>
             <div className={`flex items-center gap-2 px-3 py-1 rounded text-xs ${zkStatus === 'verified' ? 'bg-[#10b981]/20 text-[#10b981]' : 'bg-black/30 text-zinc-400'}`}>
               <div className={`w-2 h-2 rounded-full ${zkStatus === 'proving' ? 'bg-amber-500 animate-ping' : zkStatus === 'verified' ? 'bg-[#10b981]' : 'bg-zinc-500'}`} />
               {zkStatus === 'idle' ? 'Aguardando dados...' :
                zkStatus === 'proving' ? 'Gerando prova ZK (Groth16)...' :
-               zkStatus === 'verified' ? 'Prova Verificada' : 'Falha na Prova'}
+               zkStatus === 'verified' ? 'Prova Verificada (k-anonymity ≥ 30)' : 'Falha na Prova'}
             </div>
           </div>
 
@@ -278,6 +330,10 @@ export default function AquiferSpectrogramPanel({ onClose }: { onClose?: () => v
                 <code className="ml-2 text-[#00d4ff]">{metrics?.spectralHash.slice(0, 16)}...</code>
               </div>
               <div>
+                <span className="text-zinc-500">Alertas ZK Totais:</span>
+                <span className="ml-2 text-[#10b981] font-bold">{state?.hydro?.zkAlertsCount || metrics?.spectralHash.length}</span>
+              </div>
+              <div>
                 <span className="text-zinc-500">Mesh-LLM Node:</span>
                 <span className="ml-2">{qhttpState.meshNodeId}</span>
               </div>
@@ -286,7 +342,7 @@ export default function AquiferSpectrogramPanel({ onClose }: { onClose?: () => v
         </div>
       </div>
 
-      <div className="flex gap-4">
+      <div className="flex gap-4 mt-6">
         <button
           onClick={toggleAudio}
           className={`flex-1 py-3 rounded-lg border font-bold uppercase transition-all flex items-center justify-center gap-2 ${isPlaying ? 'bg-purple-500/20 border-purple-500 text-purple-400' : 'bg-[#00d4ff]/10 border-[#00d4ff] text-[#00d4ff] hover:bg-[#00d4ff]/20'}`}
