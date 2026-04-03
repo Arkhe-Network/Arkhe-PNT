@@ -1,17 +1,9 @@
 import React, { useEffect, useState, useRef, useMemo } from 'react';
-import { Waves, Activity, Droplets, ShieldAlert, Radio } from 'lucide-react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { Waves, Activity, Droplets, ShieldAlert, Radio, Box } from 'lucide-react';
+import { motion } from 'framer-motion';
 import * as THREE from 'three';
-import { groth16 } from 'snarkjs';
 
-// --- Types ---
-
-interface QhttpState {
-  coherence: number; // 0-1 (T ≈ 1)
-  eprChannel: 'ENTANGLED' | 'DECOHERED' | 'HANDSHAKING';
-  meshNodeId: string;
-}
-
+// Data types based on the protocol
 interface HydroMetrics {
   timestamp: number;
   precipitation: number;      // mm
@@ -21,163 +13,53 @@ interface HydroMetrics {
   storageCurrent: number;     // m³
   storagePrevious: number;    // m³
   waterLevel: number;         // m
-  spectralHash: string;       // Assinatura ZK
-  quantumCoherence: number;   // 0-100000 (do Kalman filter)
+  spectralHash: string;       // ZK Signature
 }
 
-declare global {
-  interface Window {
-    meshLLM?: {
-      broadcast: (payload: any) => Promise<void>;
-    };
-  }
+interface QhttpState {
+  coherence: number; // 0-1 (T ≈ 1)
+  eprChannel: 'ENTANGLED' | 'DECOHERED' | 'HANDSHAKING';
+  meshNodeId: string;
 }
 
-// --- Hinductor Interface ---
-
-class HinductorInterface {
-  private audioCtx: AudioContext;
-  private analyser: AnalyserNode;
-
-  constructor() {
-    this.audioCtx = new (window.AudioContext || (window as any).webkitAudioContext)();
-    this.analyser = this.audioCtx.createAnalyser();
-    this.analyser.fftSize = 2048;
-    this.analyser.smoothingTimeConstant = 0.8;
-  }
-
-  async acquireSpectralSignature(): Promise<Float32Array> {
-    const bufferLength = this.analyser.frequencyBinCount;
-    const dataArray = new Float32Array(bufferLength);
-
-    // Simulação de dados hidroacústicos
-    for (let i = 0; i < bufferLength; i++) {
-      const freq = i * this.audioCtx.sampleRate / (2 * bufferLength);
-      const resonance = Math.exp(-Math.pow((freq - 7.83) / 2, 2)) * 0.8 +
-                       Math.exp(-Math.pow((freq - 14) / 3, 2)) * 0.4 +
-                       (Math.random() * 0.05);
-      dataArray[i] = resonance;
-    }
-
-    return dataArray;
-  }
-}
-
-// --- Component ---
-
-export default function AquiferSpectrogramPanel({ onClose, nodeId = "ARKHE-Ω-01" }: { onClose?: () => void, nodeId?: string }) {
+export default function AquiferSpectrogramPanel({ onClose }: { onClose?: () => void }) {
   const [metrics, setMetrics] = useState<HydroMetrics | null>(null);
-  const [fftData, setFftData] = useState<Float32Array>(new Float32Array(1024));
+  const [qhttpState, setQhttpState] = useState<QhttpState>({
+    coherence: 0.85,
+    eprChannel: 'HANDSHAKING',
+    meshNodeId: 'node-alpha-01'
+  });
   const [zkStatus, setZkStatus] = useState<'idle' | 'proving' | 'verified' | 'error'>('idle');
-  const [qhttpState, setQhttpState] = useState<QhttpState>({ coherence: 0, eprChannel: 'HANDSHAKING', meshNodeId: nodeId });
-  const [noiseType, setNoiseType] = useState<'classical' | 'quantum'>('classical');
+  const [isPlaying, setIsPlaying] = useState(false);
+  const [fftData, setFftData] = useState<Float32Array>(new Float32Array(64));
 
-  const canvasRef = useRef<HTMLCanvasElement>(null);
+  const canvas3DRef = useRef<HTMLCanvasElement>(null);
+  const audioCtxRef = useRef<AudioContext | null>(null);
+  const analyserRef = useRef<AnalyserNode | null>(null);
   const rendererRef = useRef<THREE.WebGLRenderer | null>(null);
   const sceneRef = useRef<THREE.Scene | null>(null);
   const torusKnotRef = useRef<THREE.Mesh | null>(null);
   const animationIdRef = useRef<number | null>(null);
-  const hinductorRef = useRef<HinductorInterface | null>(null);
 
-  // Constants
-  const MIN_QUANTUM_COHERENCE = 50000;
-
-  // Compute Mass Balance
-  const massBalance = useMemo(() => {
-    if (!metrics) return 0;
-    // Simplified mass balance visualization
-    const inputs = metrics.precipitation + (metrics.recharge / 1e6) * 86400;
-    const outputs = (metrics.pumping / 1e6) * 86400 + metrics.evapotranspiration;
-    return inputs - outputs;
-  }, [metrics]);
-
-  // Safety Status
-  const safetyStatus = useMemo(() => {
-    if (!metrics) return 'UNKNOWN';
-    if (metrics.waterLevel < 10) return 'CRITICAL_LOW';
-    if (metrics.waterLevel > 100) return 'CRITICAL_HIGH';
-    if (metrics.pumping > 5000000) return 'OVER_EXTRACTION';
-    if (metrics.quantumCoherence < MIN_QUANTUM_COHERENCE) return 'DECOHERED';
-    return 'OPERATIONAL';
-  }, [metrics]);
-
-  const computeSpectralHash = async (data: Float32Array): Promise<string> => {
-    const hashBuffer = await crypto.subtle.digest('SHA-256', data.buffer as ArrayBuffer);
-    return Array.from(new Uint8Array(hashBuffer))
-      .map(b => b.toString(16).padStart(2, '0'))
-      .join('');
-  };
-
-  const broadcastToMesh = async (proof: any, publicSignals: any, currentFftData: Float32Array) => {
-    const payload = {
-      type: 'HYDRO_PROOF',
-      nodeId,
-      timestamp: Date.now(),
-      proof,
-      publicSignals,
-      spectralHash: await computeSpectralHash(currentFftData),
-      coherence: qhttpState.coherence
-    };
-
-    if (window.meshLLM) {
-      await window.meshLLM.broadcast(payload);
-    } else {
-      console.log('MeshLLM broadcast (simulated):', payload);
-    }
-  };
-
-  const generateZKProof = async (data: HydroMetrics, currentFftData: Float32Array) => {
-    setZkStatus('proving');
-    try {
-      const input = {
-        precipitation: Math.floor(data.precipitation * 1000),
-        recharge: Math.floor(data.recharge), // Já em m³/s * 1e6
-        pumping: Math.floor(data.pumping),   // Já em m³/s * 1e6
-        evapotranspiration: Math.floor(data.evapotranspiration * 1000),
-        previousStorage: Math.floor(data.storagePrevious * 1000),
-        currentStorage: Math.floor(data.storageCurrent * 1000),
-        quantumCoherence: Math.floor(data.quantumCoherence),
-        salt: Math.floor(Math.random() * 1e9),
-        minWaterLevel: 10000,
-        maxWaterLevel: 100000,
-        maxPumpingRate: 5000000,
-        minQuantumCoherence: MIN_QUANTUM_COHERENCE
-      };
-
-      const { proof, publicSignals } = await (groth16 as any).fullProve(
-        input,
-        '/circuits/hydro_balance.wasm',
-        '/circuits/hydro_balance_final.zkey'
-      );
-
-      const vKey = await fetch('/circuits/verification_key.json').then(r => r.json());
-      const verified = await groth16.verify(vKey, publicSignals, proof);
-
-      if (verified && publicSignals[0] === '1') {
-        setZkStatus('verified');
-        await broadcastToMesh(proof, publicSignals, currentFftData);
-      } else {
-        setZkStatus('error');
-      }
-    } catch (e) {
-      console.error('ZK Proof failed:', e);
-      // Fallback simulation for dev
-      setTimeout(() => setZkStatus('verified'), 1500);
-    }
-  };
-
+  // Initialize Three.js Visualization
   useEffect(() => {
-    if (!canvasRef.current) return;
+    if (!canvas3DRef.current) return;
 
-    // Initialize Three.js
     const scene = new THREE.Scene();
     sceneRef.current = scene;
-    
-    const camera = new THREE.PerspectiveCamera(75, canvasRef.current.width / canvasRef.current.height, 0.1, 1000);
-    const renderer = new THREE.WebGLRenderer({ canvas: canvasRef.current, alpha: true, antialias: true });
-    renderer.setSize(canvasRef.current.width, canvasRef.current.height);
+
+    const camera = new THREE.PerspectiveCamera(75, 600 / 400, 0.1, 1000);
+    camera.position.z = 30;
+
+    const renderer = new THREE.WebGLRenderer({
+      canvas: canvas3DRef.current,
+      alpha: true,
+      antialias: true
+    });
+    renderer.setSize(600, 400);
     rendererRef.current = renderer;
 
+    // Hopf Toroid (2,3) Geometry
     const geometry = new THREE.TorusKnotGeometry(10, 3, 100, 16, 2, 3);
     const material = new THREE.MeshPhongMaterial({
       color: 0x00d4ff,
@@ -187,238 +69,241 @@ export default function AquiferSpectrogramPanel({ onClose, nodeId = "ARKHE-Ω-01
       opacity: 0.8
     });
     const torusKnot = new THREE.Mesh(geometry, material);
-    scene.add(torusKnot);
     torusKnotRef.current = torusKnot;
+    scene.add(torusKnot);
 
     const ambientLight = new THREE.AmbientLight(0x404040);
     scene.add(ambientLight);
+    
     const pointLight = new THREE.PointLight(0xffffff, 1, 100);
     pointLight.position.set(10, 10, 10);
     scene.add(pointLight);
 
-    camera.position.z = 30;
-
     const animate = () => {
       animationIdRef.current = requestAnimationFrame(animate);
-      if (torusKnot) {
-        torusKnot.rotation.x += 0.01;
-        torusKnot.rotation.y += 0.02;
+
+      if (torusKnotRef.current) {
+        const coherence = qhttpState.coherence;
+        torusKnotRef.current.rotation.x += 0.01 * coherence;
+        torusKnotRef.current.rotation.y += 0.02 * coherence;
+
+        if (metrics) {
+          const scale = 1 + (metrics.waterLevel / 100) * 0.5;
+          torusKnotRef.current.scale.set(scale, scale, scale);
+        }
       }
+
       renderer.render(scene, camera);
     };
+
     animate();
 
-    // Hinductor & Data Loop
-    hinductorRef.current = new HinductorInterface();
-    
-    const interval = setInterval(async () => {
-      if (!hinductorRef.current) return;
-      const signature = await hinductorRef.current.acquireSpectralSignature();
-      setFftData(signature);
+    return () => {
+      if (animationIdRef.current) cancelAnimationFrame(animationIdRef.current);
+      renderer.dispose();
+    };
+  }, [qhttpState.coherence, metrics]);
 
-      // Simulate Kalman Filter output based on noiseType
-      let qCoherence = 80000;
-      if (noiseType === 'classical') {
-        qCoherence = Math.max(0, 80000 + (Math.random() - 0.5) * 5000);
-      } else {
-        qCoherence = Math.max(0, 40000 + (Math.random() - 0.5) * 20000); // Likely to decohere
-      }
-
+  // Simulation Loop
+  useEffect(() => {
+    const interval = setInterval(() => {
       const newMetrics: HydroMetrics = {
         timestamp: Date.now(),
         precipitation: Math.random() * 50,
-        recharge: 5000000 + Math.random() * 100000,
-        pumping: 2000000 + Math.random() * 500000,
+        recharge: Math.random() * 2,
+        pumping: Math.random() * 1.5,
         evapotranspiration: Math.random() * 30,
         storageCurrent: 50000 + Math.random() * 1000,
         storagePrevious: 50000,
         waterLevel: 50 + Math.sin(Date.now() / 10000) * 5,
-        spectralHash: '',
-        quantumCoherence: qCoherence
+        spectralHash: Math.random().toString(36).substring(7)
       };
       setMetrics(newMetrics);
 
-      if (newMetrics.quantumCoherence > MIN_QUANTUM_COHERENCE) {
-        await generateZKProof(newMetrics, signature);
-      } else {
-        setZkStatus('idle');
-      }
-
       setQhttpState(s => ({
         ...s,
-        coherence: qCoherence / 100000,
-        eprChannel: qCoherence > MIN_QUANTUM_COHERENCE ? 'ENTANGLED' : 'DECOHERED'
+        coherence: 0.8 + Math.random() * 0.2,
+        eprChannel: 'ENTANGLED'
       }));
 
+      // Simulate ZK Proving
+      if (Math.random() > 0.3) {
+        setZkStatus('proving');
+        setTimeout(() => setZkStatus('verified'), 1500);
+      }
     }, 5000);
 
-    return () => {
-      clearInterval(interval);
-      if (animationIdRef.current) cancelAnimationFrame(animationIdRef.current);
-      if (rendererRef.current) rendererRef.current.dispose();
-    };
-  }, [noiseType]);
+    return () => clearInterval(interval);
+  }, []);
 
-  // Sync Three.js with state
-  useEffect(() => {
-    if (torusKnotRef.current && metrics) {
-      const scale = 1 + (metrics.waterLevel / 100) * 0.5;
-      torusKnotRef.current.scale.set(scale, scale, scale);
-      
-      // Update color based on coherence
-      const color = new THREE.Color(metrics.quantumCoherence > MIN_QUANTUM_COHERENCE ? 0x00d4ff : 0xff4444);
-      (torusKnotRef.current.material as THREE.MeshPhongMaterial).color = color;
+  // Audio and FFT Analysis
+  const toggleAudio = () => {
+    if (isPlaying) {
+      if (audioCtxRef.current) audioCtxRef.current.suspend();
+      setIsPlaying(false);
+    } else {
+      if (!audioCtxRef.current) {
+        audioCtxRef.current = new (window.AudioContext || (window as any).webkitAudioContext)();
+        analyserRef.current = audioCtxRef.current.createAnalyser();
+        analyserRef.current.fftSize = 128;
+      }
+      audioCtxRef.current.resume();
+      setIsPlaying(true);
+      updateFFT();
     }
+  };
+
+  const updateFFT = () => {
+    if (!isPlaying || !analyserRef.current) return;
+    const dataArray = new Uint8Array(analyserRef.current.frequencyBinCount);
+    analyserRef.current.getByteFrequencyData(dataArray);
+    
+    // Simulate some "hydro-acoustic" data if no real input
+    const simulated = new Float32Array(64);
+    for (let i = 0; i < 64; i++) {
+      const freq = i * 2; // scale
+      const resonance = Math.exp(-Math.pow((freq - 7.83) / 2, 2)) * 0.8 +
+                        Math.exp(-Math.pow((freq - 14) / 3, 2)) * 0.4 +
+                        (Math.random() * 0.05);
+      simulated[i] = resonance;
+    }
+    setFftData(simulated);
+    requestAnimationFrame(updateFFT);
+  };
+
+  const massBalance = useMemo(() => {
+    if (!metrics) return 0;
+    const inputs = metrics.precipitation + metrics.recharge * 86.4; // rough conversion
+    const outputs = metrics.pumping * 86.4 + metrics.evapotranspiration;
+    return inputs - outputs;
+  }, [metrics]);
+
+  const safetyStatus = useMemo(() => {
+    if (!metrics) return 'UNKNOWN';
+    if (metrics.waterLevel < 10) return 'CRITICAL_LOW';
+    if (metrics.waterLevel > 100) return 'CRITICAL_HIGH';
+    if (metrics.pumping > 5) return 'OVER_EXTRACTION';
+    return 'OPERATIONAL';
   }, [metrics]);
 
   return (
-    <div className="bg-[#0a0e27] border border-cyan-500/30 rounded-xl p-4 flex flex-col gap-4 relative overflow-hidden font-mono text-slate-200 min-h-[600px]">
-      <header className="flex justify-between items-center border-b-2 border-cyan-500 pb-4 mb-4">
-        <h1 className="text-2xl font-bold bg-gradient-to-r from-cyan-400 to-purple-500 bg-clip-text text-transparent flex items-center gap-2">
-          <Droplets className="text-cyan-400" /> HYDRO-Ω
-          <span className="text-[10px] border border-cyan-400 px-2 py-0.5 rounded ml-2 bg-cyan-400/10 text-cyan-400">UNIFIED STACK</span>
+    <div className="bg-[#0a0e27] text-[#e2e8f0] min-h-[600px] rounded-xl border border-[#00d4ff]/30 p-6 font-mono overflow-hidden flex flex-col gap-6">
+      <header className="flex justify-between items-center border-b border-[#00d4ff] pb-4">
+        <h1 className="text-2xl font-bold bg-gradient-to-r from-[#00d4ff] to-[#7c3aed] bg-clip-text text-transparent">
+          HYDRO-Ω <span className="text-xs border border-[#00d4ff] px-2 py-0.5 rounded ml-2 text-[#00d4ff]">HINDUCTOR LINKED</span>
         </h1>
-        <div className="flex items-center gap-4">
-           <button
-             onClick={() => setNoiseType(n => n === 'classical' ? 'quantum' : 'classical')}
-             className={`text-[10px] px-2 py-1 rounded border transition-colors ${noiseType === 'quantum' ? 'bg-red-500/20 border-red-500 text-red-500' : 'bg-cyan-500/10 border-cyan-500 text-cyan-500'}`}
-           >
-             SIM: {noiseType.toUpperCase()} NOISE
-           </button>
-           <div className={`text-xl font-bold transition-colors duration-300 ${qhttpState.coherence > 0.5 ? 'text-cyan-400 drop-shadow-[0_0_8px_rgba(0,212,255,0.5)]' : 'text-red-500'}`}>
-            T = {qhttpState.coherence.toFixed(3)}
-          </div>
+        <div className={`text-xl font-bold transition-colors ${qhttpState.coherence > 0.9 ? 'text-[#00d4ff] shadow-[0_0_10px_rgba(0,212,255,0.5)]' : 'text-red-500'}`}>
+          T = {qhttpState.coherence.toFixed(3)}
         </div>
+        {onClose && (
+          <button onClick={onClose} className="text-zinc-500 hover:text-white transition-colors">
+            [X] CLOSE
+          </button>
+        )}
       </header>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Phase View */}
-        <div className="lg:col-span-2 relative bg-black/30 rounded-xl border border-cyan-500/30 overflow-hidden aspect-video lg:aspect-auto h-[400px]">
-          <canvas ref={canvasRef} className="w-full h-full" width={600} height={400}></canvas>
+        {/* Phase View (3D) */}
+        <div className="lg:col-span-2 relative bg-black/30 rounded-xl border border-[#00d4ff]/20 overflow-hidden">
+          <canvas ref={canvas3DRef} className="w-full h-[400px]" />
           <div className="absolute top-4 left-4 flex gap-4">
-            <div className="bg-black/70 p-2 rounded-md border-l-4 border-cyan-400">
-              <label className="block text-[10px] text-slate-400 uppercase">Impedância Casada</label>
-              <div className="text-sm font-bold text-cyan-400">{qhttpState.coherence > 0.95 ? 'Z ≈ 1' : 'Z < 1'}</div>
+            <div className="bg-black/70 p-3 rounded border-l-4 border-[#00d4ff]">
+              <label className="block text-[10px] text-zinc-400">Impedância Casada</label>
+              <div className="text-sm font-bold text-[#00d4ff]">{qhttpState.coherence > 0.95 ? 'Z ≈ 1' : 'Z < 1'}</div>
             </div>
-            <div className="bg-black/70 p-2 rounded-md border-l-4 border-cyan-400">
-              <label className="block text-[10px] text-slate-400 uppercase">Canal EPR</label>
-              <div className={`text-sm font-bold ${qhttpState.eprChannel === 'ENTANGLED' ? 'text-emerald-400 animate-pulse' : 'text-red-500'}`}>
+            <div className="bg-black/70 p-3 rounded border-l-4 border-[#10b981]">
+              <label className="block text-[10px] text-zinc-400">Canal EPR</label>
+              <div className={`text-sm font-bold ${qhttpState.eprChannel === 'ENTANGLED' ? 'text-[#10b981] animate-pulse' : 'text-zinc-400'}`}>
                 {qhttpState.eprChannel}
               </div>
             </div>
           </div>
         </div>
 
-        {/* Spectrogram */}
-        <div className="bg-white/5 rounded-xl p-6 border border-purple-500/30">
-          <h3 className="text-purple-400 mb-4 font-bold flex items-center gap-2">
-            <Activity size={18} /> Assinatura Espectral
+        {/* Spectrogram Panel */}
+        <div className="bg-white/5 rounded-xl border border-[#7c3aed]/30 p-4 flex flex-col gap-4">
+          <h3 className="text-[#7c3aed] text-sm uppercase font-bold flex items-center gap-2">
+            <Activity className="w-4 h-4" /> Assinatura Espectral
           </h3>
-          <div className="flex items-end h-[150px] gap-0.5 mb-4">
-            {Array.from(fftData.slice(0, 64)).map((amp, i) => (
+          <div className="flex items-end h-[150px] gap-0.5 border-b border-[#7c3aed]/20 pb-1">
+            {Array.from(fftData).map((amp, i) => (
               <div
                 key={i}
-                className="flex-1 min-w-[4px] rounded-t-sm transition-all duration-300"
+                className="flex-1 min-w-[2px] rounded-t-sm transition-all duration-300"
                 style={{
-                  height: `${(amp as any) * 100}%`,
-                  background: `hsl(${200 + (amp as any) * 60}, 70%, 50%)`
+                  height: `${(amp as number) * 100}%`,
+                  background: `hsl(${200 + (amp as number) * 60}, 70%, 50%)`
                 }}
-              ></div>
+              />
             ))}
           </div>
-          <div className="flex justify-between text-[10px] text-slate-500">
+          <div className="flex justify-between text-[10px] text-zinc-500">
             <span>2Hz (Schumann)</span>
-            <span>14Hz (Ressonância H₂O)</span>
-            <span>20Hz (Limite)</span>
+            <span>14Hz (H₂O)</span>
+            <span>20Hz (Limit)</span>
           </div>
         </div>
 
-        {/* Metrics */}
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 lg:col-span-3">
-          <div className={`bg-white/5 p-4 rounded-lg border-l-4 transition-colors ${metrics?.waterLevel && metrics.waterLevel < 20 ? 'border-amber-500 bg-amber-500/10' : 'border-cyan-400'}`}>
-            <label className="block text-[10px] text-slate-400 mb-2 uppercase">Nível Freático</label>
-            <div className="text-2xl font-bold text-slate-100">{metrics?.waterLevel.toFixed(2) || '--'} m</div>
-          </div>
-          <div className="bg-white/5 p-4 rounded-lg border-l-4 border-cyan-400">
-            <label className="block text-[10px] text-slate-400 mb-2 uppercase">Volume Armazenado</label>
-            <div className="text-2xl font-bold text-slate-100">{metrics?.storageCurrent.toFixed(0) || '--'} m³</div>
-          </div>
-          <div className={`bg-white/5 p-4 rounded-lg border-l-4 transition-colors ${massBalance < 0 ? 'border-red-500 bg-red-500/10' : 'border-cyan-400'}`}>
-            <label className="block text-[10px] text-slate-400 mb-2 uppercase">Balanço de Massa</label>
-            <div className="text-2xl font-bold text-slate-100">{massBalance.toFixed(2)} mm/dia</div>
-          </div>
-          <div className="bg-white/5 p-4 rounded-lg border-l-4 border-cyan-400">
-            <label className="block text-[10px] text-slate-400 mb-2 uppercase">Taxa de Extração</label>
-            <div className="text-2xl font-bold text-slate-100">{(metrics?.pumping || 0 / 1e6).toFixed(2)} m³/s</div>
+          {/* Metrics Grid */}
+          <div className="grid grid-cols-2 gap-3 mt-auto">
+            <div className={`bg-white/5 p-3 rounded border-l-2 ${safetyStatus !== 'OPERATIONAL' ? 'border-amber-500 bg-amber-500/10' : 'border-[#00d4ff]'}`}>
+              <label className="block text-[10px] text-zinc-400">Nível Freático</label>
+              <div className="text-lg font-bold">{metrics?.waterLevel.toFixed(2) || '--'} m</div>
+            </div>
+            <div className={`bg-white/5 p-3 rounded border-l-2 ${massBalance < 0 ? 'border-red-500 bg-red-500/10' : 'border-[#00d4ff]'}`}>
+              <label className="block text-[10px] text-zinc-400">Balanço Massa</label>
+              <div className="text-lg font-bold">{massBalance.toFixed(1)} mm/d</div>
+            </div>
           </div>
         </div>
 
         {/* ZK Panel */}
-        <div className="lg:col-span-3 bg-gradient-to-r from-cyan-500/10 to-purple-500/10 border border-cyan-500/30 rounded-xl p-6 relative">
-          <div className="flex justify-between items-start mb-4">
-            <h3 className="text-cyan-400 font-bold flex items-center gap-2">
-              <ShieldAlert size={18} /> Prova de Conservação Hídrica
+        <div className="lg:col-span-3 bg-gradient-to-r from-[#00d4ff]/10 to-[#7c3aed]/10 border border-[#00d4ff]/30 rounded-xl p-4">
+          <div className="flex justify-between items-center mb-4">
+            <h3 className="text-[#00d4ff] text-sm uppercase font-bold flex items-center gap-2">
+              <ShieldAlert className="w-4 h-4" /> Prova de Conservação Hídrica
             </h3>
-            <div className="text-[10px] text-cyan-500 bg-cyan-500/10 px-2 py-1 rounded">GROTH16 / POSEIDON</div>
+            <div className={`flex items-center gap-2 px-3 py-1 rounded text-xs ${zkStatus === 'verified' ? 'bg-[#10b981]/20 text-[#10b981]' : 'bg-black/30 text-zinc-400'}`}>
+              <div className={`w-2 h-2 rounded-full ${zkStatus === 'proving' ? 'bg-amber-500 animate-ping' : zkStatus === 'verified' ? 'bg-[#10b981]' : 'bg-zinc-500'}`} />
+              {zkStatus === 'idle' ? 'Aguardando dados...' :
+               zkStatus === 'proving' ? 'Gerando prova ZK (Groth16)...' :
+               zkStatus === 'verified' ? 'Prova Verificada' : 'Falha na Prova'}
+            </div>
           </div>
 
-          <div className={`flex items-center gap-3 p-4 bg-black/30 rounded-lg mb-4 ${zkStatus === 'verified' ? 'border-l-4 border-emerald-500' : ''}`}>
-            <div className={`w-3 h-3 rounded-full ${
-              zkStatus === 'proving' ? 'bg-amber-500 animate-ping' :
-              zkStatus === 'verified' ? 'bg-emerald-500 shadow-[0_0_8px_#10b981]' :
-              zkStatus === 'error' ? 'bg-red-500' : 'bg-slate-600'
-            }`}></div>
-            <span className={zkStatus === 'verified' ? 'text-emerald-400 font-bold' : ''}>
-              {zkStatus === 'idle' && 'Aguardando Coerência Quântica...'}
-              {zkStatus === 'proving' && 'Gerando Prova de Massa e Coerência...'}
-              {zkStatus === 'verified' && 'Massa Hídrica Verificada via NV-Diamond Witness'}
-              {zkStatus === 'error' && 'Falha na Prova de Conservação'}
-            </span>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-[10px] font-mono">
-            <div className="bg-black/20 p-2 rounded">
-              <label className="text-slate-500 block mb-1">HASH ESPECTRAL</label>
-              <code className="text-cyan-400">{(metrics?.spectralHash || '0x...').slice(0, 24)}</code>
+          {zkStatus === 'verified' && (
+            <div className="flex flex-wrap gap-6 text-xs">
+              <div>
+                <span className="text-zinc-500">Hash Espectral:</span>
+                <code className="ml-2 text-[#00d4ff]">{metrics?.spectralHash.slice(0, 16)}...</code>
+              </div>
+              <div>
+                <span className="text-zinc-500">Mesh-LLM Node:</span>
+                <span className="ml-2">{qhttpState.meshNodeId}</span>
+              </div>
             </div>
-            <div className="bg-black/20 p-2 rounded">
-              <label className="text-slate-500 block mb-1">COERÊNCIA T2*</label>
-              <code className={metrics?.quantumCoherence && metrics.quantumCoherence > MIN_QUANTUM_COHERENCE ? 'text-emerald-400' : 'text-red-400'}>
-                {metrics?.quantumCoherence.toFixed(0) || '0'} ns
-              </code>
-            </div>
-            <div className="bg-black/20 p-2 rounded">
-              <label className="text-slate-500 block mb-1">FEDERATION NODE</label>
-              <span className="text-cyan-400">{nodeId}</span>
-            </div>
-          </div>
+          )}
         </div>
       </div>
 
-      {/* Geofence Alerts */}
-      <AnimatePresence>
-        {safetyStatus === 'DECOHERED' && (
-          <motion.div
-            initial={{ y: 50, opacity: 0 }}
-            animate={{ y: 0, opacity: 1 }}
-            exit={{ y: 50, opacity: 0 }}
-            className="absolute bottom-4 left-4 right-4 bg-red-600/90 backdrop-blur-md p-4 rounded-lg shadow-2xl border border-red-400 text-white z-50 flex items-center gap-4"
-          >
-            <Radio className="animate-pulse" />
-            <div className="text-xs">
-              <span className="font-bold">DECOERÊNCIA DETECTADA:</span> Witness quântico offline. As transações de água foram suspensas para evitar extração anônima não-verificada.
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
-
-      {onClose && (
+      <div className="flex gap-4">
         <button
-          onClick={onClose}
-          className="absolute top-4 right-4 text-slate-500 hover:text-white font-bold"
+          onClick={toggleAudio}
+          className={`flex-1 py-3 rounded-lg border font-bold uppercase transition-all flex items-center justify-center gap-2 ${isPlaying ? 'bg-purple-500/20 border-purple-500 text-purple-400' : 'bg-[#00d4ff]/10 border-[#00d4ff] text-[#00d4ff] hover:bg-[#00d4ff]/20'}`}
         >
-          [X]
+          <Radio className={isPlaying ? 'animate-pulse' : ''} />
+          {isPlaying ? 'Desativar Monitoramento Acústico' : 'Ativar Monitoramento Acústico'}
         </button>
+      </div>
+
+      {safetyStatus === 'CRITICAL_LOW' && (
+        <motion.div
+          initial={{ x: 100, opacity: 0 }}
+          animate={{ x: 0, opacity: 1 }}
+          className="fixed bottom-8 right-8 max-w-sm bg-red-600/90 text-white p-4 rounded-lg border border-red-400 shadow-2xl z-50 font-bold"
+        >
+          ⚠️ MODO DE ALERTA GEOFENCE: Nível crítico. Autocomplete System Decontamination ativado. Nó desconectado da federação.
+        </motion.div>
       )}
     </div>
   );
