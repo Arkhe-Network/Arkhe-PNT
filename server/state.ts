@@ -131,7 +131,8 @@ export let state: SimulationState = {
       global_phase: 1.5708,
       coherence: 0.991,
     }
-  }
+  },
+  lucentSessions: []
 };
 
 export const generateOrbId = () => {
