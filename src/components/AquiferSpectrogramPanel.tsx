@@ -242,6 +242,7 @@ export default function AquiferSpectrogramPanel({ onClose }: { onClose?: () => v
             <span>14Hz (H₂O)</span>
             <span>20Hz (Limit)</span>
           </div>
+        </div>
 
           {/* Metrics Grid */}
           <div className="grid grid-cols-2 gap-3 mt-auto">
