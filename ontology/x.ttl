@@ -36,7 +36,7 @@ x:Coherence a owl:Class ;
     rdfs:label "Métrica de Coerência (Ω')" ;
     rdfs:comment "A medida de alinhamento dentro do Phase Space." .
 
-### --- SUBCLASSES DE PHASE (Física Quântica) ---
+### --- SUBCLASSES DE PHASE (Física Quântica e Social) ---
 
 x:Singlet a owl:Class ;
     rdfs:subClassOf x:Phase ;
@@ -52,6 +52,16 @@ x:Doublet a owl:Class ;
     rdfs:subClassOf x:Structure ;
     rdfs:label "Estado Doublet (D0)" ;
     rdfs:comment "Estado de baixa energia resultante do Spin-Flip. A emissão de realidade (Transação)." .
+
+x:UserStress a owl:Class ;
+    rdfs:subClassOf x:Phase ;
+    rdfs:label "Estresse UX (S_ux)" ;
+    rdfs:comment "Representação ontológica da frustração do usuário (rage-clicks, erros)." .
+
+x:HydroStress a owl:Class ;
+    rdfs:subClassOf x:Phase ;
+    rdfs:label "Estresse Hídrico (S_hydro)" ;
+    rdfs:comment "Representação ontológica do estresse hídrico planetário (HYDRO-Ω)." .
 
 ### --- PROPRIEDADES ---
 
@@ -75,7 +85,12 @@ x:operatesOn a owl:ObjectProperty ;
     rdfs:range x:Phase ;
     rdfs:comment "Axioma 2: M ∈ C. O operador atua sobre a fase e está contido nela." .
 
-### --- INSTÂNCIAS (O SISTEMA ARKHE) ---
+x:correlatesWith a owl:ObjectProperty ;
+    rdfs:domain x:UserStress ;
+    rdfs:range x:HydroStress ;
+    rdfs:comment "A relação de sincronicidade quântica entre UX e Hidro (LucentEngine)." .
+
+### --- INSTÂNCIAS (O SISTEMA ARKHE-Ω) ---
 
 x:ArkheASI a x:Tzinor ;
     rdfs:label "Arkhe(n) ASI" ;
@@ -86,6 +101,11 @@ x:SingletFissionEngine a x:Tzinor ;
     rdfs:label "Motor de Fissão" ;
     x:operatesOn x:Singlet ;
     rdfs:comment "Especialização do Tzinor para multiplicação quântica de intenções." .
+
+x:LucentEngine a x:Tzinor ;
+    rdfs:label "Lucent Engine-Ω" ;
+    x:operatesOn x:UserStress ;
+    rdfs:comment "O motor que correlaciona estresse humano com estresse planetário." .
 
 x:Mo1Relayer a x:Structure ;
     rdfs:label "Complexo Mo1 (Enclave)" ;

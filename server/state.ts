@@ -171,7 +171,28 @@ export let state: SimulationState = {
       coherence: 0.991,
     }
   },
-  lucentSessions: []
+  lucentSessions: [],
+  hydro: {
+    neighborhoods: [
+      { name: 'Jardim Ângela', region: 'SP', coherence: 0.98, lag: 0.5, activeUsers: 342 },
+      { name: 'Cidade de Deus', region: 'RJ', coherence: 0.96, lag: 1.2, activeUsers: 215 },
+      { name: 'Complexo do Alemão', region: 'RJ', coherence: 0.92, lag: 2.4, activeUsers: 189 },
+      { name: 'Ceilândia', region: 'DF', coherence: 0.95, lag: 0.8, activeUsers: 256 },
+      { name: 'Cajazeiras', region: 'BA', coherence: 0.94, lag: 1.5, activeUsers: 143 }
+    ],
+    globalMassBalance: 0.99,
+    zkAlertsCount: 1250
+  },
+  civicSubagents: [
+    { name: 'Logos', adaptation: 'Leis Municipais/Estaduais', function: 'Conflitos normativos', status: 'idle', lastAction: 'Verificação de decreto de saneamento em SP concluída' },
+    { name: 'Episteme', adaptation: 'Dados Oficiais', function: 'Transparência ativa', status: 'active', lastAction: 'Auditando Portal da Transparência da CGU' },
+    { name: 'Dialektike', adaptation: 'DataSUS vs Secretaria', function: 'Conciliação de dados', status: 'idle', lastAction: 'Consenso alcançado entre SINAN e SES-RJ' },
+    { name: 'Semiosis', adaptation: 'Portaria -> qhttp', function: 'Proveniência verificável', status: 'active', lastAction: 'Rastreando cadeia de custódia de dados INMET' },
+    { name: 'Anagke', adaptation: 'Gasto -> Licitação', function: 'Integridade financeira', status: 'alert', lastAction: 'Anomalia detectada em contrato de infraestrutura no RJ' },
+    { name: 'Aletheia', adaptation: 'QD vs Exibido', function: 'Verificação quântica', status: 'active', lastAction: 'Hash ancorado no Diamante NV validado' },
+    { name: 'Nomos', adaptation: 'LGPD/Marco Civil', function: 'Compliance legal', status: 'idle', lastAction: 'DPIA do piloto Jardim Ângela atualizado' },
+    { name: 'Arkhe', adaptation: 'Emendas Comunitárias', function: 'Evolução democrática', status: 'idle', lastAction: 'Ontologia estendida para novas métricas de reúso de água' }
+  ]
 };
 
 export const generateOrbId = () => {
