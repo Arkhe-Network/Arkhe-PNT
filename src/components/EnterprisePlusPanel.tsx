@@ -58,14 +58,7 @@ const DomainSection: React.FC<DomainSectionProps> = ({ title, icon, agents, colo
         {agents.map((agent) => (
           <div key={agent.id} className="bg-black/30 border border-[#2a2b30] rounded p-2 text-[10px] font-mono">
             <div className="flex justify-between items-start mb-1">
-              <div className="flex flex-col">
-                <span className="text-arkhe-cyan font-bold">{agent.id}: {agent.name}</span>
-                {agent.nip && (
-                  <span className="text-[7px] text-white/40 uppercase tracking-widest mt-0.5">
-                    Subnet: {agent.nip}
-                  </span>
-                )}
-              </div>
+              <span className="text-arkhe-cyan">{agent.id}: {agent.name}</span>
               <span className={`px-1.5 py-0.5 rounded border border-current ${
                 agent.status === 'alert' ? 'text-red-400' :
                 agent.status === 'active' ? 'text-emerald-400' : 'text-amber-400'
