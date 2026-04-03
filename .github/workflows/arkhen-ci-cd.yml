@@ -59,8 +59,8 @@ jobs:
     if: github.ref == 'refs/heads/main'
     steps:
     - uses: actions/checkout@v4
-    - name: Subagent Skopos: Coordinate Deployment & Distribution
-      run: python3 scripts/subagent_deploy.py --target production --distribute
+    - name: Subagent Skopos: Coordinate Deployment
+      run: python3 scripts/subagent_deploy.py --target production
 
   deploy-aws-eks:
     needs: deploy-subagents

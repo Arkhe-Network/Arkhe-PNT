@@ -1,0 +1,106 @@
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix x: <http://arkhe.network/ontology/x#> .
+@prefix rm: <http://arkhe.network/ontology/roadmap#> .
+
+### ═══════════════════════════════════════════════════════════
+### ONTOLOGIA DE ROADMAPS (roadmap.sh)
+### ═══════════════════════════════════════════════════════════
+
+rm:Ontology a owl:Ontology ;
+    rdfs:label "Ontologia de Desenvolvimento de Carreiras e Habilidades" ;
+    owl:imports <http://arkhe.network/ontology/x> ;
+    rdfs:comment "Mapeia o conhecimento técnico e caminhos de aprendizagem do roadmap.sh para a estrutura Arkhe-Ω." .
+
+### --- CLASSES ---
+
+rm:Roadmap a owl:Class ;
+    rdfs:subClassOf x:Tzinor ;
+    rdfs:label "Roadmap" ;
+    rdfs:comment "Um guia estruturado que atua como um operador de transformação (Tzinor) de um aprendiz." .
+
+rm:RoleRoadmap a owl:Class ;
+    rdfs:subClassOf rm:Roadmap ;
+    rdfs:label "Roadmap de Cargo" .
+
+rm:SkillRoadmap a owl:Class ;
+    rdfs:subClassOf rm:Roadmap ;
+    rdfs:label "Roadmap de Habilidade" .
+
+rm:BestPracticeRoadmap a owl:Class ;
+    rdfs:subClassOf rm:Roadmap ;
+    rdfs:label "Roadmap de Melhores Práticas" .
+
+rm:Topic a owl:Class ;
+    rdfs:subClassOf x:Structure ;
+    rdfs:label "Tópico de Conhecimento" .
+
+### --- INSTÂNCIAS: ROLE-BASED ---
+
+rm:Frontend a rm:RoleRoadmap ; rdfs:label "Frontend Developer" .
+rm:Backend a rm:RoleRoadmap ; rdfs:label "Backend Developer" .
+rm:DevOps a rm:RoleRoadmap ; rdfs:label "DevOps Engineer" .
+rm:FullStack a rm:RoleRoadmap ; rdfs:label "Full Stack Developer" .
+rm:DevSecOps a rm:RoleRoadmap ; rdfs:label "DevSecOps Engineer" .
+rm:AIEngineer a rm:RoleRoadmap ; rdfs:label "AI Engineer" .
+rm:DataScientist a rm:RoleRoadmap ; rdfs:label "Data Scientist" .
+rm:DataEngineer a rm:RoleRoadmap ; rdfs:label "Data Engineer" .
+rm:BlockchainDev a rm:RoleRoadmap ; rdfs:label "Blockchain Developer" .
+rm:CyberSecurity a rm:RoleRoadmap ; rdfs:label "Cyber Security Engineer" .
+rm:SoftwareArchitect a rm:RoleRoadmap ; rdfs:label "Software Architect" .
+rm:QAEngineer a rm:RoleRoadmap ; rdfs:label "QA Engineer" .
+rm:UXDesign a rm:RoleRoadmap ; rdfs:label "UX Designer" .
+rm:MLOps a rm:RoleRoadmap ; rdfs:label "MLOps Engineer" .
+rm:ProductManager a rm:RoleRoadmap ; rdfs:label "Product Manager" .
+rm:EngineeringManager a rm:RoleRoadmap ; rdfs:label "Engineering Manager" .
+
+### --- INSTÂNCIAS: SKILL-BASED ---
+
+rm:JavaScript a rm:SkillRoadmap ; rdfs:label "JavaScript" .
+rm:TypeScript a rm:SkillRoadmap ; rdfs:label "TypeScript" .
+rm:React a rm:SkillRoadmap ; rdfs:label "React" .
+rm:NodeJS a rm:SkillRoadmap ; rdfs:label "Node.js" .
+rm:Python a rm:SkillRoadmap ; rdfs:label "Python" .
+rm:Go a rm:SkillRoadmap ; rdfs:label "Go" .
+rm:Rust a rm:SkillRoadmap ; rdfs:label "Rust" .
+rm:Java a rm:SkillRoadmap ; rdfs:label "Java" .
+rm:SQL a rm:SkillRoadmap ; rdfs:label "SQL" .
+rm:MongoDB a rm:SkillRoadmap ; rdfs:label "MongoDB" .
+rm:Redis a rm:SkillRoadmap ; rdfs:label "Redis" .
+rm:PostgreSQL a rm:SkillRoadmap ; rdfs:label "PostgreSQL" .
+rm:Docker a rm:SkillRoadmap ; rdfs:label "Docker" .
+rm:Kubernetes a rm:SkillRoadmap ; rdfs:label "Kubernetes" .
+rm:Terraform a rm:SkillRoadmap ; rdfs:label "Terraform" .
+rm:AWS a rm:SkillRoadmap ; rdfs:label "AWS" .
+rm:Linux a rm:SkillRoadmap ; rdfs:label "Linux" .
+rm:Git rdfs:label "Git" .
+rm:SystemDesign a rm:SkillRoadmap ; rdfs:label "System Design" .
+rm:DSA a rm:SkillRoadmap ; rdfs:label "Data Structures & Algorithms" .
+rm:PromptEngineering a rm:SkillRoadmap ; rdfs:label "Prompt Engineering" .
+rm:AIAgents a rm:SkillRoadmap ; rdfs:label "AI Agents" .
+rm:AiredTeaming a rm:SkillRoadmap ; rdfs:label "AI Red Teaming" .
+
+### --- INSTÂNCIAS: BEST PRACTICES ---
+
+rm:APISecurity rdfs:label "API Security" .
+rm:BackendPerformance rdfs:label "Backend Performance" .
+rm:FrontendPerformance rdfs:label "Frontend Performance" .
+rm:CodeReview rdfs:label "Code Review" .
+
+### --- ASSOCIAÇÃO COM SUBAGENTES ENTERPRISE ---
+
+x:G1_Nomos rm:specializesIn rm:APISecurity, rm:BlockchainDev .
+x:D1_Techne rm:specializesIn rm:DevOps, rm:CI_CD, rm:Docker, rm:Kubernetes .
+x:S1_Stochasis rm:specializesIn rm:CyberSecurity, rm:Cryptography .
+x:I1_Nous rm:specializesIn rm:AIEngineer, rm:PromptEngineering, rm:AIAgents .
+x:X1_Hermes rm:specializesIn rm:APIDesign, rm:SystemDesign .
+x:O1_Chrematistike rm:specializesIn rm:ProductManager, rm:EngineeringManager .
+
+### --- PROPRIEDADE DE ESPECIALIZAÇÃO ---
+
+rm:specializesIn a owl:ObjectProperty ;
+    rdfs:domain x:Tzinor ;
+    rdfs:range rm:Roadmap ;
+    rdfs:comment "Indica que um subagente Arkhe(n) possui competência em um domínio do roadmap.sh." .

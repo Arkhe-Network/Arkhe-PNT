@@ -366,15 +366,14 @@ Versions are managed via a central `VERSION` file.
 python3 scripts/bump_version.py patch
 ```
 
-### 5.3. Subagent-Driven Deployment & Distribution
+### 5.3. Subagent-Driven Deployment
 
-The `scripts/subagent_deploy.py` script ensures consensus among subagents before any deployment or package distribution.
+The `scripts/subagent_deploy.py` script ensures consensus among subagents before any deployment.
 
 - **Techne:** Validates build artifacts.
 - **Aletheia:** Performs ZK-integrity proofs.
 - **Kairos:** Forecasts network load and coherence windows.
-- **Hermes:** Distributes packages to Maven, NuGet, RubyGems, npm, and Containers.
-- **Skopos:** Coordinates the final materialization and distribution.
+- **Skopos:** Coordinates the final materialization.
 
 ---
 
