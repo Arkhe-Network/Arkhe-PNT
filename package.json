@@ -40,6 +40,8 @@
     "lucide-react": "^0.577.0",
     "motion": "^12.38.0",
     "nostr-tools": "^2.23.3",
+    "posthog-js": "^1.364.6",
+    "posthog-node": "^5.28.11",
     "react": "^19.2.4",
     "react-dom": "^19.2.4",
     "react-router-dom": "^7.13.2",
