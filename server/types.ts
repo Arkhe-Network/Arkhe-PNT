@@ -60,6 +60,30 @@ export interface MetricsHistory {
   wmaBc: number;
 }
 
+export interface SessionEvent {
+  type: 'SESSION_START' | 'SESSION_EVENT' | 'SESSION_END' | 'SESSION_ANALYSIS';
+  sessionId: string;
+  timestamp: number;
+  eventType?: string;
+  payload?: any;
+  coherence?: number;
+  zkProof?: string;
+}
+
+export interface UserSession {
+  id: string;
+  startTime: number;
+  endTime?: number;
+  events: SessionEvent[];
+  analysis?: {
+    bugDetected: boolean;
+    uxScore: number;
+    description: string;
+    zkProof: string;
+    consensusReached: boolean;
+  };
+}
+
 export interface SimulationState {
   coherenceData: { time: string; lambda: number; threshold: number }[];
   currentLambda: number;
@@ -193,4 +217,27 @@ export interface SimulationState {
       coherence: number;
     };
   };
+  lucentSessions: UserSession[];
+  hydro: {
+    neighborhoods: NeighborhoodCoherence[];
+    globalMassBalance: number;
+    zkAlertsCount: number;
+  };
+  civicSubagents: CivicSubagentState[];
+}
+
+export interface NeighborhoodCoherence {
+  name: string;
+  region: string;
+  coherence: number;
+  lag: number; // in hours
+  activeUsers: number;
+}
+
+export interface CivicSubagentState {
+  name: string;
+  adaptation: string;
+  function: string;
+  status: 'active' | 'idle' | 'alert';
+  lastAction: string;
 }

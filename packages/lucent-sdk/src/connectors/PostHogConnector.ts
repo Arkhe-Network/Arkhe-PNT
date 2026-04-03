@@ -10,15 +10,13 @@ export class PostHogConnector extends BaseConnector {
       loaded: () => {
         // Override do capture original para interceptar
         const originalCapture = (posthog.capture as any).bind(posthog);
-        (posthog as any).capture = (eventName: string, properties?: any) => {
+        posthog.capture = (eventName: string, properties?: any) => {
           // Envia para PostHog (comportamento normal)
-          const result = originalCapture(eventName, properties);
+          originalCapture(eventName, properties);
 
           // Envia para Lucent-Ω (camada quântica)
           const lucentEvent = this.transform({ eventName, properties });
           this.lucent.track(lucentEvent);
-
-          return result;
         };
       }
     });

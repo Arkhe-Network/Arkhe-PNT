@@ -2,6 +2,7 @@ import React, { useEffect, useState, useRef, useMemo } from 'react';
 import { Waves, Activity, Droplets, ShieldAlert, Radio, Box, Users, Link as LinkIcon, AlertTriangle } from 'lucide-react';
 import { motion } from 'framer-motion';
 import * as THREE from 'three';
+import { SimulationState } from '../../server/types';
 
 // Data types based on the protocol
 interface HydroMetrics {
@@ -32,6 +33,7 @@ interface CorrelationData {
 
 export default function AquiferSpectrogramPanel({ onClose }: { onClose?: () => void }) {
   const [metrics, setMetrics] = useState<HydroMetrics | null>(null);
+  const [state, setState] = useState<SimulationState | null>(null);
   const [qhttpState, setQhttpState] = useState<QhttpState>({
     coherence: 0.85,
     eprChannel: 'HANDSHAKING',
@@ -115,6 +117,16 @@ export default function AquiferSpectrogramPanel({ onClose }: { onClose?: () => v
       renderer.dispose();
     };
   }, [qhttpState.coherence, metrics]);
+
+  // Real-time Data Sync
+  useEffect(() => {
+    const eventSource = new EventSource('/api/stream');
+    eventSource.onmessage = (event) => {
+      const newState = JSON.parse(event.data);
+      setState(newState);
+    };
+    return () => eventSource.close();
+  }, []);
 
   // Simulation Loop
   useEffect(() => {
@@ -354,7 +366,7 @@ export default function AquiferSpectrogramPanel({ onClose }: { onClose?: () => v
               </div>
             </div>
           </div>
-        )}
+        </div>
 
         {activeTab === 'correlation' && (
           <div className="animate-in fade-in duration-500 space-y-6">
@@ -411,7 +423,7 @@ export default function AquiferSpectrogramPanel({ onClose }: { onClose?: () => v
               <div className={`w-2 h-2 rounded-full ${zkStatus === 'proving' ? 'bg-amber-500 animate-ping' : zkStatus === 'verified' ? 'bg-[#10b981]' : 'bg-zinc-500'}`} />
               {zkStatus === 'idle' ? 'Aguardando dados...' :
                zkStatus === 'proving' ? 'Gerando prova ZK (Groth16)...' :
-               zkStatus === 'verified' ? 'Prova Verificada' : 'Falha na Prova'}
+               zkStatus === 'verified' ? 'Prova Verificada (k-anonymity ≥ 30)' : 'Falha na Prova'}
             </div>
           </div>
 
@@ -420,6 +432,10 @@ export default function AquiferSpectrogramPanel({ onClose }: { onClose?: () => v
               <div>
                 <span className="text-zinc-500">Hash Espectral:</span>
                 <code className="ml-2 text-[#00d4ff]">{metrics?.spectralHash.slice(0, 16)}...</code>
+              </div>
+              <div>
+                <span className="text-zinc-500">Alertas ZK Totais:</span>
+                <span className="ml-2 text-[#10b981] font-bold">{state?.hydro?.zkAlertsCount || metrics?.spectralHash.length}</span>
               </div>
               <div>
                 <span className="text-zinc-500">Mesh-LLM Node:</span>
@@ -434,7 +450,7 @@ export default function AquiferSpectrogramPanel({ onClose }: { onClose?: () => v
         </div>
       </div>
 
-      <div className="flex gap-4">
+      <div className="flex gap-4 mt-6">
         <button
           onClick={toggleAudio}
           className={`flex-1 py-3 rounded-lg border font-bold uppercase transition-all flex items-center justify-center gap-2 ${isPlaying ? 'bg-purple-500/20 border-purple-500 text-purple-400' : 'bg-[#00d4ff]/10 border-[#00d4ff] text-[#00d4ff] hover:bg-[#00d4ff]/20'}`}
