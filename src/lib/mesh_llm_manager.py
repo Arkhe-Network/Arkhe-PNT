@@ -10,10 +10,12 @@ import threading
 MESH_LLM_BIN = os.getenv("MESH_LLM_BIN", "mesh-llm")
 # The join token should be provided as an environment variable
 MESH_LLM_JOIN_TOKEN = os.getenv("MESH_LLM_JOIN_TOKEN")
+MESH_LLM_MODEL = os.getenv("MESH_LLM_MODEL")
 
 class MeshLLMManager:
-    def __init__(self, token=None):
+    def __init__(self, token=None, model=None):
         self.token = token or MESH_LLM_JOIN_TOKEN
+        self.model = model or MESH_LLM_MODEL
         self.decoded_token = self._decode_token(self.token) if self.token else None
 
     def _decode_token(self, token):
@@ -33,7 +35,7 @@ class MeshLLMManager:
             if line:
                 print(f"[{prefix}] {line.strip()}", flush=True)
 
-    def join_mesh(self, client=True):
+    def join_mesh(self, client=True, model=None):
         bin_path = shutil.which(MESH_LLM_BIN)
         if not bin_path:
             print(f"Error: {MESH_LLM_BIN} not found in PATH")
@@ -44,8 +46,15 @@ class MeshLLMManager:
             return False
 
         cmd = [bin_path]
-        if client:
+
+        # Use provided model or instance default
+        active_model = model or self.model
+
+        if active_model:
+            cmd.extend(["--model", active_model])
+        elif client:
             cmd.append("--client")
+
         cmd.extend(["--join", self.token])
 
         print(f"Joining mesh with command: {' '.join(cmd)}", flush=True)
@@ -92,15 +101,16 @@ if __name__ == "__main__":
     import argparse
     parser = argparse.ArgumentParser(description="Arkhe(n) Mesh-LLM Manager")
     parser.add_argument("--join", type=str, help="Token to join the mesh (overrides MESH_LLM_JOIN_TOKEN)")
+    parser.add_argument("--model", type=str, help="Model to serve (overrides MESH_LLM_MODEL)")
     parser.add_argument("--status", action="store_true", help="Get mesh status")
 
     args = parser.parse_args()
 
-    manager = MeshLLMManager(args.join)
+    manager = MeshLLMManager(args.join, args.model)
 
     if args.status:
         print(manager.get_status())
     else:
-        success = manager.join_mesh()
+        success = manager.join_mesh(model=args.model)
         if not success:
             sys.exit(1)
