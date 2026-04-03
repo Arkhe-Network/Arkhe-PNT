@@ -5,34 +5,33 @@ include "circomlib/comparators.circom";
 include "circomlib/bitify.circom";
 
 template HydroBalanceProof() {
-    // Precisão: 3 casas decimais
     const PRECISION = 1000;
-    const ERROR_MARGIN = 10; // 1% de tolerância (10/1000)
+    const ERROR_MARGIN = 10; // 1%
 
-    // Inputs privados (sensores TEE)
+    // === INPUTS PRIVADOS ===
     signal input precipitation;      // mm (×1000)
-    signal input recharge;           // m³/s (×10^6) - convertido para volume equivalente
+    signal input recharge;           // m³/s (×10^6)
     signal input pumping;            // m³/s (×10^6)
     signal input evapotranspiration; // mm (×1000)
     signal input previousStorage;    // m³ (×1000)
     signal input currentStorage;     // m³ (×1000)
-    signal input quantumCoherence;   // 0-100000 (métrica do Kalman filter)
+    signal input quantumCoherence;   // 0-100000 (do Kalman filter)
     signal input salt;
 
-    // Inputs públicos (limites de governança)
+    // === INPUTS PÚBLICOS ===
     signal input minWaterLevel;      // mm (×1000)
     signal input maxWaterLevel;      // mm (×1000)
     signal input maxPumpingRate;     // m³/s (×10^6)
-    signal input minQuantumCoherence; // Limiar de coerência para validação
+    signal input minQuantumCoherence; // Limiar T2*
 
-    // Outputs
+    // === OUTPUTS ===
     signal output massBalanceValid;
     signal output safetyCompliant;
     signal output quantumValid;
     signal output integrityHash;
     signal output nullifier;
 
-    // 1. Verificação de integridade (Poseidon)
+    // 1. Integridade (Poseidon-8)
     component hasher = Poseidon(8);
     hasher.inputs[0] <== precipitation;
     hasher.inputs[1] <== recharge;
@@ -50,16 +49,15 @@ template HydroBalanceProof() {
     nullHasher.inputs[1] <== salt;
     nullifier <== nullHasher.out;
 
-    // 2. Verificação Quântica
-    // O hardware QD deve provar coerência mínima para validar a medição
+    // 2. Verificação Quântica (O hardware testemunha a coerência)
     component coherenceCheck = GreaterThan(32);
     coherenceCheck.in[0] <== quantumCoherence;
     coherenceCheck.in[1] <== minQuantumCoherence;
     quantumValid <== coherenceCheck.out;
 
-    // 3. Balanço de Massa com valor absoluto seguro
-    // Conversões de unidades consistentes
-    signal precipContrib <== precipitation * 1000; // mm → m (×1000 * 1000 / 10^6, simplificado)
+    // 3. Balanço de Massa com |x| seguro em campo finito
+    // Conversões: tudo para mm-equivalente-volume
+    signal precipContrib <== precipitation * 1000;
     signal evapContrib <== evapotranspiration * 1000;
 
     signal totalInputs <== precipContrib + recharge;
@@ -68,28 +66,28 @@ template HydroBalanceProof() {
     signal deltaStorage <== currentStorage - previousStorage;
     signal theoreticalDelta <== totalInputs - totalOutputs;
 
-    // Cálculo seguro de |a - b| em campo finito
+    // |a - b| sem underflow: compara antes de subtrair
     signal diff <== deltaStorage - theoreticalDelta;
     signal diffAbs;
 
-    // Se diff >= 0, diffAbs = diff, senão diffAbs = -diff
+    // Verifica se diff é negativo (em complemento de 2)
     component diffIsNeg = LessThan(64);
-    diffIsNeg.in[0] <== diff + (1 << 63); // Offset para comparação signed
+    diffIsNeg.in[0] <== diff + (1 << 63); // Offset para signed
     diffIsNeg.in[1] <== (1 << 63);
 
-    // diffAbs = diffIsNeg ? -diff : diff
+    // diffAbs = diff >= 0 ? diff : -diff
     signal negDiff <== 0 - diff;
     diffAbs <== diffIsNeg.out * negDiff + (1 - diffIsNeg.out) * diff;
 
-    // Verificação de erro < 1%
+    // Erro < 1% ?
     component errorCheck = LessThan(32);
     errorCheck.in[0] <== diffAbs;
     errorCheck.in[1] <== ERROR_MARGIN * PRECISION;
 
-    // Mass balance válido se erro pequeno E coerência quântica confirmada
+    // Mass balance válido SOMENTE se quanticamente coerente
     massBalanceValid <== errorCheck.out * quantumValid;
 
-    // 4. Limites Operacionais (Geofence)
+    // 4. Geofence (Limites Operacionais)
     component checkMin = GreaterThan(64);
     checkMin.in[0] <== currentStorage;
     checkMin.in[1] <== minWaterLevel;
@@ -106,11 +104,11 @@ template HydroBalanceProof() {
     checkEvap.in[0] <== evapotranspiration;
     checkEvap.in[1] <== 0;
 
-    // Safety = AND de todas as condições
     signal levelSafe <== checkMin.out * checkMax.out;
     signal pumpSafe <== checkPump.out;
     signal evapSafe <== checkEvap.out;
 
+    // Safety só é válido se tudo for verdadeiro E o quantum for coerente
     safetyCompliant <== levelSafe * pumpSafe * evapSafe * quantumValid;
 }
 
