@@ -1,9 +1,9 @@
 # Arkhe(n) Bio-Quantum Cathedral Makefile
 # 🜏 From source to running node, the path is scripted. The future is compiled.
 
-.PHONY: all clean build build-go build-python build-node test test-zk-aggregation test-vdf-selection deploy-swarm verify-integrity publish-all publish-npm publish-maven publish-nuget publish-rubygems publish-container
+.PHONY: all clean build build-go build-python build-node test test-zk-aggregation test-vdf-selection test-quantum-handover deploy-swarm verify-integrity publish-all publish-npm publish-maven publish-nuget publish-rubygems publish-container
 
-all: build test test-zk-aggregation test-vdf-selection
+all: build test test-zk-aggregation test-vdf-selection test-quantum-handover
 
 build: build-go build-python build-node
 
@@ -41,6 +41,10 @@ test-zk-aggregation:
 test-vdf-selection:
 	@echo "🜏 Subagent Stochasis: Testing QRB + VDF Selection Protocol..."
 	python3 scripts/vdf_selection_sim.py
+
+test-quantum-handover:
+	@echo "🜏 Subagent Nomos: Testing Quantum Handover & Identity Transfer..."
+	python3 scripts/quantum_handover_sim.py
 
 deploy-swarm:
 	@echo "🜏 Materializing on Docker Swarm..."

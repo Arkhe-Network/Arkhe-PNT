@@ -1,5 +1,5 @@
 import { Card } from './ui/Card';
-import { Network, Server, ShieldCheck, Zap } from 'lucide-react';
+import { Network, Server, ShieldCheck, Zap, Repeat } from 'lucide-react';
 import { Shard } from '../hooks/useArkheSimulation';
 
 interface NetworkStatusProps {
@@ -90,6 +90,17 @@ export default function NetworkStatus({ shards }: NetworkStatusProps) {
           <div className="flex items-center gap-2">
             <span className="text-[10px] font-mono font-bold text-arkhe-orange">ACTIVE</span>
             <div className="w-1.5 h-1.5 rounded-full bg-arkhe-orange animate-ping" />
+          </div>
+        </div>
+
+        <div className="flex justify-between items-center p-2 bg-[#1a1b1e] rounded border border-arkhe-border/50 group hover:border-arkhe-purple/30 transition-colors">
+          <div className="flex items-center gap-2">
+            <Repeat className="w-3 h-3 text-arkhe-purple animate-spin-slow" />
+            <span className="text-[10px] font-mono text-arkhe-muted uppercase">Quantum Handover (Teleport)</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <span className="text-[10px] font-mono font-bold text-arkhe-purple">READY</span>
+            <div className="w-1.5 h-1.5 rounded-full bg-arkhe-purple" />
           </div>
         </div>
       </div>

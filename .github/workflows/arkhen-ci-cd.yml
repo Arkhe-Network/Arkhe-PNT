@@ -47,6 +47,9 @@ jobs:
     - name: Subagent Stochasis: QRB + VDF Selection Verification
       run: make test-vdf-selection
 
+    - name: Subagent Nomos: Quantum Handover & Identity Verification
+      run: make test-quantum-handover
+
   docker-publish:
     needs: build-and-verify
     runs-on: ubuntu-latest

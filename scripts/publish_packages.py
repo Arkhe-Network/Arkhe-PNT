@@ -47,7 +47,8 @@ if __name__ == "__main__":
 
     if registry == 'all':
         for reg, action in actions.items():
-            action()
+            if not action():
+                sys.exit(1)
     elif registry in actions:
         if not actions[registry]():
             sys.exit(1)
