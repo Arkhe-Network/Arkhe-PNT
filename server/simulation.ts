@@ -1,5 +1,7 @@
 import { state, updateState, tzinorStore, generateOrbId } from "./state";
 
+let lastTriggeredThreshold: number | null = null;
+
 export function runSimulationTick(broadcastState: () => void) {
   const now = Date.now();
   const isAttack = Math.random() < 0.08; // 8% chance of attack/anomaly per tick
@@ -17,6 +19,119 @@ export function runSimulationTick(broadcastState: () => void) {
   let newHardware = { ...state.hardware };
   let newSecurity = { ...state.security };
   let newSecurityAdvanced = { ...state.securityAdvanced };
+  let newRamsey = { ...state.ramsey };
+
+  // Ramsey Sweep Logic
+  if (newRamsey.enabled && !newRamsey.isFrozen) {
+    const sweepSpeed = 0.002;
+    newRamsey.theta += newRamsey.direction * sweepSpeed;
+
+    // Reverse direction at boundaries (0 to PI)
+    if (newRamsey.theta > Math.PI) {
+      newRamsey.theta = Math.PI;
+      newRamsey.direction = -1;
+    } else if (newRamsey.theta < 0) {
+      newRamsey.theta = 0;
+      newRamsey.direction = 1;
+    }
+
+    // Add to sliding window (max 5 points as per spec)
+    newRamsey.window = [...newRamsey.window, { theta: newRamsey.theta, coherence: newLambda }].slice(-5);
+
+    // Peak Detection Logic
+    let thresholdFound = false;
+    for (const threshold of newRamsey.thresholds) {
+      if (Math.abs(newRamsey.theta - threshold.angle_rad) <= threshold.tolerance) {
+        thresholdFound = true;
+        // Simple peak check: current coherence > baseline * min_gain
+        // and latch to prevent multiple triggers per pass
+        if (newLambda > newRamsey.baseline * threshold.min_gain && lastTriggeredThreshold !== threshold.angle_rad) {
+          lastTriggeredThreshold = threshold.angle_rad;
+          // Trigger action
+          if (threshold.action === 'LOCAL_ADJUST') {
+            newLogs.unshift({
+              id: generateOrbId(),
+              originTime: now,
+              targetTime: now,
+              coherence: newLambda,
+              status: 'Valid',
+              threatType: `RAMSEY_PEAK: LOCAL_ADJUST at ${threshold.angle_rad.toFixed(4)}`
+            });
+            // Simulate local adjust effect
+            newLambda = Math.min(1.0, newLambda + 0.01);
+          } else if (threshold.action === 'LOG_ONLY') {
+            newLogs.unshift({
+              id: generateOrbId(),
+              originTime: now,
+              targetTime: now,
+              coherence: newLambda,
+              status: 'Valid',
+              threatType: `RAMSEY_PEAK: LOG_ONLY at ${threshold.angle_rad.toFixed(4)}`
+            });
+          } else if (threshold.action === 'LOCAL_ADJUST_NOTIFY') {
+            newLogs.unshift({
+              id: generateOrbId(),
+              originTime: now,
+              targetTime: now,
+              coherence: newLambda,
+              status: 'Valid',
+              threatType: `RAMSEY_PEAK: NOTIFY at ${threshold.angle_rad.toFixed(4)}`
+            });
+            // Execute LOCAL_ADJUST effect (as per spec: executes LOCAL_ADJUST + notify)
+            newLambda = Math.min(1.0, newLambda + 0.01);
+          }
+        }
+      }
+    }
+
+    // Simulate a manual action requirement for GLOBAL_ADJUST (example scenario)
+    // In this simulation, we'll trigger a GLOBAL_ADJUST if theta is near PI/2
+    if (Math.abs(newRamsey.theta - 1.5709) <= 0.005 && !newRamsey.pendingAction) {
+      newRamsey.isFrozen = true;
+      const expiresAt = new Date(now + 30000).toISOString();
+      newRamsey.pendingAction = {
+        id: generateOrbId(),
+        type: 'GLOBAL_ADJUST',
+        angle: newRamsey.theta,
+        coherence: newLambda,
+        timestamp: new Date(now).toISOString(),
+        expiresAt: expiresAt
+      };
+
+      newLogs.unshift({
+        id: generateOrbId(),
+        originTime: now,
+        targetTime: now,
+        coherence: newLambda,
+        status: 'Valid',
+        threatType: 'RAMSEY: Awaiting GLOBAL_ADJUST confirmation'
+      });
+    }
+
+    if (!thresholdFound) {
+      lastTriggeredThreshold = null;
+    }
+  }
+
+  // Handle Manual Confirmation Timeout (30s) - Moved outside the !isFrozen block
+  if (newRamsey.pendingAction) {
+    const expiresAt = new Date(newRamsey.pendingAction.expiresAt).getTime();
+    if (now >= expiresAt) {
+      newLogs.unshift({
+        id: generateOrbId(),
+        originTime: now,
+        targetTime: now,
+        coherence: newLambda,
+        status: 'Valid',
+        threatType: 'RAMSEY: Confirmation Timeout. Automatic execution applied.'
+      });
+
+      // Automatic execution logic (e.g., execute and unfreeze)
+      newRamsey.isFrozen = false;
+      newRamsey.pendingAction = null;
+      newLambda = Math.min(1.0, newLambda + 0.05); // Simulate recovery
+    }
+  }
 
   // Base noise
   newLambda = Math.min(1.0, Math.max(0.0, newLambda + (Math.random() - 0.5) * 0.05));
@@ -282,6 +397,7 @@ export function runSimulationTick(broadcastState: () => void) {
     hardware: newHardware,
     security: newSecurity,
     securityAdvanced: newSecurityAdvanced,
+    ramsey: newRamsey,
     logs: newLogs,
     tzinor: tzinorStore.state,
     epoch: now / 1000,

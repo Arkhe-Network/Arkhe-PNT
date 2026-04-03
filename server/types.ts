@@ -264,6 +264,7 @@ export interface SimulationState {
     globalMassBalance: number;
     zkAlertsCount: number;
   };
+  ramsey: RamseyState;
   civicSubagents: CivicSubagentState[];
   enterpriseSubagents: {
     governance: EnterpriseSubagentState[];
@@ -281,6 +282,37 @@ export interface NeighborhoodCoherence {
   coherence: number;
   lag: number; // in hours
   activeUsers: number;
+}
+
+export type RamseyAction = 'LOCAL_ADJUST' | 'LOG_ONLY' | 'LOCAL_ADJUST_NOTIFY' | 'GLOBAL_ADJUST';
+
+export interface RamseyThreshold {
+  angle_rad: number;
+  tolerance: number;
+  min_gain: number;
+  action: RamseyAction;
+}
+
+export interface RamseyPendingAction {
+  id: string;
+  type: RamseyAction;
+  angle: number;
+  coherence: number;
+  timestamp: string;
+  expiresAt: string;
+}
+
+export interface RamseyState {
+  enabled: boolean;
+  auto_adjust: boolean;
+  manual_approval_required: boolean;
+  theta: number;
+  direction: number;
+  baseline: number;
+  thresholds: RamseyThreshold[];
+  window: { theta: number; coherence: number }[];
+  pendingAction: RamseyPendingAction | null;
+  isFrozen: boolean;
 }
 
 export interface CivicSubagentState {
