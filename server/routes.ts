@@ -1,7 +1,7 @@
 import express from "express";
 import { exec } from "child_process";
 import * as crypto from "crypto";
-import { state, tzinorStore } from "./state";
+import { state, tzinorStore, generateOrbId } from "./state";
 import { OrbPayload } from "./types";
 import { OrderBook, Order } from "./arkhedx";
 import { GoogleGenAI } from "@google/genai";
@@ -624,6 +624,82 @@ export function setupRoutes(app: express.Express, broadcastState: () => void, cl
       url,
       connections: state.edge.mcpConnections
     });
+  });
+
+  app.post("/api/ramsey/confirm", express.json(), (req, res) => {
+    const { actionId, status, justification, signature } = req.body;
+
+    if (!state.ramsey.pendingAction || state.ramsey.pendingAction.id !== actionId) {
+      return res.status(404).json({ error: "Pending action not found or expired" });
+    }
+
+    const action = state.ramsey.pendingAction;
+
+    // Handle postponement
+    if (status === 'postponed') {
+      state.logs.unshift({
+        id: generateOrbId(),
+        originTime: Date.now(),
+        targetTime: Date.now(),
+        coherence: state.currentLambda,
+        status: 'Valid',
+        threatType: `RAMSEY: Action ${action.type} POSTPONED for 1h.`
+      });
+      state.ramsey.isFrozen = false;
+      state.ramsey.pendingAction = null;
+      broadcastState();
+      return res.json({ success: true, status: 'postponed' });
+    }
+
+    const approved = status === 'approved';
+
+    // Record on Arkhe-Chain as a COLLAPSE event (simulated)
+    try {
+      arkheChain.addTransaction({
+        sender: "ARCHIMEDES_O",
+        recipient: "ARKHE_SYSTEM",
+        amount: 0,
+        memoryFragment: JSON.stringify({
+          type: "MANUAL_CONFIRMATION",
+          action_id: actionId,
+          status,
+          justification,
+          angle: action.angle,
+          coherence: action.coherence
+        }),
+        phaseSignature: signature || "SIMULATED_ECDSA_SIG"
+      });
+    } catch (e: any) {
+      logger.error("Failed to record Ramsey confirmation on Arkhe-Chain: " + e.message);
+    }
+
+    if (approved) {
+      state.currentLambda = Math.min(1.0, state.currentLambda + 0.1); // Peak injection effect
+      state.logs.unshift({
+        id: generateOrbId(),
+        originTime: Date.now(),
+        targetTime: Date.now(),
+        coherence: state.currentLambda,
+        status: 'Valid',
+        threatType: `RAMSEY: Action ${action.type} APPROVED and executed.`
+      });
+    } else {
+      state.logs.unshift({
+        id: generateOrbId(),
+        originTime: Date.now(),
+        targetTime: Date.now(),
+        coherence: state.currentLambda,
+        status: 'Rejected',
+        threatType: `RAMSEY: Action ${action.type} REJECTED (VETO).`
+      });
+    }
+
+    // Unfreeze and clear pending action
+    state.ramsey.isFrozen = false;
+    state.ramsey.pendingAction = null;
+
+    broadcastState();
+    res.json({ success: true, approved });
   });
 
   app.post("/api/parameters", (req, res) => {

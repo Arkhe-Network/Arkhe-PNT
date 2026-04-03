@@ -183,6 +183,23 @@ export let state: SimulationState = {
     globalMassBalance: 0.99,
     zkAlertsCount: 1250
   },
+  ramsey: {
+    enabled: true,
+    auto_adjust: false,
+    manual_approval_required: true,
+    theta: 0.0,
+    direction: 1,
+    baseline: 0.963,
+    thresholds: [
+      { angle_rad: 0.6284, tolerance: 0.005, min_gain: 1.025, action: 'LOCAL_ADJUST' },
+      { angle_rad: 0.7855, tolerance: 0.005, min_gain: 1.019, action: 'LOG_ONLY' },
+      { angle_rad: 1.0473, tolerance: 0.005, min_gain: 1.030, action: 'LOCAL_ADJUST_NOTIFY' },
+      { angle_rad: 1.5709, tolerance: 0.005, min_gain: 1.016, action: 'LOG_ONLY' }
+    ],
+    window: [],
+    pendingAction: null,
+    isFrozen: false
+  },
   civicSubagents: [
     { name: 'Logos', adaptation: 'Leis Municipais/Estaduais', function: 'Conflitos normativos', status: 'idle', lastAction: 'Verificação de decreto de saneamento em SP concluída' },
     { name: 'Episteme', adaptation: 'Dados Oficiais', function: 'Transparência ativa', status: 'active', lastAction: 'Auditando Portal da Transparência da CGU' },

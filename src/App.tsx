@@ -63,6 +63,7 @@ import SecurityAdvancedPanel from './components/SecurityAdvancedPanel';
 import PluralityMCPPanel from './components/PluralityMCPPanel';
 import { EnterprisePlusPanel } from './components/EnterprisePlusPanel';
 import { ConsensusMeter } from './components/ConsensusMeter';
+import RamseyConfirmationModal from './components/RamseyConfirmationModal';
 import { CommandCenter } from './components/CommandCenter';
 import { useArkheSimulation } from './hooks/useArkheSimulation';
 import Profile from './components/Profile';
@@ -400,6 +401,12 @@ export function Dashboard() {
       )}
       {showEnterprisePlus && (
         <EnterprisePlusPanel onClose={() => setShowEnterprisePlus(false)} />
+      )}
+      {state.ramsey?.pendingAction && (
+        <RamseyConfirmationModal
+          pendingAction={state.ramsey.pendingAction}
+          onClose={() => {}}
+        />
       )}
     </div>
   );
