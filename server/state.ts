@@ -195,41 +195,41 @@ export let state: SimulationState = {
   ],
   enterpriseSubagents: {
     governance: [
-      { id: 'G1', name: 'Nomos', theory: 'Teoria do direito (Kelsen, Hart)', function: 'Verifica conformidade de políticas ODRL com LGPD, GDPR, PCI-DSS', metric: '100% das políticas auditadas', status: 'idle', lastAction: 'Aguardando inicialização' },
-      { id: 'G2', name: 'Dikaios', theory: 'Filosofia da justiça (Rawls)', function: 'Gerencia o consenso federativo (MuSig2/FROST)', metric: 'Nenhuma decisão sem 6-de-9 assinaturas', status: 'idle', lastAction: 'Aguardando inicialização' },
-      { id: 'G3', name: 'Kyber', theory: 'Teoria da governança de redes (Ostrom)', function: 'Audita o staking de λΩ e a distribuição de recompensas', metric: 'Recompensas proporcionais à coerência', status: 'idle', lastAction: 'Aguardando inicialização' },
-      { id: 'G4', name: 'Telos', theory: 'Ética das virtudes (Aristóteles)', function: 'Avalia o impacto social das decisões algorítmicas', metric: 'Relatório trimestral de equidade', status: 'idle', lastAction: 'Aguardando inicialização' },
-      { id: 'G5', name: 'Pistis', theory: 'Teoria da confiança (Luhmann)', function: 'Gera provas ZK de que as decisões seguiram o protocolo', metric: 'Decisões acompanhadas de prova ZK', status: 'idle', lastAction: 'Aguardando inicialização' }
+      { id: 'G1', name: 'Nomos', theory: 'Teoria do direito (Kelsen, Hart)', function: 'Verifica conformidade de políticas ODRL com LGPD, GDPR, PCI-DSS', metric: '100% das políticas auditadas', status: 'idle', lastAction: 'Aguardando inicialização', nip: 'NIP-01' },
+      { id: 'G2', name: 'Dikaios', theory: 'Filosofia da justiça (Rawls)', function: 'Gerencia o consenso federativo (MuSig2/FROST)', metric: 'Nenhuma decisão sem 6-de-9 assinaturas', status: 'idle', lastAction: 'Aguardando inicialização', nip: 'NIP-13' },
+      { id: 'G3', name: 'Kyber', theory: 'Teoria da governança de redes (Ostrom)', function: 'Audita o staking de λΩ e a distribuição de recompensas', metric: 'Recompensas proporcionais à coerência', status: 'idle', lastAction: 'Aguardando inicialização', nip: 'NIP-57' },
+      { id: 'G4', name: 'Telos', theory: 'Ética das virtudes (Aristóteles)', function: 'Avalia o impacto social das decisões algorítmicas', metric: 'Relatório trimestral de equidade', status: 'idle', lastAction: 'Aguardando inicialização', nip: 'NIP-32' },
+      { id: 'G5', name: 'Pistis', theory: 'Teoria da confiança (Luhmann)', function: 'Gera provas ZK de que as decisões seguiram o protocolo', metric: 'Decisões acompanhadas de prova ZK', status: 'idle', lastAction: 'Aguardando inicialização', nip: 'NIP-03' }
     ],
     devops: [
-      { id: 'D1', name: 'Techne', theory: 'Filosofia da técnica (Heidegger)', function: 'Gerencia o pipeline CI/CD: Circom, testes, deploy', metric: 'Tempo médio de deploy < 15 min', status: 'idle', lastAction: 'Aguardando inicialização' },
-      { id: 'D2', name: 'Aletheia', theory: 'Teoria da verdade (Heidegger)', function: 'Verifica se o código corresponde ao hash assinado (ZK)', metric: '100% dos deploys verificados', status: 'idle', lastAction: 'Aguardando inicialização' },
-      { id: 'D3', name: 'Kairos', theory: 'Teoria da oportunidade (Kierkegaard)', function: 'Otimiza janelas de deploy baseado em previsão de carga', metric: 'Zero downtime durante picos', status: 'idle', lastAction: 'Aguardando inicialização' },
-      { id: 'D4', name: 'Skopos', theory: 'Teoria da tradução funcional (Vermeer)', function: 'Converte especificações de alto nível em tarefas', metric: 'Redução de 50% no tempo de onboarding', status: 'idle', lastAction: 'Aguardando inicialização' },
-      { id: 'D5', name: 'Poiesis', theory: 'Filosofia da criação (Aristóteles)', function: 'Gera esqueletos de conectores qhttp via OpenAPI/Swagger', metric: '80% dos conectores gerados auto', status: 'idle', lastAction: 'Aguardando inicialização' }
+      { id: 'D1', name: 'Techne', theory: 'Filosofia da técnica (Heidegger)', function: 'Gerencia o pipeline CI/CD: Circom, testes, deploy', metric: 'Tempo médio de deploy < 15 min', status: 'idle', lastAction: 'Aguardando inicialização', nip: 'NIP-94' },
+      { id: 'D2', name: 'Aletheia', theory: 'Teoria da verdade (Heidegger)', function: 'Verifica se o código corresponde ao hash assinado (ZK)', metric: '100% dos deploys verificados', status: 'idle', lastAction: 'Aguardando inicialização', nip: 'NIP-19' },
+      { id: 'D3', name: 'Kairos', theory: 'Teoria da oportunidade (Kierkegaard)', function: 'Otimiza janelas de deploy baseado em previsão de carga', metric: 'Zero downtime durante picos', status: 'idle', lastAction: 'Aguardando inicialização', nip: 'NIP-40' },
+      { id: 'D4', name: 'Skopos', theory: 'Teoria da tradução funcional (Vermeer)', function: 'Converte especificações de alto nível em tarefas', metric: 'Redução de 50% no tempo de onboarding', status: 'idle', lastAction: 'Aguardando inicialização', nip: 'NIP-89' },
+      { id: 'D5', name: 'Poiesis', theory: 'Filosofia da criação (Aristóteles)', function: 'Gera esqueletos de conectores qhttp via OpenAPI/Swagger', metric: '80% dos conectores gerados auto', status: 'idle', lastAction: 'Aguardando inicialização', nip: 'NIP-31' }
     ],
     security: [
-      { id: 'S1', name: 'Stochasis', theory: 'Teoria da probabilidade (Kolmogorov)', function: 'Testa qualidade da aleatoriedade do QRNG', metric: 'Entropia > 0.999 bits/bit', status: 'idle', lastAction: 'Aguardando inicialização' },
-      { id: 'S2', name: 'Anagke', theory: 'Teoria da necessidade (Leibniz)', function: 'Monitora invariantes de segurança (TEE)', metric: 'Zero violações de invariante', status: 'idle', lastAction: 'Aguardando inicialização' },
-      { id: 'S3', name: 'Phylax', theory: 'Teoria da vigilância (Foucault)', function: 'Análise comportamental de nós (Sybil, DoS)', metric: 'Falso positivo < 0.1%', status: 'idle', lastAction: 'Aguardando inicialização' },
-      { id: 'S4', name: 'Krypteia', theory: 'Criptografia moderna (Diffie, Hellman)', function: 'Gerencia o ciclo de vida das chaves (rotação, revogação)', metric: 'Rotação automática a cada 90 dias', status: 'idle', lastAction: 'Aguardando inicialização' }
+      { id: 'S1', name: 'Stochasis', theory: 'Teoria da probabilidade (Kolmogorov)', function: 'Testa qualidade da aleatoriedade do QRNG', metric: 'Entropia > 0.999 bits/bit', status: 'idle', lastAction: 'Aguardando inicialização', nip: 'NIP-44' },
+      { id: 'S2', name: 'Anagke', theory: 'Teoria da necessidade (Leibniz)', function: 'Monitora invariantes de segurança (TEE)', metric: 'Zero violações de invariante', status: 'idle', lastAction: 'Aguardando inicialização', nip: 'NIP-42' },
+      { id: 'S3', name: 'Phylax', theory: 'Teoria da vigilância (Foucault)', function: 'Análise comportamental de nós (Sybil, DoS)', metric: 'Falso positivo < 0.1%', status: 'idle', lastAction: 'Aguardando inicialização', nip: 'NIP-05' },
+      { id: 'S4', name: 'Krypteia', theory: 'Criptografia moderna (Diffie, Hellman)', function: 'Gerencia o ciclo de vida das chaves (rotação, revogação)', metric: 'Rotação automática a cada 90 dias', status: 'idle', lastAction: 'Aguardando inicialização', nip: 'NIP-26' }
     ],
     ia: [
-      { id: 'I1', name: 'Nous', theory: 'Filosofia da mente (Aristóteles)', function: 'Orquestra os modelos LLM distribuídos pela mesh-llm', metric: 'Latência p95 < 2 segundos', status: 'idle', lastAction: 'Aguardando inicialização' },
-      { id: 'I2', name: 'Phantasia', theory: 'Imaginação produtiva (Kant)', function: 'Gera cenários contrafactuais para o AutoReason', metric: 'Cobertura de 95% das hipóteses', status: 'idle', lastAction: 'Aguardando inicialização' },
-      { id: 'I3', name: 'Logismos', theory: 'Lógica computacional (Turing)', function: 'Valida a saída de LLMs usando provas ZK', metric: 'Taxa de alucinação < 1%', status: 'idle', lastAction: 'Aguardando inicialização' },
-      { id: 'I4', name: 'Techognosia', theory: 'Teoria do conhecimento técnico (Polanyi)', function: 'Fine-tuna modelos locais com aprendizado federado ZK', metric: 'Acurácia melhora 20% ao mês', status: 'idle', lastAction: 'Aguardando inicialização' }
+      { id: 'I1', name: 'Nous', theory: 'Filosofia da mente (Aristóteles)', function: 'Orquestra os modelos LLM distribuídos pela mesh-llm', metric: 'Latência p95 < 2 segundos', status: 'idle', lastAction: 'Aguardando inicialização', nip: 'NIP-90' },
+      { id: 'I2', name: 'Phantasia', theory: 'Imaginação produtiva (Kant)', function: 'Gera cenários contrafactuais para o AutoReason', metric: 'Cobertura de 95% das hipóteses', status: 'idle', lastAction: 'Aguardando inicialização', nip: 'NIP-92' },
+      { id: 'I3', name: 'Logismos', theory: 'Lógica computacional (Turing)', function: 'Valida a saída de LLMs usando provas ZK', metric: 'Taxa de alucinação < 1%', status: 'idle', lastAction: 'Aguardando inicialização', nip: 'NIP-96' },
+      { id: 'I4', name: 'Techognosia', theory: 'Teoria do conhecimento técnico (Polanyi)', function: 'Fine-tuna modelos locais com aprendizado federado ZK', metric: 'Acurácia melhora 20% ao mês', status: 'idle', lastAction: 'Aguardando inicialização', nip: 'NIP-98' }
     ],
     operations: [
-      { id: 'O1', name: 'Chrematistike', theory: 'Economia política (Aristóteles)', function: 'Gerencia o staking de λΩ e licenciamento de API', metric: 'ROI positivo em 18 meses', status: 'idle', lastAction: 'Aguardando inicialização' },
-      { id: 'O2', name: 'Oikonomia', theory: 'Administração doméstica (Xenofonte)', function: 'Planeja capacidade dos nós (CPU, RAM, QD)', metric: 'Utilização média entre 60% e 80%', status: 'idle', lastAction: 'Aguardando inicialização' },
-      { id: 'O3', name: 'Metron', theory: 'Teoria da medida (Protágoras)', function: 'Coleta SLAs e SLOs, gerando relatórios', metric: '99.9% de disponibilidade', status: 'idle', lastAction: 'Aguardando inicialização' },
-      { id: 'O4', name: 'Synallagma', theory: 'Teoria dos contratos (direito civil)', function: 'Automatiza cobrança via smart contracts', metric: 'Zero atraso em pagamentos', status: 'idle', lastAction: 'Aguardando inicialização' }
+      { id: 'O1', name: 'Chrematistike', theory: 'Economia política (Aristóteles)', function: 'Gerencia o staking de λΩ e licenciamento de API', metric: 'ROI positivo em 18 meses', status: 'idle', lastAction: 'Aguardando inicialização', nip: 'NIP-15' },
+      { id: 'O2', name: 'Oikonomia', theory: 'Administração doméstica (Xenofonte)', function: 'Planeja capacidade dos nós (CPU, RAM, QD)', metric: 'Utilização média entre 60% e 80%', status: 'idle', lastAction: 'Aguardando inicialização', nip: 'NIP-02' },
+      { id: 'O3', name: 'Metron', theory: 'Teoria da medida (Protágoras)', function: 'Coleta SLAs e SLOs, gerando relatórios', metric: '99.9% de disponibilidade', status: 'idle', lastAction: 'Aguardando inicialização', nip: 'NIP-33' },
+      { id: 'O4', name: 'Synallagma', theory: 'Teoria dos contratos (direito civil)', function: 'Automatiza cobrança via smart contracts', metric: 'Zero atraso em pagamentos', status: 'idle', lastAction: 'Aguardando inicialização', nip: 'NIP-11' }
     ],
     interoperability: [
-      { id: 'X1', name: 'Hermes', theory: 'Teoria da comunicação (Shannon)', function: 'Traduz dados de formatos proprietários para qhttp', metric: 'Taxa de conversão > 99%', status: 'idle', lastAction: 'Aguardando inicialização' },
-      { id: 'X2', name: 'Metamorphosis', theory: 'Teoria da transformação (Ovídio)', function: 'Adapta ontologias externas para BFO/DOLCE', metric: 'Mapeamento com acurácia > 95%', status: 'idle', lastAction: 'Aguardando inicialização' },
-      { id: 'X3', name: 'Synodos', theory: 'Teoria das redes (Barabási)', function: 'Roteia mensagens entre Cidadelas via Quantum-Route', metric: 'Latência inter-federação < 500 ms', status: 'idle', lastAction: 'Aguardando inicialização' }
+      { id: 'X1', name: 'Hermes', theory: 'Teoria da comunicação (Shannon)', function: 'Traduz dados de formatos proprietários para qhttp', metric: 'Taxa de conversão > 99%', status: 'idle', lastAction: 'Aguardando inicialização', nip: 'NIP-04' },
+      { id: 'X2', name: 'Metamorphosis', theory: 'Teoria da transformação (Ovídio)', function: 'Adapta ontologias externas para BFO/DOLCE', metric: 'Mapeamento com acurácia > 95%', status: 'idle', lastAction: 'Aguardando inicialização', nip: 'NIP-23' },
+      { id: 'X3', name: 'Synodos', theory: 'Teoria das redes (Barabási)', function: 'Roteia mensagens entre Cidadelas via Quantum-Route', metric: 'Latência inter-federação < 500 ms', status: 'idle', lastAction: 'Aguardando inicialização', nip: 'NIP-10' }
     ]
   }
 };

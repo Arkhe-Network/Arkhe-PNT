@@ -937,6 +937,56 @@ export function setupRoutes(app: express.Express, broadcastState: () => void, cl
     res.json({ success: true, root: state.securityAdvanced.l4.merkleDagRoot });
   });
 
+  app.post("/api/security/auto-orthogonal-proof", express.json(), (req, res) => {
+    const { expected_T, tolerance_T, coherence_threshold, device_id } = req.body;
+
+    // Simulating ZK Proof generation for Auto-Orthogonality
+    const logs = [
+      "🜏 [ZK-CIRCUIT] Loading auto_orthogonal_proof.circom...",
+      "🜏 [SENSORS] Reading formative pressure (e) and containment tension (B)...",
+      "🜏 [MATH] Calculating Berry Phase and phase difference (π/2)...",
+      "🜏 [PROVER] Generating Groth16 witness...",
+      "🜏 [PROVER] Proving auto-orthogonality condition (T ≈ 1, Δφ ≈ 90°)..."
+    ];
+
+    const is_auto_orthogonal = (state.currentLambda >= (coherence_threshold || 0.95));
+
+    if (is_auto_orthogonal) {
+      logs.push("🜏 [SUCCESS] System is operating in Auto-Orthogonality regime.");
+      state.securityAdvanced.l4.zkOntologicalProof = true;
+    } else {
+      logs.push("🜏 [FAILURE] Coherence below threshold for auto-orthogonality.");
+    }
+
+    broadcastState();
+
+    res.json({
+      success: true,
+      is_auto_orthogonal,
+      proof: "0x" + crypto.randomBytes(64).toString('hex'),
+      nullifier: "0x" + crypto.randomBytes(32).toString('hex'),
+      logs
+    });
+  });
+
+  app.post("/api/nostr/sign-event", express.json(), (req, res) => {
+    const { kind, content, tags } = req.body;
+
+    const event = {
+      id: crypto.randomBytes(32).toString('hex'),
+      pubkey: "0x" + crypto.randomBytes(32).toString('hex'),
+      created_at: Math.floor(Date.now() / 1000),
+      kind: kind || 1,
+      tags: tags || [],
+      content: content || "",
+      sig: crypto.randomBytes(64).toString('hex')
+    };
+
+    logger.info(`🜏 [NOSTR] Signed event kind ${event.kind} for subagent subnet`);
+
+    res.json({ success: true, event });
+  });
+
   // Enterprise qhttp Standardized API (Simulated)
   // Supports methods: SUPERPOSITION (GET), COLLAPSE (POST), ENTANGLE (PUT/POST)
   app.all("/api/subagent/:id/:action", (req, res) => {
