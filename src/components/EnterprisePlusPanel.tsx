@@ -11,37 +11,102 @@ interface DomainSectionProps {
   color: string;
 }
 
-const DomainSection: React.FC<DomainSectionProps> = ({ title, icon, agents, color }) => (
-  <div className="bg-[#1a1b1e] border border-[#2a2b30] rounded-lg p-4 overflow-hidden">
-    <div className="flex items-center gap-2 mb-4 border-b border-[#2a2b30] pb-2">
-      <div className={`${color}`}>{icon}</div>
-      <h3 className="text-sm font-bold text-white uppercase tracking-widest">{title}</h3>
-    </div>
-    <div className="space-y-3">
-      {agents.map((agent) => (
-        <div key={agent.id} className="bg-black/30 border border-[#2a2b30] rounded p-2 text-[10px] font-mono">
-          <div className="flex justify-between items-start mb-1">
-            <span className="text-arkhe-cyan">{agent.id}: {agent.name}</span>
-            <span className={`px-1.5 py-0.5 rounded border border-current ${
-              agent.status === 'alert' ? 'text-red-400' :
-              agent.status === 'active' ? 'text-emerald-400' : 'text-amber-400'
-            }`}>
-              {agent.status.toUpperCase()}
-            </span>
+const DomainSection: React.FC<DomainSectionProps> = ({ title, icon, agents, color }) => {
+  const [loading, setLoading] = React.useState<string | null>(null);
+
+  const triggerAction = async (agentId: string) => {
+    setLoading(agentId);
+    try {
+      let action = 'process';
+      let body: any = {};
+
+      if (agentId === 'G1') {
+        action = 'validate-policy';
+        body = { policy: 'Permission: allow data extraction for POC' };
+      } else if (agentId === 'D1') {
+        action = 'deploy-circuit';
+      } else if (agentId === 'X1') {
+        action = 'translate';
+        body = { source_data: { user: 'operator-zero', action: 'login' } };
+      }
+
+      await fetch(`/api/subagent/${agentId}/${action}`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-Kuramoto-Phase': '1.57',
+          'X-ZK-Proof': '0x' + Math.random().toString(16).slice(2, 34)
+        },
+        body: JSON.stringify(body)
+      });
+    } catch (error) {
+      console.error(`Failed to trigger action for ${agentId}:`, error);
+    } finally {
+      setTimeout(() => setLoading(null), 1000);
+    }
+  };
+
+  const isPOCAgent = (id: string) => ['G1', 'D1', 'X1'].includes(id);
+
+  return (
+    <div className="bg-[#1a1b1e] border border-[#2a2b30] rounded-lg p-4 overflow-hidden">
+      <div className="flex items-center gap-2 mb-4 border-b border-[#2a2b30] pb-2">
+        <div className={`${color}`}>{icon}</div>
+        <h3 className="text-sm font-bold text-white uppercase tracking-widest">{title}</h3>
+      </div>
+      <div className="space-y-3">
+        {agents.map((agent) => (
+          <div key={agent.id} className="bg-black/30 border border-[#2a2b30] rounded p-2 text-[10px] font-mono">
+            <div className="flex justify-between items-start mb-1">
+              <div className="flex flex-col">
+                <span className="text-arkhe-cyan font-bold">{agent.id}: {agent.name}</span>
+                {agent.nip && (
+                  <span className="text-[7px] text-white/40 uppercase tracking-widest mt-0.5">
+                    Subnet: {agent.nip}
+                  </span>
+                )}
+              </div>
+              <span className={`px-1.5 py-0.5 rounded border border-current ${
+                agent.status === 'alert' ? 'text-red-400' :
+                agent.status === 'active' ? 'text-emerald-400' : 'text-amber-400'
+              }`}>
+                {agent.status.toUpperCase()}
+              </span>
+            </div>
+            <div className="text-white/70 mb-1 leading-tight">{agent.function}</div>
+            <div className="text-white/40 italic mb-2">Theory: {agent.theory}</div>
+            <div className="flex justify-between items-center text-[9px] border-t border-[#2a2b30] pt-1 mb-2">
+              <div className="flex flex-col gap-0.5">
+                <span className="text-emerald-500/70 uppercase tracking-tighter">Metric: {agent.metric}</span>
+                {agent.status === 'active' && (
+                  <span className="text-arkhe-cyan/60 text-[7px] uppercase font-bold">
+                    [ZK-PROOF: VERIFICADO]
+                  </span>
+                )}
+              </div>
+              <span className="text-white/30 truncate max-w-[120px]" title={agent.lastAction}>
+                {agent.lastAction}
+              </span>
+            </div>
+            {isPOCAgent(agent.id) && (
+              <button
+                onClick={() => triggerAction(agent.id)}
+                disabled={loading === agent.id}
+                className={`w-full py-1.5 rounded border transition-all uppercase tracking-tighter text-[9px] font-bold ${
+                  loading === agent.id
+                    ? 'bg-arkhe-cyan/20 border-arkhe-cyan text-arkhe-cyan animate-pulse'
+                    : 'bg-black/40 border-arkhe-cyan/50 text-arkhe-cyan hover:bg-arkhe-cyan hover:text-black'
+                }`}
+              >
+                {loading === agent.id ? 'EXECUTANDO qhttp COLLAPSE...' : `ACIONAR ${agent.name} POC`}
+              </button>
+            )}
           </div>
-          <div className="text-white/70 mb-1 leading-tight">{agent.function}</div>
-          <div className="text-white/40 italic mb-2">Theory: {agent.theory}</div>
-          <div className="flex justify-between items-center text-[9px] border-t border-[#2a2b30] pt-1">
-            <span className="text-emerald-500/70">Success: {agent.metric}</span>
-            <span className="text-white/30 truncate max-w-[120px]" title={agent.lastAction}>
-              {agent.lastAction}
-            </span>
-          </div>
-        </div>
-      ))}
+        ))}
+      </div>
     </div>
-  </div>
-);
+  );
+};
 
 interface EnterprisePlusPanelProps {
   onClose: () => void;

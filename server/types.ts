@@ -299,4 +299,5 @@ export interface EnterpriseSubagentState {
   metric: string;
   status: 'active' | 'idle' | 'alert';
   lastAction: string;
+  nip?: string;
 }
