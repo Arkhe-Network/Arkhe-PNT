@@ -32,12 +32,17 @@ def verify_enterprise_plus(page):
     expect(slashing_trigger).to_be_visible()
     slashing_trigger.click()
 
-    # 7. Verificar o status verificado (ZK-PROOF)
+    # 7. Acionar a Standby Queue - Health Proof
+    standby_button = page.get_by_role("button", name="ACIONAR Standby Queue POC")
+    expect(standby_button).to_be_visible()
+    standby_button.click()
+
+    # 8. Verificar o status verificado (ZK-PROOF)
     # O backend retorna um log com [ZK-PROOF: VERIFICADO]
     status_text = page.get_by_text("[ZK-PROOF: VERIFICADO]")
     expect(status_text).to_be_visible()
 
-    # 8. Tirar screenshot
+    # 9. Tirar screenshot
     page.screenshot(path="/app/verification/poc_verified_final.png", full_page=True)
     print("Screenshot salva em /app/verification/poc_verified_final.png")
 

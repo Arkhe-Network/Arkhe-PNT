@@ -31,6 +31,7 @@ pub struct NetworkContext {
     pub network_coherence: f64,
     pub recent_slashing_events: u32,
     pub regulatory_pressure: u32,
+    pub avg_transaction_value: u64,
 }
 
 pub struct AlphaCouncil {
@@ -55,15 +56,26 @@ impl AlphaCouncil {
         }
     }
 
+    /// Alinhado com alpha_calculator.circom
+    /// Pesos: Threat(3), Coherence(2), Slashing(4), Regulatory(1), Value(2). Total = 12.
     fn calculate_alpha(context: &NetworkContext) -> u64 {
-        let threat = context.global_threat_level as u64;
-        let coherence = (context.network_coherence * 1000.0) as u64;
-        let slashing = context.recent_slashing_events as u64;
-        let regulatory = (100 - context.regulatory_pressure) as u64;
+        let threat = context.global_threat_level as u64 * 10;
+        let coherence = ((1.0 - context.network_coherence) * 5000.0) as u64; // (1000-coh)*5
+        let slashing = context.recent_slashing_events as u64 * 100;
+        let regulatory = (100 - context.regulatory_pressure as u64) * 3;
 
-        // Pesos: Threat(3), Coherence(2), Slashing(4), Regulatory(3)
-        let raw = (threat * 30) + ((1000 - coherence) * 20) + (slashing * 100) + (regulatory * 30);
-        let alpha = raw / 18; // Soma simplificada de pesos para Rust
+        let log_value = if context.avg_transaction_value > 1000000 {
+            1000
+        } else if context.avg_transaction_value > 100000 {
+            700
+        } else if context.avg_transaction_value > 10000 {
+            400
+        } else {
+            100
+        };
+
+        let raw = (threat * 3) + (coherence * 2) + (slashing * 4) + (regulatory * 1) + (log_value * 2);
+        let alpha = raw / 12;
 
         alpha.min(1000)
     }

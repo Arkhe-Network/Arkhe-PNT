@@ -34,6 +34,7 @@ impl QuantumSlashingCouncil {
         QuantumSlashingCouncil { history: Vec::new() }
     }
 
+    /// Alinhado com quantum_slashing.circom
     pub fn investigate(&self, t2_before: u64, t2_after: u64, env: &EnvironmentalFactors) -> SlashingVerdict {
         // Se ≥2 fatores críticos, isenta (Innocent)
         let solar_critical = env.solar_flux > 800;
@@ -47,14 +48,18 @@ impl QuantumSlashingCouncil {
         }
 
         let delta = t2_before - t2_after;
-        let pct_drop = (delta * 100) / t2_before;
+        let severity_raw = (delta * 1000) / t2_before; // Corresponde ao severity_raw do circuito
 
-        if pct_drop > 70 {
+        // Usando thresholds de severidade do circuito (mitigados por boa fé/histórico seriam calculados aqui)
+        // No POC, mapeamos severity_raw diretamente para o veredito
+        if severity_raw > 700 {
             SlashingVerdict::BanPermanent
-        } else if pct_drop > 30 {
+        } else if severity_raw > 300 {
             SlashingVerdict::Malicious(3000) // 30%
-        } else {
+        } else if severity_raw > 100 {
             SlashingVerdict::Negligent(500) // 5%
+        } else {
+            SlashingVerdict::Innocent
         }
     }
 }

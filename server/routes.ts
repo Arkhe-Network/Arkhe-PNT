@@ -1089,6 +1089,16 @@ export function setupRoutes(app: express.Express, broadcastState: () => void, cl
         zk_proof: "0x" + crypto.randomBytes(32).toString('hex')
       };
       logs.push("🜏 [G3-KYBER] Slashing quântico executado: -3.5 ARKHE (30% stake).");
+    } else if (id.toUpperCase() === 'G3' && action === 'standby-health') {
+      logs.push("🜏 [G3-KYBER] Solicitando atestação de saúde para nó standby 0xC4...");
+      logs.push("🜏 [G3-KYBER] Recebendo ramsey_fringes assinadas pelo Enclave TEE...");
+      resultPayload = {
+        isHealthy: true,
+        t2Inferred: 48500,
+        zkProof: "0x" + crypto.randomBytes(32).toString('hex'),
+        teeQuoteVerified: true
+      };
+      logs.push("🜏 [G3-KYBER] Saúde do nó standby 0xC4 confirmada via ZK + TEE.");
     }
 
     // Simulated response

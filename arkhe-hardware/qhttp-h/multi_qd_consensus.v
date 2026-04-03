@@ -34,12 +34,15 @@ module multi_qd_consensus #(
     reg [63:0] weight_accumulator;
     reg [95:0] weighted_sum;  // Para precisão em cálculo ponderado
 
-    // Combinatorial bit counting (Reduction operator or bit sum)
-    wire [7:0] current_valid_count;
-    assign current_valid_count = (valid_nodes[0] ? 1 : 0) +
-                                 (valid_nodes[1] ? 1 : 0) +
-                                 (valid_nodes[2] ? 1 : 0) +
-                                 (valid_nodes[3] ? 1 : 0);
+    // Generic combinatorial bit counting using a generate loop or reduction sum
+    integer j;
+    reg [7:0] current_valid_count;
+    always @(*) begin
+        current_valid_count = 0;
+        for (j = 0; j < NUM_QD_NODES; j = j + 1) begin
+            if (valid_nodes[j]) current_valid_count = current_valid_count + 1;
+        end
+    end
 
     // Cálculo de pesos geodésicos: w = exp(-d/c)
     function [31:0] calculate_weight;
@@ -63,6 +66,10 @@ module multi_qd_consensus #(
             state <= COLLECT;
             consensus_valid <= 0;
             consensus_count <= 0;
+            weighted_t2_star <= 0;
+            weight_accumulator <= 0;
+            weighted_sum <= 0;
+            valid_nodes <= 0;
         end else begin
             case (state)
                 COLLECT: begin
@@ -92,7 +99,7 @@ module multi_qd_consensus #(
 
                 VERIFY: begin
                     consensus_count <= current_valid_count;
-                    // Verifica se atingimos 3/4 de consenso
+                    // Verifica se atingimos o ratio de consenso parametrizado
                     if (current_valid_count >= (NUM_QD_NODES * CONSENSUS_RATIO / 4)) begin
                         if (weight_accumulator > 0) begin
                           weighted_t2_star <= weighted_sum / weight_accumulator;

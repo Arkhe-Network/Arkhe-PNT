@@ -9,84 +9,85 @@ template QuantumSlashing() {
     // INPUTS PRIVADOS (Witness) - Dados do incidente
     // ============================================================
 
-    // Identidade do nó (commitment, não o ID em claro)
     signal input node_commitment;
-    signal input node_stake;              // Stake em tokens (escalado)
+    signal input node_stake;
 
-    // Métricas quânticas do incidente
-    signal input t2_star_before;          // T₂* antes do incidente (μs × 1000)
-    signal input t2_star_after;           // T₂* durante/depois (μs × 1000)
-    signal input coherence_duration;      // Quanto tempo durou a falha (ms)
-    signal input recovery_time;           // Tempo para recuperação (ms)
+    signal input t2_star_before;
+    signal input t2_star_after;
+    signal input coherence_duration;
+    signal input recovery_time;
 
-    // Provas de contexto
-    signal input environmental_noise;     // Ruído ambiental medido (0-1000)
-    signal input seismic_activity;        // Atividade sísmica (Richter × 100)
-    signal input solar_flux_index;        // Índice de atividade solar (0-1000)
-    signal input network_challenges_sent; // Desafios enviados ao nó
-    signal input network_challenges_failed; // Desafios não respondidos
+    signal input environmental_noise;
+    signal input seismic_activity;
+    signal input solar_flux_index;
+    signal input network_challenges_sent;
+    signal input network_challenges_failed;
 
-    // Histórico do nó
-    signal input previous_slashings;      // Número de infrações anteriores
-    signal input uptime_percentage;       // Uptime histórico (0-1000)
+    signal input previous_slashings;
+    signal input uptime_percentage;
 
-    // Nonce único do incidente
     signal input incident_salt;
 
     // ============================================================
     // INPUTS PÚBLICOS
     // ============================================================
 
-    signal input threshold_t2_critical;   // Limiar crítico de T₂* (40000 = 40μs)
-    signal input min_uptime_required;     // Uptime mínimo (950 = 95%)
-    signal input max_recovery_time;       // Tempo máximo de recuperação (60000ms)
-    signal input environmental_exemption; // Limiar de isenção ambiental (800)
+    signal input threshold_t2_critical;
+    signal input min_uptime_required;
+    signal input max_recovery_time;
+    signal input environmental_exemption;
 
     // ============================================================
     // OUTPUTS
     // ============================================================
 
-    signal output slashing_valid;         // 1 se a penalidade é válida
-    signal output slashing_severity;      // 0-3 (0=nenhuma, 1=leve, 2=severa, 3=ban)
-    signal output penalty_amount;         // Tokens a serem queimados/slashados
-    signal output incident_hash;          // Hash público do incidente
-    signal output node_reputation_delta;  // Mudança na reputação (-100 a 0)
+    signal output slashing_valid;
+    signal output slashing_severity;
+    signal output penalty_amount;
+    signal output incident_hash;
+    signal output node_reputation_delta;
 
     // ============================================================
     // 1. CÁLCULO DA GRAVIDADE DA FALHA
     // ============================================================
 
-    // Delta de coerência: quanto caiu T₂*
     signal t2_delta <== t2_star_before - t2_star_after;
 
-    // Componente 1: Magnitude da perda de coerência
     component t2_critical = GreaterThan(64);
     t2_critical.in[0] <== threshold_t2_critical;
-    t2_critical.in[1] <== t2_star_after;  // 1 se threshold > T2_after
+    t2_critical.in[1] <== t2_star_after;
 
-    // Proper integer division for severity_raw
     signal severity_raw_numerator <== t2_critical.out * t2_delta * 1000;
+
+    // Using IsZero to handle t2_star_before safety without ternary
+    component checkBeforeZero = IsZero();
+    checkBeforeZero.in <== t2_star_before;
+
     signal severity_raw;
     signal severity_raw_remainder;
 
-    severity_raw <-- t2_star_before > 0 ? severity_raw_numerator / t2_star_before : 0;
-    severity_raw_remainder <-- t2_star_before > 0 ? severity_raw_numerator % t2_star_before : 0;
+    // q * d + r = n
+    // If d is 0, we set q=0, r=0. But constraints must hold.
+    // In Circom, if d=0, division in <-- will fail.
+    // We can use a divisor that is never zero: d + isZero(d)
+    signal safe_divisor <== t2_star_before + checkBeforeZero.out;
+
+    severity_raw <-- (1 - checkBeforeZero.out) * (severity_raw_numerator / safe_divisor);
+    severity_raw_remainder <-- (1 - checkBeforeZero.out) * (severity_raw_numerator % safe_divisor);
 
     severity_raw_numerator === severity_raw * t2_star_before + severity_raw_remainder;
 
     component severity_raw_rem_bound = LessThan(64);
     severity_raw_rem_bound.in[0] <== severity_raw_remainder;
-    severity_raw_rem_bound.in[1] <== t2_star_before + (1 - (t2_star_before > 0)); // handle div by zero logic
+    severity_raw_rem_bound.in[1] <== safe_divisor;
     severity_raw_rem_bound.out === 1;
 
-    // Componente 2: Duração da falha
     component long_duration = GreaterThan(64);
     long_duration.in[0] <== coherence_duration;
-    long_duration.in[1] <== 10000;  // > 10 segundos é grave
+    long_duration.in[1] <== 10000;
 
-    signal duration_severity <== long_duration.out * 500;  // +50% severidade
+    signal duration_severity <== long_duration.out * 500;
 
-    // Componente 3: Falha em desafios de rede
     signal challenge_num <== network_challenges_failed * 1000;
     signal challenge_den <== (network_challenges_sent + 1) * 2;
     signal challenge_severity;
@@ -94,10 +95,10 @@ template QuantumSlashing() {
 
     component high_failure = GreaterThan(32);
     high_failure.in[0] <== network_challenges_failed * 1000;
-    high_failure.in[1] <== 500 * (network_challenges_sent + 1);  // > 50% falha é grave
+    high_failure.in[1] <== 500 * (network_challenges_sent + 1);
 
-    challenge_severity <-- high_failure.out * challenge_num / challenge_den;
-    challenge_rem <-- high_failure.out * challenge_num % challenge_den;
+    challenge_severity <-- high_failure.out * (challenge_num / challenge_den);
+    challenge_rem <-- high_failure.out * (challenge_num % challenge_den);
     high_failure.out * challenge_num === challenge_severity * challenge_den + challenge_rem;
 
     component challenge_rem_bound = LessThan(64);
@@ -106,7 +107,7 @@ template QuantumSlashing() {
     challenge_rem_bound.out === 1;
 
     // ============================================================
-    // 2. AVALIAÇÃO DE CULPABILIDADE (Natural vs. Malícia)
+    // 2. AVALIAÇÃO DE CULPABILIDADE
     // ============================================================
 
     signal environmental_stress <== environmental_noise + seismic_activity + solar_flux_index;
@@ -136,7 +137,6 @@ template QuantumSlashing() {
     // ============================================================
 
     signal raw_severity_sum <== severity_raw + duration_severity + challenge_severity + recidivism_penalty;
-
     signal total_mitigation <== environmental_mitigation + recovery_mitigation + reputation_mitigation;
 
     component underflow_check = GreaterThan(64);
@@ -172,14 +172,19 @@ template QuantumSlashing() {
     component s3 = IsEqual(); s3.in[0] <== slashing_severity; s3.in[1] <== 3;
 
     signal severity_factor <== s1.out * 50 + s2.out * 300 + s3.out * 1000;
-
     signal recidivism_multiplier <== 1000 + (previous_slashings * 200);
 
-    // penalty_amount * 1000000 = node_stake * severity_factor * recidivism_multiplier
     signal penalty_num <== node_stake * severity_factor * recidivism_multiplier;
     signal penalty_final;
+    signal penalty_rem;
     penalty_final <-- penalty_num / 1000000;
-    penalty_final * 1000000 === penalty_num;
+    penalty_rem <-- penalty_num % 1000000;
+    penalty_num === penalty_final * 1000000 + penalty_rem;
+
+    component penalty_rem_bound = LessThan(64);
+    penalty_rem_bound.in[0] <== penalty_rem;
+    penalty_rem_bound.in[1] <== 1000000;
+    penalty_rem_bound.out === 1;
 
     component penalty_cap = LessThan(64);
     penalty_cap.in[0] <== penalty_final;

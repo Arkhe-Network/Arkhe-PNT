@@ -35,6 +35,10 @@ const DomainSection: React.FC<DomainSectionProps> = ({ title, icon, agents, colo
         action = 'alpha-governance';
       } else if (agentId === 'G3') {
         action = 'quantum-slashing';
+      } else if (agentId === 'G3_Standby') {
+        const originalId = agentId;
+        agentId = 'G3';
+        action = 'standby-health';
       }
 
       await fetch(`/api/subagent/${agentId}/${action}`, {
@@ -53,7 +57,7 @@ const DomainSection: React.FC<DomainSectionProps> = ({ title, icon, agents, colo
     }
   };
 
-  const isPOCAgent = (id: string) => ['G1', 'G2', 'G3', 'D1', 'S3', 'X1'].includes(id);
+  const isPOCAgent = (id: string) => ['G1', 'G2', 'G3', 'D1', 'S3', 'X1', 'G3_Standby'].includes(id);
 
   return (
     <div className="bg-[#1a1b1e] border border-[#2a2b30] rounded-lg p-4 overflow-hidden">
