@@ -202,7 +202,7 @@ export default function AquiferSpectrogramPanel({ onClose }: { onClose?: () => v
         )}
       </header>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 flex-1">
         {/* Phase View (3D) */}
         <div className="lg:col-span-2 relative bg-black/30 rounded-xl border border-[#00d4ff]/20 overflow-hidden">
           <canvas ref={canvas3DRef} className="w-full h-[400px]" />
@@ -242,7 +242,6 @@ export default function AquiferSpectrogramPanel({ onClose }: { onClose?: () => v
             <span>14Hz (H₂O)</span>
             <span>20Hz (Limit)</span>
           </div>
-        </div>
 
           {/* Metrics Grid */}
           <div className="grid grid-cols-2 gap-3 mt-auto">

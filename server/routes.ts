@@ -434,6 +434,12 @@ export function setupRoutes(app: express.Express, broadcastState: () => void, cl
       state.security.zkProofValid = false;
     } else if (type === 'SEU Radiation') {
       state.hardware.tmrFaultsCorrected += 10;
+    } else if (type === 'Phase Spoofing') {
+      state.securityAdvanced.l2.eprHandshake = 'failed';
+      state.securityAdvanced.l2.pneumaOutlierDetected = true;
+    } else if (type === 'Ontology Injection') {
+      state.securityAdvanced.l4.owlSignatureValid = false;
+      state.securityAdvanced.l4.logosConsistency = 0.3;
     } else {
       // Corrupt shards for Jamming or default
       state.shards = state.shards.map(s => Math.random() > 0.3 ? { ...s, status: 'corrupted' } : s);
@@ -893,5 +899,41 @@ export function setupRoutes(app: express.Express, broadcastState: () => void, cl
     }
     const taskId = createTask(type, payload || {}, requiredCoherence || 0.8);
     res.json({ success: true, task_id: taskId });
+  });
+
+  // Advanced Security Control Endpoints
+  app.post("/api/security/remote-attestation", (req, res) => {
+    state.securityAdvanced.l1.teeStatus = 'attesting';
+    broadcastState();
+    setTimeout(() => {
+      state.securityAdvanced.l1.teeStatus = 'secure';
+      state.securityAdvanced.l1.lastRemoteAttestation = new Date().toISOString();
+      broadcastState();
+      res.json({ success: true, quote: "TEE-QUOTE-0x" + Math.random().toString(16).slice(2, 66) });
+    }, 2000);
+  });
+
+  app.post("/api/security/hsm-sync", (req, res) => {
+    state.securityAdvanced.l1.hsmBackupSynced = false;
+    broadcastState();
+    setTimeout(() => {
+      state.securityAdvanced.l1.hsmBackupSynced = true;
+      broadcastState();
+      res.json({ success: true, message: "HSM Backup Synchronized" });
+    }, 1500);
+  });
+
+  app.post("/api/security/thermal-destruction", express.json(), (req, res) => {
+    const { arm } = req.body;
+    state.securityAdvanced.l1.thermalDestructionArmed = !!arm;
+    broadcastState();
+    res.json({ success: true, armed: state.securityAdvanced.l1.thermalDestructionArmed });
+  });
+
+  app.post("/api/security/ontology-sign", (req, res) => {
+    state.securityAdvanced.l4.owlSignatureValid = true;
+    state.securityAdvanced.l4.merkleDagRoot = '0x' + Math.random().toString(16).slice(2, 66);
+    broadcastState();
+    res.json({ success: true, root: state.securityAdvanced.l4.merkleDagRoot });
   });
 }
