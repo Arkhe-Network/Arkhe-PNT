@@ -46,13 +46,19 @@ def check_hydro_balance(state: HydroState) -> tuple:
 
     mass_valid = (diff_abs < ERROR_MARGIN * PRECISION) and quantum_valid
 
-    # 3. Geofence & Segurança
+    # 3. Geofence & Segurança (República HYDRO-Ω: k-anonimato >= 30 lares)
     level_safe = MIN_LEVEL < state.storage_current < MAX_LEVEL
     pump_safe = state.pumping < 5000000
 
-    safety_valid = level_safe and pump_safe and quantum_valid
+    # Simulação de Prova ZK de Geofence
+    zk_geofence_valid = random.random() > 0.05 # 95% de chance de prova válida
+    k_anonymity_satisfied = True # Presumido no simulador
+
+    safety_valid = level_safe and pump_safe and quantum_valid and zk_geofence_valid and k_anonymity_satisfied
 
     diagnostics = []
+    if not zk_geofence_valid:
+        diagnostics.append("ZK-GEOFENCE: Falha na prova de localização (ou k-anonimato < 30)")
     if not quantum_valid:
         diagnostics.append(f"DECOERÊNCIA: T2*={state.quantum_coherence}ns (<50000ns)")
     if diff_abs >= ERROR_MARGIN * PRECISION:
