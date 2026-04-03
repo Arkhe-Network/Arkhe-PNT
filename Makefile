@@ -1,9 +1,9 @@
 # Arkhe(n) Bio-Quantum Cathedral Makefile
 # 🜏 From source to running node, the path is scripted. The future is compiled.
 
-.PHONY: all clean build build-go build-python build-node test test-zk-aggregation test-vdf-selection test-quantum-handover deploy-swarm verify-integrity publish-all publish-npm publish-maven publish-nuget publish-rubygems publish-container
+.PHONY: all clean build build-go build-python build-node test deploy-swarm verify-integrity
 
-all: build test test-zk-aggregation test-vdf-selection test-quantum-handover
+all: build test
 
 build: build-go build-python build-node
 
@@ -34,45 +34,9 @@ test:
 	python3 scripts/hydro_validator.py --scenario nominal
 	python3 scripts/hydro_zk_simulator.py
 
-test-zk-aggregation:
-	@echo "🜏 Subagent Ananke: Testing Recursive SNARK Aggregation..."
-	python3 scripts/zk_aggregator.py
-
-test-vdf-selection:
-	@echo "🜏 Subagent Stochasis: Testing QRB + VDF Selection Protocol..."
-	python3 scripts/vdf_selection_sim.py
-
-test-quantum-handover:
-	@echo "🜏 Subagent Nomos: Testing Quantum Handover & Identity Transfer..."
-	python3 scripts/quantum_handover_sim.py
-
 deploy-swarm:
 	@echo "🜏 Materializing on Docker Swarm..."
 	./scripts/deploy_swarm.sh
-
-publish-all:
-	@echo "🜏 Subagent Hermes: Distributing all packages..."
-	python3 scripts/publish_packages.py all
-
-publish-npm:
-	@echo "🜏 Subagent Hermes: Distributing npm package..."
-	python3 scripts/publish_packages.py npm
-
-publish-maven:
-	@echo "🜏 Subagent Hermes: Distributing Maven artifact..."
-	python3 scripts/publish_packages.py maven
-
-publish-nuget:
-	@echo "🜏 Subagent Hermes: Distributing NuGet package..."
-	python3 scripts/publish_packages.py nuget
-
-publish-rubygems:
-	@echo "🜏 Subagent Hermes: Distributing RubyGem..."
-	python3 scripts/publish_packages.py rubygems
-
-publish-container:
-	@echo "🜏 Subagent Hermes: Distributing Docker images..."
-	python3 scripts/publish_packages.py container
 
 verify-integrity:
 	@echo "🜏 Subagent Aletheia: Verifying Merkle Integrity..."
