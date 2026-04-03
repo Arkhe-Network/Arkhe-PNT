@@ -937,11 +937,73 @@ export function setupRoutes(app: express.Express, broadcastState: () => void, cl
     res.json({ success: true, root: state.securityAdvanced.l4.merkleDagRoot });
   });
 
+  app.post("/api/security/auto-orthogonal-proof", express.json(), (req, res) => {
+    const { expected_T, tolerance_T, coherence_threshold, device_id } = req.body;
+
+    // Simulating ZK Proof generation for Auto-Orthogonality
+    const logs = [
+      "🜏 [ZK-CIRCUIT] Loading auto_orthogonal_proof.circom...",
+      "🜏 [SENSORS] Reading formative pressure (e) and containment tension (B)...",
+      "🜏 [MATH] Calculating Berry Phase and phase difference (π/2)...",
+      "🜏 [PROVER] Generating Groth16 witness...",
+      "🜏 [PROVER] Proving auto-orthogonality condition (T ≈ 1, Δφ ≈ 90°)..."
+    ];
+
+    const is_auto_orthogonal = (state.currentLambda >= (coherence_threshold || 0.95));
+
+    if (is_auto_orthogonal) {
+      logs.push("🜏 [SUCCESS] System is operating in Auto-Orthogonality regime.");
+      state.securityAdvanced.l4.zkOntologicalProof = true;
+    } else {
+      logs.push("🜏 [FAILURE] Coherence below threshold for auto-orthogonality.");
+    }
+
+    broadcastState();
+
+    res.json({
+      success: true,
+      is_auto_orthogonal,
+      proof: "0x" + crypto.randomBytes(64).toString('hex'),
+      nullifier: "0x" + crypto.randomBytes(32).toString('hex'),
+      logs
+    });
+  });
+
+  app.post("/api/nostr/sign-event", express.json(), (req, res) => {
+    const { kind, content, tags } = req.body;
+
+    const event = {
+      id: crypto.randomBytes(32).toString('hex'),
+      pubkey: "0x" + crypto.randomBytes(32).toString('hex'),
+      created_at: Math.floor(Date.now() / 1000),
+      kind: kind || 1,
+      tags: tags || [],
+      content: content || "",
+      sig: crypto.randomBytes(64).toString('hex')
+    };
+
+    logger.info(`🜏 [NOSTR] Signed event kind ${event.kind} for subagent subnet`);
+
+    res.json({ success: true, event });
+  });
+
   // Enterprise qhttp Standardized API (Simulated)
   // Supports methods: SUPERPOSITION (GET), COLLAPSE (POST), ENTANGLE (PUT/POST)
   app.all("/api/subagent/:id/:action", (req, res) => {
     const { id, action } = req.params;
-    const method = req.method; // We'll map this to the qhttp concept
+    const method = req.method;
+
+    // Enforce qhttp headers for Enterprise Plus subagents only
+    const xKuramotoPhase = req.headers['x-kuramoto-phase'] as string;
+    const xZkProof = req.headers['x-zk-proof'] as string;
+
+    const isEnterpriseAgent = (id.startsWith('G') || id.startsWith('D') || id.startsWith('S') || id.startsWith('I') || id.startsWith('O') || id.startsWith('X')) && id.length <= 3;
+
+    if (isEnterpriseAgent && (!xKuramotoPhase || !xZkProof)) {
+      return res.status(400).json({
+        error: `Missing mandatory qhttp headers for Enterprise agent ${id}: X-Kuramoto-Phase and X-ZK-Proof are required.`
+      });
+    }
 
     // Find the subagent across domains
     let subagent: any = null;
@@ -949,7 +1011,7 @@ export function setupRoutes(app: express.Express, broadcastState: () => void, cl
 
     if (state.enterpriseSubagents) {
       for (const [domain, agents] of Object.entries(state.enterpriseSubagents)) {
-        const found = agents.find(a => a.id.toLowerCase() === id.toLowerCase());
+        const found = agents.find(a => a.id.toUpperCase() === id.toUpperCase());
         if (found) {
           subagent = found;
           foundDomain = domain;
@@ -967,10 +1029,67 @@ export function setupRoutes(app: express.Express, broadcastState: () => void, cl
     if (method === 'POST') qhttpMethod = 'COLLAPSE';
     if (method === 'PUT') qhttpMethod = 'ENTANGLE';
 
-    const xKuramotoPhase = req.headers['x-kuramoto-phase'] || '1.0';
-    const xZkProof = req.headers['x-zk-proof'] || null;
-
     logger.info(`🜏 [qhttp] ${qhttpMethod} ${action} for subagent ${subagent.name} (${id})`);
+
+    let resultPayload: any = { status: "processed" };
+    let logs: string[] = [];
+
+    // POC Specific Logic for G1, D1, X1
+    if (id.toUpperCase() === 'G1' && action === 'validate-policy') {
+      const policy = req.body.policy;
+      logs.push("🜏 [G1-NOMOS] Auditando política ODRL contra ontologia x.ttl...");
+      if (policy && policy.includes("Permission")) {
+        resultPayload = { valid: true, compliance: "LGPD/GDPR", proof_id: "zk-pol-0x" + crypto.randomBytes(4).toString('hex') };
+        logs.push("🜏 [G1-NOMOS] Política validada com sucesso.");
+      } else {
+        resultPayload = { valid: false, reason: "Invalid ODRL structure" };
+        logs.push("🜏 [G1-NOMOS] Falha na validação: estrutura ODRL inválida.");
+      }
+    } else if (id.toUpperCase() === 'D1' && action === 'deploy-circuit') {
+      logs.push("🜏 [D1-TECHNE] Iniciando deploy de circuito Circom...");
+      logs.push("🜏 [D1-TECHNE] Compilando R1CS...");
+      logs.push("🜏 [D1-TECHNE] Gerando testemunha quântica...");
+      resultPayload = { status: "deployed", circuit_hash: "0x" + crypto.randomBytes(32).toString('hex'), deployment_time_ms: 450 };
+      logs.push("🜏 [D1-TECHNE] Circuito deployed no cluster.");
+    } else if (id.toUpperCase() === 'X1' && action === 'translate') {
+      const source = req.body.source_data;
+      logs.push("🜏 [X1-HERMES] Traduzindo payload PostHog para frames qhttp...");
+      resultPayload = {
+        converted: true,
+        qhttp_frame: {
+          type: "SESSION_EVENT",
+          data: source,
+          phase: parseFloat(xKuramotoPhase)
+        }
+      };
+      logs.push("🜏 [X1-HERMES] Tradução concluída com 99.9% de fidelidade.");
+    } else if (id.toUpperCase() === 'S3' && action === 'frustration-proof') {
+      logs.push("🜏 [S3-PHYLAX] Analisando padrões de interação para frustração humana...");
+      resultPayload = {
+        isHuman: true,
+        isFrustrated: false,
+        frustrationScore: 120,
+        zk_proof: "0x" + crypto.randomBytes(32).toString('hex')
+      };
+      logs.push("🜏 [S3-PHYLAX] Prova de frustração humana verificada via ZK.");
+    } else if (id.toUpperCase() === 'G2' && action === 'alpha-governance') {
+      logs.push("🜏 [G2-DIKAIOS] Calculando limiar Alpha dinâmico para MuSig2...");
+      resultPayload = {
+        alpha: 0.45,
+        regime: "Balanced",
+        zk_proof: "0x" + crypto.randomBytes(32).toString('hex')
+      };
+      logs.push("🜏 [G2-DIKAIOS] Regime de governança equilibrado estabelecido (α=0.45).");
+    } else if (id.toUpperCase() === 'G3' && action === 'quantum-slashing') {
+      logs.push("🜏 [G3-KYBER] Investigando incidente de decoerência no nó 0xB2...");
+      resultPayload = {
+        incidentHash: "0x" + crypto.randomBytes(32).toString('hex'),
+        verdict: "Malicious",
+        penalty: "3.5 ARKHE",
+        zk_proof: "0x" + crypto.randomBytes(32).toString('hex')
+      };
+      logs.push("🜏 [G3-KYBER] Slashing quântico executado: -3.5 ARKHE (30% stake).");
+    }
 
     // Simulated response
     const response = {
@@ -980,13 +1099,16 @@ export function setupRoutes(app: express.Express, broadcastState: () => void, cl
       qhttpMethod,
       action,
       coherence: state.currentLambda,
-      zkProof: xZkProof || "0x" + Math.random().toString(16).slice(2, 34),
+      zkProof: xZkProof,
       timestamp: new Date().toISOString(),
-      auditTrail: `quantum://ledger/0x${Math.random().toString(16).slice(2, 10)}`
+      result: resultPayload,
+      logs: logs,
+      auditTrail: `quantum://ledger/0x${crypto.randomBytes(4).toString('hex')}`
     };
 
     // Update subagent's last action in state
-    subagent.lastAction = `Executando ${qhttpMethod} ${action} via API qhttp`;
+    subagent.lastAction = logs.length > 0 ? logs[logs.length - 1] : `Executando ${qhttpMethod} ${action} via API qhttp`;
+    subagent.status = 'active';
     broadcastState();
 
     res.json(response);
