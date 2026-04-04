@@ -1,5 +1,5 @@
-import { LucentCollector } from './packages/lucent-sdk/src/LucentCollector.ts';
-import { HydroUXCorrelator } from './packages/lucent-sdk/src/correlation/HydroUXCorrelator.ts';
+import { LucentCollector } from './packages/lucent-sdk/src/LucentCollector';
+import { HydroUXCorrelator } from './packages/lucent-sdk/src/correlation/HydroUXCorrelator';
 
 async function testLucent() {
   console.log("Starting Lucent Test...");

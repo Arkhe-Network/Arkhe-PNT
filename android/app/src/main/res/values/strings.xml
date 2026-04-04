@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">Arkhe-PNT</string>
+    <string name="title_activity_main">Arkhe-PNT</string>
+    <string name="package_name">network.arkhe.pnt</string>
+    <string name="custom_url_scheme">network.arkhe.pnt</string>
+</resources>

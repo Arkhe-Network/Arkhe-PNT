@@ -1,0 +1,6 @@
+{
+  "appId": "network.arkhe.pnt",
+  "appName": "Arkhe-PNT",
+  "webDir": "dist",
+  "bundledWebRuntime": false
+}

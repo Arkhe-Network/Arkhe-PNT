@@ -1,6 +1,6 @@
 {
-  "name": "react-example",
-  "private": true,
+  "name": "@arkhe-network/arkhe-pnt",
+  "private": false,
   "version": "1.0.1",
   "type": "module",
   "scripts": {
@@ -14,6 +14,10 @@
   },
   "dependencies": {
     "@base-ui/react": "^1.3.0",
+    "@capacitor/android": "^8.3.0",
+    "@capacitor/cli": "^8.3.0",
+    "@capacitor/core": "^8.3.0",
+    "@capacitor/ios": "^8.3.0",
     "@fontsource-variable/geist": "^5.2.8",
     "@google/genai": "^1.47.0",
     "@grpc/grpc-js": "^1.14.3",

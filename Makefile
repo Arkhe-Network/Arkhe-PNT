@@ -12,6 +12,58 @@ build-go:
 	mkdir -p build/bin
 	cd arkhe-sentinel && go build -o ../build/bin/arkhe-sentinel bot.go
 
+build-go-cross:
+	@echo "🜏 Cross-compiling Go for multiple platforms..."
+	mkdir -p build/bin
+	cd arkhe-sentinel && \
+		GOOS=linux GOARCH=amd64 go build -o ../build/bin/arkhe-sentinel-linux-amd64 bot.go && \
+		GOOS=windows GOARCH=amd64 go build -o ../build/bin/arkhe-sentinel-windows-amd64.exe bot.go && \
+		GOOS=darwin GOARCH=amd64 go build -o ../build/bin/arkhe-sentinel-macos-amd64 bot.go && \
+		GOOS=darwin GOARCH=arm64 go build -o ../build/bin/arkhe-sentinel-macos-arm64 bot.go
+
+build-python:
+	@echo "🜏 Preparing Python environments..."
+	mkdir -p build/python
+	pip install -r arkhe-oracle/requirements.txt
+	pip install -r arkhe-brain/requirements.txt
+	# Oracle and Brain are run as scripts, but we could pack them if needed
+	cp arkhe-oracle/sentinel.py build/python/arkhe-oracle.py
+	cp arkhe-brain/llm_service.py build/python/arkhe-brain.py
+
+build-python-cross:
+	@echo "🜏 Building Python executables with PyInstaller..."
+	pip install pyinstaller
+	pyinstaller --onefile arkhe-oracle/sentinel.py -n arkhe-oracle
+	pyinstaller --onefile arkhe-brain/llm_service.py -n arkhe-brain
+	pyinstaller --onefile presence_field_server.py -n presence-field-server
+	mkdir -p build/python
+	mv dist/* build/python/
+
+build-node:
+	@echo "🜏 Building Node/React Dashboard..."
+	npm install
+	npm run build
+	mkdir -p build/dashboard
+	cp -r dist/* build/dashboard/
+
+build-mobile:
+	@echo "🜏 Building for Android and iOS..."
+	npm install @capacitor/core @capacitor/cli @capacitor/android @capacitor/ios
+	npx cap add android
+	npx cap add ios
+	npx cap sync
+	# For Android APK
+	npx cap build android
+	# For iOS, requires Xcode on macOS
+	# npx cap build ios
+
+all: build test
+
+build-go:
+	@echo "🜏 Building Go components (Sentinel)..."
+	mkdir -p build/bin
+	cd arkhe-sentinel && go build -o ../build/bin/arkhe-sentinel bot.go
+
 build-python:
 	@echo "🜏 Preparing Python environments..."
 	mkdir -p build/python
