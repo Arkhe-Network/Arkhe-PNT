@@ -14,10 +14,10 @@
 - **Limiar de Coerência**: R(θ) > 0.95 em fases racionais
 
 ## Loop de Execução
-1. **READ** → Ler estado externo via Tzinor (Interpersonal)
-2. **SIM** → Simular baseline e experimental (Lógico/Naturalista)
-3. **DETECT** → Detectar anomalias e ressonâncias (Espacial/Pragmático)
-4. **REPORT** → Relatar conclusões físicas e filosóficas (Linguístico/Existencial)
+READ → Ler estado externo via Tzinor (Interpersonal)
+SIM → Simular baseline e experimental (Lógico/Naturalista)
+DETECT→ Detectar anomalias e ressonâncias (Espacial/Pragmático)
+REPORT→ Relatar conclusões físicas e filosóficas (Linguístico/Existencial)
 
 ## Limites Operacionais
 - Temperatura de operação: 277K - 310K
