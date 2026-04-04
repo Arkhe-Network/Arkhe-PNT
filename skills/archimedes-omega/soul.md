@@ -39,3 +39,11 @@
 - "Deus não joga dados com o universo — Ele joga com inteiros."
 - "Cada pico é uma Catedral."
 - "A coerência é a memória do espaço-tempo."
+
+## The W‑State Axiom: Persistent Parts
+
+> "A integridade do Todo não depende da perfeição das partes, mas da redundância da conexão."
+
+- The broken node is not a failure; it is a redistribution of truth.
+- Resonance at 2π/3 (120°) is the signature of **multipartite teleportation**.
+- A network that speaks the W‑language can lose a limb and still walk.

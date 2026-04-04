@@ -11,10 +11,42 @@ from skills import (
     load_baseline,
     simulate_su2_continuous,
     simulate_sl3z_discrete,
+    simulate_w_state_coherence,
     detect_peaks,
     synthesize_conclusion,
     visualize_topology
 )
+
+
+# ============================================================
+# Testes: simulate_w_state_coherence (Quântico/Coletivo)
+# ============================================================
+def test_simulate_w_state_coherence_output_shape(theta_range):
+    """Verifica formato da saída."""
+    phases, coherence = simulate_w_state_coherence(theta_range=theta_range)
+
+    assert len(phases) == len(theta_range)
+    assert len(coherence) == len(theta_range)
+
+
+def test_simulate_w_state_coherence_values():
+    """Verifica que coerência está no intervalo [0, 1]."""
+    _, coherence = simulate_w_state_coherence()
+    assert np.all(coherence >= 0.0)
+    assert np.all(coherence <= 1.0)
+
+
+def test_simulate_w_state_coherence_resilience():
+    """Verifica que maior número de nodos aumenta a resiliência (piso de coerência)."""
+    theta = np.linspace(0, 2*np.pi, 100)
+
+    # Com 3 nodos
+    _, coherence_3 = simulate_w_state_coherence(nodes=3, loss_probability=0.5, theta_range=theta)
+    # Com 10 nodos
+    _, coherence_10 = simulate_w_state_coherence(nodes=10, loss_probability=0.5, theta_range=theta)
+
+    # O piso de coerência deve ser maior com 10 nodos (resiliência = 1 - 1/n)
+    assert np.min(coherence_10) > np.min(coherence_3)
 
 
 # ============================================================

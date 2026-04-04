@@ -1,113 +1,598 @@
-openapi: 3.0.0
+openapi: 3.0.3
 info:
-  title: Archimedes-Ω Coherence Agent API
-  description: API for simulating, detecting, and analyzing quantum coherence in biological microtubules.
-  version: 1.0.0
+  title: Archimedes-Ω Agent API
+  description: |
+    API for the Archimedes-Ω coherence interrogation agent.
+    Provides endpoints for simulating quantum coherence under SU(2) (continuous),
+    SL(3,ℤ) (discrete), and W‑state (multipartite entanglement) models.
+    Detects resonance peaks and assesses teleportation readiness.
+    Includes therapeutic protocol optimization for combined LIPUS and quantum drug delivery.
+  version: 2.2.0
+  contact:
+    name: Arkhe Consortium
+    url: https://github.com/arkhe/archimedes-agent
+  license:
+    name: MIT
+    url: https://opensource.org/licenses/MIT
+
+servers:
+  - url: http://localhost:8080
+    description: Local development server
+  - url: https://api.arkhe.org/archimedes
+    description: Production server
+
+tags:
+  - name: simulation
+    description: Coherence model simulations
+  - name: detection
+    description: Peak detection and analysis
+  - name: analysis
+    description: Complete pipeline (simulation + detection + conclusion)
+  - name: teleportation
+    description: W‑state and teleportation resource assessment
+  - name: therapy
+    description: Therapeutic protocol optimization
+
 paths:
   /simulate/su2:
     post:
-      summary: Simulate continuous SU(2) coherence
+      summary: Simulate SU(2) continuous coherence
+      description: |
+        Generates coherence data following an exponential decay model
+        (continuous quantum decoherence). Optionally includes thermal noise.
+      operationId: simulateSU2
+      tags: [simulation]
       requestBody:
+        required: true
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/SimulationRequest'
+              $ref: '#/components/schemas/SU2Request'
       responses:
         '200':
           description: Successful simulation
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/SimulationResponse'
+                $ref: '#/components/schemas/CoherenceResponse'
+        '400':
+          description: Invalid request parameters
+        '500':
+          description: Internal server error
+
   /simulate/sl3z:
     post:
-      summary: Simulate discrete SL(3,ℤ) coherence
+      summary: Simulate SL(3,ℤ) discrete coherence
+      description: |
+        Generates coherence data with discrete resonance peaks at rational
+        angles (π/5, 2π/5, π/4, π/3, π/2). Implements the group structure
+        of SL(3,ℤ) with Fibonacci anyon braiding.
+      operationId: simulateSL3Z
+      tags: [simulation]
       requestBody:
+        required: true
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/SimulationRequest'
+              $ref: '#/components/schemas/SL3ZRequest'
       responses:
         '200':
           description: Successful simulation
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/SimulationResponse'
+                $ref: '#/components/schemas/CoherenceResponse'
+        '400':
+          description: Invalid request parameters
+        '500':
+          description: Internal server error
+
+  /simulate/wstate:
+    post:
+      summary: Simulate W‑state coherence (multipartite entanglement)
+      description: |
+        Generates coherence profile of a W‑state, which is robust against
+        particle loss. Characterized by a broad peak at 2π/3 (120°) and a
+        persistent coherence floor due to entanglement redundancy.
+      operationId: simulateWState
+      tags: [simulation]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/WStateRequest'
+      responses:
+        '200':
+          description: Successful simulation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CoherenceResponse'
+        '400':
+          description: Invalid request parameters
+        '500':
+          description: Internal server error
+
   /detect/peaks:
     post:
       summary: Detect coherence peaks
+      description: |
+        Identifies local maxima (peaks) in coherence data using a sliding‑window
+        algorithm with adaptive thresholding. Returns peak positions, coherence
+        values, and prominence, along with a flag indicating whether the peak
+        coincides with a rational resonance (π/5, 2π/5, π/4, π/3, π/2) or
+        the W‑state resonance (2π/3).
+      operationId: detectPeaks
+      tags: [detection]
       requestBody:
+        required: true
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/DetectionRequest'
+              $ref: '#/components/schemas/PeakDetectionRequest'
       responses:
         '200':
-          description: Successful peak detection
+          description: Peak detection results
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/DetectionResponse'
+                $ref: '#/components/schemas/PeakDetectionResponse'
+        '400':
+          description: Invalid input
+        '500':
+          description: Internal server error
+
   /analyze:
     post:
-      summary: Run full analysis pipeline
+      summary: Full analysis pipeline
+      description: |
+        Runs the complete interrogation pipeline:
+        - Generates data (simulated or uses provided experimental data)
+        - Detects peaks
+        - Synthesizes conclusion and philosophical interpretation
+      operationId: analyze
+      tags: [analysis]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AnalysisRequest'
       responses:
         '200':
-          description: Successful analysis
+          description: Analysis results
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/AnalysisResponse'
+        '400':
+          description: Invalid request
+        '500':
+          description: Internal server error
+
+  /analyze/teleportation-resource:
+    post:
+      summary: Assess teleportation resource (W‑state readiness)
+      description: |
+        Evaluates whether measured coherence matches a W‑state profile,
+        indicating that the system is ready for multipartite quantum teleportation.
+        Returns a robustness score and a verdict.
+      operationId: checkTeleportationResource
+      tags: [teleportation]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TeleportationRequest'
+      responses:
+        '200':
+          description: Teleportation resource assessment
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TeleportationResponse'
+        '400':
+          description: Invalid input
+        '500':
+          description: Internal server error
+
+  /therapy/combined-protocol:
+    post:
+      summary: Optimize combined LIPUS + quantum drug protocol
+      description: |
+        Calculates the optimal timing interval between LIPUS therapy and quantum
+        drug administration to maximize BBE permeability and clearance efficiency.
+        Uses a phase-coupled oscillator model with tissue state transitions.
+      operationId: optimizeCombinedProtocol
+      tags: [therapy]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CombinedProtocolRequest'
+      responses:
+        '200':
+          description: Optimized protocol result
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CombinedProtocolResponse'
+        '400':
+          description: Invalid input parameters
+        '500':
+          description: Internal server error
+
 components:
   schemas:
-    SimulationRequest:
+    SU2Request:
       type: object
       properties:
-        theta_start: {type: number, default: 0.0}
-        theta_end: {type: number, default: 6.28318}
-        points: {type: integer, default: 1000}
-        thermal_noise: {type: number, default: 0.05}
-        temperature: {type: number, default: 310.0}
+        theta_range:
+          type: array
+          description: Range of phases [start, end] in radians.
+          items:
+            type: number
+            format: double
+          minItems: 2
+          maxItems: 2
+          default: [0, 6.283185307179586]
+        num_points:
+          type: integer
+          description: Number of points to generate.
+          default: 1000
+          minimum: 10
+          maximum: 100000
+        thermal_noise:
+          type: number
+          format: double
+          description: Amplitude of thermal noise (0‑1).
+          default: 0.05
+          minimum: 0
+          maximum: 1
+        temperature:
+          type: number
+          format: double
+          description: Temperature in Kelvin.
+          default: 310
+          minimum: 0
+      required:
+        - theta_range
+        - num_points
+
+    SL3ZRequest:
+      type: object
+      properties:
+        theta_range:
+          type: array
+          items:
+            type: number
+            format: double
+          minItems: 2
+          maxItems: 2
+          default: [0, 6.283185307179586]
+        num_points:
+          type: integer
+          default: 1000
+          minimum: 10
+          maximum: 100000
         words:
           type: array
-          items: {type: string}
+          description: List of group words (generators) to include.
+          items:
+            type: string
           default: ["e", "a", "b", "ab", "ba", "aba"]
-    SimulationResponse:
+      required:
+        - theta_range
+        - num_points
+
+    WStateRequest:
       type: object
       properties:
-        phases: {type: array, items: {type: number}}
-        coherence: {type: array, items: {type: number}}
-    DetectionRequest:
+        nodes:
+          type: integer
+          description: Number of entangled parties.
+          default: 3
+          minimum: 3
+          maximum: 10
+        loss_probability:
+          type: number
+          format: double
+          description: Probability of losing a qubit (0‑1).
+          default: 0.2
+          minimum: 0
+          maximum: 1
+        theta_range:
+          type: array
+          items:
+            type: number
+            format: double
+          minItems: 2
+          maxItems: 2
+          default: [0, 6.283185307179586]
+        num_points:
+          type: integer
+          default: 1000
+          minimum: 10
+          maximum: 100000
+      required:
+        - nodes
+
+    CoherenceResponse:
       type: object
-      required: [phases, coherence]
       properties:
-        phases: {type: array, items: {type: number}}
-        coherence: {type: array, items: {type: number}}
-        threshold_multiplier: {type: number, default: 1.2}
-        min_prominence: {type: number, default: 0.05}
-    DetectionResponse:
+        phases:
+          type: array
+          items:
+            type: number
+            format: double
+        coherence:
+          type: array
+          items:
+            type: number
+            format: double
+      required:
+        - phases
+        - coherence
+
+    PeakDetectionRequest:
+      type: object
+      properties:
+        phases:
+          type: array
+          items:
+            type: number
+            format: double
+        coherence:
+          type: array
+          items:
+            type: number
+            format: double
+        threshold_multiplier:
+          type: number
+          default: 1.2
+          minimum: 0
+        min_prominence:
+          type: number
+          default: 0.05
+          minimum: 0
+      required:
+        - phases
+        - coherence
+
+    PeakInfo:
+      type: object
+      properties:
+        phase:
+          type: number
+          format: double
+        phase_degrees:
+          type: number
+          format: double
+        coherence:
+          type: number
+          format: double
+        prominence:
+          type: number
+          format: double
+        is_resonance:
+          type: boolean
+          description: True if peak coincides with π/5, 2π/5, π/4, π/3, π/2, or 2π/3.
+        index:
+          type: integer
+      required:
+        - phase
+        - coherence
+        - is_resonance
+
+    PeakDetectionResponse:
       type: object
       properties:
         peaks:
           type: array
           items:
-            type: object
-            properties:
-              phase: {type: number}
-              phase_degrees: {type: number}
-              coherence: {type: number}
-              is_resonance: {type: boolean}
+            $ref: '#/components/schemas/PeakInfo'
+      required:
+        - peaks
+
+    TeleportationRequest:
+      type: object
+      properties:
+        phases:
+          type: array
+          items:
+            type: number
+            format: double
+          description: Measured phase angles (radians)
+        coherence:
+          type: array
+          items:
+            type: number
+            format: double
+          description: Corresponding coherence values
+        nodes:
+          type: integer
+          default: 3
+          minimum: 3
+          description: Number of entangled parties (≥3)
+        loss_probability:
+          type: number
+          format: double
+          default: 0.2
+          minimum: 0
+          maximum: 1
+          description: Assumed particle loss probability
+      required:
+        - phases
+        - coherence
+
+    TeleportationResponse:
+      type: object
+      properties:
+        resource_type:
+          type: string
+          example: "W‑State"
+        teleportation_ready:
+          type: boolean
+          description: True if W‑state coherence is confirmed
+        robustness_score:
+          type: number
+          format: double
+          description: 0‑1 score of how well the data matches a W‑state
+        has_2pi3_resonance:
+          type: boolean
+          description: Whether a peak at 120° (2π/3) was detected
+        status:
+          type: string
+          enum: [W‑STATE_CONFIRMED, PARTIAL_W_STATE, NO_W_STATE]
+        interpretation:
+          type: string
+        philosophical_note:
+          type: string
+      required:
+        - resource_type
+        - teleportation_ready
+        - robustness_score
+        - status
+
+    CombinedProtocolRequest:
+      type: object
+      properties:
+        lipus:
+          type: object
+          properties:
+            intensity_mw_cm2: { type: number, format: double }
+            frequency_mhz: { type: number, format: double }
+            duration_minutes: { type: number, format: double }
+            mi: { type: number, format: double }
+          required: [intensity_mw_cm2, frequency_mhz, duration_minutes, mi]
+        drug:
+          type: object
+          properties:
+            particle_size_nm: { type: number, format: double }
+            surface_charge_mv: { type: number, format: double }
+            entanglement_degree: { type: number, format: double }
+            half_life_hours: { type: number, format: double }
+          required: [particle_size_nm, surface_charge_mv, entanglement_degree, half_life_hours]
+      required: [lipus, drug]
+
+    CombinedProtocolResponse:
+      type: object
+      properties:
+        optimal_interval_hours: { type: number, format: double }
+        predicted_absorption_efficiency: { type: number, format: double }
+        clearance_boost_factor: { type: number, format: double }
+        safety_margin: { type: number, format: double }
+        tissue_states:
+          type: array
+          items:
+            type: array
+            items: { oneOf: [{ type: number }, { type: string }] }
+        recommendation: { type: string }
+      required: [optimal_interval_hours, predicted_absorption_efficiency, clearance_boost_factor, recommendation]
+
+    AnalysisRequest:
+      type: object
+      properties:
+        data_source:
+          type: string
+          enum: [simulated, experimental]
+        su2_params:
+          $ref: '#/components/schemas/SU2Request'
+        sl3z_params:
+          $ref: '#/components/schemas/SL3ZRequest'
+        w_state_params:
+          $ref: '#/components/schemas/WStateRequest'
+        detection_params:
+          type: object
+          properties:
+            threshold_multiplier:
+              type: number
+              default: 1.2
+            min_prominence:
+              type: number
+              default: 0.05
+        experimental_data:
+          type: object
+          properties:
+            phases:
+              type: array
+              items:
+                type: number
+                format: double
+            coherence:
+              type: array
+              items:
+                type: number
+                format: double
+      required:
+        - data_source
+
+    Conclusion:
+      type: object
+      properties:
+        status:
+          type: string
+          enum: [DISCRETE_LATTICE_CONFIRMED, PARTIAL_SIGNAL, NO_SIGNAL, INCONCLUSIVE, W_STATE_CONFIRMED]
+        peaks_total:
+          type: integer
+        peaks_in_resonance:
+          type: integer
+        max_coherence:
+          type: number
+          format: double
+        interpretation:
+          type: string
+        philosophical_note:
+          type: string
+      required:
+        - status
+        - interpretation
+        - philosophical_note
+
     AnalysisResponse:
       type: object
       properties:
-        timestamp: {type: string}
-        data_source: {type: string}
-        peaks_detected: {type: array, items: {type: object}}
+        id:
+          type: string
+        timestamp:
+          type: string
+          format: date-time
+        data_source:
+          type: string
+        peaks:
+          type: array
+          items:
+            $ref: '#/components/schemas/PeakInfo'
         conclusion:
-          type: object
-          properties:
-            status: {type: string}
-            interpretation: {type: string}
-            philosophical_note: {type: string}
-        output_file: {type: string}
+          $ref: '#/components/schemas/Conclusion'
+        output_file:
+          type: string
+      required:
+        - timestamp
+        - peaks
+        - conclusion
+
+  examples:
+    SU2ResponseExample:
+      summary: SU(2) simulation output
+      value:
+        phases: [0, 0.0314, 0.0628, ...]
+        coherence: [0.98, 0.975, 0.97, ...]
+    WStateResponseExample:
+      summary: W‑state simulation output
+      value:
+        phases: [0, 0.0314, 0.0628, ...]
+        coherence: [0.4, 0.45, 0.5, ...]
+    TeleportationResponseExample:
+      summary: Teleportation resource assessment
+      value:
+        resource_type: "W‑State"
+        teleportation_ready: true
+        robustness_score: 0.86
+        has_2pi3_resonance: true
+        status: "W‑STATE_CONFIRMED"
+        interpretation: "Strong W‑state signature detected. Teleportation resource available."
+        philosophical_note: "A integridade do Todo não depende da perfeição das partes, mas da redundância da conexão."

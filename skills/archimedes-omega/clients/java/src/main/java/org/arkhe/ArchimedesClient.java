@@ -3,6 +3,9 @@ package org.arkhe;
 import okhttp3.*;
 import com.google.gson.Gson;
 import java.io.IOException;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 public class ArchimedesClient {
     private final OkHttpClient httpClient;
@@ -14,10 +17,12 @@ public class ArchimedesClient {
         this.httpClient = new OkHttpClient();
     }
 
-    public String analyze() throws IOException {
+    public String analyze(Object request) throws IOException {
+        String json = gson.toJson(request);
+        RequestBody body = RequestBody.create(json, MediaType.get("application/json"));
         Request httpRequest = new Request.Builder()
                 .url(baseUrl + "/analyze")
-                .post(RequestBody.create("", MediaType.parse("application/json")))
+                .post(body)
                 .build();
         try (Response response = httpClient.newCall(httpRequest).execute()) {
             if (!response.isSuccessful()) throw new IOException("Unexpected code " + response);
@@ -27,9 +32,84 @@ public class ArchimedesClient {
 
     public String simulateSU2(Object request) throws IOException {
         String json = gson.toJson(request);
-        RequestBody body = RequestBody.create(json, MediaType.parse("application/json"));
+        RequestBody body = RequestBody.create(json, MediaType.get("application/json"));
         Request httpRequest = new Request.Builder()
                 .url(baseUrl + "/simulate/su2")
+                .post(body)
+                .build();
+        try (Response response = httpClient.newCall(httpRequest).execute()) {
+            if (!response.isSuccessful()) throw new IOException("Unexpected code " + response);
+            return response.body().string();
+        }
+    }
+
+    public String simulateSL3Z(Object request) throws IOException {
+        String json = gson.toJson(request);
+        RequestBody body = RequestBody.create(json, MediaType.get("application/json"));
+        Request httpRequest = new Request.Builder()
+                .url(baseUrl + "/simulate/sl3z")
+                .post(body)
+                .build();
+        try (Response response = httpClient.newCall(httpRequest).execute()) {
+            if (!response.isSuccessful()) throw new IOException("Unexpected code " + response);
+            return response.body().string();
+        }
+    }
+
+    public String simulateWState(Object request) throws IOException {
+        String json = gson.toJson(request);
+        RequestBody body = RequestBody.create(json, MediaType.get("application/json"));
+        Request httpRequest = new Request.Builder()
+                .url(baseUrl + "/simulate/wstate")
+                .post(body)
+                .build();
+        try (Response response = httpClient.newCall(httpRequest).execute()) {
+            if (!response.isSuccessful()) throw new IOException("Unexpected code " + response);
+            return response.body().string();
+        }
+    }
+
+    public String detectPeaks(Object request) throws IOException {
+        String json = gson.toJson(request);
+        RequestBody body = RequestBody.create(json, MediaType.get("application/json"));
+        Request httpRequest = new Request.Builder()
+                .url(baseUrl + "/detect/peaks")
+                .post(body)
+                .build();
+        try (Response response = httpClient.newCall(httpRequest).execute()) {
+            if (!response.isSuccessful()) throw new IOException("Unexpected code " + response);
+            return response.body().string();
+        }
+    }
+
+    public String checkTeleportationResource(List<Double> phases, List<Double> coherence, int nodes, double lossProb) throws IOException {
+        Map<String, Object> payload = new HashMap<>();
+        payload.put("phases", phases);
+        payload.put("coherence", coherence);
+        payload.put("nodes", nodes);
+        payload.put("loss_probability", lossProb);
+
+        String json = gson.toJson(payload);
+        RequestBody body = RequestBody.create(json, MediaType.get("application/json"));
+        Request httpRequest = new Request.Builder()
+                .url(baseUrl + "/analyze/teleportation-resource")
+                .post(body)
+                .build();
+        try (Response response = httpClient.newCall(httpRequest).execute()) {
+            if (!response.isSuccessful()) throw new IOException("Unexpected code " + response);
+            return response.body().string();
+        }
+    }
+
+    public String optimizeCombinedProtocol(Object lipus, Object drug) throws IOException {
+        Map<String, Object> payload = new HashMap<>();
+        payload.put("lipus", lipus);
+        payload.put("drug", drug);
+
+        String json = gson.toJson(payload);
+        RequestBody body = RequestBody.create(json, MediaType.get("application/json"));
+        Request httpRequest = new Request.Builder()
+                .url(baseUrl + "/therapy/combined-protocol")
                 .post(body)
                 .build();
         try (Response response = httpClient.newCall(httpRequest).execute()) {
