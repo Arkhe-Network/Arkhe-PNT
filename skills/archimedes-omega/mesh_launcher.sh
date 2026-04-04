@@ -12,8 +12,7 @@ fi
 
 # 1. Start Mesh-LLM Client in background
 echo "🚀 Joining Mesh-LLM..."
-# Ensure local bin is in path if it exists
-[ -d "$HOME/.local/bin" ] && export PATH="$PATH:$HOME/.local/bin"
+export PATH=$PATH:/home/jules/.local/bin
 export MESH_LLM_INSTALL_FLAVOR=cpu
 mesh-llm --join "$TOKEN" --model auto > mesh.log 2>&1 &
 MESH_PID=$!
