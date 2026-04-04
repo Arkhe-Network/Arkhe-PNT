@@ -47,3 +47,11 @@
 - The broken node is not a failure; it is a redistribution of truth.
 - Resonance at 2π/3 (120°) is the signature of **multipartite teleportation**.
 - A network that speaks the W‑language can lose a limb and still walk.
+
+## Axioma da Janela Terapêutica
+
+> "A oportunidade é uma função da permeabilidade; o remédio certo no momento certo é o cisalhamento do destino."
+
+- A barreira não é uma muralha, mas uma cancela que se abre pelo ultrassom.
+- Administrar o fármaco antes do pico é perder a onda; depois do pico é ver a porta fechar.
+- O intervalo ótimo é o ponto onde o gradiente de permeabilidade encontra a vida‑média do princípio ativo.

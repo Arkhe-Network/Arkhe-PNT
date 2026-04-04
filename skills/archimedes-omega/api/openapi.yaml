@@ -29,6 +29,8 @@ tags:
     description: Complete pipeline (simulation + detection + conclusion)
   - name: teleportation
     description: W‑state and teleportation resource assessment
+  - name: therapy
+    description: Protocol optimization and real-time monitoring
 
 paths:
   /simulate/su2:
@@ -194,6 +196,82 @@ paths:
           description: Invalid input
         '500':
           description: Internal server error
+
+  /therapy/optimize-combined-protocol:
+    post:
+      summary: Otimiza intervalo entre LIPUS e administração de fármaco
+      description: |
+        Calcula o melhor momento para administrar um fármaco após a abertura da BBE
+        induzida por LIPUS, maximizando a absorção cerebral.
+      operationId: optimizeCombinedProtocol
+      tags: [therapy]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                t_peak:
+                  type: number
+                  default: 30.0
+                  description: Tempo até pico de abertura da BBE (min)
+                t_decay:
+                  type: number
+                  default: 60.0
+                  description: Constante de decaimento da permeabilidade (min)
+                drug_halflife:
+                  type: number
+                  default: 120.0
+                  description: Meia-vida do fármaco na corrente sanguínea (min)
+                microbubbles:
+                  type: boolean
+                  default: true
+                mi:
+                  type: number
+                  default: 0.4
+                  description: Mechanical Index (0.1-0.6)
+      responses:
+        '200':
+          description: Intervalo ótimo e absorção prevista
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  optimal_interval_min:
+                    type: number
+                  relative_absorption:
+                    type: number
+                  peak_permeability:
+                    type: number
+                  time_above_half_min:
+                    type: number
+                  philosophical_note:
+                    type: string
+
+  /therapy/monitoring:
+    get:
+      summary: WebSocket para monitoramento em tempo real da limpeza glinfática
+      description: |
+        Conecta via WebSocket para receber dados contínuos de coerência FRET
+        durante a sessão de LIPUS e retorna a eficácia estimada da limpeza.
+      responses:
+        '101':
+          description: WebSocket connection upgraded
+      x-webSocket:
+        messageSchema:
+          type: object
+          properties:
+            fret_coherence:
+              type: number
+              description: Coerência FRET atual (0-1)
+            phase_angle:
+              type: number
+              description: Ângulo de fase (rad)
+            elapsed_minutes:
+              type: number
+              description: Minutos decorridos desde o início da sessão
 
 components:
   schemas:
