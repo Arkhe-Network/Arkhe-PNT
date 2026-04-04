@@ -210,7 +210,8 @@ async def detect_peaks_endpoint(req: PeakDetectionRequest):
         np.array(req.coherence),
         np.array(req.phases),
         req.threshold_multiplier,
-        req.min_prominence
+        req.min_prominence,
+        req.energy_ev
     )
     return {"peaks": peaks}
 

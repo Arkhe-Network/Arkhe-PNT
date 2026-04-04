@@ -18,7 +18,10 @@ from skills import (
     visualize_topology,
     evaluate_eqbe_safety,
     optimize_lipus_drug_interval,
-    estimate_glymphatic_clearance
+    estimate_glymphatic_clearance,
+    rainbow_coherence,
+    simulate_rainbow_sl3z,
+    simulate_rainbow_w_state
 )
 
 
@@ -387,6 +390,43 @@ def test_estimate_glymphatic_clearance():
     )
     assert result_low["response_category"] == "BAIXA"
     assert result_low["glymphatic_clearance_efficiency"] < 0.3
+
+
+# ============================================================
+# Testes: Rainbow Coherence
+# ============================================================
+def test_rainbow_coherence():
+    """Verifica que a função rainbow_coherence produz picos centrados em pi/5."""
+    # Se energy_ev = 0, rainbow_factor = 1.0, pico deve estar em pi/5
+    val = rainbow_coherence(1.0, np.pi/5, 0.0)
+    assert val == 1.0
+
+    # Se energy_ev > 0, o ângulo físico que produz o pico deve mudar
+    # f(E) = 1 / (1 - E/0.041). Se E = 0.0205, f(E) = 2.0.
+    # effective_cartan = cartan_angle * 2.0.
+    # Para ser pi/5, cartan_angle deve ser pi/10.
+    val_shifted = rainbow_coherence(1.0, np.pi/10, 0.0205)
+    assert abs(val_shifted - 1.0) < 1e-3
+
+def test_detect_peaks_rainbow():
+    """Verifica se detect_peaks reconhece ressonâncias deslocadas."""
+    theta = np.linspace(0, 2*np.pi, 1000)
+
+    # Simula SL3Z com energy_ev = 0.0205 (rainbow_factor = 2.0)
+    # Pico nominal em pi/5 aparecerá em pi/10
+    energy = 0.0205
+    _, coherence = simulate_rainbow_sl3z(theta, energy_ev=energy, words=["a"])
+
+    # Detectar picos sem informar a energia (deve falhar em reconhecer ressonância em pi/10)
+    peaks_no_energy = detect_peaks(coherence, theta, threshold_multiplier=0.5)
+    assert len(peaks_no_energy) > 0
+    assert peaks_no_energy[0]['is_resonance'] is False
+
+    # Detectar picos informando a energia (deve reconhecer ressonância)
+    peaks_with_energy = detect_peaks(coherence, theta, threshold_multiplier=0.5, energy_ev=energy)
+    assert len(peaks_with_energy) > 0
+    assert peaks_with_energy[0]['is_resonance'] is True
+    assert peaks_with_energy[0]['rainbow_shift'] == 2.0
 
 
 # ============================================================
