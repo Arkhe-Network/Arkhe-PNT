@@ -10,6 +10,7 @@ import uuid
 from skills import (
     simulate_su2_continuous,
     simulate_sl3z_discrete,
+    simulate_fibonacci_braid,
     simulate_w_state_coherence,
     detect_peaks,
     synthesize_conclusion,
@@ -46,6 +47,19 @@ class WStateRequest(BaseModel):
     theta_range: List[float] = Field([0.0, 6.283185307179586], min_length=2, max_length=2)
     num_points: int = Field(1000, ge=10, le=100000)
 
+class FibonacciRequest(BaseModel):
+    dalpha: float = Field(0.0, description="Dipole reorientation (rad). Bound: 0.25° (0.00436 rad)")
+    epsilon: float = Field(0.0, description="Helical polarity asymmetry. Bound: 7.07e-3")
+    eta: float = Field(0.0, description="Relative phase locking (rad). Bound: 0.41° (0.00715 rad)")
+    lambda_param: float = Field(0.0, alias="lambda", description="Leakage amplitude. Bound: 0.01")
+
+class FibonacciResponse(BaseModel):
+    braid_fidelity: float
+    leakage_probability: float
+    gamma5: float
+    admissible: bool
+    recommendation: str
+
 class CoherenceResponse(BaseModel):
     phases: List[float]
     coherence: List[float]
@@ -62,6 +76,7 @@ class PeakInfo(BaseModel):
     coherence: float
     prominence: float
     is_resonance: bool
+    fivefold_deviation_rad: Optional[float] = None
     index: int
 
 class PeakDetectionResponse(BaseModel):
@@ -76,10 +91,11 @@ class AnalysisRequest(BaseModel):
     experimental_data: Optional[Dict[str, List[float]]] = None
 
 class Conclusion(BaseModel):
-    status: str = Field(..., description="W‑STATE_CONFIRMED, PARTIAL_W_STATE, NO_W_STATE, DISCRETE_LATTICE_CONFIRMED, PARTIAL_SIGNAL, NO_SIGNAL, INCONCLUSIVE")
+    status: str = Field(..., description="W‑STATE_CONFIRMED, PARTIAL_W_STATE, NO_W_STATE, DISCRETE_LATTICE_CONFIRMED, FIBONACCI_BRAID_CONFIRMED, PARTIAL_SIGNAL, NO_SIGNAL, INCONCLUSIVE")
     peaks_total: int
     peaks_in_resonance: int
     max_coherence: float
+    experimental_gamma5: Optional[float] = None
     interpretation: str
     philosophical_note: str
 
@@ -136,6 +152,19 @@ async def simulate_wstate(req: WStateRequest):
         theta_range=theta
     )
     return {"phases": phases.tolist(), "coherence": coherence.tolist()}
+
+@app.post("/simulate/fibonacci-braid", response_model=FibonacciResponse, tags=["simulation"])
+async def simulate_fibonacci(req: FibonacciRequest):
+    """
+    Real-time assessment of Fibonacci braid realization feasibility.
+    """
+    result = simulate_fibonacci_braid(
+        dalpha=req.dalpha,
+        epsilon=req.epsilon,
+        eta=req.eta,
+        lambda_=req.lambda_param
+    )
+    return result
 
 @app.post("/detect/peaks", response_model=PeakDetectionResponse, tags=["detection"])
 async def detect_peaks_endpoint(req: PeakDetectionRequest):
@@ -279,6 +308,9 @@ async def websocket_glymphatic_monitor(websocket: WebSocket):
         lipus_intensity = session_params.get("lipus_intensity_mw_cm2", 150.0)
         baseline_coherence = session_params.get("baseline_coherence", 0.3)
 
+        # Parâmetros Fibonacci (opcionais) para avaliação de trança em tempo real
+        fib_params = session_params.get("fibonacci_params", {})
+
         while True:
             # Recebe pacote com dados de coerência em tempo real
             data = await websocket.receive_json()
@@ -290,6 +322,7 @@ async def websocket_glymphatic_monitor(websocket: WebSocket):
                 await websocket.send_json({"error": "Missing fret_coherence"})
                 continue
 
+            # Estimativa de Limpeza
             result = estimate_glymphatic_clearance(
                 fret_coherence=fret_coherence,
                 phase_angle=phase_angle,
@@ -297,6 +330,17 @@ async def websocket_glymphatic_monitor(websocket: WebSocket):
                 elapsed_minutes=elapsed_minutes,
                 baseline_coherence=baseline_coherence
             )
+
+            # Se parâmetros de Fibonacci foram fornecidos, realiza avaliação de trança
+            if fib_params:
+                braid_eval = simulate_fibonacci_braid(
+                    dalpha=fib_params.get("dalpha", 0.0),
+                    epsilon=fib_params.get("epsilon", 0.0),
+                    eta=fib_params.get("eta", 0.0),
+                    lambda_=fib_params.get("lambda", 0.0)
+                )
+                result["fibonacci_braid_assessment"] = braid_eval
+
             await websocket.send_json(result)
 
     except WebSocketDisconnect:

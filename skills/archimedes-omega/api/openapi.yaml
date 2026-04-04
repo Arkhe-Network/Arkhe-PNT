@@ -113,6 +113,33 @@ paths:
         '500':
           description: Internal server error
 
+  /simulate/fibonacci-braid:
+    post:
+      summary: Assess Fibonacci braid realization feasibility
+      description: |
+        Simulates the realization of Fibonacci braids on the microtubule A‑lattice.
+        Evaluates logical gate fidelity and leakage based on dipole orientation,
+        helical asymmetry, and phase locking.
+      operationId: simulateFibonacciBraid
+      tags: [simulation]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/FibonacciRequest'
+      responses:
+        '200':
+          description: Braid simulation results
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FibonacciResponse'
+        '400':
+          description: Invalid parameters
+        '500':
+          description: Internal server error
+
   /detect/peaks:
     post:
       summary: Detect coherence peaks
@@ -256,6 +283,8 @@ paths:
       description: |
         Conecta via WebSocket para receber dados contínuos de coerência FRET
         durante a sessão de LIPUS e retorna a eficácia estimada da limpeza.
+        Opcionalmente, realiza avaliação de tranças de Fibonacci se 'fibonacci_params'
+        for enviado na mensagem inicial.
       responses:
         '101':
           description: WebSocket connection upgraded
@@ -272,6 +301,8 @@ paths:
             elapsed_minutes:
               type: number
               description: Minutos decorridos desde o início da sessão
+            fibonacci_braid_assessment:
+              $ref: '#/components/schemas/FibonacciResponse'
 
 components:
   schemas:
@@ -368,6 +399,53 @@ components:
       required:
         - nodes
 
+    FibonacciRequest:
+      type: object
+      properties:
+        dalpha:
+          type: number
+          format: double
+          description: Dipole reorientation (rad).
+          default: 0.0
+        epsilon:
+          type: number
+          format: double
+          description: Helical polarity asymmetry.
+          default: 0.0
+        eta:
+          type: number
+          format: double
+          description: Relative phase locking (rad).
+          default: 0.0
+        lambda:
+          type: number
+          format: double
+          description: Leakage amplitude.
+          default: 0.0
+
+    FibonacciResponse:
+      type: object
+      properties:
+        braid_fidelity:
+          type: number
+          format: double
+        leakage_probability:
+          type: number
+          format: double
+        gamma5:
+          type: number
+          format: double
+        admissible:
+          type: boolean
+        recommendation:
+          type: string
+      required:
+        - braid_fidelity
+        - leakage_probability
+        - gamma5
+        - admissible
+        - recommendation
+
     CoherenceResponse:
       type: object
       properties:
@@ -427,7 +505,11 @@ components:
           format: double
         is_resonance:
           type: boolean
-          description: True if peak coincides with π/5, 2π/5, π/4, π/3, π/2, or 2π/3.
+          description: True if peak coincides with a π/5 harmonic.
+        fivefold_deviation_rad:
+          type: number
+          format: double
+          description: Deviation from the nearest π/5 harmonic.
         index:
           type: integer
       required:
@@ -547,7 +629,7 @@ components:
       properties:
         status:
           type: string
-          enum: [DISCRETE_LATTICE_CONFIRMED, PARTIAL_SIGNAL, NO_SIGNAL, INCONCLUSIVE, W_STATE_CONFIRMED]
+          enum: [DISCRETE_LATTICE_CONFIRMED, PARTIAL_SIGNAL, NO_SIGNAL, INCONCLUSIVE, W_STATE_CONFIRMED, FIBONACCI_BRAID_CONFIRMED]
         peaks_total:
           type: integer
         peaks_in_resonance:
@@ -555,6 +637,10 @@ components:
         max_coherence:
           type: number
           format: double
+        experimental_gamma5:
+          type: number
+          format: double
+          description: Sum of squared phase deviations from π/5 harmonics.
         interpretation:
           type: string
         philosophical_note:

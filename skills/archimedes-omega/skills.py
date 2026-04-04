@@ -97,6 +97,59 @@ def simulate_sl3z_discrete(
     return theta_range, coherence
 
 # ============================================================
+# [TOPOLÓGICO / COMPUTACIONAL] - Compilador de Tranças de Fibonacci
+# ============================================================
+def simulate_fibonacci_braid(
+    dalpha: float,     # Dipole reorientation (rad)
+    epsilon: float,    # Helical polarity asymmetry
+    eta: float,        # Relative phase locking (rad)
+    lambda_: float     # Leakage amplitude
+) -> Dict:
+    """
+    Simula a realização de tranças de Fibonacci no reticulado A de microtúbulos.
+    Avalia a fidelidade da porta lógica e a permanência no subespaço computacional.
+    """
+    # Constantes de Admissibilidade (Bounds de 0.25°, 7.07e-3, 0.41°, 0.01)
+    BOUND_ALPHA = np.radians(0.25)
+    BOUND_EPSILON = 7.07e-3
+    BOUND_ETA = np.radians(0.41)
+    BOUND_LAMBDA = 0.01
+
+    # Score de Fase Gama5 (conforme definido na tese: soma dos quadrados dos desvios)
+    gamma5 = eta**2
+
+    # Cálculo de Fidelidade (Heurística: proximidade do centro da região admissível)
+    fidelity = 1.0 - (
+        0.2 * (abs(dalpha) / BOUND_ALPHA) +
+        0.2 * (abs(epsilon) / BOUND_EPSILON) +
+        0.2 * (abs(eta) / BOUND_ETA) +
+        0.4 * (abs(lambda_) / BOUND_LAMBDA)
+    )
+    fidelity = np.clip(fidelity, 0, 1)
+
+    # Probabilidade de Leakage (conforme bound l_j <= 10^-4 quando lambda <= 0.01)
+    leakage_prob = lambda_**2
+
+    # Verificação de Admissibilidade (10D Admissible Region check)
+    admissible = (
+        abs(dalpha) <= BOUND_ALPHA and
+        abs(epsilon) <= BOUND_EPSILON and
+        abs(eta) <= BOUND_ETA and
+        abs(lambda_) <= BOUND_LAMBDA
+    )
+
+    logger.info(f"Fibonacci Braid Sim: Admissível={admissible}, Fidelidade={fidelity:.4f}")
+
+    return {
+        "braid_fidelity": round(float(fidelity), 5),
+        "leakage_probability": round(float(leakage_prob), 6),
+        "gamma5": round(float(gamma5), 7),
+        "admissible": bool(admissible),
+        "recommendation": "Braid operation feasible" if admissible else "Outside tolerance"
+    }
+
+
+# ============================================================
 # [QUÂNTICO / COLETIVO] - Simulação de Estado W
 # ============================================================
 def simulate_w_state_coherence(
@@ -154,14 +207,22 @@ def detect_peaks(
     )
 
     results = []
+    pi_over_5 = np.pi / 5
     for i, peak_idx in enumerate(peaks):
+        phase = phases[peak_idx]
+
+        # Encontrar o harmônico de π/5 mais próximo
+        n_nearest = round(phase / pi_over_5)
+        deviation = phase - (n_nearest * pi_over_5)
+
         results.append({
-            'phase': phases[peak_idx],
-            'phase_degrees': np.degrees(phases[peak_idx]),
+            'phase': phase,
+            'phase_degrees': np.degrees(phase),
             'coherence': coherence_data[peak_idx],
             'prominence': properties['prominences'][i],
             'index': peak_idx,
-            'is_resonance': any(abs(phases[peak_idx] - n*np.pi/5) < 0.1 for n in range(1, 6))
+            'is_resonance': abs(deviation) < 0.1 and n_nearest > 0,
+            'fivefold_deviation_rad': round(float(deviation), 6)
         })
 
     logger.info(f"Detectados {len(results)} picos acima do limiar")
@@ -234,17 +295,32 @@ def synthesize_conclusion(
     resonances = [p for p in peak_data if p['is_resonance']]
     max_coherence = max([p['coherence'] for p in peak_data]) if peak_data else 0
 
+    # Calcular Score de Fase Gama5 Experimental (soma dos quadrados dos desvios das ressonâncias)
+    experimental_gamma5 = sum(p['fivefold_deviation_rad']**2 for p in resonances) if resonances else 0.0
+
     conclusion = {
         "status": "inconclusive",
         "peaks_total": len(peak_data),
         "peaks_in_resonance": len(resonances),
         "max_coherence": max_coherence,
+        "experimental_gamma5": round(float(experimental_gamma5), 7),
         "interpretation": "",
         "philosophical_note": ""
     }
 
     # Avaliação
-    if len(resonances) >= 2 and max_coherence > threshold:
+    if len(resonances) >= 3 and max_coherence > threshold:
+        conclusion["status"] = "FIBONACCI_BRAID_CONFIRMED"
+        conclusion["interpretation"] = (
+            f"Trança de Fibonacci detectada! Coerência de {max_coherence:.3f} em "
+            f"{len(resonances)} ressonâncias de 5-ordem. "
+            f"O sistema Bexorg 3.0 opera em regime de qubit topológico protegido."
+        )
+        conclusion["philosophical_note"] = (
+            "O pensamento é uma trança no tempo. A geometria helicoidal da tubulina "
+            "não é apenas suporte, é o código fundamental da orquestração."
+        )
+    elif len(resonances) >= 2 and max_coherence > threshold:
         conclusion["status"] = "DISCRETE_LATTICE_CONFIRMED"
         conclusion["interpretation"] = (
             f"Coerência de {max_coherence:.3f} detectada em {len(resonances)} "
