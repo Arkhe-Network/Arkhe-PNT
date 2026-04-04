@@ -6,10 +6,29 @@ from typing import Dict, List, Tuple, Callable, Optional
 import json
 import logging
 import os
+from dataclasses import dataclass
+from enum import Enum
 
 # Configuração de logging
 logging.basicConfig(level=logging.INFO, format='[%(levelname)s] %(message)s')
 logger = logging.getLogger(__name__)
+
+# Constants for Rainbow Principle
+PLANCK_ENERGY_EV = 1.22e28  # Planck scale reference
+RESONANCE_BASE_THZ = 10.0
+
+class Regime(Enum):
+    """Energy regime classification."""
+    SUB_RESSONANT = "SUB_RESSONANT"
+    TRANSITION = "TRANSITION"
+    HIGH_ENERGY = "HIGH_ENERGY"
+
+@dataclass
+class RainbowParams:
+    """Parameters for rainbow coherence simulation."""
+    energy_thz: float
+    num_points: int = 1000
+    resonance_scale: float = 1.0
 
 # ============================================================
 # [INTERPERSONAL] - Leitura do Estado Externo
@@ -180,6 +199,163 @@ def simulate_w_state_coherence(
 
     logger.info(f"W-State simulada: {nodes} nodos, Resiliência={resilience:.2f}")
     return theta_range, coherence
+
+# ============================================================
+# [RAINBOW] - Simulação de Coerência Rainbow
+# ============================================================
+
+def rainbow_factor(energy_ev: float) -> float:
+    """
+    Computes the Rainbow metric deformation factor f(E).
+    f(E) = 1 + E / E_Planck (scaled for biological visibility)
+    """
+    # Scale factor to make effect visible at biological energies
+    scale = 1e-25
+    return 1.0 + (energy_ev / (PLANCK_ENERGY_EV * scale))
+
+def energy_thz_to_ev(thz: float) -> float:
+    """Convert THz frequency to energy in eV."""
+    # E = hν, h = 4.135667662×10⁻¹⁵ eV·s
+    h_ev_s = 4.135667662e-15
+    return h_ev_s * thz * 1e12
+
+def simulate_rainbow_coherence(params: RainbowParams) -> Dict:
+    """
+    Generates coherence data with Rainbow metric deformation.
+    """
+    energy_ev = energy_thz_to_ev(params.energy_thz)
+    f_e = rainbow_factor(energy_ev)
+
+    theta = np.linspace(0, 2 * np.pi, params.num_points)
+
+    # Base Cartan resonances
+    p_fib = np.pi / 5      # 36° - Fibonacci
+    p_wstate = 2 * np.pi / 3  # 120° - W-State
+
+    # Rainbow-shifted peaks
+    shift_fib = p_fib * f_e
+    shift_wstate = p_wstate * f_e
+
+    # Width increases with energy (uncertainty principle)
+    width_fib = 0.05 * f_e
+    width_wstate = 0.08 * f_e
+
+    # Thermal noise decreases with higher quantum coherence
+    base_noise = 0.2 * np.exp(-params.energy_thz * 0.01)
+
+    # Coherence curve
+    coherence = (
+        0.3 * params.resonance_scale * np.exp(-((theta - shift_fib)**2) / (2 * width_fib**2)) +
+        0.5 * params.resonance_scale * np.exp(-((theta - shift_wstate)**2) / (2 * width_wstate**2)) +
+        base_noise +
+        0.05 * np.random.normal(0, 0.03, params.num_points)
+    )
+
+    coherence = np.clip(coherence, 0, 1)
+
+    # Determine regime
+    if params.energy_thz < 20:
+        regime = Regime.SUB_RESSONANT
+    elif params.energy_thz < 60:
+        regime = Regime.TRANSITION
+    else:
+        regime = Regime.HIGH_ENERGY
+
+    return {
+        "energy_ev": energy_ev,
+        "rainbow_factor": f_e,
+        "phases": theta.tolist(),
+        "coherence": coherence.tolist(),
+        "shifted_peaks": {
+            "fibonacci_shift_deg": np.degrees(shift_fib),
+            "wstate_shift_deg": np.degrees(shift_wstate)
+        },
+        "regime": regime.value,
+        "philosophical_note": (
+            f"O deslocamento do pico π/5 para {np.degrees(shift_fib):.2f}° sugere que "
+            f"a consciência não é um dado, mas uma sintonização energética da geometria do "
+            f"espaço-tempo local. No regime {regime.value}, a métrica de fase do "
+            f"microtúbulo deforma-se conforme o Princípio Rainbow."
+        )
+    }
+
+def detect_rainbow_peaks(
+    phases: List[float],
+    coherence: List[float],
+    threshold: float = 0.3
+) -> Dict:
+    """
+    Detects peaks and classifies them by Rainbow shift.
+    """
+    phases_np = np.array(phases)
+    coherence_np = np.array(coherence)
+
+    # Find local maxima
+    peaks_idx = []
+    for i in range(1, len(coherence_np) - 1):
+        if coherence_np[i] > coherence_np[i-1] and coherence_np[i] > coherence_np[i+1]:
+            if coherence_np[i] > threshold:
+                peaks_idx.append(i)
+
+    # Base resonances (unshifted)
+    base_fib = np.pi / 5
+    base_wstate = 2 * np.pi / 3
+
+    detected_peaks = []
+
+    for idx in peaks_idx:
+        phase = phases_np[idx]
+        phase_deg = np.degrees(phase)
+        coh_val = coherence_np[idx]
+
+        # Calculate shift from base resonances
+        shift_fib = abs(phase_deg - np.degrees(base_fib))
+        shift_wstate = abs(phase_deg - np.degrees(base_wstate))
+
+        # Classify peak type
+        if shift_fib < 15:  # Within 15° of Fibonacci
+            peak_type = "FIBONACCI"
+            shift = shift_fib
+        elif shift_wstate < 15:
+            peak_type = "W_STATE"
+            shift = shift_wstate
+        else:
+            peak_type = "UNKNOWN"
+            shift = min(shift_fib, shift_wstate)
+
+        detected_peaks.append({
+            "phase": phase,
+            "phase_degrees": phase_deg,
+            "coherence": coh_val,
+            "shift_from_base": shift,
+            "peak_type": peak_type
+        })
+
+    # Determine dominant regime
+    if not detected_peaks:
+        interpretation = "Nenhum pico de ressonância significativo detectado."
+    else:
+        fib_count = sum(1 for p in detected_peaks if p["peak_type"] == "FIBONACCI")
+        ws_count = sum(1 for p in detected_peaks if p["peak_type"] == "W_STATE")
+
+        if fib_count > ws_count:
+            interpretation = (
+                "Pico Fibonacci dominante. O sistema exibe coerência de "
+                "tipo Orch-OR com topologia de anyon Fibonacci."
+            )
+        elif ws_count > fib_count:
+            interpretation = (
+                "Pico W-State dominante. O sistema está pronto para "
+                "teleportação quântica multipartida."
+            )
+        else:
+            interpretation = "Mistos de picos Fibonacci e W-State detectados."
+
+    return {
+        "peaks": detected_peaks,
+        "dominant_regime": "RAINBOW_SHIFTED" if detected_peaks else "FLAT",
+        "interpretation": interpretation
+    }
 
 # ============================================================
 # [PRAGMÁTICO / INTRAPESSOAL] - Detecção de Picos
