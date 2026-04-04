@@ -12,10 +12,13 @@ from skills import (
     simulate_sl3z_discrete,
     simulate_fibonacci_braid,
     simulate_w_state_coherence,
+    simulate_rainbow_coherence,
+    detect_rainbow_peaks,
     detect_peaks,
     synthesize_conclusion,
     optimize_lipus_drug_interval,
-    estimate_glymphatic_clearance
+    estimate_glymphatic_clearance,
+    RainbowParams
 )
 
 # Logging configuration
@@ -25,7 +28,7 @@ logger = logging.getLogger(__name__)
 app = FastAPI(
     title="Archimedes-Ω Agent API",
     description="API for the Archimedes-Ω coherence interrogation agent.",
-    version="2.1.0"
+    version="2.5.0"
 )
 
 # --- Schemas ---
@@ -67,20 +70,42 @@ class CoherenceResponse(BaseModel):
 class PeakDetectionRequest(BaseModel):
     phases: List[float]
     coherence: List[float]
-    threshold_multiplier: float = 1.2
-    min_prominence: float = 0.05
+    threshold_multiplier: Optional[float] = 1.2
+    min_prominence: Optional[float] = 0.05
+    threshold: Optional[float] = 0.3 # For rainbow detection
 
 class PeakInfo(BaseModel):
     phase: float
     phase_degrees: float
     coherence: float
-    prominence: float
-    is_resonance: bool
+    prominence: Optional[float] = None
+    is_resonance: Optional[bool] = None
     fivefold_deviation_rad: Optional[float] = None
-    index: int
+    index: Optional[int] = None
+    shift_from_base: Optional[float] = None
+    peak_type: Optional[str] = None
 
 class PeakDetectionResponse(BaseModel):
     peaks: List[PeakInfo]
+
+class RainbowRequest(BaseModel):
+    energy_thz: float = Field(10.0, ge=1.0, le=1000.0)
+    num_points: int = Field(1000, ge=10)
+    resonance_scale: float = 1.0
+
+class RainbowResponse(BaseModel):
+    energy_ev: float
+    rainbow_factor: float
+    phases: List[float]
+    coherence: List[float]
+    shifted_peaks: Dict[str, float]
+    regime: str
+    philosophical_note: str
+
+class RainbowPeakResponse(BaseModel):
+    peaks: List[PeakInfo]
+    dominant_regime: str
+    interpretation: str
 
 class AnalysisRequest(BaseModel):
     data_source: str # simulated or experimental
@@ -166,6 +191,19 @@ async def simulate_fibonacci(req: FibonacciRequest):
     )
     return result
 
+@app.post("/simulate/rainbow-coherence", response_model=RainbowResponse, tags=["simulation"])
+async def simulate_rainbow(req: RainbowRequest):
+    """
+    Simulate Rainbow metric deformation based on probe energy.
+    """
+    params = RainbowParams(
+        energy_thz=req.energy_thz,
+        num_points=req.num_points,
+        resonance_scale=req.resonance_scale
+    )
+    result = simulate_rainbow_coherence(params)
+    return result
+
 @app.post("/detect/peaks", response_model=PeakDetectionResponse, tags=["detection"])
 async def detect_peaks_endpoint(req: PeakDetectionRequest):
     peaks = detect_peaks(
@@ -175,6 +213,19 @@ async def detect_peaks_endpoint(req: PeakDetectionRequest):
         req.min_prominence
     )
     return {"peaks": peaks}
+
+@app.post("/detect/rainbow-peaks", response_model=RainbowPeakResponse, tags=["detection"])
+async def detect_rainbow_peaks_endpoint(req: PeakDetectionRequest):
+    """
+    Identifies peaks in coherence data and classifies them according to
+    their shift from the base Cartan resonances (π/5, 2π/3).
+    """
+    result = detect_rainbow_peaks(
+        phases=req.phases,
+        coherence=req.coherence,
+        threshold=req.threshold or 0.3
+    )
+    return result
 
 @app.post("/analyze", response_model=AnalysisResponse, tags=["analysis"])
 async def analyze_endpoint(req: AnalysisRequest):
