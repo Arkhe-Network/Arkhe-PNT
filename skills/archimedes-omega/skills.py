@@ -1,15 +1,36 @@
 # skills.py - Módulos Callable do Agente Archimedes-Ω
 
 import numpy as np
-from scipy import signal
+from scipy import signal, integrate
 from typing import Dict, List, Tuple, Callable, Optional
 import json
 import logging
 import os
+from dataclasses import dataclass
+from enum import Enum
 
 # Configuração de logging
 logging.basicConfig(level=logging.INFO, format='[%(levelname)s] %(message)s')
 logger = logging.getLogger(__name__)
+
+# Constants for Rainbow Principle & Cartan Resonances
+PLANCK_ENERGY_EV = 1.22e28  # Planck scale reference
+RESONANCE_BASE_THZ = 10.0
+FIBONACCI_RESONANCE = np.pi / 5    # 36°
+WSTATE_RESONANCE = 2 * np.pi / 3    # 120°
+
+class Regime(Enum):
+    """Energy regime classification."""
+    SUB_RESSONANT = "SUB_RESSONANT"
+    TRANSITION = "TRANSITION"
+    HIGH_ENERGY = "HIGH_ENERGY"
+
+@dataclass
+class RainbowParams:
+    """Parameters for rainbow coherence simulation."""
+    energy_thz: float
+    num_points: int = 1000
+    resonance_scale: float = 1.0
 
 # ============================================================
 # [INTERPERSONAL] - Leitura do Estado Externo
@@ -182,6 +203,441 @@ def simulate_w_state_coherence(
     return theta_range, coherence
 
 # ============================================================
+# [RAINBOW] - Simulação de Coerência Rainbow
+# ============================================================
+
+def rainbow_factor(energy_ev: float) -> float:
+    """
+    Computes the Rainbow metric deformation factor f(E).
+    f(E) = 1 + E / E_Planck (scaled for biological visibility)
+    """
+    # Scale factor to make effect visible at biological energies
+    scale = 1e-25
+    return 1.0 + (energy_ev / (PLANCK_ENERGY_EV * scale))
+
+def energy_thz_to_ev(thz: float) -> float:
+    """Convert THz frequency to energy in eV."""
+    # E = hν, h = 4.135667662×10⁻¹⁵ eV·s
+    h_ev_s = 4.135667662e-15
+    return h_ev_s * thz * 1e12
+
+def simulate_rainbow_coherence(params: RainbowParams) -> Dict:
+    """
+    Generates coherence data with Rainbow metric deformation.
+    """
+    energy_ev = energy_thz_to_ev(params.energy_thz)
+    f_e = rainbow_factor(energy_ev)
+
+    theta = np.linspace(0, 2 * np.pi, params.num_points)
+
+    # Base Cartan resonances
+    p_fib = FIBONACCI_RESONANCE
+    p_wstate = WSTATE_RESONANCE
+
+    # Rainbow-shifted peaks
+    shift_fib = p_fib * f_e
+    shift_wstate = p_wstate * f_e
+
+    # Width increases with energy (uncertainty principle)
+    width_fib = 0.05 * f_e
+    width_wstate = 0.08 * f_e
+
+    # Thermal noise decreases with higher quantum coherence
+    base_noise = 0.2 * np.exp(-params.energy_thz * 0.01)
+
+    # Coherence curve
+    coherence = (
+        0.3 * params.resonance_scale * np.exp(-((theta - shift_fib)**2) / (2 * width_fib**2)) +
+        0.5 * params.resonance_scale * np.exp(-((theta - shift_wstate)**2) / (2 * width_wstate**2)) +
+        base_noise +
+        0.05 * np.random.normal(0, 0.03, params.num_points)
+    )
+
+    coherence = np.clip(coherence, 0, 1)
+
+    # Determine regime
+    if params.energy_thz < 20:
+        regime = Regime.SUB_RESSONANT
+    elif params.energy_thz < 60:
+        regime = Regime.TRANSITION
+    else:
+        regime = Regime.HIGH_ENERGY
+
+    return {
+        "energy_ev": energy_ev,
+        "rainbow_factor": f_e,
+        "phases": theta.tolist(),
+        "coherence": coherence.tolist(),
+        "shifted_peaks": {
+            "fibonacci_shift_deg": np.degrees(shift_fib),
+            "wstate_shift_deg": np.degrees(shift_wstate)
+        },
+        "regime": regime.value,
+        "philosophical_note": (
+            f"O deslocamento do pico π/5 para {np.degrees(shift_fib):.2f}° sugere que "
+            f"a consciência não é um dado, mas uma sintonização energética da geometria do "
+            f"espaço-tempo local. No regime {regime.value}, a métrica de fase do "
+            f"microtúbulo deforma-se conforme o Princípio Rainbow."
+        )
+    }
+
+def detect_rainbow_peaks(
+    phases: List[float],
+    coherence: List[float],
+    threshold: float = 0.3
+) -> Dict:
+    """
+    Detects peaks and classifies them by Rainbow shift.
+    """
+    phases_np = np.array(phases)
+    coherence_np = np.array(coherence)
+
+    # Find local maxima
+    peaks_idx = []
+    for i in range(1, len(coherence_np) - 1):
+        if coherence_np[i] > coherence_np[i-1] and coherence_np[i] > coherence_np[i+1]:
+            if coherence_np[i] > threshold:
+                peaks_idx.append(i)
+
+    # Base resonances (unshifted)
+    base_fib = FIBONACCI_RESONANCE
+    base_wstate = WSTATE_RESONANCE
+
+    detected_peaks = []
+
+    for idx in peaks_idx:
+        phase = phases_np[idx]
+        phase_deg = np.degrees(phase)
+        coh_val = coherence_np[idx]
+
+        # Calculate shift from base resonances
+        shift_fib = abs(phase_deg - np.degrees(base_fib))
+        shift_wstate = abs(phase_deg - np.degrees(base_wstate))
+
+        # Classify peak type
+        if shift_fib < 15:  # Within 15° of Fibonacci
+            peak_type = "FIBONACCI"
+            shift = shift_fib
+        elif shift_wstate < 15:
+            peak_type = "W_STATE"
+            shift = shift_wstate
+        else:
+            peak_type = "UNKNOWN"
+            shift = min(shift_fib, shift_wstate)
+
+        detected_peaks.append({
+            "phase": phase,
+            "phase_degrees": phase_deg,
+            "coherence": coh_val,
+            "shift_from_base": shift,
+            "peak_type": peak_type
+        })
+
+    # Determine dominant regime
+    if not detected_peaks:
+        interpretation = "Nenhum pico de ressonância significativo detectado."
+    else:
+        fib_count = sum(1 for p in detected_peaks if p["peak_type"] == "FIBONACCI")
+        ws_count = sum(1 for p in detected_peaks if p["peak_type"] == "W_STATE")
+
+        if fib_count > ws_count:
+            interpretation = (
+                "Pico Fibonacci dominante. O sistema exibe coerência de "
+                "tipo Orch-OR com topologia de anyon Fibonacci."
+            )
+        elif ws_count > fib_count:
+            interpretation = (
+                "Pico W-State dominante. O sistema está pronto para "
+                "teleportação quântica multipartida."
+            )
+        else:
+            interpretation = "Mistos de picos Fibonacci e W-State detectados."
+
+    return {
+        "peaks": detected_peaks,
+        "dominant_regime": "RAINBOW_SHIFTED" if detected_peaks else "FLAT",
+        "interpretation": interpretation
+    }
+
+# ============================================================
+# [SYNC] - Sincronização de Kuramoto (Coerência Coletiva)
+# ============================================================
+
+@dataclass
+class KuramotoParams:
+    """Parameters for Kuramoto synchronization."""
+    nodes: List[Dict]  # [{"phase": float, "natural_freq": float, "weight": float}]
+    coupling_K: float = 1.0
+    time_horizon: float = 10.0
+    dt: float = 0.01
+    fusion_threshold: float = 0.95
+    stabilization_time: float = 0.5
+    enable_rainbow_resonance: bool = False
+
+def kuramoto_ode(t: float, theta: np.ndarray, omega: np.ndarray, K: float, weights: np.ndarray) -> np.ndarray:
+    """
+    Derivative of the Kuramoto system.
+    dθ_i/dt = ω_i + (K/N) Σ w_j * sin(θ_j - θ_i) / Σ w_j
+    """
+    N = len(theta)
+    total_weight = np.sum(weights)
+    dtheta = np.zeros(N)
+    for i in range(N):
+        sin_sum = np.sum(weights * np.sin(theta - theta[i]))
+        dtheta[i] = omega[i] + (K / total_weight) * sin_sum
+    return dtheta
+
+def compute_order_parameter(theta: np.ndarray, weights: np.ndarray) -> Tuple[float, float]:
+    """Computes global order parameter R and collective phase Φ."""
+    complex_sum = np.sum(weights * np.exp(1j * theta))
+    total_weight = np.sum(weights)
+    R = np.abs(complex_sum) / total_weight
+    Phi = np.angle(complex_sum)
+    return R, Phi
+
+def check_rainbow_resonance(theta: np.ndarray, weights: np.ndarray) -> Dict:
+    """Checks if the collective phase is near Cartan resonances."""
+    _, Phi = compute_order_parameter(theta, weights)
+    # Check Fibonacci resonance (π/5 ≈ 36°)
+    fib_diff = abs(Phi - FIBONACCI_RESONANCE)
+    fib_resonant = fib_diff < 0.15
+    # Check W-State resonance (2π/3 ≈ 120°)
+    wstate_diff = abs(Phi - WSTATE_RESONANCE)
+    wstate_resonant = wstate_diff < 0.15
+    # Alignment score
+    min_diff = min(fib_diff, wstate_diff, abs(Phi), abs(Phi - 2*np.pi))
+    alignment_score = max(0, 1 - min_diff / 0.5)
+    return {
+        "fibonacci_resonant": fib_resonant,
+        "wstate_resonant": wstate_resonant,
+        "alignment_score": round(alignment_score, 3),
+        "collective_phase_deg": float(np.degrees(Phi))
+    }
+
+def simulate_collective_coherence(params: KuramotoParams) -> Dict:
+    """Main simulation for collective phase fusion (v4.0.0)."""
+    N = len(params.nodes)
+    theta0 = np.array([n["phase"] for n in params.nodes])
+    omega = np.array([n["natural_freq"] for n in params.nodes])
+    weights = np.array([n.get("weight", 1.0) for n in params.nodes])
+
+    t_span = (0, params.time_horizon)
+    t_eval = np.arange(0, params.time_horizon, params.dt)
+
+    sol = integrate.solve_ivp(
+        lambda t, y: kuramoto_ode(t, y, omega, params.coupling_K, weights),
+        t_span, theta0, t_eval=t_eval, method='RK45'
+    )
+
+    if not sol.success:
+        return {"error": f"Integration failed: {sol.message}"}
+
+    trajectory_R = []
+    trajectory_phases = sol.y.T
+    for theta in trajectory_phases:
+        R, _ = compute_order_parameter(theta, weights)
+        trajectory_R.append(float(R))
+
+    trajectory_R = np.array(trajectory_R)
+    t = sol.t
+    is_fused = False
+    time_to_fusion = None
+    above_threshold_idx = np.where(trajectory_R >= params.fusion_threshold)[0]
+
+    if len(above_threshold_idx) > 0:
+        for idx in above_threshold_idx:
+            t_start = t[idx]
+            t_end = t_start + params.stabilization_time
+            if t_end > t[-1]: break
+            mask = (t >= t_start) & (t <= t_end)
+            if np.all(trajectory_R[mask] >= params.fusion_threshold):
+                is_fused = True
+                time_to_fusion = float(t_start)
+                break
+
+    final_theta = trajectory_phases[-1]
+    final_R, final_phase = compute_order_parameter(final_theta, weights)
+
+    resonance = check_rainbow_resonance(final_theta, weights) if params.enable_rainbow_resonance else {
+        "fibonacci_resonant": False, "wstate_resonant": False, "alignment_score": 0.0, "collective_phase_deg": float(np.degrees(final_phase))
+    }
+
+    if is_fused:
+        interpretation = f"Fusão de fases alcançada em {time_to_fusion:.2f}s. R = {final_R:.3f}. Φ = {np.degrees(final_phase):.1f}°. Os {N} nós formam um coletivo coerente."
+        note = "A consciência coletiva emerge quando as fases individuais se sincronizam. O coro se torna um único acorde."
+    else:
+        max_R = np.max(trajectory_R)
+        interpretation = f"Fusão quase alcançada (R_max = {max_R:.3f})." if max_R >= params.fusion_threshold * 0.9 else f"Fusão não alcançada. R final = {final_R:.3f}."
+        note = "A dessincronização é a norma. Cada nó mantém sua fase, e o coletivo permanece fragmentado."
+
+    if resonance["alignment_score"] > 0.7:
+        note += f" A fase coletiva de {resonance['collective_phase_deg']:.1f}° {'resoa com Fibonacci' if resonance['fibonacci_resonant'] else 'resoa com W-State' if resonance['wstate_resonant'] else 'aproxima-se de uma ressonância de Cartan'}."
+
+    return {
+        "final_R": round(float(final_R), 4),
+        "final_phase": round(float(final_phase), 4),
+        "is_fused": is_fused,
+        "time_to_fusion": round(time_to_fusion, 3) if time_to_fusion else None,
+        "trajectory_R": trajectory_R.tolist() if len(trajectory_R) <= 500 else trajectory_R[::len(trajectory_R)//500].tolist(),
+        "trajectory_phases": final_theta.tolist(),
+        "resonance_status": resonance,
+        "interpretation": interpretation,
+        "philosophical_note": note
+    }
+
+def optimize_coupling(params: KuramotoParams, K_range: Tuple[float, float] = (0.1, 10.0)) -> Dict:
+    """Finds optimal coupling constant K for fastest fusion."""
+    K_values = np.linspace(K_range[0], K_range[1], 50)
+    fusion_times = []
+    for K in K_values:
+        test_params = KuramotoParams(nodes=params.nodes, coupling_K=float(K), time_horizon=params.time_horizon, dt=params.dt, fusion_threshold=params.fusion_threshold, stabilization_time=params.stabilization_time)
+        result = simulate_collective_coherence(test_params)
+        fusion_times.append(result["time_to_fusion"] if result["is_fused"] else float('inf'))
+    min_idx = np.argmin(fusion_times)
+    optimal_K = float(K_values[min_idx])
+    optimal_time = fusion_times[min_idx]
+    return {
+        "optimal_K": round(optimal_K, 2),
+        "fusion_time_at_optimal": round(float(optimal_time), 3) if optimal_time != float('inf') else None,
+        "K_vs_fusion_time": [{"K": round(float(k), 2), "fusion_time": round(float(t), 3) if t != float('inf') else None} for k, t in zip(K_values, fusion_times)]
+    }
+
+# ============================================================
+# [XENO] - Xenoatualização (Zeno Dynamics)
+# ============================================================
+
+class DomainType(Enum):
+    """Three-reality classification."""
+    HYPO = "HYPO"           # Pure ℂ, unobserved potential
+    CONSENSUS = "CONSENSUS"  # Incoherent ℤ, low coherence
+    XENO = "XENO"          # τ-collapse, Zeno-stabilized
+
+@dataclass
+class XenoParams:
+    """Input parameters for xenoactualization simulation."""
+    coherence_profile: List[float]
+    blueprint_complexity: float
+    measurement_rate: float = 1.0
+    tau_field_strength: float = 0.5
+
+def compute_zeno_suppression(measurement_rate: float) -> float:
+    """Computes Zeno suppression factor."""
+    return 1.0 - np.exp(-measurement_rate)
+
+def compute_complexity_penalty(complexity: float) -> float:
+    """Blueprint complexity increases chance of deviation."""
+    return 1.0 - np.exp(-complexity / 10.0)
+
+def compute_collapse_time(mean_coherence: float, tau_strength: float, complexity: float) -> float:
+    """Estimates τ-collapse time."""
+    base_time = 10.0
+    coherence_factor = max(mean_coherence, 0.01) ** 2
+    tau_factor = max(tau_strength, 0.01)
+    complexity_factor = 1.0 + (complexity / 10.0)
+    return base_time / (coherence_factor * tau_factor * complexity_factor)
+
+def compute_stability(coherence_profile: List[float], measurement_rate: float, complexity: float) -> float:
+    """Predicts long-term stability."""
+    coherence_arr = np.array(coherence_profile)
+    coherence_std = np.std(coherence_arr)
+    stability_from_coherence = 1.0 - min(coherence_std * 2, 1.0)
+    zeno = compute_zeno_suppression(measurement_rate)
+    penalty = compute_complexity_penalty(complexity)
+    stability = stability_from_coherence * zeno * (1.0 - 0.3 * penalty)
+    return float(np.clip(stability, 0, 1))
+
+def simulate_xenoactualization(params: XenoParams) -> Dict:
+    """Main simulation for xenoactualization fidelity."""
+    coherence_arr = np.array(params.coherence_profile)
+    mean_coherence = np.mean(coherence_arr)
+    zeno_suppression = compute_zeno_suppression(params.measurement_rate)
+    complexity_penalty = compute_complexity_penalty(params.blueprint_complexity)
+
+    fidelity = float(mean_coherence * zeno_suppression * np.exp(-complexity_penalty))
+    fidelity = min(fidelity, 1.0)
+
+    stability = compute_stability(params.coherence_profile, params.measurement_rate, params.blueprint_complexity)
+    collapse_time = compute_collapse_time(mean_coherence, params.tau_field_strength, params.blueprint_complexity)
+
+    # Domain classification
+    if fidelity >= 0.8 and zeno_suppression >= 0.5:
+        domain = DomainType.XENO
+    elif fidelity >= 0.4 or mean_coherence >= 0.5:
+        domain = DomainType.CONSENSUS
+    else:
+        domain = DomainType.HYPO
+
+    if domain == DomainType.XENO:
+        recommendation = (
+            "✅ Xenoatualização viável. Estrutura virtual colapsará em "
+            f"≈{collapse_time:.1f}s com fidelidade {fidelity:.1%}. "
+            "O campo τ está suficientemente alinhado."
+        )
+    elif domain == DomainType.CONSENSUS:
+        recommendation = (
+            "⚠️ Domínio de consenso. A estrutura requer mais medições "
+            f"({params.measurement_rate * 2:.1f} checks/s) ou maior coerência "
+            f"({mean_coherence:.1%} atual) para xenoatualização completa."
+        )
+    else:
+        recommendation = (
+            "❌ Hipótese pura. Coerência insuficiente para colapso. "
+            "A estrutura permanece no domínio virtual ℂ."
+        )
+
+    philosophical = (
+        f"Como o efeito Zeno congela um estado quântico sob observação frequente, "
+        f"os {params.measurement_rate:.1f} atuadores/m² mantêm a intenção "
+        f"do blueprint alinhada. Com fidelidade {fidelity:.1%}, o parque não é "
+        "construído — é colapsado da possibilidade em realidade."
+    )
+
+    return {
+        "fidelity": round(fidelity, 4),
+        "zeno_suppression": round(float(zeno_suppression), 4),
+        "coherence_factor": round(float(mean_coherence), 4),
+        "complexity_penalty": round(float(complexity_penalty), 4),
+        "stability_score": round(float(stability), 4),
+        "collapse_time_estimate": round(float(collapse_time), 2),
+        "domain_result": domain.value,
+        "recommendation": recommendation,
+        "philosophical_note": philosophical
+    }
+
+def scan_optimal_measurement_rate(
+    coherence_profile: List[float],
+    blueprint_complexity: float,
+    tau_strength: float = 0.5,
+    rate_range: tuple = (0.1, 20.0)
+) -> Dict:
+    """Scans measurement rate to find optimal."""
+    rates = np.linspace(rate_range[0], rate_range[1], 100)
+    fidelities = []
+
+    for rate in rates:
+        params = XenoParams(
+            coherence_profile=coherence_profile,
+            blueprint_complexity=blueprint_complexity,
+            measurement_rate=float(rate),
+            tau_field_strength=tau_strength
+        )
+        result = simulate_xenoactualization(params)
+        fidelities.append(result["fidelity"])
+
+    best_idx = np.argmax(fidelities)
+    optimal_rate = float(rates[best_idx])
+    max_fidelity = float(fidelities[best_idx])
+
+    return {
+        "optimal_measurement_rate": round(optimal_rate, 2),
+        "max_fidelity_at_optimal": round(max_fidelity, 4),
+        "fidelity_curve": [
+            {"rate": round(float(r), 2), "fidelity": round(float(f), 4)}
+            for r, f in zip(rates, fidelities)
+        ]
+    }
+
+# ============================================================
 # [PRAGMÁTICO / INTRAPESSOAL] - Detecção de Picos
 # ============================================================
 def detect_peaks(
@@ -207,7 +663,7 @@ def detect_peaks(
     )
 
     results = []
-    pi_over_5 = np.pi / 5
+    pi_over_5 = FIBONACCI_RESONANCE
     for i, peak_idx in enumerate(peaks):
         phase = phases[peak_idx]
 
