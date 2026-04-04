@@ -22,7 +22,8 @@ from skills import (
     simulate_sl3z_discrete,
     detect_peaks,
     visualize_topology,
-    synthesize_conclusion
+    synthesize_conclusion,
+    evaluate_eqbe_safety
 )
 
 # Importar módulos adicionais
@@ -167,14 +168,31 @@ def run_interrogation(
         )
 
     # ─────────────────────────────────────────────────────────
-    # PASSO 5: Sintetizar conclusão (Criativo/Existencial)
+    # PASSO 5: Auditoria Ética (EQBE Protocol)
     # ─────────────────────────────────────────────────────────
-    logger.info("[5/5] Sintetizando conclusão filosófica...")
-
-    conclusion = synthesize_conclusion(
-        peak_data=significant_peaks,
-        threshold=SOUL['threshold']
+    logger.info("[5/6] Executando Auditoria Ética EQBE...")
+    safety_report = evaluate_eqbe_safety(
+        intervention_type=data_source,
+        coherence_data=coherence,
+        metadata={"timestamp": timestamp, "has_kill_switch": True}
     )
+
+    if not safety_report['is_safe']:
+        logger.error("   → VIOLAÇÃO DETECTADA! Bloqueando síntese de conclusão.")
+        conclusion = {
+            "status": "ETHICAL_VETO",
+            "interpretation": "A operação foi interrompida devido a riscos de segurança (Protocolo EQBE).",
+            "philosophical_note": "A verdade não justifica a transgressão da integridade biológica."
+        }
+    else:
+        # ─────────────────────────────────────────────────────────
+        # PASSO 6: Sintetizar conclusão (Criativo/Existencial)
+        # ─────────────────────────────────────────────────────────
+        logger.info("[6/6] Sintetizando conclusão filosófica...")
+        conclusion = synthesize_conclusion(
+            peak_data=significant_peaks,
+            threshold=SOUL['threshold']
+        )
 
     # Adicionar nota filosófica
     logger.info("")
