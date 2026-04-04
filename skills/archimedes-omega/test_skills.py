@@ -15,7 +15,9 @@ from skills import (
     detect_peaks,
     synthesize_conclusion,
     visualize_topology,
-    evaluate_eqbe_safety
+    evaluate_eqbe_safety,
+    optimize_lipus_drug_interval,
+    estimate_glymphatic_clearance
 )
 
 
@@ -295,6 +297,53 @@ def test_visualize_topology_creates_file(temp_dir):
 
     assert output_file.exists()
     assert result == str(output_file)
+
+
+# ============================================================
+# Testes: optimize_lipus_drug_interval
+# ============================================================
+def test_optimize_lipus_drug_interval():
+    """Verifica se a otimização retorna valores coerentes."""
+    result = optimize_lipus_drug_interval(
+        t_peak=30.0,
+        t_decay=60.0,
+        drug_halflife=120.0,
+        microbubbles=True,
+        mi=0.4
+    )
+
+    assert "optimal_interval_min" in result
+    assert "relative_absorption" in result
+    assert result["optimal_interval_min"] > 0
+    assert 0 <= result["relative_absorption"] <= 1.0
+
+
+# ============================================================
+# Testes: estimate_glymphatic_clearance
+# ============================================================
+def test_estimate_glymphatic_clearance():
+    """Verifica estimativa de limpeza glinfática."""
+    # Cenário de alta eficiência
+    result_high = estimate_glymphatic_clearance(
+        fret_coherence=0.9,
+        phase_angle=0.0,
+        lipus_intensity_mw_cm2=200.0,
+        elapsed_minutes=60.0,
+        baseline_coherence=0.3
+    )
+    assert result_high["response_category"] == "OTIMA"
+    assert result_high["glymphatic_clearance_efficiency"] > 0.5
+
+    # Cenário de baixa eficiência
+    result_low = estimate_glymphatic_clearance(
+        fret_coherence=0.35,
+        phase_angle=0.0,
+        lipus_intensity_mw_cm2=50.0,
+        elapsed_minutes=5.0,
+        baseline_coherence=0.3
+    )
+    assert result_low["response_category"] == "BAIXA"
+    assert result_low["glymphatic_clearance_efficiency"] < 0.3
 
 
 # ============================================================

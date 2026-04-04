@@ -321,3 +321,139 @@ def evaluate_eqbe_safety(
         logger.info("🜏 [EQBE] Auditoria de Segurança concluída com sucesso.")
 
     return safety_report
+
+
+# ============================================================
+# [CLÍNICO / OTIMIZAÇÃO] - Protocolo Combinado LIPUS + Fármaco
+# ============================================================
+def optimize_lipus_drug_interval(
+    t_peak: float = 30.0,          # minutos para pico de abertura da BBE
+    t_decay: float = 60.0,         # minutos para decaimento da permeabilidade (meia-vida)
+    drug_halflife: float = 120.0,  # minutos (meia-vida do fármaco)
+    microbubbles: bool = True,
+    mi: float = 0.4,
+    time_window: Tuple[float, float] = (0, 240)  # janela de análise (min)
+) -> Dict:
+    """
+    Calcula o intervalo ótimo entre LIPUS e administração do fármaco
+    para maximizar a absorção cumulativa (AUC).
+
+    Returns:
+        dicionário com:
+        - optimal_interval_min: tempo (min) após LIPUS para administrar o fármaco
+        - relative_absorption: fração da dose que será absorvida (0-1)
+        - peak_permeability: permeabilidade máxima (unidades arbitrárias)
+        - time_above_half: duração da janela com permeabilidade > 50% do pico
+    """
+    from scipy.optimize import minimize_scalar
+
+    # Modelo de permeabilidade da BBE: rápido aumento, decaimento exponencial
+    # Baseado em dados de abertura induzida por ultrassom + microbolhas
+    def permeability(t):
+        # t em minutos após LIPUS
+        if t < 0:
+            return 0.0
+        # Subida sigmoide até o pico
+        rise = 1.0 / (1.0 + np.exp(-(t - t_peak/2) / (t_peak/4)))
+        # Decaimento exponencial após o pico
+        decay = np.exp(-np.maximum(0, t - t_peak) / t_decay)
+        return rise * decay * (1.5 if microbubbles else 1.0) * (mi / 0.4)
+
+    # Cinética do fármaco no sangue (assumimos administração intravenosa)
+    # Concentração normalizada: C(t) = exp(-ln2 * t / drug_halflife)
+    def drug_concentration(t, admin_time):
+        tau = t - admin_time
+        if tau < 0:
+            return 0.0
+        return np.exp(-np.log(2) * tau / drug_halflife)
+
+    # Absorção cerebral: integral (permeabilidade * concentração) dt
+    def absorption(admin_time):
+        t_grid = np.linspace(admin_time, time_window[1], 500)
+        perm = np.array([permeability(ti) for ti in t_grid])
+        conc = np.array([drug_concentration(ti, admin_time) for ti in t_grid])
+        # Trapezoidal integration
+        if hasattr(np, 'trapezoid'):
+            auc = np.trapezoid(perm * conc, t_grid)
+        else:
+            auc = np.trapz(perm * conc, t_grid)
+        return auc
+
+    # Otimização do tempo de administração
+    res = minimize_scalar(
+        lambda x: -absorption(x),  # negativo para maximizar
+        bounds=(0, time_window[1]),
+        method='bounded'
+    )
+    optimal_interval = res.x
+    max_auc = absorption(optimal_interval)
+
+    # Permeabilidade de pico (normalizada)
+    peak_perm = max(permeability(t) for t in np.linspace(0, time_window[1], 200))
+
+    # Duração com permeabilidade > 50% do pico
+    t_high = [t for t in np.linspace(0, time_window[1], 500) if permeability(t) > 0.5 * peak_perm]
+    time_above_half = t_high[-1] - t_high[0] if t_high else 0.0
+
+    return {
+        "optimal_interval_min": round(optimal_interval, 1),
+        "relative_absorption": round(max_auc / (peak_perm * drug_halflife), 3),
+        "peak_permeability": round(peak_perm, 3),
+        "time_above_half_min": round(time_above_half, 1),
+        "model_assumptions": {
+            "t_peak_min": t_peak,
+            "t_decay_min": t_decay,
+            "drug_halflife_min": drug_halflife,
+            "microbubbles": microbubbles,
+            "mechanical_index": mi
+        }
+    }
+
+
+# ============================================================
+# [TERAPÊUTICO / MONITORAMENTO] - Limpeza Glinfática
+# ============================================================
+def estimate_glymphatic_clearance(
+    fret_coherence: float,          # valor de coerência R(θ) no instante atual
+    phase_angle: float,             # ângulo de fase atual (rad)
+    lipus_intensity_mw_cm2: float,
+    elapsed_minutes: float,
+    baseline_coherence: float = 0.3
+) -> Dict:
+    """
+    Estima a eficácia da limpeza glinfática com base na coerência FRET em tempo real.
+
+    A coerência é um proxy da organização do citoesqueleto e do fluxo de fluidos.
+    Quanto maior a coerência, mais eficiente a remoção de metabólitos.
+    """
+    # Coerência normalizada (0-1)
+    norm_coherence = np.clip((fret_coherence - baseline_coherence) / (1.0 - baseline_coherence), 0, 1)
+
+    # Modelo de limpeza: eficiência = coerência * (1 - exp(-tempo/constante))
+    # A eficiência máxima é limitada pela intensidade do ultrassom
+    max_efficiency = min(1.0, lipus_intensity_mw_cm2 / 200.0)
+    time_factor = 1.0 - np.exp(-elapsed_minutes / 30.0)  # constante de 30 min
+    raw_efficiency = norm_coherence * time_factor * max_efficiency
+
+    # Saturação (não pode ultrapassar 95%)
+    efficiency = min(0.95, raw_efficiency)
+
+    # Classificação da resposta
+    if efficiency < 0.3:
+        response = "BAIXA"
+        suggestion = "Aumentar intensidade ou prolongar sessão"
+    elif efficiency < 0.6:
+        response = "MODERADA"
+        suggestion = "Manter parâmetros; monitorar evolução"
+    else:
+        response = "OTIMA"
+        suggestion = "Reduzir intensidade para evitar saturação"
+
+    return {
+        "glymphatic_clearance_efficiency": round(efficiency, 3),
+        "fret_coherence": round(fret_coherence, 3),
+        "response_category": response,
+        "clinical_suggestion": suggestion,
+        "phase_angle_rad": phase_angle,
+        "elapsed_minutes": elapsed_minutes
+    }
