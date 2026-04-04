@@ -55,7 +55,7 @@ export function runSimulationTick(broadcastState: () => void) {
               targetTime: now,
               coherence: newLambda,
               status: 'Valid',
-              threatType: `RAMSEY_PEAK: LOCAL_ADJUST at ${threshold.angle_rad.toFixed(4)}`
+              threatType: `RAMSEY_PEAK: LOCAL_ADJUST at ${threshold.angle_rad.toFixed(4)} rad. Pulso: 157.1 fs`
             });
             // Simulate local adjust effect
             newLambda = Math.min(1.0, newLambda + 0.01);
@@ -66,7 +66,7 @@ export function runSimulationTick(broadcastState: () => void) {
               targetTime: now,
               coherence: newLambda,
               status: 'Valid',
-              threatType: `RAMSEY_PEAK: LOG_ONLY at ${threshold.angle_rad.toFixed(4)}`
+              threatType: `RAMSEY_PEAK: LOG_ONLY at ${threshold.angle_rad.toFixed(4)} rad.`
             });
           } else if (threshold.action === 'LOCAL_ADJUST_NOTIFY') {
             newLogs.unshift({
@@ -75,38 +75,38 @@ export function runSimulationTick(broadcastState: () => void) {
               targetTime: now,
               coherence: newLambda,
               status: 'Valid',
-              threatType: `RAMSEY_PEAK: NOTIFY at ${threshold.angle_rad.toFixed(4)}`
+              threatType: `RAMSEY_PEAK: NOTIFY at ${threshold.angle_rad.toFixed(4)} rad. Pulso: 157.1 fs`
             });
             // Execute LOCAL_ADJUST effect (as per spec: executes LOCAL_ADJUST + notify)
             newLambda = Math.min(1.0, newLambda + 0.01);
+          } else if (threshold.action === 'GLOBAL_ADJUST') {
+            // Trigger Fibonacci injection if it's the pi/5 peak
+            if (Math.abs(threshold.angle_rad - 0.6283) < 0.001) {
+              newRamsey.isFrozen = true;
+              const expiresAt = new Date(now + 30000).toISOString();
+              newRamsey.pendingAction = {
+                id: generateOrbId(),
+                type: 'GLOBAL_ADJUST',
+                angle: newRamsey.theta,
+                coherence: newLambda,
+                timestamp: new Date(now).toISOString(),
+                expiresAt: expiresAt
+              };
+
+              newLogs.unshift({
+                id: generateOrbId(),
+                originTime: now,
+                targetTime: now,
+                coherence: newLambda,
+                status: 'Valid',
+                threatType: 'RAMSEY: Injeção de Fase Fibonacci (π/5) Detectada. Aguardando aprovação.'
+              });
+            }
           }
         }
       }
     }
 
-    // Simulate a manual action requirement for GLOBAL_ADJUST (example scenario)
-    // In this simulation, we'll trigger a GLOBAL_ADJUST if theta is near PI/2
-    if (Math.abs(newRamsey.theta - 1.5709) <= 0.005 && !newRamsey.pendingAction) {
-      newRamsey.isFrozen = true;
-      const expiresAt = new Date(now + 30000).toISOString();
-      newRamsey.pendingAction = {
-        id: generateOrbId(),
-        type: 'GLOBAL_ADJUST',
-        angle: newRamsey.theta,
-        coherence: newLambda,
-        timestamp: new Date(now).toISOString(),
-        expiresAt: expiresAt
-      };
-
-      newLogs.unshift({
-        id: generateOrbId(),
-        originTime: now,
-        targetTime: now,
-        coherence: newLambda,
-        status: 'Valid',
-        threatType: 'RAMSEY: Awaiting GLOBAL_ADJUST confirmation'
-      });
-    }
 
     if (!thresholdFound) {
       lastTriggeredThreshold = null;

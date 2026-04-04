@@ -191,14 +191,25 @@ export let state: SimulationState = {
     direction: 1,
     baseline: 0.963,
     thresholds: [
-      { angle_rad: 0.6284, tolerance: 0.005, min_gain: 1.025, action: 'LOCAL_ADJUST' },
-      { angle_rad: 0.7855, tolerance: 0.005, min_gain: 1.019, action: 'LOG_ONLY' },
-      { angle_rad: 1.0473, tolerance: 0.005, min_gain: 1.030, action: 'LOCAL_ADJUST_NOTIFY' },
-      { angle_rad: 1.5709, tolerance: 0.005, min_gain: 1.016, action: 'LOG_ONLY' }
+      { angle_rad: 0.6283, tolerance: 0.005, min_gain: 1.025, action: 'GLOBAL_ADJUST' }, // π/5 Fibonacci
+      { angle_rad: 0.7854, tolerance: 0.005, min_gain: 1.019, action: 'LOG_ONLY' },        // π/4
+      { angle_rad: 1.0472, tolerance: 0.005, min_gain: 1.030, action: 'LOCAL_ADJUST_NOTIFY' }, // π/3
+      { angle_rad: 1.5708, tolerance: 0.005, min_gain: 1.016, action: 'LOG_ONLY' }         // π/2
     ],
     window: [],
     pendingAction: null,
-    isFrozen: false
+    isFrozen: false,
+    rabi_frequency: 1.0e13,
+    generator_configs: {
+      "S": { generator: "S", duration_fs: 157.1, polarization: "Circular Direita", peak_power_w_cm2: 1.2e13, angle_rad: 1.5708 },
+      "T": { generator: "T", duration_fs: 157.1, polarization: "Linear Horizontal", peak_power_w_cm2: 1.2e13, angle_rad: 1.5708 },
+      "U": { generator: "U", duration_fs: 157.1, polarization: "Linear Vertical", peak_power_w_cm2: 1.2e13, angle_rad: 1.5708 },
+      "S-1": { generator: "S-1", duration_fs: 157.1, polarization: "Circular Esquerda", peak_power_w_cm2: 1.2e13, angle_rad: -1.5708 }
+    },
+    fibonacci_sequence: {
+      name: "Fibonacci Phase Injection Sequence",
+      generators: ["S", "T", "S-1", "T", "S"]
+    }
   },
   civicSubagents: [
     { name: 'Logos', adaptation: 'Leis Municipais/Estaduais', function: 'Conflitos normativos', status: 'idle', lastAction: 'Verificação de decreto de saneamento em SP concluída' },
