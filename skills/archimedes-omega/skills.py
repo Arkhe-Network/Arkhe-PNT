@@ -97,6 +97,38 @@ def simulate_sl3z_discrete(
     return theta_range, coherence
 
 # ============================================================
+# [QUÂNTICO / COLETIVO] - Simulação de Estado W
+# ============================================================
+def simulate_w_state_coherence(
+    nodes: int = 3,
+    loss_probability: float = 0.2,
+    theta_range: Optional[np.ndarray] = None) -> Tuple[np.ndarray, np.ndarray]:
+    """
+    Simula a ressonância robusta de um emaranhamento de estado W.
+    Mesmo com a perda de partículas, uma coerência 'residual' persiste.
+    """
+    if theta_range is None:
+        theta_range = np.linspace(0, 2*np.pi, 1000)
+
+    # W-state signature: A broader, more resilient peak
+    # centered around tripartite resonance (2π/3)
+    tripartite_resonance = 2 * np.pi / 3
+
+    # Base resilience factor: 1 - (1/nodes)
+    # (The mathematical persistence of W-states)
+    resilience = 1.0 - (1.0 / nodes)
+
+    # Coherence doesn't drop to zero upon noise/loss
+    base_signal = np.exp(-((theta_range - tripartite_resonance)**2) / 0.15)
+    persistent_floor = resilience * (1.0 - loss_probability)
+
+    coherence = np.maximum(base_signal, persistent_floor * 0.5)
+    coherence = np.clip(coherence, 0, 1)
+
+    logger.info(f"W-State simulada: {nodes} nodos, Resiliência={resilience:.2f}")
+    return theta_range, coherence
+
+# ============================================================
 # [PRAGMÁTICO / INTRAPESSOAL] - Detecção de Picos
 # ============================================================
 def detect_peaks(
