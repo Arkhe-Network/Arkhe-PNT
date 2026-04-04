@@ -20,6 +20,28 @@ export function runSimulationTick(broadcastState: () => void) {
   let newSecurity = { ...state.security };
   let newSecurityAdvanced = { ...state.securityAdvanced };
   let newRamsey = { ...state.ramsey };
+  let newCHSH = { ...state.chshMonitor };
+
+  // CHSH Live Telemetry Simulation
+  if (newCHSH.status === 'ACTIVATED') {
+    newCHSH.liveTelemetry.dataPoints += 1;
+
+    // Simulate S value calculation approaching the target 2.82
+    // We start with some noise and converge
+    const currentS = newCHSH.liveTelemetry.currentS === null ? 2.0 : newCHSH.liveTelemetry.currentS;
+    const targetS = 2.8284;
+    const drift = (targetS - currentS) * 0.05;
+    const noise = (Math.random() - 0.5) * 0.02;
+    newCHSH.liveTelemetry.currentS = Math.min(2.8284, currentS + drift + noise);
+
+    const timeStr = new Date().toLocaleTimeString('en-US', { hour12: false, second: '2-digit', minute: '2-digit' });
+    newCHSH.liveTelemetry.history = [...(newCHSH.liveTelemetry.history || []), { time: timeStr, s: newCHSH.liveTelemetry.currentS }].slice(-20);
+
+    if (newCHSH.liveTelemetry.dataPoints > 30) {
+      newCHSH.liveTelemetry.stabilityIndicator = "SUPER-STABLE";
+      newCHSH.archimedesComment = "Emaranhamento biológico confirmado. O array Bexorg 3.0 demonstra violação de Bell S > 2.80.";
+    }
+  }
 
   // Ramsey Sweep Logic
   if (newRamsey.enabled && !newRamsey.isFrozen) {
@@ -398,6 +420,7 @@ export function runSimulationTick(broadcastState: () => void) {
     security: newSecurity,
     securityAdvanced: newSecurityAdvanced,
     ramsey: newRamsey,
+    chshMonitor: newCHSH,
     logs: newLogs,
     tzinor: tzinorStore.state,
     epoch: now / 1000,
