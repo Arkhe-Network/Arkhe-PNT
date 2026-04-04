@@ -199,7 +199,18 @@ export let state: SimulationState = {
     ],
     window: [],
     pendingAction: null,
-    isFrozen: false
+    isFrozen: false,
+    rabi_frequency: 1.0e13,
+    generator_configs: {
+      "S": { generator: "S", duration_fs: 157.1, polarization: "Circular Direita", peak_power_w_cm2: 1.2e13, angle_rad: 1.5708 },
+      "T": { generator: "T", duration_fs: 157.1, polarization: "Linear Horizontal", peak_power_w_cm2: 1.2e13, angle_rad: 1.5708 },
+      "U": { generator: "U", duration_fs: 157.1, polarization: "Linear Vertical", peak_power_w_cm2: 1.2e13, angle_rad: 1.5708 },
+      "S-1": { generator: "S-1", duration_fs: 157.1, polarization: "Circular Esquerda", peak_power_w_cm2: 1.2e13, angle_rad: -1.5708 }
+    },
+    fibonacci_sequence: {
+      name: "Fibonacci Phase Injection Sequence",
+      generators: ["S", "T", "S-1", "T", "S"]
+    }
   },
   civicSubagents: [
     { name: 'Logos', adaptation: 'Leis Municipais/Estaduais', function: 'Conflitos normativos', status: 'idle', lastAction: 'Verificação de decreto de saneamento em SP concluída' },

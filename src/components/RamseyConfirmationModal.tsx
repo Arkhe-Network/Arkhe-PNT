@@ -90,9 +90,26 @@ export default function RamseyConfirmationModal({ pendingAction, onClose }: Rams
           <div className="bg-black/60 border border-arkhe-border p-4 rounded-lg">
             <div className="text-[10px] text-arkhe-muted uppercase mb-2">Ação Sugerida</div>
             <div className="text-xs font-bold text-arkhe-text mb-2 tracking-widest">{pendingAction.type}</div>
-            <div className="text-[10px] text-arkhe-muted leading-relaxed">
-              APLICAÇÃO DE PULSO DE CORREÇÃO DE FASE EM TODOS OS NÓS DO CLUSTER PARA SINCRONIZAÇÃO DISCRETA SL(3,ℤ).
+            <div className="text-[10px] text-arkhe-muted leading-relaxed mb-3">
+              APLICAÇÃO DE SEQUÊNCIA DE PULSOS PARA SINCRONIZAÇÃO DISCRETA SL(3,ℤ).
             </div>
+
+            {Math.abs(pendingAction.angle - 0.6283) < 0.01 && (
+              <div className="border-t border-arkhe-border/30 pt-3 space-y-2">
+                <div className="text-[9px] text-arkhe-cyan font-bold uppercase tracking-widest">Injeção Fibonacci (π/5)</div>
+                <div className="flex flex-wrap gap-2">
+                  {["S", "T", "S⁻¹", "T", "S"].map((gen, i) => (
+                    <div key={i} className="px-2 py-1 bg-arkhe-cyan/10 border border-arkhe-cyan/30 rounded text-[9px] text-arkhe-cyan font-bold">
+                      {gen}
+                    </div>
+                  ))}
+                </div>
+                <div className="grid grid-cols-2 gap-2 text-[8px] text-arkhe-muted uppercase">
+                  <div>Duração: 157.1 fs/pulso</div>
+                  <div>Pico: 1.2e13 W/cm²</div>
+                </div>
+              </div>
+            )}
           </div>
 
           <div className="space-y-2">

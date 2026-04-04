@@ -303,6 +303,19 @@ export interface RamseyPendingAction {
   expiresAt: string;
 }
 
+export interface PulseConfig {
+  generator: string;
+  duration_fs: number;
+  polarization: string;
+  peak_power_w_cm2: number;
+  angle_rad: number;
+}
+
+export interface GeneratorSequence {
+  name: string;
+  generators: string[];
+}
+
 export interface RamseyState {
   enabled: boolean;
   auto_adjust: boolean;
@@ -314,6 +327,9 @@ export interface RamseyState {
   window: { theta: number; coherence: number }[];
   pendingAction: RamseyPendingAction | null;
   isFrozen: boolean;
+  rabi_frequency: number;
+  generator_configs: Record<string, PulseConfig>;
+  fibonacci_sequence: GeneratorSequence;
 }
 
 export interface CivicSubagentState {
