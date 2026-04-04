@@ -1,0 +1,103 @@
+syntax = "proto3";
+
+package archimedes;
+
+service CoherenceAgent {
+  rpc SimulateSU2 (SU2Request) returns (CoherenceResponse);
+  rpc SimulateSL3Z (SL3ZRequest) returns (CoherenceResponse);
+  rpc DetectPeaks (PeakDetectionRequest) returns (PeakDetectionResponse);
+  rpc Analyze (AnalysisRequest) returns (AnalysisResponse);
+  rpc StreamCoherence (stream CoherenceStreamRequest) returns (stream CoherenceStreamResponse);
+}
+
+message SU2Request {
+  double theta_start = 1;
+  double theta_end = 2;
+  int32 num_points = 3;
+  double thermal_noise = 4;
+  double temperature = 5;
+}
+
+message SL3ZRequest {
+  double theta_start = 1;
+  double theta_end = 2;
+  int32 num_points = 3;
+  repeated string words = 4;
+}
+
+message CoherenceResponse {
+  repeated double phases = 1;
+  repeated double coherence = 2;
+}
+
+message PeakDetectionRequest {
+  repeated double phases = 1;
+  repeated double coherence = 2;
+  double threshold_multiplier = 3;
+  double min_prominence = 4;
+}
+
+message PeakInfo {
+  double phase = 1;
+  double phase_degrees = 2;
+  double coherence = 3;
+  double prominence = 4;
+  bool is_resonance = 5;
+  int32 index = 6;
+}
+
+message PeakDetectionResponse {
+  repeated PeakInfo peaks = 1;
+}
+
+message AnalysisRequest {
+  enum DataSource {
+    SIMULATED = 0;
+    EXPERIMENTAL = 1;
+  }
+  DataSource data_source = 1;
+  SU2Request su2_params = 2;
+  SL3ZRequest sl3z_params = 3;
+  ExperimentalData experimental_data = 4;
+  DetectionParams detection_params = 5;
+}
+
+message ExperimentalData {
+  repeated double phases = 1;
+  repeated double coherence = 2;
+}
+
+message DetectionParams {
+  double threshold_multiplier = 1;
+  double min_prominence = 2;
+}
+
+message Conclusion {
+  string status = 1;
+  int32 peaks_total = 2;
+  int32 peaks_in_resonance = 3;
+  double max_coherence = 4;
+  string interpretation = 5;
+  string philosophical_note = 6;
+}
+
+message AnalysisResponse {
+  string id = 1;
+  string timestamp = 2;
+  string data_source = 3;
+  repeated PeakInfo peaks = 4;
+  Conclusion conclusion = 5;
+  string output_file = 6;
+}
+
+message CoherenceStreamRequest {
+  string session_id = 1;
+  double theta = 2;
+  double coherence = 3;
+}
+
+message CoherenceStreamResponse {
+  string session_id = 1;
+  double predicted_coherence = 2;
+  string status = 3;
+}

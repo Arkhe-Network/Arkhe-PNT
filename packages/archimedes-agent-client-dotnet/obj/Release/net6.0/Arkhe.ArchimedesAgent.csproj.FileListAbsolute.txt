@@ -1,0 +1,13 @@
+/workspaces/Arkhe-PNT/packages/archimedes-agent-client-dotnet/obj/Release/net6.0/Arkhe.ArchimedesAgent.csproj.AssemblyReference.cache
+/workspaces/Arkhe-PNT/packages/archimedes-agent-client-dotnet/obj/Release/net6.0/Arkhe.ArchimedesAgent.GeneratedMSBuildEditorConfig.editorconfig
+/workspaces/Arkhe-PNT/packages/archimedes-agent-client-dotnet/obj/Release/net6.0/Arkhe.ArchimedesAgent.AssemblyInfoInputs.cache
+/workspaces/Arkhe-PNT/packages/archimedes-agent-client-dotnet/obj/Release/net6.0/Arkhe.ArchimedesAgent.AssemblyInfo.cs
+/workspaces/Arkhe-PNT/packages/archimedes-agent-client-dotnet/obj/Release/net6.0/Arkhe.ArchimedesAgent.csproj.CoreCompileInputs.cache
+/workspaces/Arkhe-PNT/packages/archimedes-agent-client-dotnet/obj/Release/net6.0/Arkhe.ArchimedesAgent.sourcelink.json
+/workspaces/Arkhe-PNT/packages/archimedes-agent-client-dotnet/bin/Release/net6.0/Arkhe.ArchimedesAgent.deps.json
+/workspaces/Arkhe-PNT/packages/archimedes-agent-client-dotnet/bin/Release/net6.0/Arkhe.ArchimedesAgent.dll
+/workspaces/Arkhe-PNT/packages/archimedes-agent-client-dotnet/bin/Release/net6.0/Arkhe.ArchimedesAgent.pdb
+/workspaces/Arkhe-PNT/packages/archimedes-agent-client-dotnet/obj/Release/net6.0/Arkhe.ArchimedesAgent.dll
+/workspaces/Arkhe-PNT/packages/archimedes-agent-client-dotnet/obj/Release/net6.0/refint/Arkhe.ArchimedesAgent.dll
+/workspaces/Arkhe-PNT/packages/archimedes-agent-client-dotnet/obj/Release/net6.0/Arkhe.ArchimedesAgent.pdb
+/workspaces/Arkhe-PNT/packages/archimedes-agent-client-dotnet/obj/Release/net6.0/ref/Arkhe.ArchimedesAgent.dll

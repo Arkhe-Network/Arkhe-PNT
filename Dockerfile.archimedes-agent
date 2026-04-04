@@ -1,0 +1,17 @@
+FROM python:3.11-slim
+
+WORKDIR /app
+
+# Copy and install requirements
+COPY skills/archimedes-omega/requirements.txt ./requirements.txt
+RUN pip install --no-cache-dir -r requirements.txt
+
+# Copy all archimedes-omega files
+COPY skills/archimedes-omega/ ./
+
+# Generate protobuf files
+RUN python -m grpc_tools.protoc --proto_path=. --python_out=. --grpc_python_out=. archimedes.proto
+
+EXPOSE 8080 8081 50051
+
+CMD ["python", "start_servers.py"]

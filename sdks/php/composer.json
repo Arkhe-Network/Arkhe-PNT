@@ -1,0 +1,22 @@
+{
+    "name": "arkhe/archimedes-agent",
+    "description": "PHP client for Archimedes-Ω Coherence Agent",
+    "type": "library",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Arkhe Network",
+            "email": "contact@arkhe.network"
+        }
+    ],
+    "require": {
+        "php": ">=8.0",
+        "grpc/grpc": "^1.42",
+        "google/protobuf": "^3.21"
+    },
+    "autoload": {
+        "psr-4": {
+            "Archimedes\\": "src/"
+        }
+    }
+}

@@ -1,0 +1,181 @@
+openapi: 3.0.3
+info:
+  title: Archimedes-Ω Agent API
+  description: HTTP REST API for the Archimedes-Ω coherence agent service.
+  version: 1.0.0
+servers:
+  - url: http://localhost:8080
+paths:
+  /health:
+    get:
+      summary: Health check
+      responses:
+        '200':
+          description: Service is alive
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                  service:
+                    type: string
+  /simulate/su2:
+    post:
+      summary: Simulate continuous SU(2) coherence
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                theta:
+                  type: array
+                  items:
+                    type: number
+                thermal_noise:
+                  type: number
+                  default: 0.05
+                temperature:
+                  type: number
+                  default: 310.0
+      responses:
+        '200':
+          description: SU(2) simulation result
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  phases:
+                    type: array
+                    items:
+                      type: number
+                  coherence:
+                    type: array
+                    items:
+                      type: number
+  /simulate/sl3z:
+    post:
+      summary: Simulate discrete SL(3,Z) coherence
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                theta:
+                  type: array
+                  items:
+                    type: number
+                words:
+                  type: array
+                  items:
+                    type: string
+      responses:
+        '200':
+          description: SL(3,Z) simulation result
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  phases:
+                    type: array
+                    items:
+                      type: number
+                  coherence:
+                    type: array
+                    items:
+                      type: number
+  /detect/peaks:
+    post:
+      summary: Detect coherence peaks
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                coherence_data:
+                  type: array
+                  items:
+                    type: number
+                phases:
+                  type: array
+                  items:
+                    type: number
+                threshold_multiplier:
+                  type: number
+                  default: 1.5
+                min_prominence:
+                  type: number
+                  default: 0.1
+      responses:
+        '200':
+          description: Detected peaks
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  peaks:
+                    type: array
+                    items:
+                      type: object
+                  count:
+                    type: integer
+  /analyze:
+    post:
+      summary: Execute full analysis pipeline
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                theta:
+                  type: array
+                  items:
+                    type: number
+                thermal_noise:
+                  type: number
+                  default: 0.05
+                temperature:
+                  type: number
+                  default: 310.0
+                words:
+                  type: array
+                  items:
+                    type: string
+                threshold_multiplier:
+                  type: number
+                  default: 1.5
+                min_prominence:
+                  type: number
+                  default: 0.1
+                output_file:
+                  type: string
+      responses:
+        '200':
+          description: Analysis result
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                  peaks:
+                    type: array
+                    items:
+                      type: object
+                  conclusion:
+                    type: object
+                  output_file:
+                    type: string

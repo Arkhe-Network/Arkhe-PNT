@@ -1,0 +1,15 @@
+[package]
+name = "archimedes-agent"
+version = "0.1.0"
+edition = "2021"
+description = "Rust client for Archimedes-Ω Coherence Agent"
+
+[dependencies]
+grpcio = "0.13"
+futures = "0.3"
+protobuf = "3.2"
+tokio = "1.0"
+
+[[bin]]
+name = "client"
+path = "src/main.rs"
