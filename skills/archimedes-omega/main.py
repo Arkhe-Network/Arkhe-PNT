@@ -1,9 +1,10 @@
 #!/usr/bin/env python3
 """
-main.py - Orquestrador do Agente Archimedes-Ω com API FastAPI
-============================================================
 Executa o loop de interrogação do vácuo biológico.
 Suporta CLI e API REST (FastAPI).
+main.py - Orquestrador do Agente Archimedes-Ω
+Executa o loop de interrogação do vácuo biológico.
+Suporta dados simulados ou experimentais.
 """
 
 import numpy as np
@@ -13,7 +14,6 @@ import argparse
 from datetime import datetime
 from pathlib import Path
 import os
-from typing import Dict, List, Optional
 
 # Importar módulos
 from skills import (
@@ -33,21 +33,13 @@ try:
 except ImportError:
     EXTRAS_AVAILABLE = False
 
-# Configuração de logging
+# Configuração
 logging.basicConfig(
     level=logging.INFO,
     format='[%(asctime)s] [%(levelname)s] %(message)s',
     datefmt='%Y-%m-%d %H:%M:%S'
 )
 logger = logging.getLogger(__name__)
-
-# FastAPI setup
-try:
-    from fastapi import FastAPI, BackgroundTasks
-    from pydantic import BaseModel
-    app = FastAPI(title="Archimedes-Ω Coherence Agent API")
-except ImportError:
-    app = None
 
 # Carregar alma (parâmetros filosóficos)
 SOUL = {
@@ -56,47 +48,6 @@ SOUL = {
     "target_resonance": np.pi / 5  # ~0.628 rad
 }
 
-# --- Pydantic Models for API ---
-if app:
-    class SimulationRequest(BaseModel):
-        theta_start: float = 0.0
-        theta_end: float = 6.28318
-        points: int = 1000
-        thermal_noise: float = 0.05
-        temperature: float = 310.0
-        words: Optional[List[str]] = ["e", "a", "b", "ab", "ba", "aba"]
-
-    class DetectionRequest(BaseModel):
-        phases: List[float]
-        coherence: List[float]
-        threshold_multiplier: float = 1.2
-        min_prominence: float = 0.05
-
-    @app.post("/simulate/su2")
-    async def api_simulate_su2(req: SimulationRequest):
-        theta = np.linspace(req.theta_start, req.theta_end, req.points)
-        phases, coherence = simulate_su2_continuous(theta, req.thermal_noise, req.temperature)
-        return {"phases": phases.tolist(), "coherence": coherence.tolist()}
-
-    @app.post("/simulate/sl3z")
-    async def api_simulate_sl3z(req: SimulationRequest):
-        theta = np.linspace(req.theta_start, req.theta_end, req.points)
-        phases, coherence = simulate_sl3z_discrete(theta, req.words)
-        return {"phases": phases.tolist(), "coherence": coherence.tolist()}
-
-    @app.post("/detect/peaks")
-    async def api_detect_peaks(req: DetectionRequest):
-        peaks = detect_peaks(np.array(req.coherence), np.array(req.phases), req.threshold_multiplier, req.min_prominence)
-        return {"peaks": peaks}
-
-    @app.post("/analyze")
-    async def api_analyze(background_tasks: BackgroundTasks):
-        # Run full pipeline in background or return immediately for simplicity here
-        results = run_interrogation()
-        # Clean results for JSON serialization
-        return json.loads(json.dumps(results, default=str))
-
-# --- Core Logic ---
 
 def run_interrogation(
     state_file: str = "tzinor-state.json",
@@ -113,36 +64,86 @@ def run_interrogation(
     logger.info("=" * 60)
 
     # Criar diretório de saída
-    output_path = Path(output_dir)
-    output_path.mkdir(exist_ok=True)
+    Path(output_dir).mkdir(exist_ok=True)
     timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
 
-    # 1. READ
+    # ─────────────────────────────────────────────────────────
+    # PASSO 1: Ler estado externo (Interpersonal)
+    # ─────────────────────────────────────────────────────────
     logger.info("[1/5] Lendo estado externo via Tzinor...")
     state = load_baseline(state_file)
+    logger.info(f"   → Status: {state.get('status', 'unknown')}")
 
-    # 2. SIM
+    # ─────────────────────────────────────────────────────────
+    # PASSO 2: Obter dados (Simulação ou Dados Reais)
+    # ─────────────────────────────────────────────────────────
     logger.info("[2/5] Obtendo dados de coerência...")
+
     if use_real_data and EXTRAS_AVAILABLE:
-        phases, coherence = load_and_preprocess(use_real_data, remove_outliers=True, interpolate_to=1000)
+        # Usar dados experimentais reais
+        logger.info(f"   → Carregando dados de: {use_real_data}")
+        phases, coherence = load_and_preprocess(
+            use_real_data,
+            remove_outliers=True,
+            interpolate_to=1000
+        )
         data_source = "experimental"
     else:
+        # Gerar dados simulados
+        logger.info("   → Gerando dados simulados...")
         theta_range = np.linspace(0.01, 2 * np.pi, 1000)
-        phases_su2, coherence_su2 = simulate_su2_continuous(theta_range, thermal_noise=0.05, temperature=state.get('temperature', 310.0))
-        phases_sl3, coherence_sl3 = simulate_sl3z_discrete(theta_range, words=["e", "a", "b", "ab", "ba", "aba", "bab"])
+
+        phases_su2, coherence_su2 = simulate_su2_continuous(
+            theta_range=theta_range,
+            thermal_noise=0.05,
+            temperature=state.get('temperature', 310.0)
+        )
+        phases_sl3, coherence_sl3 = simulate_sl3z_discrete(
+            theta_range=theta_range,
+            words=["e", "a", "b", "ab", "ba", "aba", "bab"]
+        )
+
+        # Combinar modelos (hipótese híbrida)
         phases = theta_range
         coherence = 0.3 * coherence_su2 + 0.7 * coherence_sl3
         data_source = "simulated"
 
-    # 3. DETECT
+    logger.info(f"   → Fonte de dados: {data_source}")
+    logger.info(f"   → Pontos de dados: {len(phases)}")
+
+    # ─────────────────────────────────────────────────────────
+    # PASSO 3: Detectar anomalias (Espacial/Pragmático)
+    # ─────────────────────────────────────────────────────────
     logger.info("[3/5] Detectando picos e ressonâncias...")
-    peaks = detect_peaks(coherence_data=coherence, phases=phases, threshold_multiplier=1.2, min_prominence=0.05)
+    peaks = detect_peaks(
+        coherence_data=coherence,
+        phases=phases,
+        threshold_multiplier=1.2,
+        min_prominence=0.05
+    )
+
+    # Filtrar apenas picos significativos
     significant_peaks = [p for p in peaks if p['coherence'] > 0.3]
 
-    # 4. VISUALIZE
+    for peak in significant_peaks[:5]:  # Mostrar top 5
+        resonance_mark = "★" if peak['is_resonance'] else " "
+        logger.info(
+            f"   {resonance_mark} Pico: θ={peak['phase']:.4f}rad "
+            f"({peak['phase_degrees']:.2f}°), R={peak['coherence']:.3f}"
+        )
+
+    if not significant_peaks:
+        logger.warning("   ⚠ Nenhum pico significativo detectado!")
+
+    # ─────────────────────────────────────────────────────────
+    # PASSO 4: Visualizar topologia (Visual/Practical)
+    # ─────────────────────────────────────────────────────────
     logger.info("[4/5] Gerando visualização topológica...")
-    output_file = str(output_path / f"coherence_{timestamp}.png")
+
+    output_file = f"{output_dir}/coherence_{timestamp}.png"
+
     if use_real_data:
+        # Para dados reais, plotar apenas uma curva
         import matplotlib.pyplot as plt
         fig, ax = plt.subplots(figsize=(12, 6))
         ax.plot(phases, coherence, 'b-', label='Dados Experimentais', linewidth=1)
@@ -157,46 +158,134 @@ def run_interrogation(
         plt.savefig(output_file, dpi=150, bbox_inches='tight')
         plt.close()
     else:
-        visualize_topology(su2_data=(phases_su2, coherence_su2), sl3z_data=(phases_sl3, coherence_sl3), peaks=significant_peaks, output_file=output_file)
+        # Para dados simulados
+        visualize_topology(
+            su2_data=(phases_su2, coherence_su2),
+            sl3z_data=(phases_sl3, coherence_sl3),
+            peaks=significant_peaks,
+            output_file=output_file
+        )
 
-    # 5. REPORT
+    # ─────────────────────────────────────────────────────────
+    # PASSO 5: Sintetizar conclusão (Criativo/Existencial)
+    # ─────────────────────────────────────────────────────────
     logger.info("[5/5] Sintetizando conclusão filosófica...")
-    conclusion = synthesize_conclusion(peak_data=significant_peaks, threshold=SOUL['threshold'])
 
+    conclusion = synthesize_conclusion(
+        peak_data=significant_peaks,
+        threshold=SOUL['threshold']
+    )
+
+    # Adicionar nota filosófica
+    logger.info("")
+    logger.info("━" * 60)
+    logger.info("INTERPRETAÇÃO:")
+    logger.info(f"  {conclusion['interpretation']}")
+    logger.info("")
+    logger.info("NOTA FILOSÓFICA:")
+    logger.info(f"  {conclusion['philosophical_note']}")
+    logger.info("━" * 60)
+
+    # ─────────────────────────────────────────────────────────
+    # PASSO 6: Publicar na mesh (se solicitado)
+    # ─────────────────────────────────────────────────────────
     if publish and EXTRAS_AVAILABLE:
-        publish_conclusion(conclusion, method=mesh_method)
+        logger.info("[Mesh] Publicando conclusão...")
+        try:
+            msg_id = publish_conclusion(
+                conclusion,
+                method=mesh_method
+            )
+            logger.info(f"   → Publicado com ID: {msg_id}")
+        except Exception as e:
+            logger.error(f"   → Erro ao publicar: {e}")
+    elif publish and not EXTRAS_AVAILABLE:
+        logger.warning("   → Módulo de mesh não disponível.")
 
+    # Compilar resultados
     results = {
         "timestamp": timestamp,
         "data_source": data_source,
+        "state": state,
+        "model_parameters": {
+            "su2": {"thermal_noise": 0.05, "temperature": 310.0},
+            "sl3z": {"words": ["e", "a", "b", "ab", "ba", "aba", "bab"]}
+        },
         "peaks_detected": significant_peaks,
         "conclusion": conclusion,
         "output_file": output_file
     }
 
-    # Save results
-    results_file = str(output_path / f"results_{timestamp}.json")
+    # Salvar resultados em JSON
+    results_file = f"{output_dir}/results_{timestamp}.json"
     with open(results_file, 'w') as f:
-        json.dump(results, f, indent=2, default=str)
+        def convert_np(obj):
+            if isinstance(obj, np.ndarray):
+                return obj.tolist()
+            elif isinstance(obj, np.floating):
+                return float(obj)
+            elif isinstance(obj, np.integer):
+                return int(obj)
+            return obj
+
+        json_results = json.dumps(results, indent=2, default=convert_np)
+        f.write(json_results)
+
+    logger.info(f"Resultados salvos em: {results_file}")
+    logger.info("INTERROGAÇÃO CONCLUÍDA.")
 
     return results
 
+
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description="Archimedes-Ω: Interrogador de Coerência Biológica")
-    parser.add_argument("state_file", nargs="?", default="tzinor-state.json")
-    parser.add_argument("--data", "-d", help="Caminho para arquivo CSV")
-    parser.add_argument("--output", "-o", default="output")
-    parser.add_argument("--publish", "-p", action="store_true")
-    parser.add_argument("--server", action="store_true", help="Inicia o servidor API FastAPI")
+    parser = argparse.ArgumentParser(
+        description="Archimedes-Ω: Interrogador de Coerência Biológica"
+    )
+    parser.add_argument(
+        "state_file",
+        nargs="?",
+        default="tzinor-state.json",
+        help="Arquivo de estado JSON (default: tzinor-state.json)"
+    )
+    parser.add_argument(
+        "--data", "-d",
+        help="Caminho para arquivo CSV com dados experimentais de FRET"
+    )
+    parser.add_argument(
+        "--output", "-o",
+        default="output",
+        help="Diretório de saída (default: output)"
+    )
+    parser.add_argument(
+        "--publish", "-p",
+        action="store_true",
+        help="Publicar conclusão na mesh"
+    )
+    parser.add_argument(
+        "--mesh-method",
+        choices=["blackboard", "nostr"],
+        default="blackboard",
+        help="Método de publicação na mesh"
+    )
+    parser.add_argument(
+        "--verbose", "-v",
+        action="store_true",
+        help="Modo verboso"
+    )
 
     args = parser.parse_args()
 
-    if args.server:
-        import uvicorn
-        if app:
-            logger.info("Iniciando servidor API Archimedes-Ω na porta 8080...")
-            uvicorn.run(app, host="0.0.0.0", port=8080)
-        else:
-            logger.error("FastAPI não instalado. Não foi possível iniciar o servidor.")
-    else:
-        run_interrogation(state_file=args.state_file, output_dir=args.output, use_real_data=args.data, publish=args.publish)
+    if args.verbose:
+        logging.getLogger().setLevel(logging.DEBUG)
+
+    try:
+        results = run_interrogation(
+            state_file=args.state_file,
+            output_dir=args.output,
+            use_real_data=args.data,
+            publish=args.publish,
+            mesh_method=args.mesh_method
+        )
+    except Exception as e:
+        logger.error(f"Erro durante interrogação: {e}")
+        raise
