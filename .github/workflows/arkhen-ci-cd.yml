@@ -1,22 +1,50 @@
-name: Arkhe(n) Multi-Cloud CI/CD
+name: Arkhe(n) Sovereign Multi-Cloud CI/CD
 
 on:
   push:
     branches: [ main ]
+    tags: [ 'v*' ]
   pull_request:
     branches: [ main ]
 
 env:
-  DOCKER_IMAGE: hyperspaceai/arkhen
+  REGISTRY: ghcr.io
+  CORE_IMAGE_NAME: ${{ github.repository }}/arkhe-core
+  RELAYER_IMAGE_NAME: ${{ github.repository }}/arkhe-relayer
   TZINOR_GATE_STRICT: true
 
 jobs:
+  lint-and-scan:
+    name: 🛡️ Lint & Security Scan
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22.x'
+          cache: 'npm'
+      - name: Install Dependencies
+        run: npm install
+      - name: Run Lint
+        run: npm run lint
+      - name: Security Scan (Trivy)
+        uses: aquasecurity/trivy-action@master
+        with:
+          scan-type: 'fs'
+          ignore-unfixed: true
+          format: 'table'
+          exit-code: '1' # Fails the build on critical vulnerabilities
+          severity: 'CRITICAL'
+
   build-and-verify:
+    name: 🧪 Build & Verify
+    needs: lint-and-scan
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v4
     
-    - name: Setup Environment
+    - name: Setup Node.js
       uses: actions/setup-node@v4
       with:
         node-version: '22.x'
@@ -32,7 +60,7 @@ jobs:
       with:
         python-version: '3.12'
         
-    - name: Subagent Techne: Orchestrate Build
+    - name: Subagent Techne: Orchestrate Build (Makefile)
       run: make build
       
     - name: Subagent Aletheia: Verify Integrity
@@ -42,44 +70,93 @@ jobs:
       run: make test
 
   docker-publish:
+    name: 🔨 Forjar e Publicar Containers
     needs: build-and-verify
     runs-on: ubuntu-latest
-    if: github.ref == 'refs/heads/main'
+    if: github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/tags/v')
+    permissions:
+      contents: read
+      packages: write
     steps:
     - uses: actions/checkout@v4
-    - name: Build and Push Docker Image
-      run: |
-        echo "Simulating Docker build for $DOCKER_IMAGE:${{ github.sha }}"
-        # docker build -t $DOCKER_IMAGE:${{ github.sha }} .
-        # docker push $DOCKER_IMAGE:${{ github.sha }}
+    - name: Setup Docker Buildx
+      uses: docker/setup-buildx-action@v3
+    - name: Login no Container Registry (GHCR)
+      uses: docker/login-action@v3
+      with:
+        registry: ${{ env.REGISTRY }}
+        username: ${{ github.actor }}
+        password: ${{ secrets.GITHUB_TOKEN }}
+
+    - name: Extract Metadata (Core)
+      id: meta-core
+      uses: docker/metadata-action@v5
+      with:
+        images: ${{ env.REGISTRY }}/${{ env.CORE_IMAGE_NAME }}
+        tags: |
+          type=sha
+          type=ref,event=branch
+          type=ref,event=tag
+          latest
+
+    - name: Extract Metadata (Relayer)
+      id: meta-relayer
+      uses: docker/metadata-action@v5
+      with:
+        images: ${{ env.REGISTRY }}/${{ env.RELAYER_IMAGE_NAME }}
+        tags: |
+          type=sha
+          type=ref,event=branch
+          type=ref,event=tag
+          latest
+
+    - name: Build & Push Arkhe Core
+      uses: docker/build-push-action@v5
+      with:
+        context: .
+        file: ./Dockerfile
+        push: true
+        tags: ${{ steps.meta-core.outputs.tags }}
+        labels: ${{ steps.meta-core.outputs.labels }}
+        cache-from: type=gha
+        cache-to: type=gha,mode=max
+
+    - name: Build & Push Arkhe Relayer
+      uses: docker/build-push-action@v5
+      with:
+        context: .
+        file: ./Dockerfile.relayer
+        push: true
+        tags: ${{ steps.meta-relayer.outputs.tags }}
+        labels: ${{ steps.meta-relayer.outputs.labels }}
+        cache-from: type=gha
+        cache-to: type=gha,mode=max
 
   deploy-subagents:
+    name: 🜏 Subagent Orchestration
     needs: docker-publish
     runs-on: ubuntu-latest
-    if: github.ref == 'refs/heads/main'
+    if: github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/tags/v')
     steps:
     - uses: actions/checkout@v4
-    - name: Subagent Skopos: Coordinate Deployment
-      run: python3 scripts/subagent_deploy.py --target production
+    - name: Subagent Skopos: Coordinate Deployment & Hermes Distribution
+      run: |
+        DIST_FLAG=""
+        if [[ "${{ github.ref }}" == refs/tags/v* ]]; then
+          DIST_FLAG="--distribute"
+        fi
+        python3 scripts/subagent_deploy.py --target production $DIST_FLAG
 
-  deploy-aws-eks:
+  deploy-multi-cloud:
+    name: ☁️ Multi-Cloud Materialization
     needs: deploy-subagents
     runs-on: ubuntu-latest
-    environment: production-aws
+    if: github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/tags/v')
     steps:
-    - name: Deploy to AWS EKS (Primary Tzinor Node)
+    - uses: actions/checkout@v4
+    - name: Deploy to AWS EKS & GCP GKE
       run: |
-        echo "Applying manifests to AWS EKS..."
-        # kubectl apply -f k8s/arkhen-deployment.yaml
-        # kubectl apply -f k8s/arkhen-network.yaml
-
-  deploy-gcp-gke:
-    needs: deploy-subagents
-    runs-on: ubuntu-latest
-    environment: production-gcp
-    steps:
-    - name: Deploy to GCP GKE (Secondary Tzinor Node)
-      run: |
-        echo "Applying manifests to GCP GKE..."
-        # kubectl apply -f k8s/arkhen-deployment.yaml
-        # kubectl apply -f k8s/arkhen-network.yaml
+        echo "🜏 Applying manifests to AWS EKS (Primary)..."
+        # kubectl apply -f k8s/
+        echo "🜏 Applying manifests to GCP GKE (Secondary)..."
+        # kubectl apply -f k8s/
