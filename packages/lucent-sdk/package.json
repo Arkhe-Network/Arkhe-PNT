@@ -1,0 +1,20 @@
+{
+  "name": "@arkhe-network/lucent-sdk",
+  "version": "1.0.0",
+  "description": "SDK for Lucent Engine in Arkhe Network",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "publish": "npm publish"
+  },
+  "devDependencies": {
+    "typescript": "^5.0.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Arkhe-Network/Arkhe-PNT.git"
+  },
+  "author": "Arkhe Network",
+  "license": "MIT"
+}
