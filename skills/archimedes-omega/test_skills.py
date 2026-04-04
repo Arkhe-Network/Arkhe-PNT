@@ -14,8 +14,40 @@ from skills import (
     simulate_w_state_coherence,
     detect_peaks,
     synthesize_conclusion,
-    visualize_topology
+    visualize_topology,
+    evaluate_eqbe_safety
 )
+
+
+# ============================================================
+# Testes: evaluate_eqbe_safety (Ético / EQBE)
+# ============================================================
+def test_evaluate_eqbe_safety_passed():
+    """Verifica sucesso na auditoria quando critérios são atendidos."""
+    theta = np.linspace(0, 1, 100)
+    coherence = np.zeros(100) # Baixa interferência
+    metadata = {"has_kill_switch": True, "timestamp": "2025-01-20"}
+
+    # Mockando np.random.random para evitar falha aleatória no teste de leakage
+    import unittest.mock as mock
+    with mock.patch('numpy.random.random', return_value=0.5):
+        report = evaluate_eqbe_safety("test_intervention", coherence, metadata)
+
+    assert bool(report["is_safe"]) is True
+    assert report["checks"]["leakage_test"] == "PASSED"
+    assert report["checks"]["reversibility"] == "PASSED"
+
+
+def test_evaluate_eqbe_safety_failed_no_kill_switch():
+    """Verifica falha na auditoria quando não há kill switch."""
+    theta = np.linspace(0, 1, 100)
+    coherence = np.zeros(100)
+    metadata = {"has_kill_switch": False}
+
+    report = evaluate_eqbe_safety("unsafe_intervention", coherence, metadata)
+
+    assert report["is_safe"] is False
+    assert report["checks"]["reversibility"] == "FAILED"
 
 
 # ============================================================
