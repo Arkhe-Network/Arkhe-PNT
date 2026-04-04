@@ -2,6 +2,7 @@ import argparse
 import time
 import random
 import sys
+import subprocess
 
 def techne_check():
     print("🜏 [Techne] Verificando artefatos de build...")
@@ -28,7 +29,7 @@ def kairos_forecast():
         print("🜏 [Kairos] Instabilidade detectada. Aguardando fase harmônica.")
         return False
 
-def skopos_deploy(target):
+def skopos_deploy(target, distribute=False):
     print(f"🜏 [Skopos] Coordenando materialização para o ambiente: {target}")
 
     if not techne_check():
@@ -38,6 +39,15 @@ def skopos_deploy(target):
     if not kairos_forecast():
         return False
 
+    if distribute:
+        print("🜏 [Skopos] Gatilho de distribuição detectado. Invocando Subagente Hermes...")
+        try:
+            subprocess.run([sys.executable, "scripts/publish_packages.py", "all"], check=True)
+            print("🜏 [Hermes] Distribuição multi-registry concluída.")
+        except subprocess.CalledProcessError:
+            print("✗ [Hermes] Falha na distribuição de pacotes.")
+            return False
+
     print(f"🜏 [Skopos] Todos os subagentes em consenso. Iniciando deploy em {target}...")
     time.sleep(2)
     print(f"🜏 [Skopos] Materialização concluída com sucesso no ambiente {target}.")
@@ -46,9 +56,10 @@ def skopos_deploy(target):
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Arkhe(n) Subagent Deployment Orchestrator")
     parser.add_argument("--target", type=str, default="staging", help="Target environment (staging/production)")
+    parser.add_argument("--distribute", action="store_true", help="Trigger multi-registry package distribution via Hermes")
     args = parser.parse_args()
 
-    success = skopos_deploy(args.target)
+    success = skopos_deploy(args.target, distribute=args.distribute)
     if not success:
         print("🜏 [Skopos] Abortando deploy devido a falta de consenso dos subagentes.")
         sys.exit(1)
