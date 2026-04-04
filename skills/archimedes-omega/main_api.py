@@ -1,0 +1,244 @@
+from fastapi import FastAPI, HTTPException
+from pydantic import BaseModel, Field
+from typing import List, Optional, Dict, Any
+import numpy as np
+from datetime import datetime
+import logging
+import uuid
+
+from skills import (
+    simulate_su2_continuous,
+    simulate_sl3z_discrete,
+    simulate_w_state_coherence,
+    detect_peaks,
+    synthesize_conclusion
+)
+
+# Logging configuration
+logging.basicConfig(level=logging.INFO, format='[%(levelname)s] %(message)s')
+logger = logging.getLogger(__name__)
+
+app = FastAPI(
+    title="Archimedes-Ω Agent API",
+    description="API for the Archimedes-Ω coherence interrogation agent.",
+    version="2.1.0"
+)
+
+# --- Schemas ---
+
+class SU2Request(BaseModel):
+    theta_range: List[float] = [0.0, 6.283185307179586]
+    num_points: int = Field(1000, ge=10, le=100000)
+    thermal_noise: float = Field(0.05, ge=0, le=1)
+    temperature: float = Field(310, ge=0)
+
+class SL3ZRequest(BaseModel):
+    theta_range: List[float] = [0.0, 6.283185307179586]
+    num_points: int = Field(1000, ge=10, le=100000)
+    words: List[str] = ["e", "a", "b", "ab", "ba", "aba"]
+
+class WStateRequest(BaseModel):
+    nodes: int = Field(3, ge=3, le=10)
+    loss_probability: float = Field(0.2, ge=0, le=1)
+    theta_range: List[float] = Field([0.0, 6.283185307179586], min_length=2, max_length=2)
+    num_points: int = Field(1000, ge=10, le=100000)
+
+class CoherenceResponse(BaseModel):
+    phases: List[float]
+    coherence: List[float]
+
+class PeakDetectionRequest(BaseModel):
+    phases: List[float]
+    coherence: List[float]
+    threshold_multiplier: float = 1.2
+    min_prominence: float = 0.05
+
+class PeakInfo(BaseModel):
+    phase: float
+    phase_degrees: float
+    coherence: float
+    prominence: float
+    is_resonance: bool
+    index: int
+
+class PeakDetectionResponse(BaseModel):
+    peaks: List[PeakInfo]
+
+class AnalysisRequest(BaseModel):
+    data_source: str # simulated or experimental
+    su2_params: Optional[SU2Request] = None
+    sl3z_params: Optional[SL3ZRequest] = None
+    w_state_params: Optional[WStateRequest] = None
+    detection_params: Optional[Dict[str, float]] = {"threshold_multiplier": 1.2, "min_prominence": 0.05}
+    experimental_data: Optional[Dict[str, List[float]]] = None
+
+class Conclusion(BaseModel):
+    status: str = Field(..., description="W‑STATE_CONFIRMED, PARTIAL_W_STATE, NO_W_STATE, DISCRETE_LATTICE_CONFIRMED, PARTIAL_SIGNAL, NO_SIGNAL, INCONCLUSIVE")
+    peaks_total: int
+    peaks_in_resonance: int
+    max_coherence: float
+    interpretation: str
+    philosophical_note: str
+
+class AnalysisResponse(BaseModel):
+    id: str
+    timestamp: str
+    data_source: str
+    peaks: List[PeakInfo]
+    conclusion: Conclusion
+    output_file: Optional[str] = None
+
+class TeleportationRequest(BaseModel):
+    phases: List[float]
+    coherence: List[float]
+    nodes: int = Field(3, ge=3)
+    loss_probability: float = Field(0.2, ge=0, le=1)
+
+class TeleportationResponse(BaseModel):
+    resource_type: str = "W‑State"
+    teleportation_ready: bool
+    robustness_score: float
+    has_2pi3_resonance: bool
+    status: str
+    interpretation: str
+    philosophical_note: str
+
+# --- Endpoints ---
+
+@app.post("/simulate/su2", response_model=CoherenceResponse, tags=["simulation"])
+async def simulate_su2(req: SU2Request):
+    theta = np.linspace(req.theta_range[0], req.theta_range[1], req.num_points)
+    phases, coherence = simulate_su2_continuous(theta, req.thermal_noise, req.temperature)
+    return {"phases": phases.tolist(), "coherence": coherence.tolist()}
+
+@app.post("/simulate/sl3z", response_model=CoherenceResponse, tags=["simulation"])
+async def simulate_sl3z(req: SL3ZRequest):
+    theta = np.linspace(req.theta_range[0], req.theta_range[1], req.num_points)
+    phases, coherence = simulate_sl3z_discrete(theta, req.words)
+    return {"phases": phases.tolist(), "coherence": coherence.tolist()}
+
+@app.post("/simulate/wstate", response_model=CoherenceResponse, tags=["simulation"])
+async def simulate_wstate(req: WStateRequest):
+    theta = np.linspace(req.theta_range[0], req.theta_range[1], req.num_points)
+    phases, coherence = simulate_w_state_coherence(
+        nodes=req.nodes,
+        loss_probability=req.loss_probability,
+        theta_range=theta
+    )
+    return {"phases": phases.tolist(), "coherence": coherence.tolist()}
+
+@app.post("/detect/peaks", response_model=PeakDetectionResponse, tags=["detection"])
+async def detect_peaks_endpoint(req: PeakDetectionRequest):
+    peaks = detect_peaks(
+        np.array(req.coherence),
+        np.array(req.phases),
+        req.threshold_multiplier,
+        req.min_prominence
+    )
+    return {"peaks": peaks}
+
+@app.post("/analyze", response_model=AnalysisResponse, tags=["analysis"])
+async def analyze_endpoint(req: AnalysisRequest):
+    """
+    Complete interrogation pipeline.
+    """
+    timestamp = datetime.now().isoformat()
+    analysis_id = str(uuid.uuid4())
+
+    if req.data_source == "experimental":
+        if not req.experimental_data or "phases" not in req.experimental_data or "coherence" not in req.experimental_data:
+            raise HTTPException(status_code=400, detail="Experimental data missing")
+        phases = np.array(req.experimental_data["phases"])
+        coherence = np.array(req.experimental_data["coherence"])
+    else:
+        # Generate simulated data (Hybrid by default if not specified)
+        theta = np.linspace(0.01, 2 * np.pi, 1000)
+
+        # SU(2) component
+        su2_p = req.su2_params or SU2Request(num_points=1000)
+        _, coh_su2 = simulate_su2_continuous(theta, su2_p.thermal_noise, su2_p.temperature)
+
+        # SL(3,Z) component
+        sl3z_p = req.sl3z_params or SL3ZRequest(num_points=1000)
+        _, coh_sl3 = simulate_sl3z_discrete(theta, sl3z_p.words)
+
+        phases = theta
+        coherence = 0.3 * coh_su2 + 0.7 * coh_sl3
+
+    # Detection
+    det_p = req.detection_params or {"threshold_multiplier": 1.2, "min_prominence": 0.05}
+    peaks = detect_peaks(
+        coherence,
+        phases,
+        det_p.get("threshold_multiplier", 1.2),
+        det_p.get("min_prominence", 0.05)
+    )
+
+    # Conclusion
+    conclusion = synthesize_conclusion(peaks, threshold=0.95)
+
+    return {
+        "id": analysis_id,
+        "timestamp": timestamp,
+        "data_source": req.data_source,
+        "peaks": peaks,
+        "conclusion": conclusion
+    }
+
+@app.post("/analyze/teleportation-resource", response_model=TeleportationResponse, tags=["teleportation"])
+async def check_w_state(req: TeleportationRequest):
+    """
+    Assess whether the measured coherence matches a W‑state profile.
+    Returns a teleportation readiness score and a verdict.
+    """
+    # Generate ideal W‑state profile
+    theta_range, w_profile = simulate_w_state_coherence(
+        nodes=req.nodes,
+        loss_probability=req.loss_probability,
+        theta_range=np.array(req.phases)
+    )
+
+    # Detect peaks in measured data
+    # Use standard defaults
+    measured_peaks = detect_peaks(np.array(req.coherence), np.array(req.phases))
+
+    # Check for 2π/3 resonance (tripartite peak)
+    target = 2 * np.pi / 3
+    tolerance = 0.15
+    has_resonance = any(abs(p['phase'] - target) < tolerance for p in measured_peaks)
+
+    # Compute robustness score (normalized cross‑correlation between measured and ideal)
+    norm_measured = np.array(req.coherence) / (np.linalg.norm(req.coherence) + 1e-15)
+    norm_profile = w_profile / (np.linalg.norm(w_profile) + 1e-15)
+    robustness = float(np.clip(np.sum(norm_measured * norm_profile), 0, 1))
+
+    # Synthesise conclusion
+    if has_resonance and robustness > 0.7:
+        status = "W‑STATE_CONFIRMED"
+        interpretation = "Strong W‑state signature detected. Teleportation resource available."
+        teleportation_ready = True
+    elif robustness > 0.5:
+        status = "PARTIAL_W_STATE"
+        interpretation = "Partial W‑state coherence; possible mixed state or incomplete entanglement."
+        teleportation_ready = False
+    else:
+        status = "NO_W_STATE"
+        interpretation = "No W‑state coherence detected. Teleportation not feasible."
+        teleportation_ready = False
+
+    # Get philosophical note from existing synthesis logic
+    conclusion = synthesize_conclusion(measured_peaks, threshold=0.95)
+
+    return {
+        "resource_type": "W‑State",
+        "teleportation_ready": teleportation_ready,
+        "robustness_score": robustness,
+        "has_2pi3_resonance": has_resonance,
+        "status": status,
+        "interpretation": interpretation,
+        "philosophical_note": conclusion["philosophical_note"]
+    }
+
+if __name__ == "__main__":
+    import uvicorn
+    uvicorn.run(app, host="0.0.0.0", port=8080)
