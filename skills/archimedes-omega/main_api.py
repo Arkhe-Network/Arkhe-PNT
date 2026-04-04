@@ -1,7 +1,8 @@
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, WebSocket, WebSocketDisconnect
 from pydantic import BaseModel, Field
-from typing import List, Optional, Dict, Any, Tuple
+from typing import List, Optional, Dict, Any
 import numpy as np
+import asyncio
 from datetime import datetime
 import logging
 import uuid
@@ -11,14 +12,9 @@ from skills import (
     simulate_sl3z_discrete,
     simulate_w_state_coherence,
     detect_peaks,
-    synthesize_conclusion
-)
-
-from protocol_optimizer import (
-    LIPUSParameters,
-    DrugPayload,
-    CombinedProtocolOptimizer,
-    CombinedProtocolResult
+    synthesize_conclusion,
+    optimize_lipus_drug_interval,
+    estimate_glymphatic_clearance
 )
 
 # Logging configuration
@@ -27,8 +23,8 @@ logger = logging.getLogger(__name__)
 
 app = FastAPI(
     title="Archimedes-Ω Agent API",
-    description="API for the Archimedes-Ω coherence interrogation agent and therapeutic optimization.",
-    version="2.2.0"
+    description="API for the Archimedes-Ω coherence interrogation agent.",
+    version="2.1.0"
 )
 
 # --- Schemas ---
@@ -110,29 +106,12 @@ class TeleportationResponse(BaseModel):
     interpretation: str
     philosophical_note: str
 
-class LIPUSParamsSchema(BaseModel):
-    intensity_mw_cm2: float
-    frequency_mhz: float
-    duration_minutes: float
-    mi: float
-
-class DrugPayloadSchema(BaseModel):
-    particle_size_nm: float
-    surface_charge_mv: float
-    entanglement_degree: float
-    half_life_hours: float
-
-class CombinedProtocolRequest(BaseModel):
-    lipus: LIPUSParamsSchema
-    drug: DrugPayloadSchema
-
-class CombinedProtocolResponse(BaseModel):
-    optimal_interval_hours: float
-    predicted_absorption_efficiency: float
-    clearance_boost_factor: float
-    safety_margin: float
-    tissue_states: List[Tuple[float, str]]
-    recommendation: str
+class OptimizationRequest(BaseModel):
+    t_peak: float = Field(30.0, description="Tempo até pico de abertura da BBE (min)")
+    t_decay: float = Field(60.0, description="Constante de decaimento da permeabilidade (min)")
+    drug_halflife: float = Field(120.0, description="Meia-vida do fármaco na corrente sanguínea (min)")
+    microbubbles: bool = True
+    mi: float = Field(0.4, description="Mechanical Index (0.1-0.6)")
 
 # --- Endpoints ---
 
@@ -270,31 +249,58 @@ async def check_w_state(req: TeleportationRequest):
         "philosophical_note": conclusion["philosophical_note"]
     }
 
-@app.post("/therapy/combined-protocol", response_model=CombinedProtocolResponse, tags=["therapy", "optimization"])
-async def optimize_combined_protocol(req: CombinedProtocolRequest):
+@app.post("/therapy/optimize-combined-protocol", tags=["therapy"])
+async def optimize_combined_protocol(req: OptimizationRequest):
     """
-    Optimize combined LIPUS + quantum drug protocol.
+    Retorna o intervalo ideal entre LIPUS e administração de fármaco,
+    bem como a absorção esperada.
     """
+    result = optimize_lipus_drug_interval(
+        t_peak=req.t_peak,
+        t_decay=req.t_decay,
+        drug_halflife=req.drug_halflife,
+        microbubbles=req.microbubbles,
+        mi=req.mi
+    )
+    # Adiciona nota filosófica
+    result["philosophical_note"] = (
+        "A janela de oportunidade é o intervalo onde a permeabilidade da barreira "
+        "e a presença do fármaco se entrelaçam. O ultrassom abre a cancela; o relógio "
+        "do medicamento decide se a cura chegará a tempo."
+    )
+    return result
+
+@app.websocket("/therapy/monitoring")
+async def websocket_glymphatic_monitor(websocket: WebSocket):
+    await websocket.accept()
     try:
-        lipus = LIPUSParameters(**req.lipus.model_dump())
-        drug = DrugPayload(**req.drug.model_dump())
+        # Parâmetros da sessão (enviados uma vez na primeira mensagem)
+        session_params = await websocket.receive_json()
+        lipus_intensity = session_params.get("lipus_intensity_mw_cm2", 150.0)
+        baseline_coherence = session_params.get("baseline_coherence", 0.3)
 
-        optimizer = CombinedProtocolOptimizer(lipus, drug)
-        result = optimizer.optimize()
+        while True:
+            # Recebe pacote com dados de coerência em tempo real
+            data = await websocket.receive_json()
+            fret_coherence = data.get("fret_coherence")
+            phase_angle = data.get("phase_angle", 0.0)
+            elapsed_minutes = data.get("elapsed_minutes", 0.0)
 
-        return {
-            "optimal_interval_hours": result.optimal_interval_hours,
-            "predicted_absorption_efficiency": result.predicted_absorption_efficiency,
-            "clearance_boost_factor": result.clearance_boost_factor,
-            "safety_margin": result.safety_margin,
-            "tissue_states": result.tissue_states,
-            "recommendation": result.recommendation
-        }
-    except ValueError as e:
-        raise HTTPException(status_code=400, detail=str(e))
-    except Exception as e:
-        logger.error(f"Error optimizing protocol: {e}")
-        raise HTTPException(status_code=500, detail="Internal server error")
+            if fret_coherence is None:
+                await websocket.send_json({"error": "Missing fret_coherence"})
+                continue
+
+            result = estimate_glymphatic_clearance(
+                fret_coherence=fret_coherence,
+                phase_angle=phase_angle,
+                lipus_intensity_mw_cm2=lipus_intensity,
+                elapsed_minutes=elapsed_minutes,
+                baseline_coherence=baseline_coherence
+            )
+            await websocket.send_json(result)
+
+    except WebSocketDisconnect:
+        logger.info("Cliente desconectado do monitoramento")
 
 if __name__ == "__main__":
     import uvicorn

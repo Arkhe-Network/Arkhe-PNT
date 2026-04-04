@@ -63,13 +63,5 @@ namespace Arkhe.ArchimedesAgent
             var response = await _client.ExecuteAsync(req);
             return response.Content;
         }
-
-        public async Task<string> OptimizeCombinedProtocolAsync(object lipus, object drug)
-        {
-            var req = new RestRequest("/therapy/combined-protocol", Method.Post);
-            req.AddJsonBody(new { lipus = lipus, drug = drug });
-            var response = await _client.ExecuteAsync(req);
-            return response.Content;
-        }
     }
 }

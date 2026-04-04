@@ -6,8 +6,7 @@ info:
     Provides endpoints for simulating quantum coherence under SU(2) (continuous),
     SL(3,ℤ) (discrete), and W‑state (multipartite entanglement) models.
     Detects resonance peaks and assesses teleportation readiness.
-    Includes therapeutic protocol optimization for combined LIPUS and quantum drug delivery.
-  version: 2.2.0
+  version: 2.1.0
   contact:
     name: Arkhe Consortium
     url: https://github.com/arkhe/archimedes-agent
@@ -31,7 +30,7 @@ tags:
   - name: teleportation
     description: W‑state and teleportation resource assessment
   - name: therapy
-    description: Therapeutic protocol optimization
+    description: Protocol optimization and real-time monitoring
 
 paths:
   /simulate/su2:
@@ -198,13 +197,12 @@ paths:
         '500':
           description: Internal server error
 
-  /therapy/combined-protocol:
+  /therapy/optimize-combined-protocol:
     post:
-      summary: Optimize combined LIPUS + quantum drug protocol
+      summary: Otimiza intervalo entre LIPUS e administração de fármaco
       description: |
-        Calculates the optimal timing interval between LIPUS therapy and quantum
-        drug administration to maximize BBE permeability and clearance efficiency.
-        Uses a phase-coupled oscillator model with tissue state transitions.
+        Calcula o melhor momento para administrar um fármaco após a abertura da BBE
+        induzida por LIPUS, maximizando a absorção cerebral.
       operationId: optimizeCombinedProtocol
       tags: [therapy]
       requestBody:
@@ -212,18 +210,68 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/CombinedProtocolRequest'
+              type: object
+              properties:
+                t_peak:
+                  type: number
+                  default: 30.0
+                  description: Tempo até pico de abertura da BBE (min)
+                t_decay:
+                  type: number
+                  default: 60.0
+                  description: Constante de decaimento da permeabilidade (min)
+                drug_halflife:
+                  type: number
+                  default: 120.0
+                  description: Meia-vida do fármaco na corrente sanguínea (min)
+                microbubbles:
+                  type: boolean
+                  default: true
+                mi:
+                  type: number
+                  default: 0.4
+                  description: Mechanical Index (0.1-0.6)
       responses:
         '200':
-          description: Optimized protocol result
+          description: Intervalo ótimo e absorção prevista
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/CombinedProtocolResponse'
-        '400':
-          description: Invalid input parameters
-        '500':
-          description: Internal server error
+                type: object
+                properties:
+                  optimal_interval_min:
+                    type: number
+                  relative_absorption:
+                    type: number
+                  peak_permeability:
+                    type: number
+                  time_above_half_min:
+                    type: number
+                  philosophical_note:
+                    type: string
+
+  /therapy/monitoring:
+    get:
+      summary: WebSocket para monitoramento em tempo real da limpeza glinfática
+      description: |
+        Conecta via WebSocket para receber dados contínuos de coerência FRET
+        durante a sessão de LIPUS e retorna a eficácia estimada da limpeza.
+      responses:
+        '101':
+          description: WebSocket connection upgraded
+      x-webSocket:
+        messageSchema:
+          type: object
+          properties:
+            fret_coherence:
+              type: number
+              description: Coerência FRET atual (0-1)
+            phase_angle:
+              type: number
+              description: Ângulo de fase (rad)
+            elapsed_minutes:
+              type: number
+              description: Minutos decorridos desde o início da sessão
 
 components:
   schemas:
@@ -456,42 +504,6 @@ components:
         - teleportation_ready
         - robustness_score
         - status
-
-    CombinedProtocolRequest:
-      type: object
-      properties:
-        lipus:
-          type: object
-          properties:
-            intensity_mw_cm2: { type: number, format: double }
-            frequency_mhz: { type: number, format: double }
-            duration_minutes: { type: number, format: double }
-            mi: { type: number, format: double }
-          required: [intensity_mw_cm2, frequency_mhz, duration_minutes, mi]
-        drug:
-          type: object
-          properties:
-            particle_size_nm: { type: number, format: double }
-            surface_charge_mv: { type: number, format: double }
-            entanglement_degree: { type: number, format: double }
-            half_life_hours: { type: number, format: double }
-          required: [particle_size_nm, surface_charge_mv, entanglement_degree, half_life_hours]
-      required: [lipus, drug]
-
-    CombinedProtocolResponse:
-      type: object
-      properties:
-        optimal_interval_hours: { type: number, format: double }
-        predicted_absorption_efficiency: { type: number, format: double }
-        clearance_boost_factor: { type: number, format: double }
-        safety_margin: { type: number, format: double }
-        tissue_states:
-          type: array
-          items:
-            type: array
-            items: { oneOf: [{ type: number }, { type: string }] }
-        recommendation: { type: string }
-      required: [optimal_interval_hours, predicted_absorption_efficiency, clearance_boost_factor, recommendation]
 
     AnalysisRequest:
       type: object

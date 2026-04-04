@@ -141,3 +141,37 @@ x:ensuresSLA a owl:ObjectProperty ;
     rdfs:domain x:Tzinor ;
     rdfs:range x:ServiceSLA ;
     rdfs:comment "Garante que o operador mantém um determinado nível de coerência." .
+
+### --- EQBE PROTOCOL EXTENSIONS ---
+
+x:EQBEProtocol a owl:Class ;
+    rdfs:label "Protocolo EQBE" ;
+    rdfs:comment "Ethical Quantum-Biological Engineering protocol. Regras para intervenção ética em substratos quântico-biológicos." .
+
+x:EthicalGuardrail a owl:Class ;
+    rdfs:label "Barreira Ética" ;
+    rdfs:comment "Um mecanismo ou princípio projetado para manter a integridade biológica e ética." .
+
+x:RedLine a owl:Class ;
+    rdfs:subClassOf x:EthicalGuardrail ;
+    rdfs:label "Linha Vermelha" ;
+    rdfs:comment "Atividades proibidas que invalidam a conformidade do sistema (ex: weaponization)." .
+
+x:TechnicalSafeguard a owl:Class ;
+    rdfs:label "Salvaguarda Técnica" ;
+    rdfs:comment "Requisito técnico obrigatório para experimentos EQBE (ex: kill switches)." .
+
+x:isEQBECompliant a owl:DatatypeProperty ;
+    rdfs:domain x:Tzinor ;
+    rdfs:range xsd:boolean ;
+    rdfs:comment "Indica se o operador ou experimento está em conformidade com o protocolo EQBE." .
+
+x:hasRedLineViolation a owl:ObjectProperty ;
+    rdfs:domain x:Phase ;
+    rdfs:range x:RedLine ;
+    rdfs:comment "Associa uma intenção ou estado a uma violação de linha vermelha do EQBE." .
+
+x:verifiedBy a owl:ObjectProperty ;
+    rdfs:domain x:EQBEProtocol ;
+    rdfs:range x:Organization ;
+    rdfs:comment "A organização ou comitê que verifica a conformidade com o protocolo." .

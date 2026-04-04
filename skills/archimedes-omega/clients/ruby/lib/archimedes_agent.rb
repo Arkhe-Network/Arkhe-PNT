@@ -39,10 +39,4 @@ class ArchimedesClient
     response = self.class.post("#{@base_uri}/analyze/teleportation-resource", body: payload.to_json, headers: { 'Content-Type' => 'application/json' })
     response.parsed_response
   end
-
-  def optimize_combined_protocol(lipus, drug)
-    payload = { lipus: lipus, drug: drug }
-    response = self.class.post("#{@base_uri}/therapy/combined-protocol", body: payload.to_json, headers: { 'Content-Type' => 'application/json' })
-    response.parsed_response
-  end
 end

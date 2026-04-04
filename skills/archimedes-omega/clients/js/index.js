@@ -36,12 +36,6 @@ class ArchimedesClient {
     const response = await this.client.post("/analyze/teleportation-resource", payload);
     return response.data;
   }
-
-  async optimizeCombinedProtocol(lipus, drug) {
-    const payload = { lipus, drug };
-    const response = await this.client.post("/therapy/combined-protocol", payload);
-    return response.data;
-  }
 }
 
 module.exports = { ArchimedesClient };

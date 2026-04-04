@@ -100,21 +100,4 @@ public class ArchimedesClient {
             return response.body().string();
         }
     }
-
-    public String optimizeCombinedProtocol(Object lipus, Object drug) throws IOException {
-        Map<String, Object> payload = new HashMap<>();
-        payload.put("lipus", lipus);
-        payload.put("drug", drug);
-
-        String json = gson.toJson(payload);
-        RequestBody body = RequestBody.create(json, MediaType.get("application/json"));
-        Request httpRequest = new Request.Builder()
-                .url(baseUrl + "/therapy/combined-protocol")
-                .post(body)
-                .build();
-        try (Response response = httpClient.newCall(httpRequest).execute()) {
-            if (!response.isSuccessful()) throw new IOException("Unexpected code " + response);
-            return response.body().string();
-        }
-    }
 }
