@@ -11,6 +11,7 @@ from skills import (
     load_baseline,
     simulate_su2_continuous,
     simulate_sl3z_discrete,
+    simulate_fibonacci_braid,
     simulate_w_state_coherence,
     detect_peaks,
     synthesize_conclusion,
@@ -178,6 +179,34 @@ def test_simulate_su2_continuous_temperature_effect():
 
 
 # ============================================================
+# Testes: simulate_fibonacci_braid (Topológico/Computacional)
+# ============================================================
+def test_simulate_fibonacci_braid_admissible():
+    """Verifica comportamento dentro da região admissível."""
+    result = simulate_fibonacci_braid(
+        dalpha=0.0,
+        epsilon=0.0,
+        eta=0.0,
+        lambda_=0.0
+    )
+    assert result["admissible"] is True
+    assert result["braid_fidelity"] == 1.0
+    assert result["leakage_probability"] == 0.0
+
+
+def test_simulate_fibonacci_braid_outside_tolerance():
+    """Verifica comportamento fora da região admissível."""
+    result = simulate_fibonacci_braid(
+        dalpha=0.1, # Muito acima do bound de ~0.004
+        epsilon=0.0,
+        eta=0.0,
+        lambda_=0.0
+    )
+    assert result["admissible"] is False
+    assert result["braid_fidelity"] < 1.0
+
+
+# ============================================================
 # Testes: simulate_sl3z_discrete (Espacial/Musical)
 # ============================================================
 def test_simulate_sl3z_discrete_output_shape(theta_range):
@@ -252,11 +281,25 @@ def test_detect_peaks_no_peaks():
 # ============================================================
 # Testes: synthesize_conclusion (Criativo/Existencial)
 # ============================================================
+def test_synthesize_conclusion_fibonacci_confirmed():
+    """Testa confirmação de trança de Fibonacci."""
+    peaks = [
+        {'phase': np.pi/5, 'coherence': 0.98, 'is_resonance': True, 'fivefold_deviation_rad': 0.0},
+        {'phase': 2*np.pi/5, 'coherence': 0.97, 'is_resonance': True, 'fivefold_deviation_rad': 0.0},
+        {'phase': 4*np.pi/5, 'coherence': 0.96, 'is_resonance': True, 'fivefold_deviation_rad': 0.0}
+    ]
+
+    conclusion = synthesize_conclusion(peaks, threshold=0.95)
+
+    assert conclusion['status'] == "FIBONACCI_BRAID_CONFIRMED"
+    assert "Trança de Fibonacci" in conclusion['interpretation']
+
+
 def test_synthesize_conclusion_discrete_confirmed():
     """Testa confirmação de reticulado discreto."""
     peaks = [
-        {'phase': np.pi/5, 'coherence': 0.98, 'is_resonance': True},
-        {'phase': 2*np.pi/5, 'coherence': 0.96, 'is_resonance': True}
+        {'phase': np.pi/5, 'coherence': 0.98, 'is_resonance': True, 'fivefold_deviation_rad': 0.0},
+        {'phase': 2*np.pi/5, 'coherence': 0.96, 'is_resonance': True, 'fivefold_deviation_rad': 0.0}
     ]
 
     conclusion = synthesize_conclusion(peaks, threshold=0.95)
