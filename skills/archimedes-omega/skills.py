@@ -99,6 +99,83 @@ def simulate_sl3z_discrete(
 # ============================================================
 # [QUÂNTICO / COLETIVO] - Simulação de Estado W
 # ============================================================
+def get_rainbow_factor(energy_ev: float) -> float:
+    """
+    Calcula o fator de escala da métrica rainbow: f(E) = 1 / (1 - E/E_res).
+    E_res = 0.041 eV (~10 THz).
+    """
+    E_res = 0.041
+    if abs(energy_ev - E_res) < 1e-6:
+        return 100.0  # Cap para estabilidade numérica
+    return 1.0 / (1.0 - (energy_ev / E_res))
+
+def rainbow_coherence(base_coherence: float, cartan_angle: float, energy_ev: float) -> float:
+    """
+    Aplica o deslocamento da métrica rainbow.
+    energy_ev: energia característica do sistema (ex: frequência THz convertida para eV)
+    """
+    rainbow_factor = get_rainbow_factor(energy_ev)
+    # O ângulo efetivo de Cartan é modulado
+    effective_cartan = cartan_angle * rainbow_factor
+    # Nova coerência baseada no ângulo efetivo (centrada em pi/5)
+    return base_coherence * np.exp(-((effective_cartan - np.pi/5)**2) / 0.001)
+
+def simulate_rainbow_sl3z(
+    theta_range: Optional[np.ndarray] = None,
+    energy_ev: float = 0.0,
+    words: List[str] = None
+) -> Tuple[np.ndarray, np.ndarray]:
+    """
+    Simula o modelo SL(3,ℤ) com deslocamento da métrica rainbow.
+    """
+    if theta_range is None:
+        theta_range = np.linspace(0, 2*np.pi, 1000)
+
+    if words is None:
+        words = ["e", "a", "b", "ab", "ba", "aba"]
+
+    rainbow_factor = get_rainbow_factor(energy_ev)
+
+    # Coerência com picos deslocados
+    coherence = np.zeros_like(theta_range)
+    pi_over_5 = np.pi / 5
+
+    for word in words:
+        # A ressonância nominal len(word) * pi/5 é "vista" em um ângulo diferente pela métrica rainbow
+        # O ângulo físico theta que sintoniza a ressonância é theta = (len(word) * pi/5) / rainbow_factor
+        shifted_resonance = (len(word) * pi_over_5) / rainbow_factor
+        resonance = np.exp(-((theta_range - shifted_resonance) ** 2) / 0.01)
+        coherence += resonance / len(words)
+
+    coherence = np.clip(coherence, 0, 1)
+    return theta_range, coherence
+
+def simulate_rainbow_w_state(
+    nodes: int = 3,
+    loss_probability: float = 0.2,
+    theta_range: Optional[np.ndarray] = None,
+    energy_ev: float = 0.0
+) -> Tuple[np.ndarray, np.ndarray]:
+    """
+    Simula o estado W com deslocamento da métrica rainbow.
+    """
+    if theta_range is None:
+        theta_range = np.linspace(0, 2*np.pi, 1000)
+
+    rainbow_factor = get_rainbow_factor(energy_ev)
+
+    # Ressonância nominal 2pi/3 deslocada
+    tripartite_resonance = (2 * np.pi / 3) / rainbow_factor
+    resilience = 1.0 - (1.0 / nodes)
+
+    base_signal = np.exp(-((theta_range - tripartite_resonance)**2) / 0.15)
+    persistent_floor = resilience * (1.0 - loss_probability)
+
+    coherence = np.maximum(base_signal, persistent_floor * 0.5)
+    coherence = np.clip(coherence, 0, 1)
+
+    return theta_range, coherence
+
 def simulate_w_state_coherence(
     nodes: int = 3,
     loss_probability: float = 0.2,
@@ -135,10 +212,11 @@ def detect_peaks(
     coherence_data: np.ndarray,
     phases: np.ndarray,
     threshold_multiplier: float = 1.5,
-    min_prominence: float = 0.1
+    min_prominence: float = 0.1,
+    energy_ev: Optional[float] = None
 ) -> List[Dict]:
     """
-    Usa janela deslizante para encontrar anomalias.
+    Usa janela deslizante para encontrar anomalias, considerando a métrica rainbow.
     """
     # Calcular limiar dinâmico
     baseline = np.median(coherence_data)
@@ -153,18 +231,38 @@ def detect_peaks(
         distance=10
     )
 
+    # Fator rainbow para ajustar a detecção de ressonância
+    rainbow_factor = get_rainbow_factor(energy_ev) if energy_ev is not None else 1.0
+
+    # Tolerância da largura de banda geodésica: 0.41° = 0.0071 rad
+    tolerance = 0.0071
+
     results = []
     for i, peak_idx in enumerate(peaks):
+        peak_phase = phases[peak_idx]
+
+        # Verifica se o pico coincide com uma ressonância nominal deslocada pela métrica rainbow
+        is_resonance = False
+        for n in range(1, 10): # Checa múltiplos de pi/5 e 2pi/3
+            targets = [n * np.pi / 5, n * 2 * np.pi / 3]
+            for target in targets:
+                shifted_target = target / rainbow_factor
+                if abs(peak_phase - shifted_target) < tolerance:
+                    is_resonance = True
+                    break
+            if is_resonance: break
+
         results.append({
-            'phase': phases[peak_idx],
-            'phase_degrees': np.degrees(phases[peak_idx]),
+            'phase': peak_phase,
+            'phase_degrees': np.degrees(peak_phase),
             'coherence': coherence_data[peak_idx],
             'prominence': properties['prominences'][i],
             'index': peak_idx,
-            'is_resonance': any(abs(phases[peak_idx] - n*np.pi/5) < 0.1 for n in range(1, 6))
+            'is_resonance': is_resonance,
+            'rainbow_shift': rainbow_factor
         })
 
-    logger.info(f"Detectados {len(results)} picos acima do limiar")
+    logger.info(f"Detectados {len(results)} picos acima do limiar (Energy={energy_ev} eV)")
     return results
 
 # ============================================================

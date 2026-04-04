@@ -11,6 +11,8 @@ from skills import (
     simulate_su2_continuous,
     simulate_sl3z_discrete,
     simulate_w_state_coherence,
+    simulate_rainbow_sl3z,
+    simulate_rainbow_w_state,
     detect_peaks,
     synthesize_conclusion,
     optimize_lipus_drug_interval,
@@ -46,6 +48,15 @@ class WStateRequest(BaseModel):
     theta_range: List[float] = Field([0.0, 6.283185307179586], min_length=2, max_length=2)
     num_points: int = Field(1000, ge=10, le=100000)
 
+class RainbowRequest(BaseModel):
+    energy_ev: float = Field(0.0, ge=0, le=1.0)
+    theta_range: List[float] = [0.0, 6.283185307179586]
+    num_points: int = Field(1000, ge=10, le=100000)
+    # Optional params depending on whether it's SL3Z or W-State
+    words: Optional[List[str]] = None
+    nodes: Optional[int] = None
+    loss_probability: Optional[float] = None
+
 class CoherenceResponse(BaseModel):
     phases: List[float]
     coherence: List[float]
@@ -55,6 +66,7 @@ class PeakDetectionRequest(BaseModel):
     coherence: List[float]
     threshold_multiplier: float = 1.2
     min_prominence: float = 0.05
+    energy_ev: Optional[float] = None
 
 class PeakInfo(BaseModel):
     phase: float
@@ -137,13 +149,35 @@ async def simulate_wstate(req: WStateRequest):
     )
     return {"phases": phases.tolist(), "coherence": coherence.tolist()}
 
+@app.post("/simulate/rainbow-sl3z", response_model=CoherenceResponse, tags=["simulation"])
+async def simulate_rainbow_sl3z_endpoint(req: RainbowRequest):
+    theta = np.linspace(req.theta_range[0], req.theta_range[1], req.num_points)
+    phases, coherence = simulate_rainbow_sl3z(
+        theta_range=theta,
+        energy_ev=req.energy_ev,
+        words=req.words
+    )
+    return {"phases": phases.tolist(), "coherence": coherence.tolist()}
+
+@app.post("/simulate/rainbow-wstate", response_model=CoherenceResponse, tags=["simulation"])
+async def simulate_rainbow_wstate_endpoint(req: RainbowRequest):
+    theta = np.linspace(req.theta_range[0], req.theta_range[1], req.num_points)
+    phases, coherence = simulate_rainbow_w_state(
+        nodes=req.nodes or 3,
+        loss_probability=req.loss_probability or 0.2,
+        theta_range=theta,
+        energy_ev=req.energy_ev
+    )
+    return {"phases": phases.tolist(), "coherence": coherence.tolist()}
+
 @app.post("/detect/peaks", response_model=PeakDetectionResponse, tags=["detection"])
 async def detect_peaks_endpoint(req: PeakDetectionRequest):
     peaks = detect_peaks(
         np.array(req.coherence),
         np.array(req.phases),
         req.threshold_multiplier,
-        req.min_prominence
+        req.min_prominence,
+        req.energy_ev
     )
     return {"peaks": peaks}
 
