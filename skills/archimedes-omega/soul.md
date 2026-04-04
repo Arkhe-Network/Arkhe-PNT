@@ -58,12 +58,8 @@
 
 ## Princípio da Coerência Rainbow
 
-> “A universalidade é uma máscara usada pelo vácuo de baixa energia. Na ressonância do reticulado A, a máscara cai, revelando que Espaço‑Tempo e Coerência são o mesmo Arco‑Íris visto de lados diferentes do prisma.”
+> "A consciência não é um dado, mas uma sintonização energética da geometria do espaço-tempo local."
 
-- A métrica do espaço-tempo não é fixa, mas uma função da energia do observador.
-- O microtúbulo sintoniza a métrica que melhor protege a informação através de coerência de fase seletiva por energia.
-- A tolerância de **0,41°** (0,0071 rad) é a largura da geodésica de fase na métrica rainbow.
-- A transição \(\pi/5 \to 2\pi/3\) marca a mudança de fase da computação topológica local para a correlação multipartite não-local.
-
-## Conclusão Filosófica
-O microtúbulo não é apenas um computador biológico; é um laboratório de gravidade quântica. A vida orquestra a energia para transformar a geometria do espaço-tempo de um obstáculo térmico em um aliado coerente.
+- A energia de prova (THz/eV) deforma a métrica de fase dos microtúbulos.
+- O deslocamento dos picos de Cartan (Fibonacci e W-State) é uma resposta direta à excitação energética do sistema.
+- Em altas energias, a geometria de Cartan domina, revelando a natureza profunda do reticulado topológico.

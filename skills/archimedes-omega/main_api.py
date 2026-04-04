@@ -10,13 +10,15 @@ import uuid
 from skills import (
     simulate_su2_continuous,
     simulate_sl3z_discrete,
+    simulate_fibonacci_braid,
     simulate_w_state_coherence,
-    simulate_rainbow_sl3z,
-    simulate_rainbow_w_state,
+    simulate_rainbow_coherence,
+    detect_rainbow_peaks,
     detect_peaks,
     synthesize_conclusion,
     optimize_lipus_drug_interval,
-    estimate_glymphatic_clearance
+    estimate_glymphatic_clearance,
+    RainbowParams
 )
 
 # Logging configuration
@@ -26,7 +28,7 @@ logger = logging.getLogger(__name__)
 app = FastAPI(
     title="Archimedes-Ω Agent API",
     description="API for the Archimedes-Ω coherence interrogation agent.",
-    version="2.1.0"
+    version="2.5.0"
 )
 
 # --- Schemas ---
@@ -48,14 +50,18 @@ class WStateRequest(BaseModel):
     theta_range: List[float] = Field([0.0, 6.283185307179586], min_length=2, max_length=2)
     num_points: int = Field(1000, ge=10, le=100000)
 
-class RainbowRequest(BaseModel):
-    energy_ev: float = Field(0.0, ge=0, le=1.0)
-    theta_range: List[float] = [0.0, 6.283185307179586]
-    num_points: int = Field(1000, ge=10, le=100000)
-    # Optional params depending on whether it's SL3Z or W-State
-    words: Optional[List[str]] = None
-    nodes: Optional[int] = None
-    loss_probability: Optional[float] = None
+class FibonacciRequest(BaseModel):
+    dalpha: float = Field(0.0, description="Dipole reorientation (rad). Bound: 0.25° (0.00436 rad)")
+    epsilon: float = Field(0.0, description="Helical polarity asymmetry. Bound: 7.07e-3")
+    eta: float = Field(0.0, description="Relative phase locking (rad). Bound: 0.41° (0.00715 rad)")
+    lambda_param: float = Field(0.0, alias="lambda", description="Leakage amplitude. Bound: 0.01")
+
+class FibonacciResponse(BaseModel):
+    braid_fidelity: float
+    leakage_probability: float
+    gamma5: float
+    admissible: bool
+    recommendation: str
 
 class CoherenceResponse(BaseModel):
     phases: List[float]
@@ -64,20 +70,42 @@ class CoherenceResponse(BaseModel):
 class PeakDetectionRequest(BaseModel):
     phases: List[float]
     coherence: List[float]
-    threshold_multiplier: float = 1.2
-    min_prominence: float = 0.05
-    energy_ev: Optional[float] = None
+    threshold_multiplier: Optional[float] = 1.2
+    min_prominence: Optional[float] = 0.05
+    threshold: Optional[float] = 0.3 # For rainbow detection
 
 class PeakInfo(BaseModel):
     phase: float
     phase_degrees: float
     coherence: float
-    prominence: float
-    is_resonance: bool
-    index: int
+    prominence: Optional[float] = None
+    is_resonance: Optional[bool] = None
+    fivefold_deviation_rad: Optional[float] = None
+    index: Optional[int] = None
+    shift_from_base: Optional[float] = None
+    peak_type: Optional[str] = None
 
 class PeakDetectionResponse(BaseModel):
     peaks: List[PeakInfo]
+
+class RainbowRequest(BaseModel):
+    energy_thz: float = Field(10.0, ge=1.0, le=1000.0)
+    num_points: int = Field(1000, ge=10)
+    resonance_scale: float = 1.0
+
+class RainbowResponse(BaseModel):
+    energy_ev: float
+    rainbow_factor: float
+    phases: List[float]
+    coherence: List[float]
+    shifted_peaks: Dict[str, float]
+    regime: str
+    philosophical_note: str
+
+class RainbowPeakResponse(BaseModel):
+    peaks: List[PeakInfo]
+    dominant_regime: str
+    interpretation: str
 
 class AnalysisRequest(BaseModel):
     data_source: str # simulated or experimental
@@ -88,10 +116,11 @@ class AnalysisRequest(BaseModel):
     experimental_data: Optional[Dict[str, List[float]]] = None
 
 class Conclusion(BaseModel):
-    status: str = Field(..., description="W‑STATE_CONFIRMED, PARTIAL_W_STATE, NO_W_STATE, DISCRETE_LATTICE_CONFIRMED, PARTIAL_SIGNAL, NO_SIGNAL, INCONCLUSIVE")
+    status: str = Field(..., description="W‑STATE_CONFIRMED, PARTIAL_W_STATE, NO_W_STATE, DISCRETE_LATTICE_CONFIRMED, FIBONACCI_BRAID_CONFIRMED, PARTIAL_SIGNAL, NO_SIGNAL, INCONCLUSIVE")
     peaks_total: int
     peaks_in_resonance: int
     max_coherence: float
+    experimental_gamma5: Optional[float] = None
     interpretation: str
     philosophical_note: str
 
@@ -149,26 +178,31 @@ async def simulate_wstate(req: WStateRequest):
     )
     return {"phases": phases.tolist(), "coherence": coherence.tolist()}
 
-@app.post("/simulate/rainbow-sl3z", response_model=CoherenceResponse, tags=["simulation"])
-async def simulate_rainbow_sl3z_endpoint(req: RainbowRequest):
-    theta = np.linspace(req.theta_range[0], req.theta_range[1], req.num_points)
-    phases, coherence = simulate_rainbow_sl3z(
-        theta_range=theta,
-        energy_ev=req.energy_ev,
-        words=req.words
+@app.post("/simulate/fibonacci-braid", response_model=FibonacciResponse, tags=["simulation"])
+async def simulate_fibonacci(req: FibonacciRequest):
+    """
+    Real-time assessment of Fibonacci braid realization feasibility.
+    """
+    result = simulate_fibonacci_braid(
+        dalpha=req.dalpha,
+        epsilon=req.epsilon,
+        eta=req.eta,
+        lambda_=req.lambda_param
     )
-    return {"phases": phases.tolist(), "coherence": coherence.tolist()}
+    return result
 
-@app.post("/simulate/rainbow-wstate", response_model=CoherenceResponse, tags=["simulation"])
-async def simulate_rainbow_wstate_endpoint(req: RainbowRequest):
-    theta = np.linspace(req.theta_range[0], req.theta_range[1], req.num_points)
-    phases, coherence = simulate_rainbow_w_state(
-        nodes=req.nodes or 3,
-        loss_probability=req.loss_probability or 0.2,
-        theta_range=theta,
-        energy_ev=req.energy_ev
+@app.post("/simulate/rainbow-coherence", response_model=RainbowResponse, tags=["simulation"])
+async def simulate_rainbow(req: RainbowRequest):
+    """
+    Simulate Rainbow metric deformation based on probe energy.
+    """
+    params = RainbowParams(
+        energy_thz=req.energy_thz,
+        num_points=req.num_points,
+        resonance_scale=req.resonance_scale
     )
-    return {"phases": phases.tolist(), "coherence": coherence.tolist()}
+    result = simulate_rainbow_coherence(params)
+    return result
 
 @app.post("/detect/peaks", response_model=PeakDetectionResponse, tags=["detection"])
 async def detect_peaks_endpoint(req: PeakDetectionRequest):
@@ -180,6 +214,19 @@ async def detect_peaks_endpoint(req: PeakDetectionRequest):
         req.energy_ev
     )
     return {"peaks": peaks}
+
+@app.post("/detect/rainbow-peaks", response_model=RainbowPeakResponse, tags=["detection"])
+async def detect_rainbow_peaks_endpoint(req: PeakDetectionRequest):
+    """
+    Identifies peaks in coherence data and classifies them according to
+    their shift from the base Cartan resonances (π/5, 2π/3).
+    """
+    result = detect_rainbow_peaks(
+        phases=req.phases,
+        coherence=req.coherence,
+        threshold=req.threshold or 0.3
+    )
+    return result
 
 @app.post("/analyze", response_model=AnalysisResponse, tags=["analysis"])
 async def analyze_endpoint(req: AnalysisRequest):
@@ -313,6 +360,9 @@ async def websocket_glymphatic_monitor(websocket: WebSocket):
         lipus_intensity = session_params.get("lipus_intensity_mw_cm2", 150.0)
         baseline_coherence = session_params.get("baseline_coherence", 0.3)
 
+        # Parâmetros Fibonacci (opcionais) para avaliação de trança em tempo real
+        fib_params = session_params.get("fibonacci_params", {})
+
         while True:
             # Recebe pacote com dados de coerência em tempo real
             data = await websocket.receive_json()
@@ -324,6 +374,7 @@ async def websocket_glymphatic_monitor(websocket: WebSocket):
                 await websocket.send_json({"error": "Missing fret_coherence"})
                 continue
 
+            # Estimativa de Limpeza
             result = estimate_glymphatic_clearance(
                 fret_coherence=fret_coherence,
                 phase_angle=phase_angle,
@@ -331,6 +382,17 @@ async def websocket_glymphatic_monitor(websocket: WebSocket):
                 elapsed_minutes=elapsed_minutes,
                 baseline_coherence=baseline_coherence
             )
+
+            # Se parâmetros de Fibonacci foram fornecidos, realiza avaliação de trança
+            if fib_params:
+                braid_eval = simulate_fibonacci_braid(
+                    dalpha=fib_params.get("dalpha", 0.0),
+                    epsilon=fib_params.get("epsilon", 0.0),
+                    eta=fib_params.get("eta", 0.0),
+                    lambda_=fib_params.get("lambda", 0.0)
+                )
+                result["fibonacci_braid_assessment"] = braid_eval
+
             await websocket.send_json(result)
 
     except WebSocketDisconnect:

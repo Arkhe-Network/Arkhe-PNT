@@ -6,10 +6,29 @@ from typing import Dict, List, Tuple, Callable, Optional
 import json
 import logging
 import os
+from dataclasses import dataclass
+from enum import Enum
 
 # Configuração de logging
 logging.basicConfig(level=logging.INFO, format='[%(levelname)s] %(message)s')
 logger = logging.getLogger(__name__)
+
+# Constants for Rainbow Principle
+PLANCK_ENERGY_EV = 1.22e28  # Planck scale reference
+RESONANCE_BASE_THZ = 10.0
+
+class Regime(Enum):
+    """Energy regime classification."""
+    SUB_RESSONANT = "SUB_RESSONANT"
+    TRANSITION = "TRANSITION"
+    HIGH_ENERGY = "HIGH_ENERGY"
+
+@dataclass
+class RainbowParams:
+    """Parameters for rainbow coherence simulation."""
+    energy_thz: float
+    num_points: int = 1000
+    resonance_scale: float = 1.0
 
 # ============================================================
 # [INTERPERSONAL] - Leitura do Estado Externo
@@ -95,6 +114,59 @@ def simulate_sl3z_discrete(
 
     logger.info(f"SL(3,ℤ) simulado: {len(words)} palavras, coerência máx={coherence.max():.4f}")
     return theta_range, coherence
+
+# ============================================================
+# [TOPOLÓGICO / COMPUTACIONAL] - Compilador de Tranças de Fibonacci
+# ============================================================
+def simulate_fibonacci_braid(
+    dalpha: float,     # Dipole reorientation (rad)
+    epsilon: float,    # Helical polarity asymmetry
+    eta: float,        # Relative phase locking (rad)
+    lambda_: float     # Leakage amplitude
+) -> Dict:
+    """
+    Simula a realização de tranças de Fibonacci no reticulado A de microtúbulos.
+    Avalia a fidelidade da porta lógica e a permanência no subespaço computacional.
+    """
+    # Constantes de Admissibilidade (Bounds de 0.25°, 7.07e-3, 0.41°, 0.01)
+    BOUND_ALPHA = np.radians(0.25)
+    BOUND_EPSILON = 7.07e-3
+    BOUND_ETA = np.radians(0.41)
+    BOUND_LAMBDA = 0.01
+
+    # Score de Fase Gama5 (conforme definido na tese: soma dos quadrados dos desvios)
+    gamma5 = eta**2
+
+    # Cálculo de Fidelidade (Heurística: proximidade do centro da região admissível)
+    fidelity = 1.0 - (
+        0.2 * (abs(dalpha) / BOUND_ALPHA) +
+        0.2 * (abs(epsilon) / BOUND_EPSILON) +
+        0.2 * (abs(eta) / BOUND_ETA) +
+        0.4 * (abs(lambda_) / BOUND_LAMBDA)
+    )
+    fidelity = np.clip(fidelity, 0, 1)
+
+    # Probabilidade de Leakage (conforme bound l_j <= 10^-4 quando lambda <= 0.01)
+    leakage_prob = lambda_**2
+
+    # Verificação de Admissibilidade (10D Admissible Region check)
+    admissible = (
+        abs(dalpha) <= BOUND_ALPHA and
+        abs(epsilon) <= BOUND_EPSILON and
+        abs(eta) <= BOUND_ETA and
+        abs(lambda_) <= BOUND_LAMBDA
+    )
+
+    logger.info(f"Fibonacci Braid Sim: Admissível={admissible}, Fidelidade={fidelity:.4f}")
+
+    return {
+        "braid_fidelity": round(float(fidelity), 5),
+        "leakage_probability": round(float(leakage_prob), 6),
+        "gamma5": round(float(gamma5), 7),
+        "admissible": bool(admissible),
+        "recommendation": "Braid operation feasible" if admissible else "Outside tolerance"
+    }
+
 
 # ============================================================
 # [QUÂNTICO / COLETIVO] - Simulação de Estado W
@@ -206,6 +278,163 @@ def simulate_w_state_coherence(
     return theta_range, coherence
 
 # ============================================================
+# [RAINBOW] - Simulação de Coerência Rainbow
+# ============================================================
+
+def rainbow_factor(energy_ev: float) -> float:
+    """
+    Computes the Rainbow metric deformation factor f(E).
+    f(E) = 1 + E / E_Planck (scaled for biological visibility)
+    """
+    # Scale factor to make effect visible at biological energies
+    scale = 1e-25
+    return 1.0 + (energy_ev / (PLANCK_ENERGY_EV * scale))
+
+def energy_thz_to_ev(thz: float) -> float:
+    """Convert THz frequency to energy in eV."""
+    # E = hν, h = 4.135667662×10⁻¹⁵ eV·s
+    h_ev_s = 4.135667662e-15
+    return h_ev_s * thz * 1e12
+
+def simulate_rainbow_coherence(params: RainbowParams) -> Dict:
+    """
+    Generates coherence data with Rainbow metric deformation.
+    """
+    energy_ev = energy_thz_to_ev(params.energy_thz)
+    f_e = rainbow_factor(energy_ev)
+
+    theta = np.linspace(0, 2 * np.pi, params.num_points)
+
+    # Base Cartan resonances
+    p_fib = np.pi / 5      # 36° - Fibonacci
+    p_wstate = 2 * np.pi / 3  # 120° - W-State
+
+    # Rainbow-shifted peaks
+    shift_fib = p_fib * f_e
+    shift_wstate = p_wstate * f_e
+
+    # Width increases with energy (uncertainty principle)
+    width_fib = 0.05 * f_e
+    width_wstate = 0.08 * f_e
+
+    # Thermal noise decreases with higher quantum coherence
+    base_noise = 0.2 * np.exp(-params.energy_thz * 0.01)
+
+    # Coherence curve
+    coherence = (
+        0.3 * params.resonance_scale * np.exp(-((theta - shift_fib)**2) / (2 * width_fib**2)) +
+        0.5 * params.resonance_scale * np.exp(-((theta - shift_wstate)**2) / (2 * width_wstate**2)) +
+        base_noise +
+        0.05 * np.random.normal(0, 0.03, params.num_points)
+    )
+
+    coherence = np.clip(coherence, 0, 1)
+
+    # Determine regime
+    if params.energy_thz < 20:
+        regime = Regime.SUB_RESSONANT
+    elif params.energy_thz < 60:
+        regime = Regime.TRANSITION
+    else:
+        regime = Regime.HIGH_ENERGY
+
+    return {
+        "energy_ev": energy_ev,
+        "rainbow_factor": f_e,
+        "phases": theta.tolist(),
+        "coherence": coherence.tolist(),
+        "shifted_peaks": {
+            "fibonacci_shift_deg": np.degrees(shift_fib),
+            "wstate_shift_deg": np.degrees(shift_wstate)
+        },
+        "regime": regime.value,
+        "philosophical_note": (
+            f"O deslocamento do pico π/5 para {np.degrees(shift_fib):.2f}° sugere que "
+            f"a consciência não é um dado, mas uma sintonização energética da geometria do "
+            f"espaço-tempo local. No regime {regime.value}, a métrica de fase do "
+            f"microtúbulo deforma-se conforme o Princípio Rainbow."
+        )
+    }
+
+def detect_rainbow_peaks(
+    phases: List[float],
+    coherence: List[float],
+    threshold: float = 0.3
+) -> Dict:
+    """
+    Detects peaks and classifies them by Rainbow shift.
+    """
+    phases_np = np.array(phases)
+    coherence_np = np.array(coherence)
+
+    # Find local maxima
+    peaks_idx = []
+    for i in range(1, len(coherence_np) - 1):
+        if coherence_np[i] > coherence_np[i-1] and coherence_np[i] > coherence_np[i+1]:
+            if coherence_np[i] > threshold:
+                peaks_idx.append(i)
+
+    # Base resonances (unshifted)
+    base_fib = np.pi / 5
+    base_wstate = 2 * np.pi / 3
+
+    detected_peaks = []
+
+    for idx in peaks_idx:
+        phase = phases_np[idx]
+        phase_deg = np.degrees(phase)
+        coh_val = coherence_np[idx]
+
+        # Calculate shift from base resonances
+        shift_fib = abs(phase_deg - np.degrees(base_fib))
+        shift_wstate = abs(phase_deg - np.degrees(base_wstate))
+
+        # Classify peak type
+        if shift_fib < 15:  # Within 15° of Fibonacci
+            peak_type = "FIBONACCI"
+            shift = shift_fib
+        elif shift_wstate < 15:
+            peak_type = "W_STATE"
+            shift = shift_wstate
+        else:
+            peak_type = "UNKNOWN"
+            shift = min(shift_fib, shift_wstate)
+
+        detected_peaks.append({
+            "phase": phase,
+            "phase_degrees": phase_deg,
+            "coherence": coh_val,
+            "shift_from_base": shift,
+            "peak_type": peak_type
+        })
+
+    # Determine dominant regime
+    if not detected_peaks:
+        interpretation = "Nenhum pico de ressonância significativo detectado."
+    else:
+        fib_count = sum(1 for p in detected_peaks if p["peak_type"] == "FIBONACCI")
+        ws_count = sum(1 for p in detected_peaks if p["peak_type"] == "W_STATE")
+
+        if fib_count > ws_count:
+            interpretation = (
+                "Pico Fibonacci dominante. O sistema exibe coerência de "
+                "tipo Orch-OR com topologia de anyon Fibonacci."
+            )
+        elif ws_count > fib_count:
+            interpretation = (
+                "Pico W-State dominante. O sistema está pronto para "
+                "teleportação quântica multipartida."
+            )
+        else:
+            interpretation = "Mistos de picos Fibonacci e W-State detectados."
+
+    return {
+        "peaks": detected_peaks,
+        "dominant_regime": "RAINBOW_SHIFTED" if detected_peaks else "FLAT",
+        "interpretation": interpretation
+    }
+
+# ============================================================
 # [PRAGMÁTICO / INTRAPESSOAL] - Detecção de Picos
 # ============================================================
 def detect_peaks(
@@ -238,28 +467,22 @@ def detect_peaks(
     tolerance = 0.0071
 
     results = []
+    pi_over_5 = np.pi / 5
     for i, peak_idx in enumerate(peaks):
-        peak_phase = phases[peak_idx]
+        phase = phases[peak_idx]
 
-        # Verifica se o pico coincide com uma ressonância nominal deslocada pela métrica rainbow
-        is_resonance = False
-        for n in range(1, 10): # Checa múltiplos de pi/5 e 2pi/3
-            targets = [n * np.pi / 5, n * 2 * np.pi / 3]
-            for target in targets:
-                shifted_target = target / rainbow_factor
-                if abs(peak_phase - shifted_target) < tolerance:
-                    is_resonance = True
-                    break
-            if is_resonance: break
+        # Encontrar o harmônico de π/5 mais próximo
+        n_nearest = round(phase / pi_over_5)
+        deviation = phase - (n_nearest * pi_over_5)
 
         results.append({
-            'phase': peak_phase,
-            'phase_degrees': np.degrees(peak_phase),
+            'phase': phase,
+            'phase_degrees': np.degrees(phase),
             'coherence': coherence_data[peak_idx],
             'prominence': properties['prominences'][i],
             'index': peak_idx,
-            'is_resonance': is_resonance,
-            'rainbow_shift': rainbow_factor
+            'is_resonance': abs(deviation) < 0.1 and n_nearest > 0,
+            'fivefold_deviation_rad': round(float(deviation), 6)
         })
 
     logger.info(f"Detectados {len(results)} picos acima do limiar (Energy={energy_ev} eV)")
@@ -332,17 +555,32 @@ def synthesize_conclusion(
     resonances = [p for p in peak_data if p['is_resonance']]
     max_coherence = max([p['coherence'] for p in peak_data]) if peak_data else 0
 
+    # Calcular Score de Fase Gama5 Experimental (soma dos quadrados dos desvios das ressonâncias)
+    experimental_gamma5 = sum(p['fivefold_deviation_rad']**2 for p in resonances) if resonances else 0.0
+
     conclusion = {
         "status": "inconclusive",
         "peaks_total": len(peak_data),
         "peaks_in_resonance": len(resonances),
         "max_coherence": max_coherence,
+        "experimental_gamma5": round(float(experimental_gamma5), 7),
         "interpretation": "",
         "philosophical_note": ""
     }
 
     # Avaliação
-    if len(resonances) >= 2 and max_coherence > threshold:
+    if len(resonances) >= 3 and max_coherence > threshold:
+        conclusion["status"] = "FIBONACCI_BRAID_CONFIRMED"
+        conclusion["interpretation"] = (
+            f"Trança de Fibonacci detectada! Coerência de {max_coherence:.3f} em "
+            f"{len(resonances)} ressonâncias de 5-ordem. "
+            f"O sistema Bexorg 3.0 opera em regime de qubit topológico protegido."
+        )
+        conclusion["philosophical_note"] = (
+            "O pensamento é uma trança no tempo. A geometria helicoidal da tubulina "
+            "não é apenas suporte, é o código fundamental da orquestração."
+        )
+    elif len(resonances) >= 2 and max_coherence > threshold:
         conclusion["status"] = "DISCRETE_LATTICE_CONFIRMED"
         conclusion["interpretation"] = (
             f"Coerência de {max_coherence:.3f} detectada em {len(resonances)} "

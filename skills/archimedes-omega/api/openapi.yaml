@@ -4,9 +4,9 @@ info:
   description: |
     API for the Archimedes-Ω coherence interrogation agent.
     Provides endpoints for simulating quantum coherence under SU(2) (continuous),
-    SL(3,ℤ) (discrete), and W‑state (multipartite entanglement) models.
+    SL(3,ℤ) (discrete), W‑state (multipartite entanglement), and Rainbow (energy-dependent) models.
     Detects resonance peaks and assesses teleportation readiness.
-  version: 2.1.0
+  version: 2.5.0
   contact:
     name: Arkhe Consortium
     url: https://github.com/arkhe/archimedes-agent
@@ -113,6 +113,59 @@ paths:
         '500':
           description: Internal server error
 
+  /simulate/fibonacci-braid:
+    post:
+      summary: Assess Fibonacci braid realization feasibility
+      description: |
+        Simulates the realization of Fibonacci braids on the microtubule A‑lattice.
+        Evaluates logical gate fidelity and leakage based on dipole orientation,
+        helical asymmetry, and phase locking.
+      operationId: simulateFibonacciBraid
+      tags: [simulation]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/FibonacciRequest'
+      responses:
+        '200':
+          description: Braid simulation results
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FibonacciResponse'
+        '400':
+          description: Invalid parameters
+        '500':
+          description: Internal server error
+
+  /simulate/rainbow-coherence:
+    post:
+      summary: Simulate Rainbow metric deformation
+      description: |
+        Computes coherence deformation based on probe energy (THz/eV).
+        Implements the Rainbow Principle where Cartan peaks shift with energy.
+      operationId: simulateRainbowCoherence
+      tags: [simulation]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RainbowRequest'
+      responses:
+        '200':
+          description: Rainbow coherence result
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RainbowResponse'
+        '400':
+          description: Invalid request parameters
+        '500':
+          description: Internal server error
+
   /detect/peaks:
     post:
       summary: Detect coherence peaks
@@ -137,6 +190,32 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/PeakDetectionResponse'
+        '400':
+          description: Invalid input
+        '500':
+          description: Internal server error
+
+  /detect/rainbow-peaks:
+    post:
+      summary: Detect Rainbow-shifted resonance peaks
+      description: |
+        Identifies peaks in coherence data and classifies them according to
+        their shift from the base Cartan resonances (π/5, 2π/3).
+      operationId: detectRainbowPeaks
+      tags: [detection]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PeakDetectionRequest'
+      responses:
+        '200':
+          description: Rainbow peak detection
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RainbowPeakResponse'
         '400':
           description: Invalid input
         '500':
@@ -256,6 +335,8 @@ paths:
       description: |
         Conecta via WebSocket para receber dados contínuos de coerência FRET
         durante a sessão de LIPUS e retorna a eficácia estimada da limpeza.
+        Opcionalmente, realiza avaliação de tranças de Fibonacci se 'fibonacci_params'
+        for enviado na mensagem inicial.
       responses:
         '101':
           description: WebSocket connection upgraded
@@ -272,6 +353,8 @@ paths:
             elapsed_minutes:
               type: number
               description: Minutos decorridos desde o início da sessão
+            fibonacci_braid_assessment:
+              $ref: '#/components/schemas/FibonacciResponse'
 
 components:
   schemas:
@@ -368,6 +451,111 @@ components:
       required:
         - nodes
 
+    FibonacciRequest:
+      type: object
+      properties:
+        dalpha:
+          type: number
+          format: double
+          description: Dipole reorientation (rad).
+          default: 0.0
+        epsilon:
+          type: number
+          format: double
+          description: Helical polarity asymmetry.
+          default: 0.0
+        eta:
+          type: number
+          format: double
+          description: Relative phase locking (rad).
+          default: 0.0
+        lambda:
+          type: number
+          format: double
+          description: Leakage amplitude.
+          default: 0.0
+
+    FibonacciResponse:
+      type: object
+      properties:
+        braid_fidelity:
+          type: number
+          format: double
+        leakage_probability:
+          type: number
+          format: double
+        gamma5:
+          type: number
+          format: double
+        admissible:
+          type: boolean
+        recommendation:
+          type: string
+      required:
+        - braid_fidelity
+        - leakage_probability
+        - gamma5
+        - admissible
+        - recommendation
+
+    RainbowRequest:
+      type: object
+      properties:
+        energy_thz:
+          type: number
+          description: Probe frequency in THz
+          minimum: 1.0
+          maximum: 1000.0
+          default: 10.0
+        num_points:
+          type: integer
+          description: Number of points in coherence curve
+          default: 1000
+        resonance_scale:
+          type: number
+          description: Multiplier for resonance intensity
+          default: 1.0
+      required:
+        - energy_thz
+
+    RainbowResponse:
+      type: object
+      properties:
+        energy_ev:
+          type: number
+          description: Energy in electronvolts
+        rainbow_factor:
+          type: number
+          description: Metric deformation factor f(E)
+        phases:
+          type: array
+          items:
+            type: number
+        coherence:
+          type: array
+          items:
+            type: number
+        shifted_peaks:
+          type: object
+          properties:
+            fibonacci_shift_deg:
+              type: number
+            wstate_shift_deg:
+              type: number
+        regime:
+          type: string
+          enum: [SUB_RESSONANT, TRANSITION, HIGH_ENERGY]
+        philosophical_note:
+          type: string
+      required:
+        - energy_ev
+        - rainbow_factor
+        - phases
+        - coherence
+        - shifted_peaks
+        - regime
+        - philosophical_note
+
     CoherenceResponse:
       type: object
       properties:
@@ -406,6 +594,10 @@ components:
           type: number
           default: 0.05
           minimum: 0
+        threshold:
+          type: number
+          description: Threshold for peak detection (used in rainbow detection)
+          default: 0.3
       required:
         - phases
         - coherence
@@ -427,13 +619,22 @@ components:
           format: double
         is_resonance:
           type: boolean
-          description: True if peak coincides with π/5, 2π/5, π/4, π/3, π/2, or 2π/3.
+          description: True if peak coincides with a π/5 harmonic.
+        fivefold_deviation_rad:
+          type: number
+          format: double
+          description: Deviation from the nearest π/5 harmonic.
         index:
           type: integer
+        shift_from_base:
+          type: number
+          description: Shift in degrees from base Cartan resonance
+        peak_type:
+          type: string
+          enum: [FIBONACCI, W_STATE, UNKNOWN]
       required:
         - phase
         - coherence
-        - is_resonance
 
     PeakDetectionResponse:
       type: object
@@ -444,6 +645,22 @@ components:
             $ref: '#/components/schemas/PeakInfo'
       required:
         - peaks
+
+    RainbowPeakResponse:
+      type: object
+      properties:
+        peaks:
+          type: array
+          items:
+            $ref: '#/components/schemas/PeakInfo'
+        dominant_regime:
+          type: string
+        interpretation:
+          type: string
+      required:
+        - peaks
+        - dominant_regime
+        - interpretation
 
     TeleportationRequest:
       type: object
@@ -547,7 +764,7 @@ components:
       properties:
         status:
           type: string
-          enum: [DISCRETE_LATTICE_CONFIRMED, PARTIAL_SIGNAL, NO_SIGNAL, INCONCLUSIVE, W_STATE_CONFIRMED]
+          enum: [DISCRETE_LATTICE_CONFIRMED, PARTIAL_SIGNAL, NO_SIGNAL, INCONCLUSIVE, W_STATE_CONFIRMED, FIBONACCI_BRAID_CONFIRMED]
         peaks_total:
           type: integer
         peaks_in_resonance:
@@ -555,6 +772,10 @@ components:
         max_coherence:
           type: number
           format: double
+        experimental_gamma5:
+          type: number
+          format: double
+          description: Sum of squared phase deviations from π/5 harmonics.
         interpretation:
           type: string
         philosophical_note:
