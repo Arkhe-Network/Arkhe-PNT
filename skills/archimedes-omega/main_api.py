@@ -13,17 +13,12 @@ from skills import (
     simulate_fibonacci_braid,
     simulate_w_state_coherence,
     simulate_rainbow_coherence,
-    simulate_collective_coherence,
-    simulate_xenoactualization,
-    scan_optimal_measurement_rate,
     detect_rainbow_peaks,
     detect_peaks,
     synthesize_conclusion,
     optimize_lipus_drug_interval,
     estimate_glymphatic_clearance,
-    RainbowParams,
-    XenoParams,
-    KuramotoParams
+    RainbowParams
 )
 
 # Logging configuration
@@ -33,7 +28,7 @@ logger = logging.getLogger(__name__)
 app = FastAPI(
     title="Archimedes-Ω Agent API",
     description="API for the Archimedes-Ω coherence interrogation agent.",
-    version="4.0.0"
+    version="2.5.0"
 )
 
 # --- Schemas ---
@@ -111,49 +106,6 @@ class RainbowPeakResponse(BaseModel):
     peaks: List[PeakInfo]
     dominant_regime: str
     interpretation: str
-
-class NodeState(BaseModel):
-    phase: float
-    natural_freq: float
-    weight: float = 1.0
-
-class CollectiveCoherenceRequest(BaseModel):
-    nodes: List[NodeState]
-    coupling_K: float = 1.0
-    time_horizon: float = 10.0
-    dt: float = 0.01
-    fusion_threshold: float = 0.95
-    stabilization_time: float = 0.5
-    enable_rainbow_resonance: bool = False
-
-class CollectiveCoherenceResponse(BaseModel):
-    final_R: float
-    final_phase: float
-    is_fused: bool
-    time_to_fusion: Optional[float]
-    trajectory_R: List[float]
-    trajectory_phases: List[float]
-    resonance_status: Dict[str, Any]
-    interpretation: str
-    philosophical_note: str
-
-class XenoactualizationRequest(BaseModel):
-    coherence_profile: List[float]
-    blueprint_complexity: float = Field(..., ge=1.0, le=10.0)
-    measurement_rate: float = Field(1.0, ge=0.1, le=100.0)
-    tau_field_strength: float = Field(0.5, ge=0.0, le=1.0)
-    domain: str = "HYPO"
-
-class XenoactualizationResponse(BaseModel):
-    fidelity: float
-    zeno_suppression: float
-    coherence_factor: float
-    complexity_penalty: float
-    stability_score: float
-    collapse_time_estimate: float
-    domain_result: str
-    recommendation: str
-    philosophical_note: str
 
 class AnalysisRequest(BaseModel):
     data_source: str # simulated or experimental
@@ -252,74 +204,14 @@ async def simulate_rainbow(req: RainbowRequest):
     result = simulate_rainbow_coherence(params)
     return result
 
-@app.post("/synchro/collective_coherence", response_model=CollectiveCoherenceResponse, tags=["synchronization"])
-async def collective_coherence_endpoint(req: CollectiveCoherenceRequest):
-    """
-    Simulate Kuramoto synchronization for collective coherence (v4.0.0).
-    """
-    params = KuramotoParams(
-        nodes=[{"phase": n.phase, "natural_freq": n.natural_freq, "weight": n.weight} for n in req.nodes],
-        coupling_K=req.coupling_K,
-        time_horizon=req.time_horizon,
-        dt=req.dt,
-        fusion_threshold=req.fusion_threshold,
-        stabilization_time=req.stabilization_time,
-        enable_rainbow_resonance=req.enable_rainbow_resonance
-    )
-    result = simulate_collective_coherence(params)
-    if "error" in result:
-        raise HTTPException(status_code=500, detail=result["error"])
-    return result
-
-@app.post("/synchro/collective_coherence/optimize", tags=["synchronization"])
-async def collective_coherence_optimize_endpoint(req: CollectiveCoherenceRequest):
-    """
-    Finds optimal coupling constant K for fastest fusion.
-    """
-    params = KuramotoParams(
-        nodes=[{"phase": n.phase, "natural_freq": n.natural_freq, "weight": n.weight} for n in req.nodes],
-        time_horizon=req.time_horizon,
-        dt=req.dt,
-        fusion_threshold=req.fusion_threshold,
-        stabilization_time=req.stabilization_time,
-        enable_rainbow_resonance=req.enable_rainbow_resonance
-    )
-    result = optimize_coupling(params)
-    return result
-
-@app.post("/simulate/xenoactualization", response_model=XenoactualizationResponse, tags=["xenoactualization"])
-async def xenoactualization_endpoint(req: XenoactualizationRequest):
-    """
-    Simulate xenoactualization fidelity with Zeno dynamics.
-    """
-    params = XenoParams(
-        coherence_profile=req.coherence_profile,
-        blueprint_complexity=req.blueprint_complexity,
-        measurement_rate=req.measurement_rate,
-        tau_field_strength=req.tau_field_strength
-    )
-    result = simulate_xenoactualization(params)
-    return result
-
-@app.post("/simulate/xenoactualization/scan", tags=["xenoactualization"])
-async def xenoactualization_scan_endpoint(req: XenoactualizationRequest):
-    """
-    Scans measurement rate to find optimal for maximum fidelity.
-    """
-    result = scan_optimal_measurement_rate(
-        coherence_profile=req.coherence_profile,
-        blueprint_complexity=req.blueprint_complexity,
-        tau_strength=req.tau_field_strength
-    )
-    return result
-
 @app.post("/detect/peaks", response_model=PeakDetectionResponse, tags=["detection"])
 async def detect_peaks_endpoint(req: PeakDetectionRequest):
     peaks = detect_peaks(
         np.array(req.coherence),
         np.array(req.phases),
         req.threshold_multiplier,
-        req.min_prominence
+        req.min_prominence,
+        req.energy_ev
     )
     return {"peaks": peaks}
 
