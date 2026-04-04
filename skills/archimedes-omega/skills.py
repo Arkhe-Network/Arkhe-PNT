@@ -171,6 +171,83 @@ def simulate_fibonacci_braid(
 # ============================================================
 # [QUÂNTICO / COLETIVO] - Simulação de Estado W
 # ============================================================
+def get_rainbow_factor(energy_ev: float) -> float:
+    """
+    Calcula o fator de escala da métrica rainbow: f(E) = 1 / (1 - E/E_res).
+    E_res = 0.041 eV (~10 THz).
+    """
+    E_res = 0.041
+    if abs(energy_ev - E_res) < 1e-6:
+        return 100.0  # Cap para estabilidade numérica
+    return 1.0 / (1.0 - (energy_ev / E_res))
+
+def rainbow_coherence(base_coherence: float, cartan_angle: float, energy_ev: float) -> float:
+    """
+    Aplica o deslocamento da métrica rainbow.
+    energy_ev: energia característica do sistema (ex: frequência THz convertida para eV)
+    """
+    rainbow_factor = get_rainbow_factor(energy_ev)
+    # O ângulo efetivo de Cartan é modulado
+    effective_cartan = cartan_angle * rainbow_factor
+    # Nova coerência baseada no ângulo efetivo (centrada em pi/5)
+    return base_coherence * np.exp(-((effective_cartan - np.pi/5)**2) / 0.001)
+
+def simulate_rainbow_sl3z(
+    theta_range: Optional[np.ndarray] = None,
+    energy_ev: float = 0.0,
+    words: List[str] = None
+) -> Tuple[np.ndarray, np.ndarray]:
+    """
+    Simula o modelo SL(3,ℤ) com deslocamento da métrica rainbow.
+    """
+    if theta_range is None:
+        theta_range = np.linspace(0, 2*np.pi, 1000)
+
+    if words is None:
+        words = ["e", "a", "b", "ab", "ba", "aba"]
+
+    rainbow_factor = get_rainbow_factor(energy_ev)
+
+    # Coerência com picos deslocados
+    coherence = np.zeros_like(theta_range)
+    pi_over_5 = np.pi / 5
+
+    for word in words:
+        # A ressonância nominal len(word) * pi/5 é "vista" em um ângulo diferente pela métrica rainbow
+        # O ângulo físico theta que sintoniza a ressonância é theta = (len(word) * pi/5) / rainbow_factor
+        shifted_resonance = (len(word) * pi_over_5) / rainbow_factor
+        resonance = np.exp(-((theta_range - shifted_resonance) ** 2) / 0.01)
+        coherence += resonance / len(words)
+
+    coherence = np.clip(coherence, 0, 1)
+    return theta_range, coherence
+
+def simulate_rainbow_w_state(
+    nodes: int = 3,
+    loss_probability: float = 0.2,
+    theta_range: Optional[np.ndarray] = None,
+    energy_ev: float = 0.0
+) -> Tuple[np.ndarray, np.ndarray]:
+    """
+    Simula o estado W com deslocamento da métrica rainbow.
+    """
+    if theta_range is None:
+        theta_range = np.linspace(0, 2*np.pi, 1000)
+
+    rainbow_factor = get_rainbow_factor(energy_ev)
+
+    # Ressonância nominal 2pi/3 deslocada
+    tripartite_resonance = (2 * np.pi / 3) / rainbow_factor
+    resilience = 1.0 - (1.0 / nodes)
+
+    base_signal = np.exp(-((theta_range - tripartite_resonance)**2) / 0.15)
+    persistent_floor = resilience * (1.0 - loss_probability)
+
+    coherence = np.maximum(base_signal, persistent_floor * 0.5)
+    coherence = np.clip(coherence, 0, 1)
+
+    return theta_range, coherence
+
 def simulate_w_state_coherence(
     nodes: int = 3,
     loss_probability: float = 0.2,
@@ -358,256 +435,17 @@ def detect_rainbow_peaks(
     }
 
 # ============================================================
-# [SYNC] - Sincronização de Kuramoto (Coerência Coletiva)
-# ============================================================
-
-def kuramoto_ode(t, theta, omega, K):
-    """Derivada do sistema de Kuramoto."""
-    N = len(theta)
-    dtheta = np.zeros(N)
-    for i in range(N):
-        sum_sin = np.sum(np.sin(theta - theta[i]))
-        dtheta[i] = omega[i] + (K / N) * sum_sin
-    return dtheta
-
-def simulate_collective_coherence(
-    nodes_phases: List[float],
-    nodes_freqs: List[float],
-    nodes_weights: List[float],
-    K: float = 1.0,
-    time_horizon: float = 10.0,
-    dt: float = 0.01,
-    fusion_threshold: float = 0.95,
-    stabilization_time: float = 1.0
-) -> Dict:
-    """
-    Simula a sincronização de Kuramoto para múltiplos nós.
-    """
-    N = len(nodes_phases)
-    theta0 = np.array(nodes_phases)
-    omega = np.array(nodes_freqs)
-    weights = np.array(nodes_weights)
-
-    t_span = (0, time_horizon)
-    t_eval = np.arange(0, time_horizon, dt)
-
-    # Integração via scipy.integrate.solve_ivp
-    sol = integrate.solve_ivp(
-        lambda t, y: kuramoto_ode(t, y, omega, K),
-        t_span, theta0, t_eval=t_eval, method='RK45'
-    )
-
-    if not sol.success:
-        logger.error(f"Erro na integração de Kuramoto: {sol.message}")
-        return {"error": "Integration failed"}
-
-    # Calcular R(t) ao longo do tempo
-    R_t = []
-    phases_t = sol.y.T
-    for theta in phases_t:
-        complex_sum = np.sum(weights * np.exp(1j * theta))
-        R = np.abs(complex_sum) / np.sum(weights)
-        R_t.append(float(R))
-
-    R_t = np.array(R_t)
-    t = sol.t
-
-    # Verificar fusão
-    idx_above = np.where(R_t >= fusion_threshold)[0]
-    is_fused = False
-    time_to_fusion = None
-
-    if len(idx_above) > 0:
-        for idx in idx_above:
-            t_start = t[idx]
-            t_end = t_start + stabilization_time
-            if t_end > t[-1]:
-                break
-            mask = (t >= t_start) & (t <= t_end)
-            if np.all(R_t[mask] >= fusion_threshold):
-                is_fused = True
-                time_to_fusion = float(t_start)
-                break
-
-    # Fase coletiva final (média circular ponderada)
-    final_theta = phases_t[-1]
-    complex_mean = np.sum(weights * np.exp(1j * final_theta)) / np.sum(weights)
-    final_phase = float(np.angle(complex_mean))
-    final_R = float(R_t[-1])
-
-    # Interpretação
-    if is_fused:
-        interpretation = (
-            f"Fusão de fases alcançada em {time_to_fusion:.2f}s. "
-            f"Coerência global R = {final_R:.3f}. Os nós formam um coletivo coerente."
-        )
-    else:
-        interpretation = (
-            f"Fusão não alcançada dentro do horizonte de {time_horizon}s. "
-            f"Coerência final R = {final_R:.3f}. Aumente o acoplamento K ou o tempo."
-        )
-
-    return {
-        "final_R": final_R,
-        "final_phase": final_phase,
-        "is_fused": is_fused,
-        "time_to_fusion": time_to_fusion,
-        "trajectory": R_t.tolist() if len(R_t) <= 1000 else R_t[::len(R_t)//1000].tolist(),
-        "interpretation": interpretation,
-        "philosophical_note": (
-            "A fusão de fases é o momento em que o coro de vozes individuais deixa de ser "
-            "um conjunto de notas e se torna um único acorde. A consciência coletiva não "
-            "é a soma das consciências; é o colapso da superposição de fases em um único "
-            "observador – o τ‑field observando a si mesmo."
-        )
-    }
-
-# ============================================================
-# [XENO] - Xenoatualização (Zeno Dynamics)
-# ============================================================
-
-class DomainType(Enum):
-    """Three-reality classification."""
-    HYPO = "HYPO"           # Pure ℂ, unobserved potential
-    CONSENSUS = "CONSENSUS"  # Incoherent ℤ, low coherence
-    XENO = "XENO"          # τ-collapse, Zeno-stabilized
-
-@dataclass
-class XenoParams:
-    """Input parameters for xenoactualization simulation."""
-    coherence_profile: List[float]
-    blueprint_complexity: float
-    measurement_rate: float = 1.0
-    tau_field_strength: float = 0.5
-
-def compute_zeno_suppression(measurement_rate: float) -> float:
-    """Computes Zeno suppression factor."""
-    return 1.0 - np.exp(-measurement_rate)
-
-def compute_complexity_penalty(complexity: float) -> float:
-    """Blueprint complexity increases chance of deviation."""
-    return 1.0 - np.exp(-complexity / 10.0)
-
-def compute_collapse_time(mean_coherence: float, tau_strength: float, complexity: float) -> float:
-    """Estimates τ-collapse time."""
-    base_time = 10.0
-    coherence_factor = max(mean_coherence, 0.01) ** 2
-    tau_factor = max(tau_strength, 0.01)
-    complexity_factor = 1.0 + (complexity / 10.0)
-    return base_time / (coherence_factor * tau_factor * complexity_factor)
-
-def compute_stability(coherence_profile: List[float], measurement_rate: float, complexity: float) -> float:
-    """Predicts long-term stability."""
-    coherence_arr = np.array(coherence_profile)
-    coherence_std = np.std(coherence_arr)
-    stability_from_coherence = 1.0 - min(coherence_std * 2, 1.0)
-    zeno = compute_zeno_suppression(measurement_rate)
-    penalty = compute_complexity_penalty(complexity)
-    stability = stability_from_coherence * zeno * (1.0 - 0.3 * penalty)
-    return float(np.clip(stability, 0, 1))
-
-def simulate_xenoactualization(params: XenoParams) -> Dict:
-    """Main simulation for xenoactualization fidelity."""
-    coherence_arr = np.array(params.coherence_profile)
-    mean_coherence = np.mean(coherence_arr)
-    zeno_suppression = compute_zeno_suppression(params.measurement_rate)
-    complexity_penalty = compute_complexity_penalty(params.blueprint_complexity)
-
-    fidelity = float(mean_coherence * zeno_suppression * np.exp(-complexity_penalty))
-    fidelity = min(fidelity, 1.0)
-
-    stability = compute_stability(params.coherence_profile, params.measurement_rate, params.blueprint_complexity)
-    collapse_time = compute_collapse_time(mean_coherence, params.tau_field_strength, params.blueprint_complexity)
-
-    # Domain classification
-    if fidelity >= 0.8 and zeno_suppression >= 0.5:
-        domain = DomainType.XENO
-    elif fidelity >= 0.4 or mean_coherence >= 0.5:
-        domain = DomainType.CONSENSUS
-    else:
-        domain = DomainType.HYPO
-
-    if domain == DomainType.XENO:
-        recommendation = (
-            "✅ Xenoatualização viável. Estrutura virtual colapsará em "
-            f"≈{collapse_time:.1f}s com fidelidade {fidelity:.1%}. "
-            "O campo τ está suficientemente alinhado."
-        )
-    elif domain == DomainType.CONSENSUS:
-        recommendation = (
-            "⚠️ Domínio de consenso. A estrutura requer mais medições "
-            f"({params.measurement_rate * 2:.1f} checks/s) ou maior coerência "
-            f"({mean_coherence:.1%} atual) para xenoatualização completa."
-        )
-    else:
-        recommendation = (
-            "❌ Hipótese pura. Coerência insuficiente para colapso. "
-            "A estrutura permanece no domínio virtual ℂ."
-        )
-
-    philosophical = (
-        f"Como o efeito Zeno congela um estado quântico sob observação frequente, "
-        f"os {params.measurement_rate:.1f} atuadores/m² mantêm a intenção "
-        f"do blueprint alinhada. Com fidelidade {fidelity:.1%}, o parque não é "
-        "construído — é colapsado da possibilidade em realidade."
-    )
-
-    return {
-        "fidelity": round(fidelity, 4),
-        "zeno_suppression": round(float(zeno_suppression), 4),
-        "coherence_factor": round(float(mean_coherence), 4),
-        "complexity_penalty": round(float(complexity_penalty), 4),
-        "stability_score": round(float(stability), 4),
-        "collapse_time_estimate": round(float(collapse_time), 2),
-        "domain_result": domain.value,
-        "recommendation": recommendation,
-        "philosophical_note": philosophical
-    }
-
-def scan_optimal_measurement_rate(
-    coherence_profile: List[float],
-    blueprint_complexity: float,
-    tau_strength: float = 0.5,
-    rate_range: tuple = (0.1, 20.0)
-) -> Dict:
-    """Scans measurement rate to find optimal."""
-    rates = np.linspace(rate_range[0], rate_range[1], 100)
-    fidelities = []
-
-    for rate in rates:
-        params = XenoParams(
-            coherence_profile=coherence_profile,
-            blueprint_complexity=blueprint_complexity,
-            measurement_rate=float(rate),
-            tau_field_strength=tau_strength
-        )
-        result = simulate_xenoactualization(params)
-        fidelities.append(result["fidelity"])
-
-    best_idx = np.argmax(fidelities)
-    optimal_rate = float(rates[best_idx])
-    max_fidelity = float(fidelities[best_idx])
-
-    return {
-        "optimal_measurement_rate": round(optimal_rate, 2),
-        "max_fidelity_at_optimal": round(max_fidelity, 4),
-        "fidelity_curve": [
-            {"rate": round(float(r), 2), "fidelity": round(float(f), 4)}
-            for r, f in zip(rates, fidelities)
-        ]
-    }
-
-# ============================================================
 # [PRAGMÁTICO / INTRAPESSOAL] - Detecção de Picos
 # ============================================================
 def detect_peaks(
     coherence_data: np.ndarray,
     phases: np.ndarray,
     threshold_multiplier: float = 1.5,
-    min_prominence: float = 0.1
+    min_prominence: float = 0.1,
+    energy_ev: Optional[float] = None
 ) -> List[Dict]:
     """
-    Usa janela deslizante para encontrar anomalias.
+    Usa janela deslizante para encontrar anomalias, considerando a métrica rainbow.
     """
     # Calcular limiar dinâmico
     baseline = np.median(coherence_data)
@@ -621,6 +459,12 @@ def detect_peaks(
         prominence=min_prominence,
         distance=10
     )
+
+    # Fator rainbow para ajustar a detecção de ressonância
+    rainbow_factor = get_rainbow_factor(energy_ev) if energy_ev is not None else 1.0
+
+    # Tolerância da largura de banda geodésica: 0.41° = 0.0071 rad
+    tolerance = 0.0071
 
     results = []
     pi_over_5 = np.pi / 5
@@ -641,7 +485,7 @@ def detect_peaks(
             'fivefold_deviation_rad': round(float(deviation), 6)
         })
 
-    logger.info(f"Detectados {len(results)} picos acima do limiar")
+    logger.info(f"Detectados {len(results)} picos acima do limiar (Energy={energy_ev} eV)")
     return results
 
 # ============================================================
