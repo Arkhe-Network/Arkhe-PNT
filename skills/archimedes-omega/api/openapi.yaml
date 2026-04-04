@@ -628,7 +628,7 @@ components:
         - dominant_regime
         - interpretation
 
-    TeleportationRequest:
+    RainbowPeakResponse:
       type: object
       properties:
         peaks:

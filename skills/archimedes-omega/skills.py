@@ -467,7 +467,7 @@ def detect_peaks(
     tolerance = 0.0071
 
     results = []
-    pi_over_5 = np.pi / 5
+    pi_over_5 = FIBONACCI_RESONANCE
     for i, peak_idx in enumerate(peaks):
         phase = phases[peak_idx]
 
