@@ -1,7 +1,7 @@
 # skills.py - Módulos Callable do Agente Archimedes-Ω
 
 import numpy as np
-from scipy import signal
+from scipy import signal, integrate
 from typing import Dict, List, Tuple, Callable, Optional
 import json
 import logging
