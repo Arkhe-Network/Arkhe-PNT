@@ -57,8 +57,3 @@ State and telemetry are managed across different storage engines:
 - **Metrics:** **Prometheus** scrapes metrics from the `arkhe-server`, `relayer`, and `trading-engine`.
 - **Visualization:** **Grafana** dashboards provide real-time visibility into the Kuramoto $R(t)$ parameter, transaction volume, and network health.
 - **Log Aggregation:** Logs are routed through the OTLP collector to **Parseable** for security analysis and retention.
-
-## 11. Quantum Verification (On-Chip Analysis)
-- **Anyon Analyzer:** A specialized C++ module (`src/kernel/quantum/anyon_analyzer.cpp`) performs real-time likelihood ratio testing on the BIP-1 embedded processor.
-- **Gold Standard:** It validates the Fibonacci anyon model ($c = \pi/5$) by comparing photon count histograms from the APD against theoretical Poisson mixture models.
-- **Sovereignty Trigger:** Success in quantum verification triggers the unlocking of the biometric private key in the secure enclave.
