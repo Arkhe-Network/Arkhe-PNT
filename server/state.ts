@@ -194,6 +194,7 @@ export let state: SimulationState = {
       { angle_rad: 0.6284, tolerance: 0.005, min_gain: 1.025, action: 'LOCAL_ADJUST' },
       { angle_rad: 0.7855, tolerance: 0.005, min_gain: 1.019, action: 'LOG_ONLY' },
       { angle_rad: 1.0473, tolerance: 0.005, min_gain: 1.030, action: 'LOCAL_ADJUST_NOTIFY' },
+      { angle_rad: 1.2566, tolerance: 0.005, min_gain: 1.025, action: 'LOCAL_ADJUST' },
       { angle_rad: 1.5709, tolerance: 0.005, min_gain: 1.016, action: 'LOG_ONLY' }
     ],
     window: [],
