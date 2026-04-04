@@ -1,0 +1,113 @@
+openapi: 3.0.0
+info:
+  title: Archimedes-Ω Coherence Agent API
+  description: API for simulating, detecting, and analyzing quantum coherence in biological microtubules.
+  version: 1.0.0
+paths:
+  /simulate/su2:
+    post:
+      summary: Simulate continuous SU(2) coherence
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SimulationRequest'
+      responses:
+        '200':
+          description: Successful simulation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SimulationResponse'
+  /simulate/sl3z:
+    post:
+      summary: Simulate discrete SL(3,ℤ) coherence
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SimulationRequest'
+      responses:
+        '200':
+          description: Successful simulation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SimulationResponse'
+  /detect/peaks:
+    post:
+      summary: Detect coherence peaks
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DetectionRequest'
+      responses:
+        '200':
+          description: Successful peak detection
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DetectionResponse'
+  /analyze:
+    post:
+      summary: Run full analysis pipeline
+      responses:
+        '200':
+          description: Successful analysis
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AnalysisResponse'
+components:
+  schemas:
+    SimulationRequest:
+      type: object
+      properties:
+        theta_start: {type: number, default: 0.0}
+        theta_end: {type: number, default: 6.28318}
+        points: {type: integer, default: 1000}
+        thermal_noise: {type: number, default: 0.05}
+        temperature: {type: number, default: 310.0}
+        words:
+          type: array
+          items: {type: string}
+          default: ["e", "a", "b", "ab", "ba", "aba"]
+    SimulationResponse:
+      type: object
+      properties:
+        phases: {type: array, items: {type: number}}
+        coherence: {type: array, items: {type: number}}
+    DetectionRequest:
+      type: object
+      required: [phases, coherence]
+      properties:
+        phases: {type: array, items: {type: number}}
+        coherence: {type: array, items: {type: number}}
+        threshold_multiplier: {type: number, default: 1.2}
+        min_prominence: {type: number, default: 0.05}
+    DetectionResponse:
+      type: object
+      properties:
+        peaks:
+          type: array
+          items:
+            type: object
+            properties:
+              phase: {type: number}
+              phase_degrees: {type: number}
+              coherence: {type: number}
+              is_resonance: {type: boolean}
+    AnalysisResponse:
+      type: object
+      properties:
+        timestamp: {type: string}
+        data_source: {type: string}
+        peaks_detected: {type: array, items: {type: object}}
+        conclusion:
+          type: object
+          properties:
+            status: {type: string}
+            interpretation: {type: string}
+            philosophical_note: {type: string}
+        output_file: {type: string}

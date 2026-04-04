@@ -1,7 +1,8 @@
 #!/usr/bin/env python3
 """
+Executa o loop de interrogação do vácuo biológico.
+Suporta CLI e API REST (FastAPI).
 main.py - Orquestrador do Agente Archimedes-Ω
-================================================
 Executa o loop de interrogação do vácuo biológico.
 Suporta dados simulados ou experimentais.
 """
