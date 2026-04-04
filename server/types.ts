@@ -274,6 +274,7 @@ export interface SimulationState {
     operations: EnterpriseSubagentState[];
     interoperability: EnterpriseSubagentState[];
   };
+  chshMonitor: CHSHMonitorState;
 }
 
 export interface NeighborhoodCoherence {
@@ -348,4 +349,43 @@ export interface EnterpriseSubagentState {
   status: 'active' | 'idle' | 'alert';
   lastAction: string;
   nip?: string;
+}
+
+export interface CHSHMonitorState {
+  status: string;
+  timestamp: string;
+  arkheChainBlock: number;
+  measurementSetup: {
+    instrument: string;
+    targetSystem: string;
+    referenceLattice: string;
+    angleBases: number[];
+    coincidenceWindowNs: number;
+    integrationTimeSec: number;
+  };
+  expectedOutcomes: {
+    classicalLimit: number;
+    quantumLimit: number;
+    thresholdEntangled: number;
+    targetEntanglement: string;
+  };
+  liveTelemetry: {
+    status: string;
+    dataPoints: number;
+    currentS: number | null;
+    stabilityIndicator: string;
+    nextUpdate: string;
+    history: { time: string; s: number }[];
+  };
+  preFlightChecks: {
+    tzinorInjector: string;
+    fibonacciPhaseAnchor: string;
+    treeLacamGeodesic: string;
+    pdsmIgnitionSequence: string;
+  };
+  archimedesComment: string;
+  nextMilestone: {
+    time: string;
+    action: string;
+  };
 }

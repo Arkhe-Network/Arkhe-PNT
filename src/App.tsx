@@ -62,6 +62,7 @@ import UnifiedOntologyPanel from './components/UnifiedOntologyPanel';
 import SecurityAdvancedPanel from './components/SecurityAdvancedPanel';
 import PluralityMCPPanel from './components/PluralityMCPPanel';
 import { EnterprisePlusPanel } from './components/EnterprisePlusPanel';
+import CHSHMonitorPanel from './components/CHSHMonitorPanel';
 import { ConsensusMeter } from './components/ConsensusMeter';
 import RamseyConfirmationModal from './components/RamseyConfirmationModal';
 import { CommandCenter } from './components/CommandCenter';
@@ -116,6 +117,7 @@ export function Dashboard() {
   const [showSecurityAdvanced, setShowSecurityAdvanced] = useState(false);
   const [showPluralityMCP, setShowPluralityMCP] = useState(false);
   const [showEnterprisePlus, setShowEnterprisePlus] = useState(false);
+  const [showCHSHMonitor, setShowCHSHMonitor] = useState(false);
   const attackTypes = ['Jamming', 'Time Shift', 'Data Spoofing', 'BGP Jitter', 'Quantum Shor', 'SEU Radiation'];
   const [timeToGenesis, setTimeToGenesis] = useState('');
 
@@ -307,6 +309,7 @@ export function Dashboard() {
             setShowSecurityAdvanced={setShowSecurityAdvanced}
             setShowPluralityMCP={setShowPluralityMCP}
             setShowEnterprisePlus={setShowEnterprisePlus}
+            setShowCHSHMonitor={setShowCHSHMonitor}
             parameters={state.parameters}
           />
         </div>
@@ -401,6 +404,13 @@ export function Dashboard() {
       )}
       {showEnterprisePlus && (
         <EnterprisePlusPanel onClose={() => setShowEnterprisePlus(false)} />
+      )}
+      {showCHSHMonitor && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4">
+          <div className="w-full max-w-5xl relative">
+            <CHSHMonitorPanel onClose={() => setShowCHSHMonitor(false)} />
+          </div>
+        </div>
       )}
       {state.ramsey?.pendingAction && (
         <RamseyConfirmationModal

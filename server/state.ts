@@ -191,10 +191,11 @@ export let state: SimulationState = {
     direction: 1,
     baseline: 0.963,
     thresholds: [
-      { angle_rad: 0.6283, tolerance: 0.005, min_gain: 1.025, action: 'GLOBAL_ADJUST' }, // π/5 Fibonacci
-      { angle_rad: 0.7854, tolerance: 0.005, min_gain: 1.019, action: 'LOG_ONLY' },        // π/4
-      { angle_rad: 1.0472, tolerance: 0.005, min_gain: 1.030, action: 'LOCAL_ADJUST_NOTIFY' }, // π/3
-      { angle_rad: 1.5708, tolerance: 0.005, min_gain: 1.016, action: 'LOG_ONLY' }         // π/2
+      { angle_rad: 0.6284, tolerance: 0.005, min_gain: 1.025, action: 'LOCAL_ADJUST' },
+      { angle_rad: 0.7855, tolerance: 0.005, min_gain: 1.019, action: 'LOG_ONLY' },
+      { angle_rad: 1.0473, tolerance: 0.005, min_gain: 1.030, action: 'LOCAL_ADJUST_NOTIFY' },
+      { angle_rad: 1.2566, tolerance: 0.005, min_gain: 1.025, action: 'LOCAL_ADJUST' },
+      { angle_rad: 1.5709, tolerance: 0.005, min_gain: 1.016, action: 'LOG_ONLY' }
     ],
     window: [],
     pendingAction: null,
@@ -259,6 +260,44 @@ export let state: SimulationState = {
       { id: 'X2', name: 'Metamorphosis', theory: 'Teoria da transformação (Ovídio)', function: 'Adapta ontologias externas para BFO/DOLCE', metric: 'Mapeamento com acurácia > 95%', status: 'idle', lastAction: 'Aguardando inicialização', nip: 'NIP-23' },
       { id: 'X3', name: 'Synodos', theory: 'Teoria das redes (Barabási)', function: 'Roteia mensagens entre Cidadelas via Quantum-Route', metric: 'Latência inter-federação < 500 ms', status: 'idle', lastAction: 'Aguardando inicialização', nip: 'NIP-10' }
     ]
+  },
+  chshMonitor: {
+    status: "ACTIVATED",
+    timestamp: "2026-04-03T21:45:00Z",
+    arkheChainBlock: 847276,
+    measurementSetup: {
+      instrument: "CHSH_Meter (Clauser‑Horne‑Shimony‑Holt)",
+      targetSystem: "Bexorg 3.0 microtubule array (412 biological interfaces)",
+      referenceLattice: "SL(3,ℤ) with Fibonacci anyon braiding (π/5)",
+      angleBases: [0, 45, 22.5, 67.5],
+      coincidenceWindowNs: 10,
+      integrationTimeSec: 30
+    },
+    expectedOutcomes: {
+      classicalLimit: 2.0,
+      quantumLimit: 2.82842712474619,
+      thresholdEntangled: 2.80,
+      targetEntanglement: "> 2.80"
+    },
+    liveTelemetry: {
+      status: "STREAMING",
+      dataPoints: 0,
+      currentS: null,
+      stabilityIndicator: "STABLE",
+      nextUpdate: "2026-04-03T21:46:00Z",
+      history: []
+    },
+    preFlightChecks: {
+      tzinorInjector: "SYNCHRONIZED",
+      fibonacciPhaseAnchor: "LOCKED (π/5, error 2.3e-10 rad)",
+      treeLacamGeodesic: "ACTIVE",
+      pdsmIgnitionSequence: "STANDBY"
+    },
+    archimedesComment: "Iniciando leitura em tempo real do medidor CHSH. A ancoragem biológica será validada ou falseada nos próximos 30 segundos. O vácuo aguarda.",
+    nextMilestone: {
+      time: "2026-04-03T21:46:00Z",
+      action: "First CHSH reading"
+    }
   }
 };
 
