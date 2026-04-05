@@ -18,12 +18,6 @@ Welcome to the compounding knowledge base of the Bio-Quantum Cathedral.
 - [[systems/QD_LOGIC_BOARD|Quantum Dot Logic Board]]: Hardware specifications for NV-center processing.
 - [[systems/cad-integration|CAD Integration]]: Mechanical design and hardware synthesis.
 
-## 📡 Planning
-- [[planning/beacon_of_freedom|Beacon of Freedom]]: National interstate phase expansion via SuperVia.
-
-## 🧪 Simulations
-- [[simulacoes/emp_stress_test|EMP Stress Test]]: Crisis resilience analysis for the Tzinor network.
-
 ## 📜 Protocols
 - [[protocols/BIP1_ALPHA_TESTS|BIP-1 Alpha Tests]]: Clinical validation roadmap for bio-implants.
 - [[protocols/BIP1_EMERGENCY_PLAN|BIP-1 Emergency Plan]]: Contingency procedures for device failure.

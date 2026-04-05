@@ -1182,7 +1182,7 @@ export function setupRoutes(app: express.Express, broadcastState: () => void, cl
     let resultPayload: any = { status: "processed" };
     let logs: string[] = [];
 
-    // POC Specific Logic for G1, D1, X1
+    // POC Specific Logic for G1, D1, X1, G4
     if (id.toUpperCase() === 'G1' && action === 'validate-policy') {
       const policy = req.body.policy;
       logs.push("🜏 [G1-NOMOS] Auditando política ODRL contra ontologia x.ttl...");
@@ -1192,6 +1192,25 @@ export function setupRoutes(app: express.Express, broadcastState: () => void, cl
       } else {
         resultPayload = { valid: false, reason: "Invalid ODRL structure" };
         logs.push("🜏 [G1-NOMOS] Falha na validação: estrutura ODRL inválida.");
+      }
+    } else if (id.toUpperCase() === 'G4' && action === 'ethics-impact') {
+      const { proposal, category } = req.body;
+      logs.push(`🜏 [G4-TELOS] Analisando proposta EQBE: ${proposal || 'General AI Task'}`);
+
+      const redLines = ["weapon", "coercion", "germline", "non-consensual"];
+      const hasViolation = redLines.some(rl => (proposal || "").toLowerCase().includes(rl));
+
+      if (hasViolation) {
+        resultPayload = { compliant: false, reason: "RED LINE VIOLATION: Proposed activity violates EQBE Protocol Section 3.", severity: "CRITICAL" };
+        logs.push("🜏 [G4-TELOS] VIOLAÇÃO ÉTICA DETECTADA! Bloqueando operação.");
+      } else {
+        resultPayload = {
+          compliant: true,
+          protocol: "EQBE v1.0",
+          safety_checks: ["Leakage", "Reversibility", "Non-target", "Evolutionary"],
+          audit_hash: "0x" + crypto.randomBytes(32).toString('hex')
+        };
+        logs.push("🜏 [G4-TELOS] Proposta em conformidade com o Protocolo EQBE.");
       }
     } else if (id.toUpperCase() === 'D1' && action === 'deploy-circuit') {
       logs.push("🜏 [D1-TECHNE] Iniciando deploy de circuito Circom...");
