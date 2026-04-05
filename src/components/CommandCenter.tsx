@@ -48,6 +48,7 @@ interface CommandCenterProps {
   setShowUnifiedOntology: (show: boolean) => void;
   setShowSecurityAdvanced: (show: boolean) => void;
   setShowPluralityMCP: (show: boolean) => void;
+  setShowCorvoNoir?: (show: boolean) => void;
   setShowEnterprisePlus?: (show: boolean) => void;
   setShowCHSHMonitor?: (show: boolean) => void;
   parameters: any;
@@ -101,6 +102,7 @@ export function CommandCenter({
   setShowUnifiedOntology,
   setShowSecurityAdvanced,
   setShowPluralityMCP,
+  setShowCorvoNoir,
   setShowEnterprisePlus,
   setShowCHSHMonitor,
   parameters,
@@ -230,6 +232,12 @@ export function CommandCenter({
               className="w-full py-2 border border-purple-500/50 text-purple-500 hover:bg-purple-500/10 rounded transition-colors uppercase tracking-widest font-bold shadow-[0_0_10px_rgba(168,85,247,0.2)] animate-pulse"
             >
               Dyson Sphere Telemetry
+            </button>
+            <button
+              onClick={() => setShowCorvoNoir && setShowCorvoNoir(true)}
+              className="w-full py-2 border border-emerald-500/50 text-emerald-500 hover:bg-emerald-500/10 rounded transition-colors uppercase tracking-widest font-bold shadow-[0_0_15px_rgba(16,185,129,0.4)] animate-pulse"
+            >
+              CORVO NOIR OS (Dashboard)
             </button>
             <button
               onClick={() => setShowEnterprisePlus && setShowEnterprisePlus(true)}

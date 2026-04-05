@@ -5,6 +5,8 @@ import path from "path";
 import { state } from "./state";
 import { runSimulationTick } from "./simulation";
 import { setupRoutes } from "./routes";
+import { ApolloServer, gql } from 'apollo-server-express';
+import { typeDefs, resolvers } from './graphql';
 import { setupPresenceServer } from "./presence_field_server";
 import { setupLucentCollector } from "./lucent_omega";
 import { logger } from "./logger";
@@ -36,6 +38,14 @@ async function startServer() {
   }));
 
   app.use(express.json());
+
+  // Setup GraphQL Apollo Server
+  const apollo = new ApolloServer({
+    typeDefs,
+    resolvers,
+  });
+  await apollo.start();
+  apollo.applyMiddleware({ app: app as any });
 
   // Serve static files for the presence field UI
   app.use("/static", express.static(path.join(process.cwd(), "static")));
