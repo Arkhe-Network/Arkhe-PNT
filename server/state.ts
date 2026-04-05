@@ -312,6 +312,71 @@ export let state: SimulationState = {
     lastVerification: new Date().toISOString(),
     heartbeatCoherence: 0.985,
     phaseSignature: [0.12, 0.45, 0.78, 0.23, 0.56, 0.89, 0.11, 0.44]
+  },
+  nare: {
+    epState: true,
+    calibrationRounds: 10,
+    packetsTransmitted: 0,
+    preAcksSuccess: 0,
+    avgEffectiveLatencyMs: -2.17,
+    temporalParadoxesDetected: 0,
+    currentLambda2: 0.9991,
+    predictionWindow: '1 year',
+    status: 'Lente Temporal Estabilizada: Rio 2027 Visível'
+  },
+  populationFeedback: [
+    {
+      id: 'fb_1',
+      residentName: 'Ana Silva',
+      year: 2027,
+      message: 'A malha urbana do Porto Maravilha em 2027 é incrível!',
+      coherence: 0.9992,
+      timestamp: new Date().toISOString()
+    }
+  ],
+  forecaster: {
+    probability: 0.12,
+    predictedLambda: 0.998,
+    isImminent: false,
+    alertsIssued: 0
+  },
+  cellularHealth: {
+    telomere_length: 0.85,
+    oxidative_stress: 0.6,
+    mitochondrial_efficiency: 0.7,
+    inflammation_marker: 0.5,
+    regeneration_rate: 0.02,
+    overall_score: 0.68
+  },
+  governanceManifesto: {
+    title: "MANIFESTO DE GOVERNANÇA 2027",
+    version: "2027.1-Ω",
+    timestamp: new Date().toISOString(),
+    indices: {
+      global_coherence: 0.9991,
+      spectral_gap: 0.05,
+      happiness_index: 1.18,
+      social_cohesion: 0.85,
+      population_sync: 94.0
+    },
+    directives: [
+      { id: "I", title: "A Primazia da Fase", description: "Governança pela manutenção da fase harmônica." },
+      { id: "II", title: "Economia da Atenção", description: "Sincronia 40Hz concede prioridade computacional." }
+    ],
+    cellular_impact: {
+      telomere_gain: 0,
+      oxidative_stress: 60,
+      mitochondrial_efficiency: 70,
+      inflammation_marker: 50
+    },
+    signature: "Hash-Σ-999-GOLDEN-RATIO"
+  },
+  expansionStatus: {
+    nodes: [
+      { id: 'node_urca', name: 'Urca', status: 'active', coherence: 0.9991, signalStrength: 0.95 },
+      { id: 'node_flamengo', name: 'Flamengo', status: 'active', coherence: 0.9985, signalStrength: 0.92 }
+    ],
+    totalCoverage: 13000
   }
 };
 
