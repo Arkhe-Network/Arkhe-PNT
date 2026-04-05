@@ -21,6 +21,7 @@ A injeção da fase do Rio (λ₂ ≈ 0.96) eleva a resiliência nacional:
 - **Vitória**: R → 0.88 (Resiliência ρ: 0.67)
 
 ## Cronograma (Fase 4)
-1. Instalação de transmissores em 10 trens (Linhas Deodoro/Japeri).
-2. Implantação de repetidoras na Serra do Mar.
-3. Ativação dos nós receptores nas estações da Luz (SP) e Central (BH).
+1. **OSINT Validation**: Pre-deployment scan of rail corridors using *Fogo Cruzado* and *TSE* data (see [[BRAZIL_INTELLIGENCE_GATHERING|Intelligence Protocol]]).
+2. Instalação de transmissores em 10 trens (Linhas Deodoro/Japeri).
+3. Implantação de repetidoras na Serra do Mar.
+4. Ativação dos nós receptores nas estações da Luz (SP) e Central (BH).

@@ -8,5 +8,11 @@ Chronological record of knowledge base updates and maintenance.
 - Created [[index.md]] and [[SCHEMA.md]].
 - Organized wiki into `concepts`, `systems`, and `protocols`.
 
+## [2026-05-18] ingest | Brazil OSINT Integration
+- Ingested UNISHKA Brazil OSINT toolkit data.
+- Created [[sources/OSINT_BRAZIL.md]] and [[protocols/BRAZIL_INTELLIGENCE_GATHERING.md]].
+- Integrated OSINT validation steps into [[planning/beacon_of_freedom.md]].
+- Updated [[index.md]] with new Protocol and Source sections.
+
 ---
 *Log starts here.*
