@@ -2,12 +2,14 @@
 
 import numpy as np
 from scipy import signal, integrate
+import torch
+import torch.nn as nn
 from typing import Dict, List, Tuple, Callable, Optional
 import json
+from datetime import datetime, timedelta
 import logging
 import os
 import hashlib
-from datetime import datetime
 from dataclasses import dataclass
 from enum import Enum
 
@@ -1008,3 +1010,339 @@ def simulate_hardware_hil(
         logger.error("🜏 [HIL] Falha na verificação de hardware!")
 
     return report
+
+
+# ============================================================
+# [MAXTOKI] - Predição Temporal e Trajetórias Celulares
+# ============================================================
+
+@dataclass
+class CellularState:
+    """Estado celular medido pelos sensores NV (168 pontos)"""
+    timestamp: datetime
+    lambda_coherence: float  # λ₂ (0-1)
+    transcriptome_vector: np.ndarray  # 20,271 genes (simulado/reduzido)
+    biological_age: float  # Anos biológicos estimados
+    tissue_type: str  # 'cochlea', 'retina', 'cardiac', 'neural'
+
+    def to_dict(self, include_transcriptome: bool = False) -> Dict:
+        """Converte estado para dicionário serializável"""
+        res = {
+            "timestamp": self.timestamp.isoformat(),
+            "lambda_coherence": round(float(self.lambda_coherence), 4),
+            "biological_age": round(float(self.biological_age), 2),
+            "tissue_type": self.tissue_type
+        }
+        if include_transcriptome:
+            res["transcriptome_vector"] = self.transcriptome_vector.tolist()
+        return res
+
+@dataclass
+class TemporalTrajectory:
+    """Trajectória temporal predita pelo MaxToki"""
+    current_state: CellularState
+    predicted_states: List[CellularState]
+    time_steps: List[float]  # Dias desde o presente
+    confidence_interval: float  # Baseado na correlação 0.77-0.85
+    intervention_effects: Dict[str, float]  # Efeito de possíveis intervenções
+
+    def to_dict(self) -> Dict:
+        """Converte trajetória para dicionário serializável"""
+        return {
+            "current_state": self.current_state.to_dict(),
+            "predicted_states": [s.to_dict() for s in self.predicted_states],
+            "time_steps": [float(ts) for ts in self.time_steps],
+            "confidence_interval": float(self.confidence_interval),
+            "intervention_effects": {k: float(v) for k, v in self.intervention_effects.items()}
+        }
+
+class MaxTokiAdapter:
+    """
+    Adaptador do MaxToki para o ecossistema Arkhe-Ω Rio
+    Converte leituras dos 168 sensores NV em tokens genéticos para o modelo
+    """
+
+    def __init__(self, model_path: str = "maxtoki_1b.pt"):
+        # Simulação do modelo MaxToki (1B parâmetros)
+        # Em produção: carregar checkpoint do HuggingFace
+        self.model = self._load_model(model_path)
+        self.gene_vocab_size = 20271  # Tamanho do transcriptoma humano
+        self.embedding_dim = 512
+        self.max_context_length = 128  # Células de contexto
+
+        # Mapeamento λ₂ → "idade celular"
+        # Baseado nos dados: fumadores +5y, fibrose +15y, Alzheimer +3y
+        self.lambda_age_correlation = {
+            'cochlea': {'baseline': 0.0, 'lambda_factor': -10.0},  # λ₂ alto = idade baixa
+            'cardiac': {'baseline': 0.0, 'lambda_factor': -12.5},
+            'neural': {'baseline': 0.0, 'lambda_factor': -8.0}
+        }
+
+        # Matriz de projeção persistente e determinística (simulação)
+        # Em produção, carregar matriz de pesos real do modelo MaxToki
+        self._projection_matrix = self._init_projection_matrix()
+
+    def _init_projection_matrix(self, seed: int = 42) -> np.ndarray:
+        """Inicializa matriz de projeção determinística 168 → 20,271"""
+        rng = np.random.default_rng(seed)
+        return rng.standard_normal((168, 20271)) * 0.01
+
+    def _load_model(self, path: str):
+        """Carrega modelo MaxToki (simulação)"""
+        # Simulação de um Transformer decoder
+        class MockMaxToki(nn.Module):
+            def __init__(self):
+                super().__init__()
+                self.embedding = nn.Embedding(20271, 512)
+                self.transformer = nn.TransformerDecoderLayer(d_model=512, nhead=8, batch_first=True)
+                self.time_predictor = nn.Linear(512, 1)
+                self.state_generator = nn.Linear(512, 20271)
+
+            def forward(self, context, query_time=None):
+                # Mock: retorna predições realistas
+                batch_size = context.size(0)
+                if query_time is None:
+                    # Prever tempo
+                    return torch.randn(batch_size) * 5 + 30  # ~30 dias std
+                else:
+                    # Gerar estado
+                    return torch.randn(batch_size, 20271) * 0.1 + 0.5
+
+        return MockMaxToki()
+
+    def nv_to_transcriptome(self, nv_readings: np.ndarray, tissue: str) -> np.ndarray:
+        """
+        Converte 168 leituras NV (λ₂) em vetor transcriptoma (20,271 genes)
+        Usa uma matriz de projeção aprendida (simulação)
+        """
+        # Projeta usando matriz persistente
+        transcriptome = nv_readings @ self._projection_matrix
+
+        # Normalização
+        std = transcriptome.std()
+        if std == 0: std = 1.0
+        transcriptome = (transcriptome - transcriptome.mean()) / std
+        return transcriptome
+
+    def predict_aging_trajectory(
+        self,
+        current_state: CellularState,
+        target_age: Optional[float] = None,
+        interventions: List[str] = None
+    ) -> TemporalTrajectory:
+        """
+        Prediz trajectória de envelhecimento/rejuvenescimento celular
+        similar ao artigo (fumadores +5y, etc.)
+        """
+        # Converte estado atual para tokens
+        nv_readings = np.full(168, current_state.lambda_coherence)
+        transcriptome = self.nv_to_transcriptome(nv_readings, current_state.tissue_type)
+
+        # Contexto: histórico de estados (se disponível)
+        context = torch.tensor(transcriptome[:self.max_context_length]).float()
+
+        # Prever próximos estados
+        predicted_states = []
+        time_steps = []
+
+        # Simulação: 6 meses de predição (180 dias)
+        for days in range(0, 180, 30):
+            time_tensor = torch.tensor([days]).float()
+
+            # MaxToki prediz estado futuro
+            with torch.no_grad():
+                future_transcriptome = self.model(context.unsqueeze(0), time_tensor)
+
+            # Converte de volta para λ₂
+            future_lambda = self._transcriptome_to_lambda(
+                future_transcriptome.numpy(),
+                current_state.tissue_type
+            )
+
+            future_state = CellularState(
+                timestamp=current_state.timestamp + timedelta(days=days),
+                lambda_coherence=future_lambda,
+                transcriptome_vector=future_transcriptome.numpy(),
+                biological_age=current_state.biological_age + (days/365),
+                tissue_type=current_state.tissue_type
+            )
+
+            predicted_states.append(future_state)
+            time_steps.append(float(days))
+
+            # Atualiza contexto (sliding window)
+            context = torch.roll(context, -1)
+            context[-1] = future_transcriptome[0, 0]
+
+        # Calcula efeitos de intervenções (como no artigo: remover genes pró-envelhecimento)
+        intervention_effects = {}
+        if interventions:
+            for intervention in interventions:
+                if intervention == "silence_P4HA1":  # Gene validado no artigo
+                    intervention_effects[intervention] = -5.0  # Rejuvenescimento 5 anos
+                elif intervention == "silence_RASGEF1B":
+                    intervention_effects[intervention] = -3.5
+                elif intervention == "AAV_OTOF" or intervention == "AAV_OTOF_Dual":  # Terapia atual
+                    intervention_effects[intervention] = -8.0  # Recuperação auditiva = rejuvenescimento funcional
+
+        return TemporalTrajectory(
+            current_state=current_state,
+            predicted_states=predicted_states,
+            time_steps=time_steps,
+            confidence_interval=0.81,  # Média da correlação 0.77-0.85
+            intervention_effects=intervention_effects
+        )
+
+    def _transcriptome_to_lambda(self, transcriptome: np.ndarray, tissue: str) -> float:
+        """Converte vetor transcriptoma de volta para λ₂"""
+        # Simplificação: λ₂ é função da "entropia" do transcriptoma
+        entropy = np.std(transcriptome)
+        lambda_val = 0.95 - (entropy * 0.1)  # Quanto mais ordenado, maior λ₂
+        return float(np.clip(lambda_val, 0.0, 1.0))
+
+    def predict_otof_recovery(
+        self,
+        pre_surgery_state: CellularState,
+        surgical_intervention: str = "AAV_OTOF_Dual"
+    ) -> Dict:
+        """
+        Prediz recuperação auditiva específica para terapia OTOF
+        Retorna timeline de recuperação do C-index (coerência auditiva)
+        """
+        # Baseado nos dados Karolinska: melhora 54 dB em 4 meses
+        trajectory = self.predict_aging_trajectory(
+            current_state=pre_surgery_state,
+            interventions=[surgical_intervention]
+        )
+
+        # Mapeia λ₂ para limiar auditivo (dB)
+        # λ₂ = 0.45 (surdez profunda) → 100+ dB
+        # λ₂ = 0.95 (audição normal) → 20 dB
+        recovery_curve = []
+        for state in trajectory.predicted_states:
+            db = 100 - (state.lambda_coherence - 0.45) * (80 / 0.5)
+            recovery_curve.append({
+                'days': (state.timestamp - pre_surgery_state.timestamp).days,
+                'lambda': state.lambda_coherence,
+                'db_threshold': max(20.0, db),
+                'status': 'profound' if db > 90 else 'severe' if db > 60 else 'moderate' if db > 40 else 'normal'
+            })
+
+        return {
+            'trajectory': trajectory,
+            'recovery_curve': recovery_curve,
+            'expected_full_recovery_days': 120,  # 4 meses
+            'confidence': trajectory.confidence_interval,
+            'genes_activated': ['OTOF', 'SYNJ2BP', 'SLC17A8'],  # Genes relacionados à função sináptica
+            'risk_genes': ['P4HA1', 'RASGEF1B']  # Genes pró-envelhecimento a monitorar
+        }
+
+class ArkheMaxTokiIntegration:
+    """
+    Integração completa ao sistema Arkhe-Ω Rio
+    Conecta aos smart contracts e sensores NV
+    """
+
+    def __init__(self):
+        self.maxtoki = MaxTokiAdapter()
+        self.nv_sensors_count = 168
+
+    def screen_patient_eligibility(self, patient_nv_data: np.ndarray) -> Dict:
+        """
+        Triagem de elegibilidade usando MaxToki
+        Verifica se paciente tem perfil celular compatível com sucesso terapêutico
+        """
+        current_state = CellularState(
+            timestamp=datetime.now(),
+            lambda_coherence=float(np.mean(patient_nv_data)),
+            transcriptome_vector=self.maxtoki.nv_to_transcriptome(patient_nv_data, 'cochlea'),
+            biological_age=0,  # Será estimado
+            tissue_type='cochlea'
+        )
+
+        # Prediz sem tratamento (envelhecimento natural)
+        # natural_trajectory = self.maxtoki.predict_aging_trajectory(current_state)
+
+        # Prediz com tratamento OTOF
+        otof_prediction = self.maxtoki.predict_otof_recovery(current_state)
+
+        # Calcula "benefício predito"
+        baseline_lambda = current_state.lambda_coherence
+        final_lambda = otof_prediction['recovery_curve'][-1]['lambda']
+        improvement = final_lambda - baseline_lambda
+
+        eligibility_score = min(100.0, improvement * 100.0 * 2.0)  # Escala 0-100
+
+        return {
+            'eligible': bool(eligibility_score > 70),
+            'eligibility_score': round(float(eligibility_score), 2),
+            'predicted_recovery_db': round(float(54 * (improvement / 0.5)), 2),  # Escala proporcional
+            'recommended_intervention': 'AAV_OTOF_Dual' if eligibility_score > 80 else 'AAV_OTOF_Single',
+            'monitoring_frequency': 'weekly' if baseline_lambda < 0.50 else 'biweekly',
+            'genetic_risk_factors': otof_prediction['risk_genes'],
+            'expected_timeline': otof_prediction['recovery_curve']
+        }
+
+    def generate_smart_contract_data(self, prediction: Dict) -> Dict:
+        """
+        Gera dados formatados para os smart contracts $RIO
+        Inclui predição de milestones baseada no MaxToki
+        """
+        contract_data = {
+            'patient_anonymous_hash': '0x' + 'a'*64,  # Placeholder
+            'maxtoki_prediction': {
+                'eligibility_score': prediction['eligibility_score'],
+                'expected_recovery_db': prediction['predicted_recovery_db'],
+                'timeline_days': 120,
+                'confidence': 0.81
+            },
+            'milestones': [
+                {'day': 30, 'lambda_threshold': 0.70, 'payout_percent': 30},
+                {'day': 60, 'lambda_threshold': 0.85, 'payout_percent': 30},
+                {'day': 120, 'lambda_threshold': 0.95, 'payout_percent': 40}
+            ],
+            'risk_genes_to_monitor': prediction['genetic_risk_factors'],
+            'timestamp': datetime.now().isoformat()
+        }
+
+        return contract_data
+
+# ============================================================
+# [AUDITÓRIO / OTOF] - Funções Legadas (Mock para Retrocompatibilidade)
+# ============================================================
+
+def simulate_auditory_coherence(baseline_db: float, weeks: float) -> Dict:
+    """
+    Simula a recuperação da coerência auditiva ao longo do tempo (OTOF).
+    Baseado no modelo de integração MaxToki-OTOF.
+    """
+    # Mapeia db para lambda
+    lambda_initial = 0.95 - (baseline_db - 20) * (0.5 / 80)
+    lambda_initial = np.clip(lambda_initial, 0.45, 0.95)
+
+    # Simula evolução temporal
+    # Recuperação total (54 dB) em 120 dias (~17 semanas)
+    recovery_rate = (54 / 17) * weeks
+    current_db = max(20.0, baseline_db - recovery_rate)
+
+    # Mapeia de volta para lambda2
+    lambda2 = 0.95 - (current_db - 20) * (0.5 / 80)
+    lambda2 = np.clip(lambda2, 0.45, 0.95)
+
+    return {
+        "hearing_threshold_db": round(float(current_db), 2),
+        "lambda2_coherence": round(float(lambda2), 4),
+        "weeks_post_op": weeks,
+        "status": "STABILIZED" if weeks >= 12 else "RECOVERING"
+    }
+
+def simulate_brillouin_auditory_sensor(power_mw: float, coherence: float) -> Dict:
+    """
+    Simula a leitura do sensor Brillouin para monitoramento auditivo.
+    """
+    return {
+        "laser_wavelength_nm": 674.0,
+        "power_received_mw": round(power_mw * coherence, 2),
+        "is_coherent": bool(coherence > 0.1),
+        "timestamp": datetime.now().isoformat()
+    }
