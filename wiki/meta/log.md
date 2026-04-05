@@ -33,3 +33,9 @@ Chronological append-only log of Arkhe(n) knowledge base actions.
 - Added `OverrideEntry` and tracking logic to C++ core.
 - Implemented `apply_node_override` for temporary K multiplication.
 - Added automatic expiration cleanup and CSV logging for audit.
+
+## [2024-05-13] bio | GT-09 Phase Therapy Activation
+- Implemented `simulate_phase_oncology` and `simulate_stem_cell_safety`.
+- Defined GT-09 transdisciplinary group for cancer phase engineering.
+- Partnered with INCA for Mini-BIP-1 liquid biopsy validation (simulated).
+- Documented IVMT-Rx-4 as a selective decoherence operator.

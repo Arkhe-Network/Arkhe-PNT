@@ -19,6 +19,11 @@ total_pages: 5 (plus stubs)
 - [[Gold Standard for BIP-1]] – The specific statistical signature (p_vac = 0.381966) that validates the hardware.
 - [[Neurodivergência como Phase Shield Natural]] – Resistance to phase dragging in atypical neural architectures.
 - [[Assinaturas de Anomalia e Vivacidade]] – Detection of Alpha-Burst and Shadow-Replay signatures.
+- [[Terapia de Fase (Phase Therapy)]] – Treating cancer as a phase addressing error in biological tissues.
+
+## Biology & Oncology
+- [[Phase Oncology Report & Protocol GT-09]] – Clinical validation of IVMT-Rx-4 and Mini-BIP-1 at INCA.
+- [[GT Terapia de Fase — CIC-GT-09]] – Operational setup for stem cell safety and Bio-Silent modes.
 
 ## Hardware & Engineering
 - [[Tzinor-Relays Subaquáticos (Fase 1)]] – Underwater fiber optic links for Zone Sul stabilization.

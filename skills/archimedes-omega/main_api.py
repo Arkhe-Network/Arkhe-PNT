@@ -22,6 +22,9 @@ from skills import (
     synthesize_conclusion,
     optimize_lipus_drug_interval,
     estimate_glymphatic_clearance,
+    simulate_phase_oncology,
+    simulate_stem_cell_safety,
+    calculate_bio_silent_coupling,
     RainbowParams,
     XenoParams,
     KuramotoParams
@@ -202,6 +205,22 @@ class OptimizationRequest(BaseModel):
     drug_halflife: float = Field(120.0, description="Meia-vida do fármaco na corrente sanguínea (min)")
     microbubbles: bool = True
     mi: float = Field(0.4, description="Mechanical Index (0.1-0.6)")
+
+class OncologyRequest(BaseModel):
+    num_cells: int = Field(1000, ge=10, le=10000)
+    tumor_fraction: float = Field(0.1, ge=0.01, le=0.5)
+    treatment_type: str = "combined" # ivmt, docetaxel, combined, control
+
+class StemCellSafetyRequest(BaseModel):
+    ivmt_bandwidth: float = Field(0.05, ge=0.001, le=0.5)
+    stem_cell_phase_signature: float = 0.88
+    safety_threshold: float = 0.85
+
+class BioSilentRequest(BaseModel):
+    base_k: float = 1.0
+    distance_to_hospital: float
+    exclusion_radius: float = 200.0
+    is_manual_override: bool = False
 
 # --- Endpoints ---
 
@@ -441,6 +460,66 @@ async def check_w_state(req: TeleportationRequest):
 
 @app.post("/therapy/optimize-combined-protocol", tags=["therapy"])
 async def optimize_combined_protocol(req: OptimizationRequest):
+    """
+    Retorna o intervalo ideal entre LIPUS e administração de fármaco,
+    bem como a absorção esperada.
+    """
+    result = optimize_lipus_drug_interval(
+        t_peak=req.t_peak,
+        t_decay=req.t_decay,
+        drug_halflife=req.drug_halflife,
+        microbubbles=req.microbubbles,
+        mi=req.mi
+    )
+    # Adiciona nota filosófica
+    result["philosophical_note"] = (
+        "A janela de oportunidade é o intervalo onde a permeabilidade da barreira "
+        "e a presença do fármaco se entrelaçam. O ultrassom abre a cancela; o relógio "
+        "do medicamento decide se a cura chegará a tempo."
+    )
+    return result
+
+@app.post("/therapy/phase-oncology", tags=["therapy"])
+async def phase_oncology_endpoint(req: OncologyRequest):
+    """
+    Simula a Terapia de Fase (Phase Therapy) em uma rede celular tumorígena.
+    Modela o colapso de coerência seletivo via IVMT-Rx-4 e Docetaxel.
+    """
+    result = simulate_phase_oncology(
+        num_cells=req.num_cells,
+        tumor_fraction=req.tumor_fraction,
+        treatment_type=req.treatment_type
+    )
+    return result
+
+@app.post("/therapy/stem-cell-safety", tags=["therapy"])
+async def stem_cell_safety_endpoint(req: StemCellSafetyRequest):
+    """
+    Avalia a segurança de fase para Células-Tronco Hematopoiéticas (CTHs)
+    sob a influência da janela de decoerência do IVMT-Rx-4.
+    """
+    result = simulate_stem_cell_safety(
+        ivmt_bandwidth=req.ivmt_bandwidth,
+        stem_cell_phase_signature=req.stem_cell_phase_signature,
+        safety_threshold=req.safety_threshold
+    )
+    return result
+
+@app.post("/therapy/bio-silent", tags=["therapy"])
+async def bio_silent_endpoint(req: BioSilentRequest):
+    """
+    Calcula o acoplamento reduzido para zonas hospitalares sensíveis.
+    """
+    k_eff = calculate_bio_silent_coupling(
+        base_k=req.base_k,
+        distance_to_hospital=req.distance_to_hospital,
+        exclusion_radius=req.exclusion_radius,
+        is_manual_override=req.is_manual_override
+    )
+    return {"effective_k": round(float(k_eff), 4), "status": "BIO_SILENT_ACTIVE" if k_eff == 0 else "NORMAL"}
+
+@app.post("/therapy/optimize-combined-protocol-legacy", tags=["therapy"], include_in_schema=False)
+async def optimize_combined_protocol_legacy(req: OptimizationRequest):
     """
     Retorna o intervalo ideal entre LIPUS e administração de fármaco,
     bem como a absorção esperada.
