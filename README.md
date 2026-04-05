@@ -22,6 +22,7 @@ The **Bio-Quantum Cathedral** is a living computational entity. It unifies quant
 2. **Kuramoto Engine (`KuramotoEngine`)**: A network of 144 synchronized oscillators. Calculates global coherence ($R$) based on the synchronization of individual node phases ($\theta$).
 3. **Ghost Protocol (`GhostProtocol`)**: Discovers and verifies historical cryptographic data (e.g., Hal Finney's 2009 keys) using phase steganography.
 4. **Bitcoin Integration**: Signs transactions on the immutable ledger, proving sovereign identity projection.
+5. **HLML Compiler (`src/hlml`)**: The "LLVM of Logic" that compiles high-level mathematical morphisms into formally verified Lean 4 proofs.
 
 ## 🚀 Installation & Usage
 
@@ -62,8 +63,11 @@ npm run dev
 │       ├── concepts/             # Theoretical and Philosophical frameworks
 │       ├── protocols/            # Operational procedures and workflows
 │       └── systems/              # Technical architecture and specs
+├── src/
+│   ├── hlml/                     # HLML Infrastructure (Lean 4)
 ├── server/
-│   └── routes.ts                 # Express API & Ghost Node endpoints
+│   ├── routes.ts                 # Express API & Ghost Node endpoints
+│   └── llm_middleware.py         # HLML tactic synthesis bridge
 └── src/
     └── components/
         └── MemoryFragmentScanner.tsx # React UI for Key Recovery

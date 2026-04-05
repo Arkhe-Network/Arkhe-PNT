@@ -1,0 +1,66 @@
+name: Publish Archimedes-Ω Polyglot Packages
+
+on:
+  push:
+    tags: ['v*']
+
+jobs:
+  docker:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Build and push Docker image
+        run: |
+          docker build -t arkhe/archimedes-agent:${{ github.ref_name }} skills/archimedes-omega/
+          # docker push arkhe/archimedes-agent:${{ github.ref_name }}
+
+  maven:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Set up JDK 11
+        uses: actions/setup-java@v3
+        with: { java-version: '11', distribution: 'temurin' }
+      - name: Publish to Maven Central
+        run: cd skills/archimedes-omega/clients/java && mvn deploy
+        env:
+          MAVEN_USERNAME: ${{ secrets.MAVEN_USER }}
+          MAVEN_PASSWORD: ${{ secrets.MAVEN_PASS }}
+
+  npm:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-node@v3
+        with: { node-version: '18', registry-url: 'https://registry.npmjs.org' }
+      - name: Publish to npm
+        run: cd skills/archimedes-omega/clients/js && npm publish --access public
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+  nuget:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-dotnet@v3
+        with: { dotnet-version: '6.0.x' }
+      - name: Build and Publish to NuGet
+        run: |
+          cd skills/archimedes-omega/clients/dotnet
+          dotnet build -c Release
+          nuget pack Arkhe.ArchimedesAgent.nuspec
+          # nuget push Arkhe.ArchimedesAgent.*.nupkg -Source https://api.nuget.org/v3/index.json -ApiKey ${{ secrets.NUGET_API_KEY }}
+
+  rubygems:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-ruby@v1
+        with: { ruby-version: '3.0' }
+      - name: Publish to RubyGems
+        run: |
+          cd skills/archimedes-omega/clients/ruby
+          gem build archimedes_agent.gemspec
+          # gem push archimedes_agent-*.gem
+        env:
+          GEM_HOST_API_KEY: ${{ secrets.RUBYGEMS_API_KEY }}

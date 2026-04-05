@@ -175,7 +175,18 @@ export interface SimulationState {
   edge: {
     activePhysicalNodes: number;
     mcpConnections: string[];
+    velxioConnections: string[];
     phase: number;
+  };
+  velxioEmulation: {
+    activeSimulations: {
+      id: string;
+      board: string;
+      status: 'running' | 'idle' | 'error';
+      startTime: string;
+      lastLog?: string;
+    }[];
+    totalCompilations: number;
   };
   astl: {
     activeMesh: string;
@@ -275,6 +286,15 @@ export interface SimulationState {
     interoperability: EnterpriseSubagentState[];
   };
   chshMonitor: CHSHMonitorState;
+  biometrics?: BiometricState;
+}
+
+export interface BiometricState {
+  livenessScore: number;
+  isAuthentic: boolean;
+  lastVerification: string;
+  heartbeatCoherence: number;
+  phaseSignature: number[];
 }
 
 export interface NeighborhoodCoherence {

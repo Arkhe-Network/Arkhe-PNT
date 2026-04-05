@@ -107,7 +107,12 @@ export let state: SimulationState = {
   edge: {
     activePhysicalNodes: 1048576,
     mcpConnections: ['mcp://arkhe-vision.sn44.bittensor', 'mcp://zombie-fleet.dimos'],
+    velxioConnections: [],
     phase: 26.0,
+  },
+  velxioEmulation: {
+    activeSimulations: [],
+    totalCompilations: 0,
   },
   astl: {
     activeMesh: 'hyper_torus.arkhestl',
@@ -298,6 +303,13 @@ export let state: SimulationState = {
       time: "2026-04-03T21:46:00Z",
       action: "First CHSH reading"
     }
+  },
+  biometrics: {
+    livenessScore: 0.99,
+    isAuthentic: true,
+    lastVerification: new Date().toISOString(),
+    heartbeatCoherence: 0.985,
+    phaseSignature: [0.12, 0.45, 0.78, 0.23, 0.56, 0.89, 0.11, 0.44]
   }
 };
 

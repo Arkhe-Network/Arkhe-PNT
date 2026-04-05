@@ -11,7 +11,7 @@ import {
   Area
 } from 'recharts';
 import { useArkheSimulation } from '../hooks/useArkheSimulation';
-import { Activity, Shield, Zap, Cpu } from 'lucide-react';
+import { Activity, Shield, Zap, Cpu, Heart, Fingerprint } from 'lucide-react';
 
 const CorvoNoirDashboard: React.FC = () => {
   const { state } = useArkheSimulation();
@@ -129,6 +129,65 @@ const CorvoNoirDashboard: React.FC = () => {
                 <p className="text-sm font-bold text-neutral-300">{state.mitigation.tzinorShardsAvailable}/24</p>
               </div>
             </div>
+          </div>
+
+          {/* Wetware Biometrics Sidebar */}
+          <div className="bg-neutral-900/50 p-4 rounded-lg border border-neutral-800">
+            <div className="flex items-center gap-3 mb-2">
+              <Fingerprint className="w-5 h-5 text-emerald-500" />
+              <p className="text-xs font-bold uppercase tracking-widest text-emerald-500">Wetware Biometrics</p>
+            </div>
+            {state.biometrics ? (
+              <div className="space-y-3">
+                <div className="flex justify-between items-end">
+                  <div>
+                    <p className="text-[8px] text-neutral-500 uppercase">Liveness Score</p>
+                    <p className={`text-lg font-bold ${(state.biometrics.livenessScore || 0) > 0.8 ? 'text-emerald-400' : 'text-red-400'}`}>
+                      {((state.biometrics.livenessScore || 0) * 100).toFixed(1)}%
+                    </p>
+                  </div>
+                  <div className="text-right">
+                    <p className="text-[8px] text-neutral-500 uppercase">Status</p>
+                    <p className={`text-xs font-bold uppercase ${state.biometrics.isAuthentic ? 'text-emerald-400' : 'text-red-400'}`}>
+                      {state.biometrics.isAuthentic ? 'AUTHENTIC' : 'UNAUTHORIZED'}
+                    </p>
+                  </div>
+                </div>
+
+                <div>
+                  <p className="text-[8px] text-neutral-500 uppercase mb-1 flex items-center gap-1">
+                    <Heart className="w-2 h-2 text-red-500" /> Heartbeat Coherence
+                  </p>
+                  <div className="w-full bg-neutral-800 h-1.5 rounded-full overflow-hidden">
+                    <div
+                      className="bg-red-500 h-full transition-all duration-500"
+                      style={{ width: `${(state.biometrics.heartbeatCoherence || 0) * 100}%` }}
+                    ></div>
+                  </div>
+                </div>
+
+                {state.biometrics.phaseSignature && (
+                  <div>
+                    <p className="text-[8px] text-neutral-500 uppercase mb-1">Phase Signature</p>
+                    <div className="flex gap-0.5 h-4 items-end">
+                      {state.biometrics.phaseSignature.map((val, idx) => (
+                        <div
+                          key={idx}
+                          className="bg-emerald-500/50 flex-1 hover:bg-emerald-500 transition-colors"
+                          style={{ height: `${val * 100}%` }}
+                        ></div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                <p className="text-[7px] text-neutral-600 uppercase text-center italic">
+                  Last verified: {state.biometrics.lastVerification ? new Date(state.biometrics.lastVerification).toLocaleTimeString() : 'N/A'}
+                </p>
+              </div>
+            ) : (
+              <p className="text-[10px] text-neutral-500 italic">No biometric data available.</p>
+            )}
           </div>
         </div>
       </div>

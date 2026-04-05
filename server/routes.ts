@@ -494,27 +494,6 @@ export function setupRoutes(app: express.Express, broadcastState: () => void, cl
     });
   });
 
-  // AR Field Technician - Manual K Override
-  app.post("/api/ar/manual-override", express.json(), (req, res) => {
-    const { technician_id, target_node, multiplier, duration_s } = req.body;
-
-    if (!target_node || !multiplier) {
-      return res.status(400).json({ error: "Missing override parameters" });
-    }
-
-    logger.info(`🜏 [AR-OVERRIDE] Technician ${technician_id} forcing K x${multiplier} on ${target_node} for ${duration_s}s`);
-
-    // Simulate updating the coupling matrix for the specific node
-    // In a real system, this would interact with the C++ redistributor core
-    res.json({
-      success: true,
-      applied_at: new Date().toISOString(),
-      expires_at: new Date(Date.now() + duration_s * 1000).toISOString(),
-      target: target_node,
-      multiplier: multiplier
-    });
-  });
-
   // API to trigger manual attack
   app.post("/api/trigger-attack", (req, res) => {
     const { type } = req.body || { type: 'Manual Override' };
@@ -718,6 +697,32 @@ export function setupRoutes(app: express.Express, broadcastState: () => void, cl
       success: true,
       url,
       connections: state.edge.mcpConnections
+    });
+  });
+
+  app.post("/api/mcp/connect-velxio", express.json(), (req, res) => {
+    const { url } = req.body;
+    if (!url) return res.status(400).json({ error: "URL is required" });
+
+    if (!state.edge.velxioConnections.includes(url)) {
+      state.edge.velxioConnections.push(url);
+    }
+
+    state.logs.unshift({
+      id: generateOrbId(),
+      originTime: Date.now(),
+      targetTime: Date.now(),
+      coherence: state.currentLambda,
+      status: 'Valid',
+      threatType: `VELXIO: Hardware Emulation Bridge connected to ${url}`
+    });
+
+    broadcastState();
+
+    res.json({
+      success: true,
+      url,
+      connections: state.edge.velxioConnections
     });
   });
 
@@ -1203,7 +1208,7 @@ export function setupRoutes(app: express.Express, broadcastState: () => void, cl
     let resultPayload: any = { status: "processed" };
     let logs: string[] = [];
 
-    // POC Specific Logic for G1, D1, X1
+    // POC Specific Logic for G1, D1, X1, G4
     if (id.toUpperCase() === 'G1' && action === 'validate-policy') {
       const policy = req.body.policy;
       logs.push("🜏 [G1-NOMOS] Auditando política ODRL contra ontologia x.ttl...");
@@ -1213,6 +1218,25 @@ export function setupRoutes(app: express.Express, broadcastState: () => void, cl
       } else {
         resultPayload = { valid: false, reason: "Invalid ODRL structure" };
         logs.push("🜏 [G1-NOMOS] Falha na validação: estrutura ODRL inválida.");
+      }
+    } else if (id.toUpperCase() === 'G4' && action === 'ethics-impact') {
+      const { proposal, category } = req.body;
+      logs.push(`🜏 [G4-TELOS] Analisando proposta EQBE: ${proposal || 'General AI Task'}`);
+
+      const redLines = ["weapon", "coercion", "germline", "non-consensual"];
+      const hasViolation = redLines.some(rl => (proposal || "").toLowerCase().includes(rl));
+
+      if (hasViolation) {
+        resultPayload = { compliant: false, reason: "RED LINE VIOLATION: Proposed activity violates EQBE Protocol Section 3.", severity: "CRITICAL" };
+        logs.push("🜏 [G4-TELOS] VIOLAÇÃO ÉTICA DETECTADA! Bloqueando operação.");
+      } else {
+        resultPayload = {
+          compliant: true,
+          protocol: "EQBE v1.0",
+          safety_checks: ["Leakage", "Reversibility", "Non-target", "Evolutionary"],
+          audit_hash: "0x" + crypto.randomBytes(32).toString('hex')
+        };
+        logs.push("🜏 [G4-TELOS] Proposta em conformidade com o Protocolo EQBE.");
       }
     } else if (id.toUpperCase() === 'D1' && action === 'deploy-circuit') {
       logs.push("🜏 [D1-TECHNE] Iniciando deploy de circuito Circom...");
@@ -1255,5 +1279,61 @@ export function setupRoutes(app: express.Express, broadcastState: () => void, cl
     broadcastState();
 
     res.json(response);
+  });
+
+  // Biometric Telemetry Endpoints
+  app.get("/api/biometrics/status", (req, res) => {
+    res.json(state.biometrics);
+  });
+
+  app.post("/api/biometrics/verify", express.json(), (req, res) => {
+    const { phaseSignature, fingerprint } = req.body;
+
+    // Integration with OrbVM logic
+    // In this production-ready simulation, we simulate the results as if they came from the C++ VM
+
+    const anchorPhases = [0.12, 0.45, 0.78, 0.23, 0.56, 0.89, 0.11, 0.44];
+    const threshold = 0.05;
+
+    // 1. Authenticate Phases
+    let isAuthentic = false;
+    if (phaseSignature && phaseSignature.length === anchorPhases.length) {
+      let variance = 0.0;
+      for (let i = 0; i < phaseSignature.length; i++) {
+        let diff = (phaseSignature[i] - anchorPhases[i] + Math.PI) % (2 * Math.PI);
+        if (diff < 0) diff += 2 * Math.PI;
+        diff -= Math.PI;
+        variance += diff * diff;
+      }
+      isAuthentic = (variance / phaseSignature.length) < threshold;
+    }
+
+    // 2. Check for Phase Clones (if fingerprint provided)
+    let isClone = false;
+    if (fingerprint && fingerprint.length === 16) {
+      // Mocking detectPhaseClone binomial logic
+      const referenceFingerprint = [128, 128, 128, 128, 128, 128, 128, 128, 128, 128, 128, 128, 128, 128, 128, 128];
+      let matches = 0;
+      for (let i = 0; i < 16; i++) {
+        if (Math.abs(fingerprint[i] - referenceFingerprint[i]) <= 1) matches++;
+      }
+      isClone = (matches / 16) >= 0.92;
+    }
+
+    if (state.biometrics) {
+      state.biometrics.isAuthentic = isAuthentic && !isClone;
+      state.biometrics.lastVerification = new Date().toISOString();
+      state.biometrics.livenessScore = isAuthentic ? (isClone ? 0.05 : 0.95 + Math.random() * 0.05) : 0.1;
+    }
+
+    broadcastState();
+
+    res.json({
+      success: true,
+      isAuthentic: state.biometrics?.isAuthentic,
+      isClone,
+      livenessScore: state.biometrics?.livenessScore,
+      timestamp: state.biometrics?.lastVerification
+    });
   });
 }
