@@ -17,29 +17,10 @@ O sensor emula o monitoramento da resposta auditiva de tronco cerebral (BERA) co
 - **Janela Terapêutica**: Recuperação observada em 4-12 semanas.
 - **Métrica de Sucesso**: λ₂ > 0.85 (Coerência Estabilizada).
 
-## 4. Governança e Subsídio (Smart Contracts)
-A gestão financeira do protocolo é automatizada via Arkhe-Chain utilizando o token **$RIO**.
-
-### 4.1 Arquitetura de Contratos
-| Contrato | Função |
-|----------|--------|
-| **RIOToken** | Token ERC-20 para pagamentos e governança da Cidade-Estado. |
-| **PatientRegistry** | Registro anônimo de elegibilidade (hash genético + consentimento). |
-| **SubsidyManager** | Orquestração de solicitações e desembolso multi-sig (3/5). |
-| **RioGovernor** | DAO para votação de parâmetros (ex: % de subsídio, idade limite). |
-
-### 4.2 Fluxo de Desembolso
-1. **Inscrição**: Médico registra o paciente no `PatientRegistry`.
-2. **Aprovação Ética**: EQBE valida o consentimento digital.
-3. **Solicitação**: Tutor solicita o subsídio (padrão 80%) via `SubsidyManager`.
-4. **Consenso**: Comitê multi-sig (médicos + bioética) aprova a transação.
-5. **Liquidação**: Mintagem de $RIO para a carteira do paciente/clínica.
-
-## 5. Diretrizes Éticas (EQBE)
-1. **Acesso Universal**: Subvenção integral para cidadãos de baixa renda via tesouro da DAO.
+## 4. Diretrizes Éticas (EQBE)
+1. **Acesso Universal**: Subvenção via tokens $RIO para cidadãos do Rio de Janeiro.
 2. **Limite de Melhoramento**: Restrição de ganho auditivo ao limiar normal (ISO 20dB).
-3. **Soberania de Dados**: Registro obrigatório de marcos de coerência (λ₂) na Arkhe-Chain.
+3. **Soberania de Dados**: Registro obrigatório de marcos de coerência na Arkhe-Chain.
 
-## 6. Implementação Técnica
-- **Simulação**: `skills/archimedes-omega/skills.py` (API: `/therapy/otof/simulate`).
-- **Firmware**: `contracts/*.sol` (Solidy 0.8.20).
+## 5. Implementação Técnica
+A simulação matemática reside em `skills/archimedes-omega/skills.py` e é exposta via API em `/therapy/otof/simulate`.

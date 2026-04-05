@@ -764,63 +764,6 @@ class ARChromestheticInterface:
         }
 
 # ============================================================
-# [AUDITIVO / TERAPIA GÊNICA] - Protocolo OTOF & Sensor Brillouin
-# ============================================================
-def simulate_auditory_coherence(
-    baseline_db: float,
-    weeks_post_aav: float,
-    aav_efficiency: float = 0.95
-) -> Dict:
-    """
-    Simula a recuperação da audição e coerência λ₂ pós-terapia gênica OTOF.
-    Modelo baseado no estudo Nature Medicine 2025.
-    """
-    # Recuperação logarítmica: R = R0 * (1 - exp(-t/tau))
-    tau = 4.0 # Constante de tempo de 4 semanas
-    recovery_factor = 1.0 - np.exp(-weeks_post_aav / tau)
-
-    # Redução de limiar (ex: 106dB -> 52dB)
-    target_reduction = (baseline_db - 20) * aav_efficiency # Alvo é 20dB (normal)
-    current_db = baseline_db - (target_reduction * recovery_factor)
-
-    # Coerência λ₂ (proxy para inteligibilidade)
-    # Sinapse coclear funcional = λ₂ alta
-    lambda2 = 0.3 + 0.65 * recovery_factor * aav_efficiency
-
-    return {
-        "weeks": weeks_post_aav,
-        "hearing_threshold_db": round(float(current_db), 2),
-        "lambda2_coherence": round(float(lambda2), 4),
-        "status": "RECOVERING" if weeks_post_aav < 12 else "STABILIZED",
-        "intelligibility_index": round(float(np.clip(recovery_factor * 1.2, 0, 1)), 2)
-    }
-
-def simulate_brillouin_auditory_sensor(
-    excitation_freq_hz: float,
-    bera_amplitude_uv: float,
-    noise_level: float = 0.05
-) -> Dict:
-    """
-    Emula o sensor Brillouin de 674nm medindo a resposta coclear (BERA).
-    """
-    # Simulação de correlação entre laser e resposta elétrica
-    # Se amplitude BERA for baixa (< 0.1 uV), a coerência cai
-    lambda2_base = np.clip(bera_amplitude_uv / 0.5, 0, 1)
-
-    # Adicionar ruído de fase
-    phase_jitter = np.random.normal(0, noise_level)
-    measured_lambda2 = lambda2_base * (1.0 - abs(phase_jitter))
-
-    return {
-        "laser_wavelength_nm": 674.0,
-        "excitation_hz": excitation_freq_hz,
-        "bera_response_uv": round(float(bera_amplitude_uv), 3),
-        "measured_lambda2": round(float(measured_lambda2), 4),
-        "is_coherent": measured_lambda2 > 0.85,
-        "timestamp": datetime.now().isoformat()
-    }
-
-# ============================================================
 # [ÉTICO / EQBE] - Validação de Segurança Falsificável
 # ============================================================
 def evaluate_eqbe_safety(
