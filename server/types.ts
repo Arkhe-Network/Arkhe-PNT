@@ -289,6 +289,29 @@ export interface SimulationState {
   };
   chshMonitor: CHSHMonitorState;
   biometrics?: BiometricState;
+  nare?: NAREStatus;
+  populationFeedback: PopulationFeedbackEntry[];
+}
+
+export interface NAREStatus {
+  epState: boolean;
+  calibrationRounds: number;
+  packetsTransmitted: number;
+  preAcksSuccess: number;
+  avgEffectiveLatencyMs: number;
+  temporalParadoxesDetected: number;
+  currentLambda2: number;
+  predictionWindow: string;
+  status: string;
+}
+
+export interface PopulationFeedbackEntry {
+  id: string;
+  residentName: string;
+  year: number;
+  message: string;
+  coherence: number;
+  timestamp: string;
 }
 
 export interface BiometricState {

@@ -1336,4 +1336,50 @@ export function setupRoutes(app: express.Express, broadcastState: () => void, cl
       timestamp: state.biometrics?.lastVerification
     });
   });
+
+  // NARE / qhttp Retrocausal Endpoints
+  app.get("/api/qhttp/nare-status", (req, res) => {
+    res.json(state.nare);
+  });
+
+  app.post("/api/qhttp/retrocausal-handshake", express.json(), (req, res) => {
+    const { payload } = req.body;
+
+    // Simulate NARE engine processing
+    if (state.nare) {
+        state.nare.packetsTransmitted += 1;
+        state.nare.preAcksSuccess += 1;
+        state.nare.avgEffectiveLatencyMs = -2.17 - (Math.random() * 0.5);
+    }
+
+    const response = {
+        success: true,
+        temporal_direction: "RETROCAUSAL",
+        effective_latency_ms: state.nare?.avgEffectiveLatencyMs,
+        coherence_preserved: true,
+        timestamp_target: new Date(Date.now() + 365 * 24 * 3600 * 1000).toISOString()
+    };
+
+    broadcastState();
+    res.json(response);
+  });
+
+  app.post("/api/feedback/population", express.json(), (req, res) => {
+    const { message, residentName } = req.body;
+
+    const entry = {
+        id: "fb_" + Date.now(),
+        residentName: residentName || "Anonymous Resident",
+        year: 2027,
+        message: message || "Interacting with 2027 self...",
+        coherence: 0.9991 + (Math.random() * 0.0005),
+        timestamp: new Date().toISOString()
+    };
+
+    state.populationFeedback.unshift(entry);
+    if (state.populationFeedback.length > 50) state.populationFeedback.pop();
+
+    broadcastState();
+    res.json({ success: true, entry });
+  });
 }

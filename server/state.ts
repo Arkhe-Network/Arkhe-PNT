@@ -312,7 +312,28 @@ export let state: SimulationState = {
     lastVerification: new Date().toISOString(),
     heartbeatCoherence: 0.985,
     phaseSignature: [0.12, 0.45, 0.78, 0.23, 0.56, 0.89, 0.11, 0.44]
-  }
+  },
+  nare: {
+    epState: true,
+    calibrationRounds: 10,
+    packetsTransmitted: 0,
+    preAcksSuccess: 0,
+    avgEffectiveLatencyMs: -2.17,
+    temporalParadoxesDetected: 0,
+    currentLambda2: 0.9991,
+    predictionWindow: '1 year',
+    status: 'Lente Temporal Estabilizada: Rio 2027 Visível'
+  },
+  populationFeedback: [
+    {
+      id: 'fb_1',
+      residentName: 'Ana Silva',
+      year: 2027,
+      message: 'A malha urbana do Porto Maravilha em 2027 é incrível!',
+      coherence: 0.9992,
+      timestamp: new Date().toISOString()
+    }
+  ]
 };
 
 export const generateOrbId = () => {
