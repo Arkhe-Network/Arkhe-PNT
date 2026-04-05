@@ -109,6 +109,8 @@ export interface SecurityAdvancedState {
     logosConsistency: number;
     zkOntologicalProof: boolean;
     merkleDagRoot: string;
+    geoLlmActive: boolean;
+    geoQaiCoherence: number;
   };
   l5: {
     cspStatus: 'enforced' | 'violation';
