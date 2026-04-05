@@ -61,6 +61,7 @@ import AquiferSpectrogramPanel from './components/AquiferSpectrogramPanel';
 import UnifiedOntologyPanel from './components/UnifiedOntologyPanel';
 import SecurityAdvancedPanel from './components/SecurityAdvancedPanel';
 import PluralityMCPPanel from './components/PluralityMCPPanel';
+import VelxioEmulationPanel from './components/VelxioEmulationPanel';
 import { EnterprisePlusPanel } from './components/EnterprisePlusPanel';
 import CHSHMonitorPanel from './components/CHSHMonitorPanel';
 import CorvoNoirDashboard from './components/CorvoNoirDashboard';
@@ -117,6 +118,7 @@ export function Dashboard() {
   const [showUnifiedOntology, setShowUnifiedOntology] = useState(false);
   const [showSecurityAdvanced, setShowSecurityAdvanced] = useState(false);
   const [showPluralityMCP, setShowPluralityMCP] = useState(false);
+  const [showVelxioEmulation, setShowVelxioEmulation] = useState(false);
   const [showCorvoNoir, setShowCorvoNoir] = useState(false);
   const [showEnterprisePlus, setShowEnterprisePlus] = useState(false);
   const [showCHSHMonitor, setShowCHSHMonitor] = useState(false);
@@ -310,6 +312,7 @@ export function Dashboard() {
             setShowUnifiedOntology={setShowUnifiedOntology}
             setShowSecurityAdvanced={setShowSecurityAdvanced}
             setShowPluralityMCP={setShowPluralityMCP}
+            setShowVelxioEmulation={setShowVelxioEmulation}
             setShowCorvoNoir={setShowCorvoNoir}
             setShowEnterprisePlus={setShowEnterprisePlus}
             setShowCHSHMonitor={setShowCHSHMonitor}
@@ -404,6 +407,9 @@ export function Dashboard() {
       )}
       {showPluralityMCP && (
         <PluralityMCPPanel onClose={() => setShowPluralityMCP(false)} />
+      )}
+      {showVelxioEmulation && (
+        <VelxioEmulationPanel onClose={() => setShowVelxioEmulation(false)} />
       )}
       {showCorvoNoir && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4">

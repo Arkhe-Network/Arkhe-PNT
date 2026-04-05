@@ -420,7 +420,7 @@ def test_detect_peaks_rainbow():
     # Detectar picos sem informar a energia (deve falhar em reconhecer ressonância em pi/10)
     peaks_no_energy = detect_peaks(coherence, theta, threshold_multiplier=0.5)
     assert len(peaks_no_energy) > 0
-    assert peaks_no_energy[0]['is_resonance'] is False
+    assert bool(peaks_no_energy[0]['is_resonance']) is False
 
     # Detectar picos informando a energia (deve reconhecer ressonância)
     peaks_with_energy = detect_peaks(coherence, theta, threshold_multiplier=0.5, energy_ev=energy)
