@@ -48,6 +48,7 @@ interface CommandCenterProps {
   setShowUnifiedOntology: (show: boolean) => void;
   setShowSecurityAdvanced: (show: boolean) => void;
   setShowPluralityMCP: (show: boolean) => void;
+  setShowVelxioEmulation: (show: boolean) => void;
   setShowCorvoNoir?: (show: boolean) => void;
   setShowEnterprisePlus?: (show: boolean) => void;
   setShowCHSHMonitor?: (show: boolean) => void;
@@ -102,6 +103,7 @@ export function CommandCenter({
   setShowUnifiedOntology,
   setShowSecurityAdvanced,
   setShowPluralityMCP,
+  setShowVelxioEmulation,
   setShowCorvoNoir,
   setShowEnterprisePlus,
   setShowCHSHMonitor,
@@ -534,6 +536,13 @@ export function CommandCenter({
             >
               <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-share-2"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" x2="15.42" y1="13.51" y2="17.49"/><line x1="15.41" x2="8.59" y1="6.51" y2="10.49"/></svg>
               <span>Plurality MCP Bridge</span>
+            </button>
+            <button
+              onClick={() => setShowVelxioEmulation(true)}
+              className="w-full py-2 border border-arkhe-orange/50 text-arkhe-orange hover:bg-arkhe-orange/10 rounded transition-colors uppercase tracking-widest font-bold shadow-[0_0_10px_rgba(255,90,26,0.2)] animate-pulse flex items-center justify-center space-x-2"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-cpu"><rect width="16" height="16" x="4" y="4" rx="2"/><rect width="6" height="6" x="9" y="9" rx="1"/><path d="M15 2v2"/><path d="M15 20v2"/><path d="M2 15h2"/><path d="M2 9h2"/><path d="M20 15h2"/><path d="M20 9h2"/><path d="M9 2v2"/><path d="M9 20v2"/></svg>
+              <span>Velxio HIL Bridge</span>
             </button>
           </div>
         )}
