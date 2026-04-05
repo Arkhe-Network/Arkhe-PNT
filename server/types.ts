@@ -286,6 +286,15 @@ export interface SimulationState {
     interoperability: EnterpriseSubagentState[];
   };
   chshMonitor: CHSHMonitorState;
+  biometrics?: BiometricState;
+}
+
+export interface BiometricState {
+  livenessScore: number;
+  isAuthentic: boolean;
+  lastVerification: string;
+  heartbeatCoherence: number;
+  phaseSignature: number[];
 }
 
 export interface NeighborhoodCoherence {

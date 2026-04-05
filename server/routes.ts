@@ -1280,4 +1280,60 @@ export function setupRoutes(app: express.Express, broadcastState: () => void, cl
 
     res.json(response);
   });
+
+  // Biometric Telemetry Endpoints
+  app.get("/api/biometrics/status", (req, res) => {
+    res.json(state.biometrics);
+  });
+
+  app.post("/api/biometrics/verify", express.json(), (req, res) => {
+    const { phaseSignature, fingerprint } = req.body;
+
+    // Integration with OrbVM logic
+    // In this production-ready simulation, we simulate the results as if they came from the C++ VM
+
+    const anchorPhases = [0.12, 0.45, 0.78, 0.23, 0.56, 0.89, 0.11, 0.44];
+    const threshold = 0.05;
+
+    // 1. Authenticate Phases
+    let isAuthentic = false;
+    if (phaseSignature && phaseSignature.length === anchorPhases.length) {
+      let variance = 0.0;
+      for (let i = 0; i < phaseSignature.length; i++) {
+        let diff = (phaseSignature[i] - anchorPhases[i] + Math.PI) % (2 * Math.PI);
+        if (diff < 0) diff += 2 * Math.PI;
+        diff -= Math.PI;
+        variance += diff * diff;
+      }
+      isAuthentic = (variance / phaseSignature.length) < threshold;
+    }
+
+    // 2. Check for Phase Clones (if fingerprint provided)
+    let isClone = false;
+    if (fingerprint && fingerprint.length === 16) {
+      // Mocking detectPhaseClone binomial logic
+      const referenceFingerprint = [128, 128, 128, 128, 128, 128, 128, 128, 128, 128, 128, 128, 128, 128, 128, 128];
+      let matches = 0;
+      for (let i = 0; i < 16; i++) {
+        if (Math.abs(fingerprint[i] - referenceFingerprint[i]) <= 1) matches++;
+      }
+      isClone = (matches / 16) >= 0.92;
+    }
+
+    if (state.biometrics) {
+      state.biometrics.isAuthentic = isAuthentic && !isClone;
+      state.biometrics.lastVerification = new Date().toISOString();
+      state.biometrics.livenessScore = isAuthentic ? (isClone ? 0.05 : 0.95 + Math.random() * 0.05) : 0.1;
+    }
+
+    broadcastState();
+
+    res.json({
+      success: true,
+      isAuthentic: state.biometrics?.isAuthentic,
+      isClone,
+      livenessScore: state.biometrics?.livenessScore,
+      timestamp: state.biometrics?.lastVerification
+    });
+  });
 }

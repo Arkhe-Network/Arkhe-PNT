@@ -23,7 +23,16 @@ export interface MetricsHistory {
   wmaBc: number;
 }
 
+export interface BiometricState {
+  livenessScore: number;
+  isAuthentic: boolean;
+  lastVerification: string;
+  heartbeatCoherence: number;
+  phaseSignature: number[];
+}
+
 export interface SimulationState {
+  biometrics?: BiometricState;
   coherenceData: { time: string; lambda: number; threshold: number }[];
   currentLambda: number;
   threatLevel: 'normal' | 'warning' | 'critical';
