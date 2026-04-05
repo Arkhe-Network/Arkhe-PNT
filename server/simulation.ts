@@ -427,6 +427,7 @@ export function runSimulationTick(broadcastState: () => void) {
     edge: {
       activePhysicalNodes: Math.max(100000, state.edge.activePhysicalNodes + Math.floor(Math.random() * 100) - 40),
       mcpConnections: state.edge.mcpConnections,
+      velxioConnections: state.edge.velxioConnections,
       phase: state.edge.phase + 0.001,
     },
     astl: {

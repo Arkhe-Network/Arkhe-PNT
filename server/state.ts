@@ -88,6 +88,8 @@ export let state: SimulationState = {
       logosConsistency: 0.99,
       zkOntologicalProof: true,
       merkleDagRoot: '0x' + Math.random().toString(16).slice(2, 66),
+      geoLlmActive: true,
+      geoQaiCoherence: 0.999,
     },
     l5: {
       cspStatus: 'enforced',
@@ -218,7 +220,7 @@ export let state: SimulationState = {
     }
   },
   civicSubagents: [
-    { name: 'Logos', adaptation: 'Leis Municipais/Estaduais', function: 'Conflitos normativos', status: 'idle', lastAction: 'Verificação de decreto de saneamento em SP concluída' },
+    { name: 'Logos', adaptation: 'GeoLLM/GeoQAI Unified', function: 'Ontological Coherence', status: 'active', lastAction: 'T3-Guided Unitary Evolution Synchronized' },
     { name: 'Episteme', adaptation: 'Dados Oficiais', function: 'Transparência ativa', status: 'active', lastAction: 'Auditando Portal da Transparência da CGU' },
     { name: 'Dialektike', adaptation: 'DataSUS vs Secretaria', function: 'Conciliação de dados', status: 'idle', lastAction: 'Consenso alcançado entre SINAN e SES-RJ' },
     { name: 'Semiosis', adaptation: 'Portaria -> qhttp', function: 'Proveniência verificável', status: 'active', lastAction: 'Rastreando cadeia de custódia de dados INMET' },
