@@ -617,6 +617,153 @@ def synthesize_conclusion(
     return conclusion
 
 # ============================================================
+# [SINESTESIA / COERÊNCIA MULTI-CANAL] - Protocolo Synapse-κ
+# ============================================================
+def lambda2_coherence(signals: np.ndarray) -> float:
+    """
+    Calcula λ₂ (segundo maior autovalor) como medida de coerência global.
+    signals: array (n_channels, n_samples)
+    """
+    if signals.shape[0] < 2:
+        return 1.0
+    corr = np.corrcoef(signals)
+    # Tratar NaNs se houver sinais constantes
+    corr = np.nan_to_num(corr, nan=0.0)
+    eigvals = np.linalg.eigvalsh(corr)
+    return float(eigvals[-2]) if len(eigvals) >= 2 else float(eigvals[-1])
+
+class SynapseKValidator:
+    """
+    Validador λ₂ para Arkhe-Ω Protocol v2.1
+    Mede coerência de fase neural (κ) e distingue sinestetas de não-sinestetas.
+    """
+    def __init__(self, fs: int = 1000, duration: int = 10):
+        self.fs = fs
+        self.duration = duration
+        self.t = np.linspace(0, duration, fs * duration)
+        self.bands = {
+            'beta': (16, 20),
+            'gamma': (35, 45),
+            'alpha': (8, 12),
+            'theta': (4, 8)
+        }
+
+    def generate_eeg_synapse(self, kappa: float = 0.8, noise_level: float = 0.3) -> Dict:
+        """Simula sinal EEG de sinesteta (alta coerência cross-modal)."""
+        f_aud = 18 # Banda Beta
+        f_vis = 40 # Banda Gamma
+        aud_phase = 2 * np.pi * f_aud * self.t + np.random.randn(len(self.t)) * 0.05
+        # Sinal visual com acoplamento de fase e vazamento direto (cross-talk)
+        vis_phase = 2 * np.pi * f_vis * self.t + kappa * np.sin(aud_phase) + np.random.randn(len(self.t)) * 0.1
+        aud_sig = np.sin(aud_phase)
+        vis_sig = np.sin(vis_phase) + kappa * 0.5 * aud_sig
+        parietal = 0.5 * (aud_sig + vis_sig) + np.random.randn(len(self.t)) * noise_level
+        return {
+            'auditory': aud_sig,
+            'visual': vis_sig,
+            'parietal': parietal,
+            'kappa': kappa
+        }
+
+    def generate_eeg_control(self, noise_level: float = 0.5) -> Dict:
+        """Sinal EEG de não-sinesteta (baixa coerência)."""
+        f_aud = 18
+        f_vis = 40
+        aud = np.sin(2 * np.pi * f_aud * self.t + np.random.randn(len(self.t)) * 0.5)
+        vis = np.sin(2 * np.pi * f_vis * self.t + np.random.randn(len(self.t)) * 0.5)
+        parietal = 0.3 * aud + 0.3 * vis + np.random.randn(len(self.t)) * noise_level
+        return {
+            'auditory': aud,
+            'visual': vis,
+            'parietal': parietal,
+            'kappa': 0.1
+        }
+
+    def calculate_phase_coherence(self, sig1: np.ndarray, sig2: np.ndarray, band: str) -> float:
+        """Calcula Phase Locking Value (PLV) entre dois sinais."""
+        low, high = self.bands[band]
+        sos = signal.butter(4, [low, high], btype='band', fs=self.fs, output='sos')
+        f1 = signal.sosfilt(sos, sig1)
+        f2 = signal.sosfilt(sos, sig2)
+        phase1 = np.angle(signal.hilbert(f1))
+        phase2 = np.angle(signal.hilbert(f2))
+        return float(np.abs(np.mean(np.exp(1j * (phase1 - phase2)))))
+
+    def validate_synaesthete(self, eeg_data: Dict) -> Dict:
+        """Determina status sinesteta baseado em λ₂ e PLV."""
+        lambda_beta = self.calculate_phase_coherence(eeg_data['auditory'], eeg_data['parietal'], 'beta')
+        lambda_gamma = self.calculate_phase_coherence(eeg_data['visual'], eeg_data['parietal'], 'gamma')
+        lambda_cross = self.calculate_phase_coherence(eeg_data['auditory'], eeg_data['visual'], 'beta')
+        lambda_score = 0.4 * lambda_beta + 0.4 * lambda_gamma + 0.2 * lambda_cross
+        return {
+            'lambda_beta': round(lambda_beta, 4),
+            'lambda_gamma': round(lambda_gamma, 4),
+            'lambda_cross': round(lambda_cross, 4),
+            'lambda_total': round(lambda_score, 4),
+            'is_synaesthete': bool(lambda_score > 0.85),
+            'confidence': round(lambda_score, 4)
+        }
+
+class TMSModulator:
+    """
+    Modela modulação do coeficiente κ via TMS no córtex parietal (IPS).
+    """
+    def __init__(self):
+        self.efficacy_curve = lambda d: 1 / (1 + np.exp(-(d - 50)/10))
+        self.decay_tau = 30  # minutos
+
+    def modulate_kappa(self, kappa_baseline: float, intensity_percent: float, duration_min: float) -> float:
+        """Calcula κ modulado por TMS."""
+        if intensity_percent < 30:
+            delta_k = 0.3 * self.efficacy_curve(intensity_percent * 2)
+        elif intensity_percent < 70:
+            delta_k = 1.0 * self.efficacy_curve(intensity_percent)
+        else:
+            delta_k = 1.2 * np.exp(-(intensity_percent - 70)/30)
+        time_decay = np.exp(-duration_min / self.decay_tau)
+        kappa_new = kappa_baseline + delta_k * time_decay
+        return float(np.clip(kappa_new, 0, 1))
+
+class ARChromestheticInterface:
+    """
+    Protótipo AR: Mapeamento áudio-visual unificando escala 36° e estrutura 21-fase.
+    """
+    def __init__(self):
+        self.phi = (1 + np.sqrt(5)) / 2
+
+    def generate_chromatic_map(self) -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
+        """Gera matriz de 21 × 10 posições (H, S, V)."""
+        phases_arkhe = np.linspace(0, 360, 21, endpoint=False)
+        phases_pent = np.linspace(0, 360, 10, endpoint=False)
+        chromatic_map = np.zeros((21, 10, 3))
+        for i, p_arkhe in enumerate(phases_arkhe):
+            for j, p_pent in enumerate(phases_pent):
+                H = (p_arkhe * self.phi + p_pent) / (self.phi + 1) % 360
+                coherence = 1 - abs((p_arkhe - p_pent) / 360)
+                S = 0.5 + 0.5 * coherence
+                V = 0.3 + 0.7 * (i / 20)
+                chromatic_map[i, j] = [H/360, S, V]
+        return chromatic_map, phases_arkhe, phases_pent
+
+    def audio_to_color(self, frequency_hz: float, kappa: float = 0.8) -> Dict:
+        """Mapeia frequência auditiva para cor HSV."""
+        f_ref = 440
+        phase_idx = int((np.log(frequency_hz / f_ref + 1e-9) / np.log(self.phi) * 21) % 21)
+        pent_idx = int((12 * np.log2(frequency_hz / f_ref + 1e-9)) % 10)
+        cmap, _, _ = self.generate_chromatic_map()
+        color_hsv = cmap[phase_idx, pent_idx].copy()
+        if kappa < 0.5:
+            color_hsv[1] *= (0.3 + 0.7 * kappa)
+            color_hsv[2] *= (0.5 + 0.5 * kappa)
+        return {
+            'h': round(float(color_hsv[0] * 360), 2),
+            's': round(float(color_hsv[1]), 4),
+            'v': round(float(color_hsv[2]), 4),
+            'phase_idx': phase_idx,
+            'pent_idx': pent_idx
+        }
+
+# ============================================================
 # [ÉTICO / EQBE] - Validação de Segurança Falsificável
 # ============================================================
 def evaluate_eqbe_safety(
