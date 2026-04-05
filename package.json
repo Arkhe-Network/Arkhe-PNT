@@ -28,6 +28,7 @@
     "@opentelemetry/resources": "^2.6.1",
     "@opentelemetry/sdk-logs": "^0.214.0",
     "@opentelemetry/semantic-conventions": "^1.40.0",
+    "@openzeppelin/contracts": "^5.0.2",
     "@tailwindcss/vite": "^4.2.2",
     "@types/redis": "^4.0.10",
     "@types/three": "^0.183.1",

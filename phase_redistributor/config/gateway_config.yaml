@@ -1,0 +1,8 @@
+# Tzinor Gateway Configuration
+n_nodes: 13
+initial_k: 1.5
+coherence_threshold: 0.85
+update_interval_ms: 10
+monitoring:
+  log_level: info
+  metrics_port: 8081
