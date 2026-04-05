@@ -2,6 +2,7 @@
 pragma solidity ^0.8.20;
 
 import "@openzeppelin/contracts/utils/cryptography/ECDSA.sol";
+import "@openzeppelin/contracts/utils/cryptography/MessageHashUtils.sol";
 
 /**
  * @title TimechainPhase
@@ -83,7 +84,7 @@ contract TimechainPhase {
         
         // Verifica se a assinatura ainda é válida (não foi revogada por decoerência)
         bytes32 message = keccak256(abi.encodePacked(pq.phaseHash, pq.timestamp));
-        address signer = message.toEthSignedMessageHash().recover(pq.signature);
+        address signer = MessageHashUtils.toEthSignedMessageHash(message).recover(pq.signature);
         
         return signer == pq.observer && pq.coherenceProof >= COHERENCE_THRESHOLD;
     }
