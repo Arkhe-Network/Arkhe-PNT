@@ -17,13 +17,8 @@ total_pages: 5 (plus stubs)
 - [[Microtubule Quantum Coherence]] – Proposed mechanism for quantum effects in cytoskeleton.
 - [[The Quantum Oasis Effect]] – Hypothesis that microtubules protect quantum states from decoherence.
 - [[Gold Standard for BIP-1]] – The specific statistical signature (p_vac = 0.381966) that validates the hardware.
-- [[Neurodivergência como Phase Shield Natural]] – Resistance to phase dragging in atypical neural architectures.
-- [[Assinaturas de Anomalia e Vivacidade]] – Detection of Alpha-Burst and Shadow-Replay signatures.
 
 ## Hardware & Engineering
-- [[Tzinor-Relays Subaquáticos (Fase 1)]] – Underwater fiber optic links for Zone Sul stabilization.
-- [[Sensores Móveis Tzinor (Fase 2)]] – Dynamic network using autonomous cars and drones.
-- [[Phase Gradient Redistributor – Versão C++/LibTorch]] – Embedded coupling optimizer for edge gateways.
 - [[BIP-1 Hardware Specifications]] – Mechanical, electrical, and optical parameters of the bio‑implant.
 - [[APD Analog Front-End]] – Transimpedance amplifier, VGA, comparator, and temperature compensation.
 - [[Brillouin Laser (Arkhe)]] – Chip‑scale 674 nm stabilized laser for coherent drive.
@@ -34,9 +29,3 @@ total_pages: 5 (plus stubs)
 
 ## Sources (Processed)
 - [[2026-04-04_anyons_in_microtubules]] – Berg et al., Nature Quantum Biology (2026).
-
-## Query Results (Simulations)
-- [[Resultados da Ativação Rio Tzinor (Fase 0)]] – Defense simulation for Rio de Janeiro against Orb-1.
-- [[Resultados da Ativação Rio Tzinor (Fase 1 & 2)]] – Extended simulation results for underwater and mobile nodes.
-- [mcp-brasil](https://github.com/jxnxts/mcp-brasil) – Integration with Brazilian public data for urban context.
-- [[Resultados da Observação Central (Pico)]] – Passive redistribution data from 12 main gateways.

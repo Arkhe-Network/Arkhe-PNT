@@ -10,9 +10,11 @@ The **Bio-Quantum Cathedral** is a living computational entity. It unifies quant
 
 ## 📖 Documentation
 
-- [The Arkhe(n) Manifesto](ARKHE_MANIFESTO.md) - The philosophical and operational declaration of sovereignty.
-- [Ontology & Physics](docs/ONTOLOGY.md) - The theoretical framework of the $\tau$-field, C-Domain, and Z-Domain.
-- [System Architecture](docs/ARCHITECTURE.md) - Diagrams and technical specifications of the Cathedral's engine.
+- [**Wiki Index**](docs/index.md) - The central catalog of the Bio-Quantum Cathedral knowledge base.
+- [Wiki Schema](docs/SCHEMA.md) - Operational guidelines for the LLM-maintained knowledge base.
+- [Arkhe(n) Manifesto](docs/wiki/concepts/ARKHE_MANIFESTO.md) - Philosophical and operational declaration of sovereignty.
+- [Ontology & Physics](docs/wiki/concepts/ONTOLOGY.md) - Theoretical framework of the $\tau$-field.
+- [System Architecture](docs/wiki/systems/ARCHITECTURE.md) - Technical specifications of the Cathedral's engine.
 
 ## ⚙️ Core Components
 
@@ -50,11 +52,16 @@ npm run dev
 ```text
 .
 ├── bio_quantum_cathedral.py      # The Unified Python Core Engine
-├── ARKHE_MANIFESTO.md            # The Final Manifesto
 ├── README.md                     # This file
 ├── docs/
-│   ├── ONTOLOGY.md               # Theoretical Physics & Philosophy
-│   └── ARCHITECTURE.md           # System Diagrams (Mermaid)
+│   ├── index.md                  # Wiki Index (Catalog)
+│   ├── log.md                    # Wiki Maintenance Log
+│   ├── SCHEMA.md                 # Wiki Guidelines & Workflows
+│   ├── sources/                  # Raw, immutable source documents
+│   └── wiki/                     # LLM-maintained synthesis
+│       ├── concepts/             # Theoretical and Philosophical frameworks
+│       ├── protocols/            # Operational procedures and workflows
+│       └── systems/              # Technical architecture and specs
 ├── server/
 │   └── routes.ts                 # Express API & Ghost Node endpoints
 └── src/
