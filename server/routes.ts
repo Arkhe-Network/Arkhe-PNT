@@ -1382,49 +1382,4 @@ export function setupRoutes(app: express.Express, broadcastState: () => void, cl
     broadcastState();
     res.json({ success: true, entry });
   });
-
-  app.post("/api/expansion/start", express.json(), (req, res) => {
-    const { targetNeighborhood } = req.body;
-
-    if (!state.expansionStatus) {
-        state.expansionStatus = { nodes: [], totalCoverage: 13000 };
-    }
-
-    const newNode = {
-        id: "node_" + targetNeighborhood.toLowerCase(),
-        name: targetNeighborhood,
-        status: 'syncing' as const,
-        coherence: 0.95,
-        signalStrength: 0.8
-    };
-
-    state.expansionStatus.nodes.push(newNode);
-    state.expansionStatus.totalCoverage += 5000;
-
-    broadcastState();
-
-    setTimeout(() => {
-        const node = state.expansionStatus?.nodes.find(n => n.id === newNode.id);
-        if (node) {
-            node.status = 'active';
-            node.coherence = 0.9991;
-            node.signalStrength = 0.9;
-            broadcastState();
-        }
-    }, 5000);
-
-    res.json({ success: true, node: newNode });
-  });
-
-  app.get("/api/forecaster/status", (req, res) => {
-    res.json(state.forecaster);
-  });
-
-  app.get("/api/health/report", (req, res) => {
-    res.json(state.cellularHealth);
-  });
-
-  app.get("/api/governance/manifesto-export", (req, res) => {
-    res.json(state.governanceManifesto);
-  });
 }
