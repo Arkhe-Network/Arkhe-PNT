@@ -12,9 +12,10 @@ import {
 } from 'recharts';
 import { useArkheSimulation } from '../hooks/useArkheSimulation';
 import { Activity, Shield, Zap, Cpu, Heart, Fingerprint } from 'lucide-react';
+import TemporalLensPanel from './TemporalLensPanel';
 
 const CorvoNoirDashboard: React.FC = () => {
-  const { state } = useArkheSimulation();
+  const state = useArkheSimulation();
 
   // Simulated time-series data for the Kuramoto R(t)
   const chartData = React.useMemo(() => {
@@ -48,6 +49,11 @@ const CorvoNoirDashboard: React.FC = () => {
               {state.threatLevel}
             </p>
           </div>
+        </div>
+
+        {/* Temporal Lens & Population Feedback */}
+        <div className="lg:col-span-1">
+          <TemporalLensPanel state={state} />
         </div>
       </div>
 
