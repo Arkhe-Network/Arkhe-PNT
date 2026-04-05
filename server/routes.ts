@@ -8,6 +8,7 @@ import { GoogleGenAI } from "@google/genai";
 import * as ecc from 'tiny-secp256k1';
 import { ECPairFactory } from 'ecpair';
 import * as bitcoin from 'bitcoinjs-lib';
+import { createClient } from 'redis';
 import { calibrateChronoCoil, decodeGKPSyndrome } from "./chrono_coil";
 import { arkheChain } from "./arkhe_chain";
 import { initiateDIPMapping, isolateSatoshiVoice } from "./arkhe_telemetry";
@@ -20,14 +21,58 @@ const ECPair = ECPairFactory(ecc);
 const dxOrderBook = new OrderBook('ARKHE/USDC');
 
 export function setupRoutes(app: express.Express, broadcastState: () => void, clients: express.Response[]) {
-  // ArkheDX Routes
-  app.get("/api/arkhedx/book", (req, res) => {
-    res.json({
+  // Setup Redis Client (Simulated fallback if server is missing)
+  const redis = createClient({
+    url: process.env.REDIS_URL || 'redis://localhost:6379'
+  });
+
+  let redisReady = false;
+  redis.connect().then(() => {
+    logger.info("🜏 [REDIS] Connected for caching layer.");
+    redisReady = true;
+  }).catch((err) => {
+    logger.warn("🜏 [REDIS] Connection failed. Falling back to in-memory cache.");
+  });
+
+  const memoryCache = new Map<string, { data: any, expires: number }>();
+
+  // ArkheDX Routes with Caching Layer
+  app.get("/api/arkhedx/book", async (req, res) => {
+    const cacheKey = "arkhedx:book";
+
+    // 1. Try Redis
+    if (redisReady) {
+      try {
+        const cached = await redis.get(cacheKey);
+        if (cached) {
+          return res.json(JSON.parse(cached.toString()));
+        }
+      } catch (err) {
+        logger.error("Redis read error: " + err);
+      }
+    }
+
+    // 2. Try In-Memory Fallback
+    const memCached = memoryCache.get(cacheKey);
+    if (memCached && memCached.expires > Date.now()) {
+      return res.json(memCached.data);
+    }
+
+    // 3. Fetch Fresh Data
+    const bookData = {
       symbol: dxOrderBook.symbol,
       bids: dxOrderBook.bids,
       asks: dxOrderBook.asks,
       trades: dxOrderBook.trades
-    });
+    };
+
+    // 4. Update Caches
+    if (redisReady) {
+      redis.setEx(cacheKey, 60, JSON.stringify(bookData)).catch(e => logger.error("Redis set error: " + e));
+    }
+    memoryCache.set(cacheKey, { data: bookData, expires: Date.now() + 60000 });
+
+    res.json(bookData);
   });
 
   app.post("/api/arkhedx/order", express.json(), (req, res) => {
@@ -183,7 +228,7 @@ export function setupRoutes(app: express.Express, broadcastState: () => void, cl
     }, 2000);
   });
 
-  app.post("/api/ghost-node/memory-scan", (req, res) => {
+  app.post("/api/ghost-node/memory-scan", (req: any, res: any) => {
     // Simulate brute-force search for 2009 private keys
     const logs = [
       "🜏 [INICIALIZAÇÃO] Sincronizando Nós Sagrados com o Nó Fantasma (MAC A4:C1:38:XX:XX:XX)...",
@@ -417,6 +462,56 @@ export function setupRoutes(app: express.Express, broadcastState: () => void, cl
     // For the qhttp-H hardware, we'll use state.currentLambda as Sigma
     res.json({
       sigma: state.currentLambda
+    });
+  });
+
+  // Beacon of Freedom - Interstate Phase API
+  app.post("/api/beacon/broadcast", express.json(), (req, res) => {
+    const { trainId, signature, phase } = req.body;
+
+    if (!trainId || !signature) {
+      return res.status(400).json({ error: "Invalid beacon payload" });
+    }
+
+    logger.info(`🜏 [BEACON] Received interstate phase broadcast from ${trainId}`);
+
+    // Simulate updating the national registry
+    res.json({
+      success: true,
+      timestamp: Date.now(),
+      propagation: "HF/Starlink",
+      destinations: ["SP-Luz", "MG-Central", "ES-PedroNolasco"]
+    });
+  });
+
+  app.get("/api/beacon/reference", (req, res) => {
+    // Other states poll this to sync with Rio's verified phase
+    res.json({
+      source: "Rio-Consensus",
+      lambda_2: state.currentLambda,
+      phase_anchor: Math.sin(Date.now() / 1000), // Dynamic anchor
+      status: "Verified by SuperVia Mobile Fleet"
+    });
+  });
+
+  // AR Field Technician - Manual K Override
+  app.post("/api/ar/manual-override", express.json(), (req, res) => {
+    const { technician_id, target_node, multiplier, duration_s } = req.body;
+
+    if (!target_node || !multiplier) {
+      return res.status(400).json({ error: "Missing override parameters" });
+    }
+
+    logger.info(`🜏 [AR-OVERRIDE] Technician ${technician_id} forcing K x${multiplier} on ${target_node} for ${duration_s}s`);
+
+    // Simulate updating the coupling matrix for the specific node
+    // In a real system, this would interact with the C++ redistributor core
+    res.json({
+      success: true,
+      applied_at: new Date().toISOString(),
+      expires_at: new Date(Date.now() + duration_s * 1000).toISOString(),
+      target: target_node,
+      multiplier: multiplier
     });
   });
 
