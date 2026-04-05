@@ -240,6 +240,19 @@ export function CommandCenter({
               CORVO NOIR OS (Dashboard)
             </button>
             <button
+              onClick={async () => {
+                const validSignature = [0.12, 0.45, 0.78, 0.23, 0.56, 0.89, 0.11, 0.44];
+                await fetch('/api/biometrics/verify', {
+                  method: 'POST',
+                  headers: { 'Content-Type': 'application/json' },
+                  body: JSON.stringify({ phaseSignature: validSignature })
+                });
+              }}
+              className="w-full py-1 text-[8px] border border-emerald-500/30 text-emerald-500/70 hover:bg-emerald-500/10 rounded transition-colors uppercase tracking-tighter"
+            >
+              Force Bio-Sync (Anchor-θ)
+            </button>
+            <button
               onClick={() => setShowEnterprisePlus && setShowEnterprisePlus(true)}
               className="w-full py-2 border border-arkhe-cyan/50 text-arkhe-cyan hover:bg-arkhe-cyan/10 rounded transition-colors uppercase tracking-widest font-bold shadow-[0_0_15px_rgba(0,255,170,0.4)] animate-pulse"
             >
