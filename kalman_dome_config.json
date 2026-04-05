@@ -1,0 +1,25 @@
+{
+    "Q": [
+        [
+            1e-10,
+            0.0
+        ],
+        [
+            0.0,
+            4e-12
+        ]
+    ],
+    "R": 0.0015,
+    "P_init": [
+        [
+            1.0,
+            0.0
+        ],
+        [
+            0.0,
+            1.0
+        ]
+    ],
+    "dt": 1e-08,
+    "notes": "Par\u00e2metros otimizados para mitiga\u00e7\u00e3o de drift magn\u00e9tico de 4ppm."
+}
