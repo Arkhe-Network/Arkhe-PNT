@@ -14,5 +14,10 @@ Chronological record of knowledge base updates and maintenance.
 - Integrated OSINT validation steps into [[planning/beacon_of_freedom.md]].
 - Updated [[index.md]] with new Protocol and Source sections.
 
+## [2026-05-20] ingest | Global OSINT Integration
+- Ingested Awesome OSINT repository data.
+- Created [[sources/OSINT_GLOBAL.md]] and [[protocols/GLOBAL_INTELLIGENCE_GATHERING.md]].
+- Updated [[index.md]] with new Global Protocol and Source sections.
+
 ---
 *Log starts here.*

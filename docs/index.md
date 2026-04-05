@@ -20,7 +20,8 @@ Welcome to the compounding knowledge base of the Bio-Quantum Cathedral.
 
 ## 📜 Protocols
 - [[protocols/BIP1_ALPHA_TESTS|BIP-1 Alpha Tests]]: Clinical validation roadmap for bio-implants.
-- [[protocols/BRAZIL_INTELLIGENCE_GATHERING|Brazil Intelligence Gathering]]: Operational procedures for Brazilian OSINT.
+- [[wiki/protocols/BRAZIL_INTELLIGENCE_GATHERING|Brazil Intelligence Gathering]]: Operational procedures for Brazilian OSINT.
+- [[wiki/protocols/GLOBAL_INTELLIGENCE_GATHERING|Global Intelligence Gathering]]: Operational procedures for Global OSINT.
 - [[protocols/BIP1_EMERGENCY_PLAN|BIP-1 Emergency Plan]]: Contingency procedures for device failure.
 - [[protocols/BIP1_SUPPLY_CHAIN|BIP-1 Supply Chain]]: Tier 1 vendors for medical-grade materials.
 - [[protocols/CODE_SIGNING|Code Signing]]: Security procedures for software integrity.
@@ -33,7 +34,8 @@ Welcome to the compounding knowledge base of the Bio-Quantum Cathedral.
 *Currently no dedicated entity pages.*
 
 ## 📂 Sources
-- [[sources/OSINT_BRAZIL|Brazil OSINT Toolkit]]: Synthesis of UNISHKA OSINT resources.
+- [[wiki/sources/OSINT_BRAZIL|Brazil OSINT Toolkit]]: Synthesis of UNISHKA OSINT resources.
+- [[wiki/sources/OSINT_GLOBAL|Global OSINT Toolkit]]: Synthesis of Awesome OSINT repository resources.
 
 ---
 *Wiki maintained by Arkhe-AI Agents following the [[SCHEMA|LM Wiki Pattern]].*
