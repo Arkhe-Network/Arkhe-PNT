@@ -107,7 +107,12 @@ export let state: SimulationState = {
   edge: {
     activePhysicalNodes: 1048576,
     mcpConnections: ['mcp://arkhe-vision.sn44.bittensor', 'mcp://zombie-fleet.dimos'],
+    velxioConnections: [],
     phase: 26.0,
+  },
+  velxioEmulation: {
+    activeSimulations: [],
+    totalCompilations: 0,
   },
   astl: {
     activeMesh: 'hyper_torus.arkhestl',

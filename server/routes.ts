@@ -700,6 +700,32 @@ export function setupRoutes(app: express.Express, broadcastState: () => void, cl
     });
   });
 
+  app.post("/api/mcp/connect-velxio", express.json(), (req, res) => {
+    const { url } = req.body;
+    if (!url) return res.status(400).json({ error: "URL is required" });
+
+    if (!state.edge.velxioConnections.includes(url)) {
+      state.edge.velxioConnections.push(url);
+    }
+
+    state.logs.unshift({
+      id: generateOrbId(),
+      originTime: Date.now(),
+      targetTime: Date.now(),
+      coherence: state.currentLambda,
+      status: 'Valid',
+      threatType: `VELXIO: Hardware Emulation Bridge connected to ${url}`
+    });
+
+    broadcastState();
+
+    res.json({
+      success: true,
+      url,
+      connections: state.edge.velxioConnections
+    });
+  });
+
   app.post("/api/ramsey/confirm", express.json(), (req, res) => {
     const { actionId, status, justification, signature } = req.body;
 
