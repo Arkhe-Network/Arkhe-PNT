@@ -8,6 +8,8 @@ import { setupRoutes } from "./routes";
 import { ApolloServer, gql } from 'apollo-server-express';
 import { typeDefs, resolvers } from './graphql';
 import { setupPresenceServer } from "./presence_field_server";
+import { setupARStream } from "./ar_stream";
+import { setupProofGraphRoutes } from "./proof_graph";
 import { setupLucentCollector } from "./lucent_omega";
 import { logger } from "./logger";
 import { startAgentGrpcServer } from "./agent_grpc_server";
@@ -52,6 +54,7 @@ async function startServer() {
 
   // Setup API Routes
   setupRoutes(app, broadcastState, clients);
+  setupProofGraphRoutes(app);
 
   // Vite middleware for development
   if (process.env.NODE_ENV !== "production") {
@@ -74,6 +77,20 @@ async function startServer() {
 
   // Attach presence server
   setupPresenceServer(server);
+
+  // Initialize AR Stream Server
+  const { WebSocketServer } = await import('ws');
+  const arWss = new WebSocketServer({ noServer: true });
+  setupARStream(arWss);
+
+  server.on('upgrade', (request, socket, head) => {
+    const { pathname } = new URL(request.url || '', `http://${request.headers.host}`);
+    if (pathname === '/api/ar/stream') {
+      arWss.handleUpgrade(request, socket, head, (ws) => {
+        arWss.emit('connection', ws, request);
+      });
+    }
+  });
 
   // Initialize Lucent-Ω Collector (qhttp)
   setupLucentCollector();
