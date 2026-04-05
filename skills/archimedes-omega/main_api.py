@@ -18,6 +18,12 @@ from skills import (
     synthesize_conclusion,
     optimize_lipus_drug_interval,
     estimate_glymphatic_clearance,
+    lambda2_coherence,
+    SynapseKValidator,
+    TMSModulator,
+    ARChromestheticInterface,
+    simulate_auditory_coherence,
+    simulate_brillouin_auditory_sensor,
     RainbowParams
 )
 
@@ -153,6 +159,33 @@ class OptimizationRequest(BaseModel):
     drug_halflife: float = Field(120.0, description="Meia-vida do fármaco na corrente sanguínea (min)")
     microbubbles: bool = True
     mi: float = Field(0.4, description="Mechanical Index (0.1-0.6)")
+
+class Lambda2Request(BaseModel):
+    signals: List[List[float]] # List of channels, each a list of samples
+
+class EEGSimulationRequest(BaseModel):
+    kappa: float = 0.8
+    noise_level: float = 0.3
+    is_synaesthete: bool = True
+
+class TMSModulationRequest(BaseModel):
+    kappa_baseline: float = 0.2
+    intensity_percent: float = 65.0
+    duration_min: float = 10.0
+
+class AudioColorRequest(BaseModel):
+    frequency_hz: float = 440.0
+    kappa: float = 0.8
+
+class OTOFSimRequest(BaseModel):
+    baseline_db: float = Field(106.0, ge=0, le=120)
+    weeks_post_aav: float = Field(4.0, ge=0, le=52)
+    aav_efficiency: float = Field(0.95, ge=0, le=1)
+
+class BrillouinSensorRequest(BaseModel):
+    excitation_freq_hz: float = Field(1000.0, ge=250, le=8000)
+    bera_amplitude_uv: float = Field(0.5, ge=0, le=10)
+    noise_level: float = 0.05
 
 # --- Endpoints ---
 
@@ -329,6 +362,52 @@ async def check_w_state(req: TeleportationRequest):
         "interpretation": interpretation,
         "philosophical_note": conclusion["philosophical_note"]
     }
+
+@app.post("/validate/lambda2", tags=["synapse-k"])
+async def validate_lambda2(req: Lambda2Request):
+    """Calcula a coerência λ₂ para sinais multi-canal."""
+    l2 = lambda2_coherence(np.array(req.signals))
+    return {"lambda2": l2}
+
+@app.post("/simulate/synapse-k/eeg", tags=["synapse-k"])
+async def simulate_synapse_k_eeg(req: EEGSimulationRequest):
+    """Simula sinais EEG para sinestetas ou controles e valida."""
+    validator = SynapseKValidator()
+    if req.is_synaesthete:
+        data = validator.generate_eeg_synapse(req.kappa, req.noise_level)
+    else:
+        data = validator.generate_eeg_control(req.noise_level)
+
+    validation = validator.validate_synaesthete(data)
+    # Convert numpy arrays to lists for JSON serialization
+    serialized_data = {k: v.tolist() if isinstance(v, np.ndarray) else v for k, v in data.items()}
+    return {"eeg_data": serialized_data, "validation": validation}
+
+@app.post("/simulate/synapse-k/tms", tags=["synapse-k"])
+async def simulate_synapse_k_tms(req: TMSModulationRequest):
+    """Modela a modulação do coeficiente κ via TMS."""
+    tms = TMSModulator()
+    k_new = tms.modulate_kappa(req.kappa_baseline, req.intensity_percent, req.duration_min)
+    return {"kappa_new": k_new}
+
+@app.post("/map/audio-to-color", tags=["synapse-k"])
+async def map_audio_to_color(req: AudioColorRequest):
+    """Mapeia uma frequência auditiva para o espaço cromático Synapse-κ."""
+    interface = ARChromestheticInterface()
+    color = interface.audio_to_color(req.frequency_hz, req.kappa)
+    return color
+
+@app.post("/therapy/otof/simulate", tags=["therapy"])
+async def simulate_otof_therapy(req: OTOFSimRequest):
+    """Simula a evolução clínica da terapia gênica OTOF."""
+    result = simulate_auditory_coherence(req.baseline_db, req.weeks_post_aav, req.aav_efficiency)
+    return result
+
+@app.post("/sensor/brillouin/auditory", tags=["sensor"])
+async def sensor_brillouin_auditory(req: BrillouinSensorRequest):
+    """Emula a leitura do sensor Brillouin para BERA."""
+    result = simulate_brillouin_auditory_sensor(req.excitation_freq_hz, req.bera_amplitude_uv, req.noise_level)
+    return result
 
 @app.post("/therapy/optimize-combined-protocol", tags=["therapy"])
 async def optimize_combined_protocol(req: OptimizationRequest):
