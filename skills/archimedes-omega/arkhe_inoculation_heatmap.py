@@ -14,8 +14,6 @@ import os
 # ============================================================================
 # DADOS DE VOLUMES E TEMPOS DE RESFRIAMENTO (DA SIMULAÇÃO TÉRMICA)
 # ============================================================================
-# Tabela de volumes (µL) e tempos de resfriamento (segundos) para 37°C
-# Assumindo T_amb = 25°C, T_max = 41.2°C, conforme simulação anterior.
 COOLING_DATA = {
     "Ciatico_Rato": {"volume_ul": 31.42, "cooling_time_s": 22},
     "Ciatico_Humano": {"volume_ul": 259.18, "cooling_time_s": 84},
@@ -28,13 +26,24 @@ COOLING_DATA = {
     "Controle": {"volume_ul": 50.0, "cooling_time_s": 30},
 }
 
+# Plate geometry for coordinate mapping
+WELL_PITCH_MM = 9.0
+ORIGIN_A1_MM = (14.0, 11.0)
+
 # ============================================================================
 # FUNÇÕES
 # ============================================================================
+def well_id_to_xy(well_id: str):
+    row_letter = well_id[0].upper()
+    col_num = int(well_id[1:])
+    row_index = ord(row_letter) - ord('A')
+    col_index = col_num - 1
+    x = col_index * WELL_PITCH_MM
+    y = row_index * WELL_PITCH_MM
+    return x, y
+
 def load_layout(csv_file):
-    """Lê o layout da placa a partir de um CSV com colunas 'well' e 'nerve_type'."""
     df = pd.read_csv(csv_file)
-    # Cria matriz 8x12 (linhas A-H, colunas 1-12) preenchida com None
     plate = np.empty((8, 12), dtype=object)
     for _, row in df.iterrows():
         well = row['well']
@@ -45,15 +54,11 @@ def load_layout(csv_file):
     return plate
 
 def get_cooling_time(nerve_type):
-    """Retorna o tempo de resfriamento (s) para o tipo de nervo."""
     if nerve_type in COOLING_DATA:
         return COOLING_DATA[nerve_type]["cooling_time_s"]
-    else:
-        # Valor padrão para poços não mapeados (ex.: controlos)
-        return 30
+    return 30
 
 def generate_inoculation_order(plate):
-    """Gera uma matriz 8x12 com a ordem de inoculação (1 = primeiro)."""
     cooling_times = np.zeros((8, 12))
     for i in range(8):
         for j in range(12):
@@ -61,9 +66,8 @@ def generate_inoculation_order(plate):
             if nerve is not None:
                 cooling_times[i, j] = get_cooling_time(nerve)
             else:
-                cooling_times[i, j] = 999  # poços vazios
+                cooling_times[i, j] = 999
 
-    # Ordenar os tempos crescentes
     flat_times = cooling_times.flatten()
     unique_times = sorted(set(flat_times))
     time_to_order = {t: idx+1 for idx, t in enumerate(unique_times)}
@@ -73,7 +77,6 @@ def generate_inoculation_order(plate):
         for j in range(12):
             order_matrix[i, j] = time_to_order[cooling_times[i, j]]
 
-    # Poços vazios (999) recebem ordem máxima + 1
     if 999 in time_to_order:
         max_order = max([v for k, v in time_to_order.items() if k != 999])
         order_matrix[cooling_times == 999] = max_order + 1
@@ -81,7 +84,6 @@ def generate_inoculation_order(plate):
     return order_matrix, cooling_times
 
 def plot_inoculation_heatmap(plate, order_matrix, cooling_times, output_file="inoculation_heatmap.png"):
-    """Plota o mapa de calor da ordem de inoculação."""
     fig, ax = plt.subplots(figsize=(14, 10))
     im = ax.imshow(order_matrix, cmap='viridis', interpolation='nearest', aspect='equal')
     plt.colorbar(im, ax=ax, label='Ordem de Inoculação (1 = primeiro)')
@@ -106,8 +108,7 @@ def plot_inoculation_heatmap(plate, order_matrix, cooling_times, output_file="in
     plt.savefig(output_file, dpi=150)
     print(f"[Arkhe] Mapa de calor salvo como {output_file}")
 
-def export_order_table(order_matrix, cooling_times, plate, output_csv="inoculation_order.csv"):
-    """Exporta a ordem de inoculação para um ficheiro CSV."""
+def export_order_table(order_matrix, cooling_times, plate, output_csv="inoculation_order_autozero.csv"):
     rows = []
     for i in range(8):
         for j in range(12):
@@ -116,14 +117,19 @@ def export_order_table(order_matrix, cooling_times, plate, output_csv="inoculati
             if nerve is not None:
                 order = int(order_matrix[i, j])
                 t_cool = float(cooling_times[i, j])
+                vol = COOLING_DATA.get(nerve, {}).get("volume_ul", 50.0)
+                x, y = well_id_to_xy(well)
                 rows.append({
                     "Well": well,
-                    "Nerve": nerve,
-                    "Cooling_time_s": t_cool,
-                    "Inoculation_order": order
+                    "Nerve_Type": nerve,
+                    "Volume_uL": vol,
+                    "Inoculation_Order": order,
+                    "T_zero_C": 25.0, # Baseline from Auto-Zero
+                    "X_mm": x,
+                    "Y_mm": y
                 })
     df = pd.DataFrame(rows)
-    df = df.sort_values("Inoculation_order")
+    df = df.sort_values("Inoculation_Order")
     df.to_csv(output_csv, index=False)
     print(f"[Arkhe] Ordem de inoculação exportada para {output_csv}")
 
