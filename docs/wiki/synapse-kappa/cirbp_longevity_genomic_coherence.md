@@ -58,6 +58,10 @@ The sequence mimics the RGG/RBD motif of the Bowhead whale CIRBP, optimized for 
 3. **Competition Assay:** Displacement of basal human CIRBP (IC50 ≤ 100 nM).
 4. **Cytotoxicity (MTT):** Safety profile (CC50 > 100 µM).
 
+### 5. Procurement (RFP)
+Detailed technical specifications for synthesis (GenScript/Thermo) are available in:
+[[tzinor-core/src/biology/cirbp/RFP_Arkhe_CIRBP_v1|RFP_Arkhe_CIRBP_v1.md]].
+
 ## 📡 Fase 3: Bio-Link 40Hz → CIRBP Coupling
 Completed at timestamp 847.635. This phase models the cross-correlation between Calmodulin coherence ($\lambda_2^{conf}$) and genomic repair activation via the Bio-Link 40Hz external reference.
 
@@ -91,6 +95,14 @@ Preparado para processar dados de fluorescência (γ-H2AX) assim que os primeiro
 - **Eficácia Primária**: Redução de focos γ-H2AX em 60 min (> 70% vs. controle).
 - **Eficácia Secundária**: Aumento de λ₂ do reparo (> 0.847, regime autônomo).
 - **Sinergia**: Efeito combinado (Peptídeo + 40Hz) > soma individual.
+
+### 🚨 Protocolo de Gatilhos de Alerta (MTT < 85%)
+| Viabilidade (%) | Status | Ação Imediata |
+|-----------------|--------|---------------|
+| ≥ 90% | GREEN | Continuar ensaio |
+| 85% - 89% | YELLOW | Repetir dose em triplicata; reduzir escala |
+| 80% - 84% | ORANGE | Pausar experimento; re-testar diluições |
+| < 80% | RED | **ABORTAR ENSAIO**; rejeitar lote |
 
 ## 🚀 Roadmap Integration
 - **Fase 1 (Current)**: Calmodulin experimental validation (GROMACS).
