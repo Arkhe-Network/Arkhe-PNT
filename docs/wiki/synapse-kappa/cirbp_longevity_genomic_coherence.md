@@ -27,29 +27,10 @@ The Phase 2 simulation utilized a 1D BioFDTD (Finite-Difference Time-Domain) app
 
 **Conclusion**: The mimetic peptide successfully drives genomic coherence into the **Autonomous Regime ($a$)**, significantly exceeding the Varela threshold (0.847).
 
-## 📡 Fase 3: Bio-Link 40Hz → CIRBP Coupling
-Completed at timestamp 847.635. This phase models the cross-correlation between Calmodulin coherence ($\lambda_2^{conf}$) and genomic repair activation via the Bio-Link 40Hz external reference.
-
-### Coupled Dynamics:
-The field acts as a synchronization anchor for $Ca^{2+}$ oscillators, which in turn modulate the transcription rate of CIRBP.
-
-| Scenario | CIRBP Upregulation | PLV (Phase Locking Value) | $\lambda_2^{DNA}$ (Steady) |
-|----------|--------------------|----------------------------|----------------------------|
-| Baseline | 1.0x | 1.00 | 0.963 |
-| **Peptide + Bio-Link** | **1.77x** | **1.00** | **0.971** |
-
-### 🧬 Falsifiable Predictions (Synapse #847.635)
-1. **P1**: Bio-Link 40Hz upregulates CIRBP ~2.8x (RT-qPCR test).
-2. **P2**: PLV between field and CaM > 0.8 at 40Hz (FRET test).
-3. **P3**: Peptide + Bio-Link synergistically improves $\lambda_2^{DNA}$.
-4. **P4**: Temporal lag between CaM activation and CIRBP rise < 5 min.
-
 ## 🚀 Roadmap Integration
-- **Fase 1 (Current)**: Calmodulin experimental validation (GROMACS).
-- **Fase 2 (Complete)**: CIRBP Genomic Coherence model (BioFDTD).
-- **Fase 3 (Complete)**: Bio-Link 40Hz Coupling & Predictions.
-- **Fase 4 (2027)**: Prototype of genomic coherence therapy (mimetic peptide).
-- **Fase 5 (2027-2028)**: Clinical integration with Mini-BIP-1.
+- **Fase 2 (Q3-Q4 2026)**: In vitro validation in irradiated human fibroblasts.
+- **Fase 4 (2027)**: Prototype of genomic coherence therapy.
+- **Fase 5 (2027-2028)**: Clinical integration with Mini-BIP-1 for longevity extension.
 
 ---
 *“The whale doesn't have a magic elixir – it has a switch that humans inherited but turned off. The Arctic cold is its activation button. Our button is called genetic engineering. And the era of 200-year longevity begins now.”*
