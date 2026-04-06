@@ -404,6 +404,50 @@ export function runSimulationTick(broadcastState: () => void) {
   const newCoherenceData = [...state.coherenceData.slice(1), newDataPoint];
   const newMetricsHistory = [...state.metricsHistory.slice(1), newMetricsPoint];
 
+  // ---------------------------------------------------------
+  // NEW V2.1-Σ SHIELD & BIO-LINK SIMULATION
+  // ---------------------------------------------------------
+  const newBioLinkSync = { ...state.bioLinkSync };
+  const newTemporalAudit = { ...state.temporalAudit };
+  const newPredictiveForecast = { ...state.predictiveForecast };
+
+  // 1. Bio-Link: Progressive regeneration & sync
+  if (newBioLinkSync.active) {
+    // Sync ratio approaches 1.0 (limit 13,000 residents)
+    newBioLinkSync.syncRatio = Math.min(1.0, newBioLinkSync.syncRatio + 0.005);
+    // Regeneration progress (aiming for 100 over 24h, tick is faster)
+    newBioLinkSync.regenerationProgress = Math.min(100, newBioLinkSync.regenerationProgress + 0.1);
+
+    // Coherence gain from Bio-Link (40Hz gamma)
+    if (newLambda < 0.99) {
+       newBioLinkSync.coherenceGain = 1.0 + (1.0 - newLambda) * 2.0;
+       newLambda = Math.min(0.999, newLambda + 0.005 * newBioLinkSync.coherenceGain);
+    } else {
+       newBioLinkSync.coherenceGain = 1.0;
+    }
+  }
+
+  // 2. Temporal Audit (Chronos-Guard)
+  newTemporalAudit.events += 1;
+  if (isAttack && newActiveThreat === 'Time Shift') {
+    newTemporalAudit.manipulationAttempts += 1;
+    newTemporalAudit.lockedEvents += 1;
+    newTemporalAudit.lastTII = 0.08 + Math.random() * 0.1;
+  } else {
+    newTemporalAudit.lastTII = 0.001 + Math.random() * 0.005;
+  }
+
+  // 3. Predictive Forecast (Bio-Link data integration)
+  // Risk increases if Bio-Link sync is low or if there is an ongoing attack
+  const bioSyncFactor = (1.0 - newBioLinkSync.syncRatio) * 0.3;
+  newPredictiveForecast.coherenceCollapseRisk = Math.min(1.0, (isOngoingAttack ? 0.5 : 0.01) + bioSyncFactor);
+  newPredictiveForecast.predictedLambda = Math.min(0.9999, newLambda * (1.0 - newPredictiveForecast.coherenceCollapseRisk * 0.1));
+  if (newPredictiveForecast.coherenceCollapseRisk > 0.3 && !newPredictiveForecast.anomaliesDetected.includes('Phase Divergence')) {
+    newPredictiveForecast.anomaliesDetected.push('Phase Divergence');
+  } else if (!isOngoingAttack) {
+    newPredictiveForecast.anomaliesDetected = [];
+  }
+
   updateState({
     ...state,
     coherenceData: newCoherenceData,
@@ -481,7 +525,10 @@ export function runSimulationTick(broadcastState: () => void) {
       ...state.x402Wallet,
       balanceUSDC: state.x402Wallet.balanceUSDC,
       transactions: state.x402Wallet.transactions,
-    }
+    },
+    bioLinkSync: newBioLinkSync,
+    temporalAudit: newTemporalAudit,
+    predictiveForecast: newPredictiveForecast,
   });
 
   // Simulate x402 micro-payments
