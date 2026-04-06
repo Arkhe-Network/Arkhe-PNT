@@ -1337,153 +1337,49 @@ export function setupRoutes(app: express.Express, broadcastState: () => void, cl
     });
   });
 
-  // --- V2.1-Σ SHIELD & BIO-LINK NEW ROUTES ---
+  // NARE / qhttp Retrocausal Endpoints
+  app.get("/api/qhttp/nare-status", (req, res) => {
+    res.json(state.nare);
+  });
 
-  // 1. Generate Governance Manifesto 2027
-  app.post("/api/governance/manifesto", (req, res) => {
-    // Non-Hermitian Governance Evolution
-    const sectors = {
-      material: "Abundância Circular baseada em Bio-Link",
-      social: "Consenso Bizantino Expandido (Quorum 112/168)",
-      cultural: "Expressão Sincrônica via MaxToki",
-      environmental: "Regeneração Celular Integrada aos Tzinor Nodes",
-      spiritual: "Coerência Unificada λ₂ em Regime de Ponto Excepcional"
+  app.post("/api/qhttp/retrocausal-handshake", express.json(), (req, res) => {
+    const { payload } = req.body;
+
+    // Simulate NARE engine processing
+    if (state.nare) {
+        state.nare.packetsTransmitted += 1;
+        state.nare.preAcksSuccess += 1;
+        state.nare.avgEffectiveLatencyMs = -2.17 - (Math.random() * 0.5);
+    }
+
+    const response = {
+        success: true,
+        temporal_direction: "RETROCAUSAL",
+        effective_latency_ms: state.nare?.avgEffectiveLatencyMs,
+        coherence_preserved: true,
+        timestamp_target: new Date(Date.now() + 365 * 24 * 3600 * 1000).toISOString()
     };
 
-    const eigenvalues = [1.18, 1.06, 0.999]; // Example eigenvalues from the prompt
+    broadcastState();
+    res.json(response);
+  });
 
-    state.governanceManifesto = {
-      year: 2027,
-      eigenvalues,
-      sectors,
-      status: 'published',
-      timestamp: new Date().toISOString()
+  app.post("/api/feedback/population", express.json(), (req, res) => {
+    const { message, residentName } = req.body;
+
+    const entry = {
+        id: "fb_" + Date.now(),
+        residentName: residentName || "Anonymous Resident",
+        year: 2027,
+        message: message || "Interacting with 2027 self...",
+        coherence: 0.9991 + (Math.random() * 0.0005),
+        timestamp: new Date().toISOString()
     };
 
-    state.logs.unshift({
-      id: generateOrbId(),
-      originTime: Date.now(),
-      targetTime: Date.now(),
-      coherence: state.currentLambda,
-      status: 'Valid',
-      threatType: "GOVERNANCE: Manifesto 2027 Published based on current eigenvalues."
-    });
+    state.populationFeedback.unshift(entry);
+    if (state.populationFeedback.length > 50) state.populationFeedback.pop();
 
     broadcastState();
-    res.json({ success: true, manifesto: state.governanceManifesto });
-  });
-
-  // 2. Stress Test Simulation
-  app.post("/api/security/stress-test", (req, res) => {
-    const { intensity } = req.body;
-    const attackIntensity = intensity || 0.7;
-
-    state.logs.unshift({
-      id: generateOrbId(),
-      originTime: Date.now(),
-      targetTime: Date.now(),
-      coherence: state.currentLambda,
-      status: 'Rejected',
-      threatType: `STRESS-TEST: Injected ${Math.floor(attackIntensity * 100)}% phase noise in sensors.`
-    });
-
-    // Simulate sensor attack
-    let attackedCount = 0;
-    state.sensors = state.sensors.map(s => {
-      if (Math.random() < attackIntensity && attackedCount < 84) {
-        attackedCount++;
-        return { ...s, status: 'attacked', value: Math.random() * 5.0 };
-      }
-      return s;
-    });
-
-    state.currentLambda = 0.985; // Initial drop
-    state.predictiveForecast.coherenceCollapseRisk = 0.45;
-
-    broadcastState();
-
-    // Shield mitigation in 120ms (simulated delay for frontend)
-    setTimeout(() => {
-      let isolatedCount = 0;
-      state.sensors = state.sensors.map(s => {
-        if (s.status === 'attacked') {
-          isolatedCount++;
-          return { ...s, status: 'isolated' };
-        }
-        return s;
-      });
-      state.currentLambda = 0.998; // Recovery after isolation
-      state.predictiveForecast.coherenceCollapseRisk = 0.05;
-
-      state.logs.unshift({
-        id: generateOrbId(),
-        originTime: Date.now(),
-        targetTime: Date.now(),
-        coherence: state.currentLambda,
-        status: 'Mitigated',
-        threatType: `SHIELD: Isolated ${isolatedCount} attacked sensors. Coherence λ₂ restored.`
-      });
-
-      broadcastState();
-    }, 2000);
-
-    res.json({ success: true, intensity: attackIntensity });
-  });
-
-  // 3. Bio-Link Activation
-  app.post("/api/bio-link/sync", (req, res) => {
-    state.bioLinkSync.active = true;
-    state.bioLinkSync.syncRatio = 0.65;
-
-    state.logs.unshift({
-      id: generateOrbId(),
-      originTime: Date.now(),
-      targetTime: Date.now(),
-      coherence: state.currentLambda,
-      status: 'Valid',
-      threatType: "BIO-LINK: Population Mass Sync (40Hz) Initiated."
-    });
-
-    broadcastState();
-    res.json({ success: true, status: state.bioLinkSync });
-  });
-
-  app.post("/api/governance/apply-regeneration-pulse", (req, res) => {
-    // Apply pulse specifically to districts with happiness < 0.75
-    let appliedToDistricts: string[] = [];
-    state.grossHappiness.districts = state.grossHappiness.districts.map(d => {
-      if (d.index < 0.75) {
-        appliedToDistricts.push(d.name);
-        return {
-          ...d,
-          index: Math.min(1.0, d.index + 0.05),
-          lastPulse: new Date().toISOString()
-        };
-      }
-      return d;
-    });
-
-    // Recalculate global index
-    state.grossHappiness.globalIndex = state.grossHappiness.districts.reduce((acc, d) => acc + d.index, 0) / state.grossHappiness.districts.length;
-
-    state.bioLinkSync.regenerationProgress = Math.min(100, state.bioLinkSync.regenerationProgress + 10);
-    state.currentLambda = Math.min(0.999, state.currentLambda + 0.01);
-
-    state.logs.unshift({
-      id: generateOrbId(),
-      originTime: Date.now(),
-      targetTime: Date.now(),
-      coherence: state.currentLambda,
-      status: 'Valid',
-      threatType: `BIO-LINK: Cellular Regeneration Pulse applied to ${appliedToDistricts.length} districts: ${appliedToDistricts.join(', ')}.`
-    });
-
-    broadcastState();
-    res.json({
-      success: true,
-      progress: state.bioLinkSync.regenerationProgress,
-      globalIndex: state.grossHappiness.globalIndex,
-      appliedTo: appliedToDistricts
-    });
+    res.json({ success: true, entry });
   });
 }

@@ -31,10 +31,31 @@ export interface BiometricState {
   phaseSignature: number[];
 }
 
+export interface NAREStatus {
+  epState: boolean;
+  calibrationRounds: number;
+  packetsTransmitted: number;
+  preAcksSuccess: number;
+  avgEffectiveLatencyMs: number;
+  temporalParadoxesDetected: number;
+  currentLambda2: number;
+  predictionWindow: string;
+  status: string;
+}
+
+export interface PopulationFeedbackEntry {
+  id: string;
+  residentName: string;
+  year: number;
+  message: string;
+  coherence: number;
+  timestamp: string;
+}
+
 export interface SimulationState {
   biometrics?: BiometricState;
-  governanceManifesto?: GovernanceManifesto;
-  grossHappiness: GrossHappinessState;
+  nare?: NAREStatus;
+  populationFeedback: PopulationFeedbackEntry[];
   coherenceData: { time: string; lambda: number; threshold: number }[];
   currentLambda: number;
   threatLevel: 'normal' | 'warning' | 'critical';
@@ -316,30 +337,7 @@ export function useArkheSimulation() {
         status: 'idle'
       }
     },
-    grossHappiness: {
-      globalIndex: 0.65,
-      districts: []
-    },
-    bioLinkSync: {
-      active: true,
-      syncRatio: 0.65,
-      frequencyHz: 40,
-      coherenceGain: 1.0,
-      regenerationProgress: 0,
-    },
-    temporalAudit: {
-      events: 0,
-      lockedEvents: 0,
-      manipulationAttempts: 0,
-      lastTII: 0,
-    },
-    predictiveForecast: {
-      coherenceCollapseRisk: 0.02,
-      predictedLambda: 0.999,
-      horizonMs: 3600000,
-      anomaliesDetected: [],
-    },
-    sensors: []
+    populationFeedback: []
   });
 
   useEffect(() => {
