@@ -1,0 +1,13 @@
+{
+  "event": "MECHANOTRANSDUCTION_CALIBRATION",
+  "timestamp": "2026-04-06T20:09:36.000178",
+  "optimal_params": {
+    "time_s": 1.2121212121212122,
+    "dose_mj_cm2": 18.181818181818183,
+    "stiffness_kpa": 13.034892557660655,
+    "yap_ratio": 1.6666783767937734,
+    "mechanic_coherence": 0.9670850534155658
+  },
+  "model_version": "v1.0-YAP-LINC",
+  "status": "VALIDATED"
+}

@@ -132,7 +132,27 @@ def generate_pdf_report(output_filename="arkhe_neural_repair_report.pdf"):
     story.append(Paragraph("4.3 Inoculação Celular", styles['Heading2']))
     story.append(Paragraph("A inoculação deve seguir o Mapa de Calor de Inoculação (arkhe_inoculation_heatmap.py). Aguardar o tempo de resfriamento predito (até 90s para volumes humanos) para garantir T < 37°C.", styles['BodyText']))
 
-    # --- 5. Registros e Telemetria ---
+    # --- 5. Mecanotransdução e YAP/TAZ ---
+    story.append(Paragraph("5. Análise de Mecanotransdução (Synergia)", styles['Heading1']))
+    story.append(Paragraph("A rigidez do polímero Tissium atua como uma linguagem mecânica que instrui a diferenciação celular via via YAP/TAZ. O modelo de fase Arkhe(n) identifica a Janela Neural Ótima em aproximadamente 12 kPa.", styles['BodyText']))
+
+    mecan_data = [
+        ["Variável", "Valor Óptimo Neural", "Efeito de Fase"],
+        ["Rigidez (E)", "10 - 14 kPa", "Diferenciação Pro-Neural"],
+        ["Razão YAP Nuc/Cyto", "< 1.0", "Inibição de linhagem fibrótica"],
+        ["Coerência Mecânica", "> 0.85", "Sincronização com Arkhe-v1"]
+    ]
+    t_mecan = Table(mecan_data, colWidths=[5*cm, 4*cm, 6*cm])
+    t_mecan.setStyle(TableStyle([
+        ('GRID', (0,0), (-1,-1), 0.5, colors.grey),
+        ('BACKGROUND', (0,0), (-1,0), colors.HexColor('#00FFAA')),
+        ('TEXTCOLOR', (0,0), (-1,0), colors.black),
+        ('FONTNAME', (0,0), (-1,0), 'Helvetica-Bold'),
+    ]))
+    story.append(t_mecan)
+    story.append(Spacer(1, 12))
+
+    # --- 6. Registros e Telemetria ---
     story.append(Paragraph("5. Registros de Verificação", styles['Heading1']))
     story.append(Paragraph("A infraestrutura lógica suporta o registro automatizado na Arkhe-Chain. Cada poço dispensado e polimerizado gera um registro assinado, garantindo a rastreabilidade da soberania biológica.", styles['BodyText']))
 

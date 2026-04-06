@@ -6,26 +6,29 @@ def test_nerve_repair_simulation():
     print("TESTE DE REPARO NEURAL - Synapse-κ / Polímero Foto-Ativado")
     print("="*70)
 
-    # Cenário 1: Reparo ideal (Intensidade alta, tempo suficiente, com fatores de crescimento)
-    print("\n[Cenário 1] Condições Ideais (60 dias de recuperação)")
+    # Cenário 1: Reparo ideal (Dose óptima para mecanotransdução)
+    # E_optimal ~ 12 kPa. Dose ~ 18 mJ/cm2
+    # Com 15mW/cm2, t = 1.2s
+    print("\n[Cenário 1] Dose Óptima (1.2s a 15mW/cm2, 60 dias)")
     res1 = simulate_light_activated_nerve_repair(
         initial_lambda2=0.45,
-        light_intensity_mw_cm2=100.0,
-        exposure_seconds=60.0,
+        light_intensity_mw_cm2=15.0,
+        exposure_seconds=1.2,
         recovery_days=60.0,
         has_growth_factors=True
     )
     print(json.dumps(res1, indent=2))
+    assert res1['mechanic_coherence'] > 0.9
     assert res1['final_lambda2'] > 0.9
     assert res1['regime'] == "AUTONOMOUS"
     assert res1['polymer_integrity'] == 1.0
 
-    # Cenário 2: Ativação insuficiente (Luz fraca)
-    print("\n[Cenário 2] Ativação Insuficiente (Luz fraca)")
+    # Cenário 2: Ativação insuficiente (Dose nula)
+    print("\n[Cenário 2] Ativação Insuficiente (Sem luz)")
     res2 = simulate_light_activated_nerve_repair(
         initial_lambda2=0.45,
-        light_intensity_mw_cm2=20.0,
-        exposure_seconds=30.0,
+        light_intensity_mw_cm2=0.0,
+        exposure_seconds=0.0,
         recovery_days=60.0
     )
     print(json.dumps(res2, indent=2))

@@ -49,6 +49,10 @@ def simulate_fluorescence_scan(layout_csv: str):
         # λ₂_DNA restauração
         lambda2 = 0.45 + (1.0 - 0.45) * success_prob * (1 - np.exp(-np.random.uniform(0.5, 1.5)))
 
+        # Simulação de YAP/TAZ Ratio (Mecanotransdução)
+        # Em poços reais, isso viria da análise de imunofluorescência nuclear
+        yap_ratio = 0.5 + 1.5 * (1 - np.exp(-lambda2)) # Heurística: correlação com restauração
+
         # Intensidade de fluorescência (RFU)
         rfu = 5000 * lambda2 + np.random.normal(0, 100)
 
@@ -57,6 +61,7 @@ def simulate_fluorescence_scan(layout_csv: str):
             "nerve_type": nerve,
             "viability_mtt": round(float(viability), 3),
             "lambda2_dna": round(float(lambda2), 4),
+            "yap_ratio": round(float(yap_ratio), 3),
             "fluorescence_rfu": round(float(rfu), 1),
             "status": "APPROVED" if viability > THRESHOLD_VIABILITY and lambda2 > THRESHOLD_LAMBDA2_CRIT else "FLAGGED"
         })

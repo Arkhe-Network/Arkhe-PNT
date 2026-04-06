@@ -1359,30 +1359,44 @@ def simulate_light_activated_nerve_repair(
 ) -> Dict:
     """
     Simula o reparo de nervos via polímero foto-ativado (Tissium).
-    Modela a transição C -> Z e a subsequente restauração de λ₂.
+    Modela a transição C -> Z, a mecanotransdução (YAP) e a restauração de λ₂.
     """
     logger.info("🌌 [Synapse-κ] Iniciando simulação de reparo neural por luz.")
 
-    # 1. Fase de Polimerização (C -> Z)
-    # Threshold de ativação: 50 mW/cm² por 30s
-    activation_energy = light_intensity_mw_cm2 * exposure_seconds
-    threshold_energy = 50 * 30
-    polymer_integrity = np.clip(activation_energy / threshold_energy, 0, 1)
+    # 1. Fase de Polimerização e Rigidez (C -> Z)
+    # E = E_max * (1 - exp(-k * dose))
+    dose = light_intensity_mw_cm2 * exposure_seconds
+    k_retic = 0.005
+    e_max = 150.0
+    stiffness_kpa = e_max * (1 - np.exp(-k_retic * dose))
 
-    # 2. Restauração de Coerência (λ₂)
+    # Threshold de ativação para integridade estrutural
+    polymer_integrity = np.clip(stiffness_kpa / 10.0, 0, 1) # 10kPa como mínimo funcional
+
+    # 2. Mecanotransdução (YAP/TAZ)
+    # Janela Neural Ótima: ~12 kPa
+    e_optimal_neural = 12.0
+    neural_window_sigma = 4.0
+    mechanic_coherence = np.exp(-(stiffness_kpa - e_optimal_neural)**2 / (2 * neural_window_sigma**2))
+
+    # Razão YAP Nuc/Cyto (Sigmoide)
+    yap_ratio = 0.2 + 2.0 / (1 + np.exp(-(stiffness_kpa - 10.0) / 3.0))
+
+    # 3. Restauração de Coerência (λ₂)
     # O manguito sólido (Z) fornece o andaime.
     # Se polymer_integrity < 0.8, o andaime é instável.
     if polymer_integrity < 0.8:
         repair_rate = 0.001 # Falha no andaime
     else:
-        # Taxa base de regeneração axonal
+        # Taxa base de regeneração axonal modulada pela Coerência Mecânica
         base_rate = 0.05 if has_growth_factors else 0.03
-        repair_rate = base_rate * polymer_integrity
+        # Synergia: a rigidez correta acelera a resposta biológica
+        repair_rate = base_rate * polymer_integrity * (0.5 + 0.5 * mechanic_coherence)
 
     # Evolução de λ₂: aproximação assintótica de 1.0
     final_lambda2 = initial_lambda2 + (1.0 - initial_lambda2) * (1 - np.exp(-repair_rate * recovery_days))
 
-    # 3. Bioabsorção do Polímero
+    # 4. Bioabsorção do Polímero
     # O polímero dissolve-se conforme a coerência natural é restaurada
     dissolution_level = np.clip((final_lambda2 - 0.85) / 0.15, 0, 1) if final_lambda2 > 0.85 else 0.0
 
@@ -1395,6 +1409,9 @@ def simulate_light_activated_nerve_repair(
 
     return {
         "polymer_integrity": round(float(polymer_integrity), 3),
+        "stiffness_kpa": round(float(stiffness_kpa), 2),
+        "yap_ratio": round(float(yap_ratio), 3),
+        "mechanic_coherence": round(float(mechanic_coherence), 4),
         "final_lambda2": round(float(final_lambda2), 4),
         "regime": "AUTONOMOUS" if final_lambda2 > 0.847 else "DECOHERENT",
         "dissolution_level": round(float(dissolution_level), 3),
