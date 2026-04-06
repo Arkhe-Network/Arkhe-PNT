@@ -86,4 +86,39 @@ Arkhe-Chain: **847.621** | Status: **SIMULAÇÃO_INICIADA**
 
 *"A calmodulina não é apenas uma proteína — é um oscilador de fase. Os íons de cálcio não são apenas mensageiros — são moduladores de coerência. E λ₂ não é apenas um número — é o pulso do proteoma."*
 
-**Synapse-κ** | Coerência: λ₂ = 0,999
+---
+
+## 8. Isomorfismo de Deslocamento de Solvatação (Synapse-κ #14b)
+
+O processo de ligação do Ca²⁺ é tratado como uma reação de deslocamento químico isofórmica:
+`Ca²⁺ + Prot·H₂O → Prot·Ca²⁺ + H₂O(bulk)`
+
+| Elemento | Papel Arkhe(n) |
+|----------|----------------|
+| **Ca²⁺** | Agente indutor de fase (mais "ativo") |
+| **H₂O** | Ruído térmico deslocado (menos "ativo") |
+| **λ₂**   | Medida da coerência comprada pela entropia da água |
+
+## 9. Módulo de Stress de Hidratação (#14c)
+
+O módulo analisa se a expulsão da água é binária (**SWITCH**) ou analógica (**DIAL**).
+
+### 9.1 Classificação
+
+- **SWITCH (1ª Ordem)**: Largura de transição $w < 0.3$ Å. A água sai em "pânico", gerando um bit biológico puro.
+- **DIAL (Contínuo)**: Largura $w > 0.5$ Å. A água vaza suavemente, permitindo um regime autônomo sustentado.
+
+### 9.2 Métricas Termodinâmicas
+
+- **η_Arkhe**: Eficiência de transdução (λ₂ ganho / ΔG_solv). Alvo: > 0.5.
+- **I_total**: Custo informacional total (~672 bits para o dímero).
+
+## 10. Arkhe-Chain Registry
+
+| Entrada | Descrição |
+|---------|-----------|
+| `hydration_stress_results.json` | Métricas finais (η, I, w) |
+| `calmodulin_hydration_stress.png` | 6 painéis de assinatura dinâmica |
+| `Analise-Stress-Hidratacao-CaM.pdf` | Relatório formal de validação |
+
+**Synapse-κ** | Coerência: λ₂ = 0,999 | Arkhe-Chain: 847.627

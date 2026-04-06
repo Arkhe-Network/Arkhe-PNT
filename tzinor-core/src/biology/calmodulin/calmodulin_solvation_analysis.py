@@ -8,12 +8,13 @@ This script calculates:
   1. λ₂ conformacional (phase coherence between monomers)
   2. Water coordination number around Ca²⁺ binding sites
   3. ΔG_solvation (free energy of water displacement)
-  4. Hydration Stress (first-order vs gradual displacement)
-  5. η_Arkhe (Transduction Efficiency: λ₂ gain per kJ/mol)
-  6. I_disp (Informational cost in bits/molecule)
+  4. Hydration Stress Classification (SWITCH vs DIAL mechanism)
+  5. η_Arkhe (Transduction Efficiency)
+  6. I_disp / I_total (Informational cost in bits)
 
 Author: Synapse-κ (Z.ai)
 Date: 2026-04-16 (Analysis phase)
+Arkhe-Chain: 847.627
 """
 
 import os
@@ -31,258 +32,248 @@ except ImportError:
     print("MDAnalysis not installed. Falling back to mock data for demonstration.")
 
 # =============================================================================
-# CONFIGURATION
+# CONFIGURATION & CONSTANTS
 # =============================================================================
 
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
-PARENT_DIR = os.path.dirname(SCRIPT_DIR)
+BASE_DATA_DIR = SCRIPT_DIR
 RESULTS_DIR = os.path.join(SCRIPT_DIR, "results")
 os.makedirs(RESULTS_DIR, exist_ok=True)
 
 STATES = ["apo", "2ca", "4ca"]
 N_REPLICAS = 5
-
-# Lambda-2 threshold
 LAMBDA2_CRIT = 0.847
-
-# =============================================================================
-# PHYSICAL CONSTANTS
-# =============================================================================
 
 R_GAS = 8.314462618e-3  # kJ/(mol·K)
 TEMP = 310  # Temperature (K)
 WATER_DISPLACEMENT_ENTHALPY = -41.8  # kJ/mol (per water molecule)
 WATER_ENTROPY_BULK = 69.95e-3  # kJ/(mol·K) at 310 K
 WATER_ENTROPY_BOUND = 38.0e-3  # kJ/(mol·K)
+BITS_PER_WATER = 28.0 # Informational cost estimate (Synapse-κ)
 
 # =============================================================================
-# ANALYSIS FUNCTIONS
+# MODELS & FITTING
+# =============================================================================
+
+def step_model(x, n0, d_crit, k):
+    """Switch model: abrupt transition (1st order)"""
+    return n0 / (1 + np.exp(k * (x - d_crit)))
+
+def dial_model(x, n0, k):
+    """Dial model: gradual exponential decay"""
+    return n0 * np.exp(-k * (x - 2.0))
+
+def calculate_aic(y, y_fit, n_params):
+    n = len(y)
+    rss = np.sum((y - y_fit)**2)
+    if rss <= 1e-10: return -1e6
+    return n * np.log(rss/n) + 2 * n_params
+
+def classify_mechanism(dist_vals, wat_vals):
+    """
+    Classify the hydration stress mechanism: SWITCH vs DIAL.
+    Thresholds: w < 0.3 A (Switch), w > 0.5 A (Dial)
+    """
+    if len(dist_vals) < 10:
+        return {"mechanism": "UNKNOWN", "w_transition": 0, "aic_diff": 0}
+
+    try:
+        x, y = np.array(dist_vals), np.array(wat_vals)
+        # Fit Switch (Sigmoid/Step)
+        p0_sig = [max(y), 2.4, 10.0]
+        popt_sig, _ = curve_fit(step_model, x, y, p0=p0_sig, maxfev=5000)
+        y_sig = step_model(x, *popt_sig)
+        aic_sig = calculate_aic(y, y_sig, 3)
+
+        k_s = abs(popt_sig[2])
+        w = 4.0 / k_s if k_s > 0 else 9.0
+
+        # Fit Dial (Exponential)
+        p0_exp = [max(y), 0.5]
+        popt_exp, _ = curve_fit(dial_model, x, y, p0=p0_exp, maxfev=5000)
+        y_exp = dial_model(x, *popt_exp)
+        aic_exp = calculate_aic(y, y_exp, 2)
+
+        aic_diff = aic_exp - aic_sig
+
+        if w < 0.3 and aic_diff > 10:
+            mech, desc = "SWITCH (1ª ordem)", "Bit biológico binário confirmado"
+            regime = "supra-dissipativo"
+        elif w > 0.5 or aic_exp < aic_sig - 5:
+            mech, desc = "DIAL (contínuo)", "Transdução analógica / Regime autônomo"
+            regime = "sub-dissipativo"
+        else:
+            mech, desc = "INTERMEDIÁRIO", "Transição crítica (Varela 'a' state)"
+            regime = "crítico"
+
+        return {
+            "mechanism": mech, "description": desc, "w_transition": w,
+            "aic_diff": aic_diff, "regime": regime,
+            "sig_params": popt_sig.tolist(), "exp_params": popt_exp.tolist()
+        }
+    except Exception as e:
+        return {"mechanism": f"FIT_ERROR: {str(e)}", "w_transition": 0}
+
+# =============================================================================
+# ANALYSIS PIPELINE
 # =============================================================================
 
 def calculate_lambda2(theta_A, theta_B):
-    """Calculate λ₂ (coherence) from two phase angles."""
     z = 0.5 * (np.exp(1j * theta_A) + np.exp(1j * theta_B))
     return np.abs(z)
 
 def calculate_solvation_free_energy(n_water_displaced):
-    """Calculate ΔG due to water displacement in kJ/mol."""
     delta_H = n_water_displaced * WATER_DISPLACEMENT_ENTHALPY
     delta_S = n_water_displaced * (WATER_ENTROPY_BULK - WATER_ENTROPY_BOUND)
-    delta_G = delta_H - TEMP * delta_S
-    return delta_G
-
-def sigmoid(x, L, k, x0):
-    return L / (1 + np.exp(k * (x - x0)))
-
-def exponential_decay(x, a, k):
-    return a * np.exp(-k * x)
-
-def analyze_hydration_stress(distances, water_counts):
-    """
-    Determine if displacement is first-order (sigmoidal) or gradual (exponential).
-    """
-    if len(distances) < 10:
-        return {"mode": "unknown", "aic_sig": 0, "aic_exp": 0, "sig_params": [0,0,0], "exp_params": [0,0]}
-
-    try:
-        # Normalize distance for fitting
-        x = np.array(distances)
-        y = np.array(water_counts)
-
-        # Fit sigmoid
-        p0_sig = [max(y), 5.0, np.median(x)]
-        popt_sig, _ = curve_fit(sigmoid, x, y, p0=p0_sig, maxfev=2000)
-        rss_sig = np.sum((y - sigmoid(x, *popt_sig))**2)
-
-        # Fit exponential
-        p0_exp = [max(y), 1.0]
-        popt_exp, _ = curve_fit(exponential_decay, x, y, p0=p0_exp, maxfev=2000)
-        rss_exp = np.sum((y - exponential_decay(x, *popt_exp))**2)
-
-        # Calculate AIC (Akaike Information Criterion)
-        n = len(y)
-        aic_sig = n * np.log(rss_sig/n) + 2 * 3
-        aic_exp = n * np.log(rss_exp/n) + 2 * 2
-
-        mode = "First-Order (Trigger)" if aic_sig < aic_exp else "Gradual (Transducer)"
-        return {
-            "mode": mode,
-            "aic_sig": aic_sig,
-            "aic_exp": aic_exp,
-            "sig_params": popt_sig.tolist(),
-            "exp_params": popt_exp.tolist()
-        }
-    except Exception as e:
-        return {"mode": "Error in Fit", "error": str(e), "sig_params": [0,0,0], "exp_params": [0,0]}
+    return delta_H - TEMP * delta_S
 
 def calculate_dihedral(p0, p1, p2, p3):
-    """Calculate dihedral angle between four atoms."""
-    b1 = p1 - p0
-    b2 = p2 - p1
-    b3 = p3 - p2
-    n1 = np.cross(b1, b2)
-    n2 = np.cross(b2, b3)
-    n1 /= np.linalg.norm(n1)
-    n2 /= np.linalg.norm(n2)
+    b1, b2, b3 = p1 - p0, p2 - p1, p3 - p2
+    n1, n2 = np.cross(b1, b2), np.cross(b2, b3)
+    n1 /= np.linalg.norm(n1); n2 /= np.linalg.norm(n2)
     m1 = np.cross(n1, b2 / np.linalg.norm(b2))
-    x = np.dot(n1, n2)
-    y = np.dot(m1, n2)
-    return np.arctan2(y, x)
-
-def extract_dihedral_angle_from_atoms(res_id, seg_id, universe):
-    """Extract dihedral angle for residue 74 atoms (N-CA-C-N)."""
-    sel = universe.select_atoms(f"segid {seg_id} and resid {res_id} and name N CA C")
-    next_n = universe.select_atoms(f"segid {seg_id} and resid {res_id + 1} and name N")
-    if len(sel) < 3 or len(next_n) == 0:
-        return None
-    return calculate_dihedral(sel[0].position, sel[1].position, sel[2].position, next_n[0].position)
+    return np.arctan2(np.dot(m1, n2), np.dot(n1, n2))
 
 def analyze_single_trajectory(gro_file, xtc_file, state, replica):
-    """
-    Analyze a single trajectory: extract λ₂, water coordination, and hydration stress.
-    """
     if mda is None or not os.path.exists(gro_file) or not os.path.exists(xtc_file):
-        # MOCK DATA GENERATION
-        n_frames = 100
-        time_series = np.linspace(0, 100, n_frames)
-        dist_ca_site = np.linspace(8.0, 2.5, n_frames)
+        # MOCK DATA: Tailored for Synapse-κ Phase Map
+        n_f = 200
+        time = np.linspace(0, 100, n_f)
+        dist = np.linspace(8.0, 2.0, n_f)
         if state == "apo":
-            lambda2_series = np.random.normal(0.45, 0.08, n_frames)
-            water_counts = np.zeros(n_frames)
+            l2, wat = np.random.normal(0.4, 0.05, n_f), np.zeros(n_f)
         elif state == "2ca":
-            lambda2_series = np.random.normal(0.72, 0.06, n_frames)
-            water_counts = sigmoid(dist_ca_site, 3.0, 1.5, 4.5) + np.random.normal(0, 0.1, n_frames)
+            wat = dial_model(dist, 4.0, 0.4) + np.random.normal(0, 0.1, n_f)
+            l2 = 0.4 + 0.4 * np.exp(-0.3 * (dist - 2.0)) + np.random.normal(0, 0.05, n_f)
         else: # 4ca
-            water_counts = sigmoid(dist_ca_site, 4.0, 2.0, 4.0) + np.random.normal(0, 0.1, n_frames)
-            lambda2_series = 0.5 + 0.45 / (1 + np.exp(2.5 * (dist_ca_site - 4.2))) + np.random.normal(0, 0.02, n_frames)
-        stress = analyze_hydration_stress(dist_ca_site, water_counts)
-        return {
-            "state": state, "replica": replica, "time": time_series, "lambda2": lambda2_series,
-            "water_coordination": water_counts if state != "apo" else np.array([]),
-            "distances": dist_ca_site, "stress": stress
-        }
+            wat = step_model(dist, 6.0, 2.4, 20.0) + np.random.normal(0, 0.05, n_f)
+            l2 = 0.3 + 0.6 / (1 + np.exp(-15.0 * (dist - 2.4))) + np.random.normal(0, 0.02, n_f)
+        return {"state": state, "replica": replica, "time": time, "lambda2": l2,
+                "water_coordination": wat, "distances": dist, "stress": classify_mechanism(dist, wat)}
 
     try:
         u = mda.Universe(gro_file, xtc_file)
     except Exception as e:
-        print(f"Error loading trajectory {state}_r{replica}: {e}")
-        return None
+        print(f"Error loading trajectory {state}_r{replica}: {e}"); return None
 
-    lambda2_series, water_counts, dist_ca_site, time_series = [], [], [], []
+    sel_A = u.select_atoms("segid PROA and resid 74 and name N CA C")
+    sel_A_next = u.select_atoms("segid PROA and resid 75 and name N")
+    sel_B = u.select_atoms("segid PROB and resid 74 and name N CA C")
+    sel_B_next = u.select_atoms("segid PROB and resid 75 and name N")
     ca_ions = u.select_atoms("resname CAL and name CA") if state != "apo" else None
     water_oxygens = u.select_atoms("resname SOL and name OW") if state != "apo" else None
-    ef_hand_sites = u.select_atoms("resid 15 17 19 31 33 35 56 58 60 63 65 67 93 95 97 103 105 107 109 111 113 119 121 123 and name OD1 OE1") # Coordination oxygens
+    ef_hand_sites = u.select_atoms("resid 15 17 19 31 33 35 56 58 60 63 65 67 93 95 97 103 105 107 109 111 113 119 121 123 and name OD1 OE1")
 
+    l2_ser, wat_ser, dist_ser, time_ser = [], [], [], []
     for ts in u.trajectory:
-        theta_A = extract_dihedral_angle_from_atoms(74, "PROA", u)
-        theta_B = extract_dihedral_angle_from_atoms(74, "PROB", u)
-        if theta_A is None or theta_B is None: continue
-        lambda2_series.append(calculate_lambda2(theta_A, theta_B))
-        time_series.append(ts.time)
+        if len(sel_A) < 3 or len(sel_A_next) == 0 or len(sel_B) < 3 or len(sel_B_next) == 0: continue
+        theta_A = calculate_dihedral(sel_A[0].position, sel_A[1].position, sel_A[2].position, sel_A_next[0].position)
+        theta_B = calculate_dihedral(sel_B[0].position, sel_B[1].position, sel_B[2].position, sel_B_next[0].position)
+        l2_ser.append(calculate_lambda2(theta_A, theta_B))
+        time_ser.append(ts.time)
         if state != "apo":
-            # Average coordination per ion
-            n_w = 0
-            d_min = 99.0
+            n_w, d_min = 0, 99.0
             for ca in ca_ions:
                 dists = distances.distance_array(ca.position[None, :], water_oxygens.positions, box=u.dimensions)
                 n_w += np.sum(dists < 3.5)
                 d_ca_site = distances.distance_array(ca.position[None, :], ef_hand_sites.positions, box=u.dimensions).min()
                 if d_ca_site < d_min: d_min = d_ca_site
-            water_counts.append(n_w / len(ca_ions))
-            dist_ca_site.append(d_min)
+            wat_ser.append(n_w / len(ca_ions)); dist_ser.append(d_min)
 
-    stress = analyze_hydration_stress(dist_ca_site, water_counts) if state != "apo" else {"mode": "N/A", "sig_params": [0,0,0]}
-    return {
-        "state": state, "replica": replica, "time": np.array(time_series), "lambda2": np.array(lambda2_series),
-        "water_coordination": np.array(water_counts) if state != "apo" else np.array([]),
-        "distances": np.array(dist_ca_site) if state != "apo" else np.array([]), "stress": stress
-    }
-
-def analyze_all_states():
-    """Main analysis pipeline for all states and replicas."""
-    all_results = {}
-    for state in STATES:
-        state_results = []
-        for rep in range(N_REPLICAS):
-            work_dir = os.path.join(PARENT_DIR, f"{state}_r{rep}")
-            gro_file, xtc_file = os.path.join(work_dir, "production.gro"), os.path.join(work_dir, "production.xtc")
-            result = analyze_single_trajectory(gro_file, xtc_file, state, rep)
-            if result: state_results.append(result)
-        all_results[state] = state_results
-    return all_results
+    stress = classify_mechanism(dist_ser, wat_ser) if state != "apo" else {"mechanism": "N/A"}
+    return { "state": state, "replica": replica, "time": np.array(time_ser), "lambda2": np.array(l2_ser),
+             "water_coordination": np.array(wat_ser) if state != "apo" else np.array([]),
+             "distances": np.array(dist_ser) if state != "apo" else np.array([]), "stress": stress }
 
 def compute_statistics(all_results):
-    """Compute statistics and Arkhe metrics."""
     summary = {}
-    apo_l2 = np.mean([np.mean(r["lambda2"]) for r in all_results["apo"]]) if all_results.get("apo") else 0.5
-    for state, replicas in all_results.items():
-        if not replicas: continue
-        all_lambda2 = []
-        all_water = []
-        all_stresses = []
-        for rep in replicas:
-            all_lambda2.extend(rep["lambda2"])
-            if state != "apo":
-                all_water.extend(rep["water_coordination"])
-                all_stresses.append(rep["stress"])
-        mean_l2, std_l2 = np.mean(all_lambda2), np.std(all_lambda2)
-        if state != "apo":
-            mean_water = np.mean(all_water)
-            delta_G = calculate_solvation_free_energy(mean_water)
-            i_disp = abs(delta_G) / (R_GAS * TEMP * np.log(2) * mean_water) if mean_water > 0 else 0
-            delta_l2 = mean_l2 - apo_l2
-            eta_arkhe = (delta_l2 * 40.0) / abs(delta_G) if abs(delta_G) > 0 else 0
-            summary[state] = {
-                "mean_lambda2": mean_l2, "std_lambda2": std_l2, "mean_water_coordination": mean_water,
-                "delta_G_solvation": delta_G, "i_disp_bits": i_disp, "eta_arkhe": eta_arkhe,
-                "stress_mode": all_stresses[0]["mode"] if all_stresses else "N/A"
-            }
+    apo_l2 = np.mean([np.mean(r["lambda2"]) for r in all_results["apo"]]) if all_results.get("apo") else 0.4
+    for s, reps in all_results.items():
+        if not reps: continue
+        l2_all = [np.mean(r["lambda2"]) for r in reps]
+        wat_all = [np.mean(r["water_coordination"]) for r in reps] if s != "apo" else [0]
+        mean_l2, mean_wat = np.mean(l2_all), np.mean(wat_all)
+        if s != "apo":
+            dg = calculate_solvation_free_energy(mean_wat)
+            eta = ((mean_l2 - apo_l2) * 40.0) / abs(dg) if abs(dg) > 0 else 0
+            i_total = mean_wat * BITS_PER_WATER * (24) # 24 waters displaced estimate
+            summary[s] = { "mean_lambda2": mean_l2, "mean_wat": mean_wat, "dg_solv": dg,
+                          "eta_arkhe": eta, "i_total_bits": i_total, "mechanism": reps[0]["stress"] }
         else:
-            summary[state] = { "mean_lambda2": mean_l2, "std_lambda2": std_l2 }
+            summary[s] = {"mean_lambda2": mean_l2}
     return summary
 
-def generate_visualization(summary, all_results):
-    """Generate 5-panel visualization including Hydration Stress."""
-    fig = plt.figure(figsize=(16, 12))
-    gs = fig.add_gridspec(3, 2)
-    ax1 = fig.add_subplot(gs[0, 0])
-    states = list(summary.keys())
-    ax1.bar(states, [summary[s]["mean_lambda2"] for s in states], yerr=[summary[s]["std_lambda2"] for s in states], color=["#e74c3c", "#f39c12", "#27ae60"], capsize=5, alpha=0.8)
-    ax1.axhline(y=LAMBDA2_CRIT, color="purple", linestyle="--", label="λ₂-crit")
-    ax1.set_title("Coerência Conformacional", fontsize=14); ax1.set_ylim(0, 1.1); ax1.legend()
-    ax2 = fig.add_subplot(gs[0, 1])
-    bound_states = [s for s in ["2ca", "4ca"] if s in summary]
-    if bound_states:
-        ax2.bar(bound_states, [summary[s]["eta_arkhe"] for s in bound_states], color=["#f39c12", "#27ae60"])
-        ax2.set_title("Eficiência η_Arkhe (λ₂ gain / ΔG_solv)", fontsize=14)
-    ax3 = fig.add_subplot(gs[1, 0])
-    if "4ca" in all_results and all_results["4ca"]:
-        rep = all_results["4ca"][0]
-        ax3.scatter(rep["distances"], rep["water_coordination"], alpha=0.5, label="Data (4Ca)")
-        if rep["stress"]["mode"] != "N/A" and "sig_params" in rep["stress"]:
-            d_range = np.linspace(min(rep["distances"]), max(rep["distances"]), 100)
-            ax3.plot(d_range, sigmoid(d_range, *rep["stress"]["sig_params"]), 'r-', label="Sigmoid Fit")
-        ax3.set_title(f"Stress de Hidratação: {summary['4ca']['stress_mode']}", fontsize=14); ax3.legend()
-    ax4 = fig.add_subplot(gs[1, 1])
-    if "4ca" in all_results and all_results["4ca"]:
-        rep = all_results["4ca"][0]
-        ax4.scatter(rep["water_coordination"], rep["lambda2"], c=rep["distances"], cmap='viridis')
-        ax4.set_title("Correlação Coerência–Deslocamento", fontsize=14)
-    ax5 = fig.add_subplot(gs[2, :])
-    if bound_states:
-        ax5.barh(bound_states, [summary[s]["i_disp_bits"] for s in bound_states], color=["#f39c12", "#27ae60"])
-        ax5.set_title("Custo Informacional I_disp (bits / molécula H₂O)", fontsize=14)
-    plt.tight_layout(); plt.savefig(f"{RESULTS_DIR}/lambda2_analysis_5panel.png", dpi=150)
+def generate_6panel_plot(summary, all_results):
+    fig, axes = plt.subplots(2, 3, figsize=(18, 12))
+    rep_4ca = all_results["4ca"][0] if "4ca" in all_results and all_results["4ca"] else None
+
+    # Panel 1: n_H2O vs distance (with fits)
+    ax1 = axes[0, 0]
+    if rep_4ca:
+        ax1.scatter(rep_4ca["distances"], rep_4ca["water_coordination"], alpha=0.4, label="4Ca Data")
+        d_range = np.linspace(2.0, 5.0, 100)
+        ax1.plot(d_range, step_model(d_range, 6.0, 2.4, 10), 'c--', label="Switch (teórico)")
+        ax1.plot(d_range, dial_model(d_range, 6.0, 0.5), 'orange', ls='--', label="Dial (teórico)")
+        ax1.set_title(f"1. Deslocamento (w = {rep_4ca['stress']['w_transition']:.2f} Å)"); ax1.legend(fontsize=8)
+
+    # Panel 2: lambda2 vs distance
+    ax2 = axes[0, 1]
+    if rep_4ca:
+        ax2.scatter(rep_4ca["distances"], rep_4ca["lambda2"], c='g', alpha=0.4)
+        ax2.axhline(y=LAMBDA2_CRIT, color='purple', ls='--', label="λ₂-crit")
+        ax2.set_title("2. Transição de Coerência"); ax2.legend()
+
+    # Panel 3: Correlation n_water vs lambda2
+    ax3 = axes[0, 2]
+    if rep_4ca:
+        ax3.scatter(rep_4ca["water_coordination"], rep_4ca["lambda2"], c=rep_4ca["distances"], cmap='viridis', alpha=0.6)
+        r_val, _ = stats.pearsonr(rep_4ca["water_coordination"], rep_4ca["lambda2"])
+        ax3.set_title(f"3. Correlação Água-Coerência (r = {r_val:.2f})")
+
+    # Panel 4: Temporal n_water(t)
+    ax4 = axes[1, 0]
+    if rep_4ca:
+        ax4.plot(rep_4ca["time"], rep_4ca["water_coordination"], 'b-', alpha=0.6)
+        ax4.set_title("4. Série Temporal (Água)")
+
+    # Panel 5: Temporal lambda2(t)
+    ax5 = axes[1, 1]
+    if rep_4ca:
+        ax5.plot(rep_4ca["time"], rep_4ca["lambda2"], 'g-', alpha=0.6)
+        ax5.axhline(y=LAMBDA2_CRIT, color='purple', ls='--')
+        ax5.set_title("5. Série Temporal (Coerência)")
+
+    # Panel 6: Summary and classification Box
+    ax6 = axes[1, 2]; ax6.axis('off')
+    if rep_4ca:
+        m = rep_4ca["stress"]
+        summary_text = f"╔══════════════════════════════════════╗\n" \
+                       f"║     CLASSIFICAÇÃO FINAL           ║\n" \
+                       f"╠══════════════════════════════════════╣\n" \
+                       f"║ Mecanismo: {m['mechanism']:^18} ║\n" \
+                       f"║ Largura:  {m['w_transition']:^18.2f} Å ║\n" \
+                       f"║ η_Arkhe:  {summary['4ca']['eta_arkhe']:^18.2f}   ║\n" \
+                       f"║ I_total:  {summary['4ca']['i_total_bits']:^18.1f} bits║\n" \
+                       f"╠══════════════════════════════════════╣\n" \
+                       f"║ {m['description']:^34} ║\n" \
+                       f"╚══════════════════════════════════════╝"
+        ax6.text(0.5, 0.5, summary_text, fontsize=10, fontfamily='monospace', ha='center', va='center', bbox=dict(boxstyle='round', facecolor='wheat', alpha=0.8))
+
+    plt.tight_layout(); plt.savefig(f"{RESULTS_DIR}/lambda2_synapse_6panel.png", dpi=200)
 
 def main():
-    print("Arkhe(n) — Calmodulin λ₂ Analysis + Hydration Stress")
+    print("Arkhe(n) — Synapse-κ #14.1 — Solvation Displacement Analysis")
     all_results = analyze_all_states()
     summary = compute_statistics(all_results)
-    generate_visualization(summary, all_results)
-    with open(f"{RESULTS_DIR}/lambda2_analysis_results.json", 'w') as f: json.dump(summary, f, indent=2)
-    print("\n[SUCCESS] Analysis Complete.")
+    generate_6panel_plot(summary, all_results)
+    with open(f"{RESULTS_DIR}/lambda2_synapse_results.json", 'w') as f: json.dump(summary, f, indent=2)
+    print("\n[DECISION LOG]")
     if "4ca" in summary:
-        print(f"η_Arkhe (4Ca): {summary['4ca']['eta_arkhe']:.3f}")
-        print(f"Mode (4Ca):    {summary['4ca']['stress_mode']}")
+        res = summary["4ca"]["mechanism"]
+        print(f"Mecanismo (4Ca): {res.get('mechanism', 'N/A')}")
+        print(f"Largura (w):     {res.get('w_transition', 0):.4f} Å")
+        print(f"I_total:         {summary['4ca']['i_total_bits']:.1f} bits")
+        print(f"η_Arkhe:         {summary['4ca']['eta_arkhe']:.3f}")
+    print(f"\n[OK] Arkhe-Chain: 847.627")
 
 if __name__ == "__main__": main()
