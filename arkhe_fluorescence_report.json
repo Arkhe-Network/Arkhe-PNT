@@ -1,0 +1,778 @@
+{
+  "event": "FLUORESCENCE_ANALYSIS_COMPLETE",
+  "timestamp": "2026-04-06T19:41:40.415624",
+  "n_samples": 96,
+  "mean_lambda2": 0.7608125000000001,
+  "mean_viability": 0.9193229166666667,
+  "verdict": "PARTIAL",
+  "details": [
+    {
+      "well": "A1",
+      "nerve_type": "Ciatico_Rato",
+      "viability_mtt": 0.914,
+      "lambda2_dna": 0.8199,
+      "fluorescence_rfu": 3982.8,
+      "status": "FLAGGED"
+    },
+    {
+      "well": "A2",
+      "nerve_type": "Ciatico_Rato",
+      "viability_mtt": 0.847,
+      "lambda2_dna": 0.8369,
+      "fluorescence_rfu": 4274.4,
+      "status": "FLAGGED"
+    },
+    {
+      "well": "A3",
+      "nerve_type": "Ciatico_Rato",
+      "viability_mtt": 0.921,
+      "lambda2_dna": 0.6951,
+      "fluorescence_rfu": 3542.7,
+      "status": "FLAGGED"
+    },
+    {
+      "well": "A4",
+      "nerve_type": "Mediano_Humano",
+      "viability_mtt": 0.94,
+      "lambda2_dna": 0.7684,
+      "fluorescence_rfu": 3694.1,
+      "status": "FLAGGED"
+    },
+    {
+      "well": "A5",
+      "nerve_type": "Mediano_Humano",
+      "viability_mtt": 0.92,
+      "lambda2_dna": 0.6924,
+      "fluorescence_rfu": 3443.5,
+      "status": "FLAGGED"
+    },
+    {
+      "well": "A6",
+      "nerve_type": "Mediano_Humano",
+      "viability_mtt": 0.952,
+      "lambda2_dna": 0.661,
+      "fluorescence_rfu": 3164.6,
+      "status": "FLAGGED"
+    },
+    {
+      "well": "A7",
+      "nerve_type": "Ulnar_Humano",
+      "viability_mtt": 0.916,
+      "lambda2_dna": 0.7982,
+      "fluorescence_rfu": 3998.8,
+      "status": "FLAGGED"
+    },
+    {
+      "well": "A8",
+      "nerve_type": "Ulnar_Humano",
+      "viability_mtt": 0.903,
+      "lambda2_dna": 0.706,
+      "fluorescence_rfu": 3530.4,
+      "status": "FLAGGED"
+    },
+    {
+      "well": "A9",
+      "nerve_type": "Ulnar_Humano",
+      "viability_mtt": 0.873,
+      "lambda2_dna": 0.7779,
+      "fluorescence_rfu": 3732.0,
+      "status": "FLAGGED"
+    },
+    {
+      "well": "A10",
+      "nerve_type": "Femoral_Humano",
+      "viability_mtt": 0.887,
+      "lambda2_dna": 0.7323,
+      "fluorescence_rfu": 3677.3,
+      "status": "FLAGGED"
+    },
+    {
+      "well": "A11",
+      "nerve_type": "Femoral_Humano",
+      "viability_mtt": 0.921,
+      "lambda2_dna": 0.7928,
+      "fluorescence_rfu": 4193.0,
+      "status": "FLAGGED"
+    },
+    {
+      "well": "A12",
+      "nerve_type": "Femoral_Humano",
+      "viability_mtt": 0.905,
+      "lambda2_dna": 0.789,
+      "fluorescence_rfu": 3764.3,
+      "status": "FLAGGED"
+    },
+    {
+      "well": "B1",
+      "nerve_type": "Tibial_Humano",
+      "viability_mtt": 0.94,
+      "lambda2_dna": 0.6471,
+      "fluorescence_rfu": 3162.9,
+      "status": "FLAGGED"
+    },
+    {
+      "well": "B2",
+      "nerve_type": "Tibial_Humano",
+      "viability_mtt": 0.937,
+      "lambda2_dna": 0.7627,
+      "fluorescence_rfu": 3706.1,
+      "status": "FLAGGED"
+    },
+    {
+      "well": "B3",
+      "nerve_type": "Tibial_Humano",
+      "viability_mtt": 0.957,
+      "lambda2_dna": 0.7919,
+      "fluorescence_rfu": 3979.6,
+      "status": "FLAGGED"
+    },
+    {
+      "well": "B4",
+      "nerve_type": "Radial_Humano",
+      "viability_mtt": 0.98,
+      "lambda2_dna": 0.813,
+      "fluorescence_rfu": 3977.5,
+      "status": "FLAGGED"
+    },
+    {
+      "well": "B5",
+      "nerve_type": "Radial_Humano",
+      "viability_mtt": 0.944,
+      "lambda2_dna": 0.6927,
+      "fluorescence_rfu": 3252.9,
+      "status": "FLAGGED"
+    },
+    {
+      "well": "B6",
+      "nerve_type": "Radial_Humano",
+      "viability_mtt": 0.905,
+      "lambda2_dna": 0.7137,
+      "fluorescence_rfu": 3474.8,
+      "status": "FLAGGED"
+    },
+    {
+      "well": "B7",
+      "nerve_type": "Peroneiro_Humano",
+      "viability_mtt": 0.903,
+      "lambda2_dna": 0.6567,
+      "fluorescence_rfu": 3153.6,
+      "status": "FLAGGED"
+    },
+    {
+      "well": "B8",
+      "nerve_type": "Peroneiro_Humano",
+      "viability_mtt": 0.863,
+      "lambda2_dna": 0.8017,
+      "fluorescence_rfu": 4055.7,
+      "status": "FLAGGED"
+    },
+    {
+      "well": "B9",
+      "nerve_type": "Peroneiro_Humano",
+      "viability_mtt": 0.942,
+      "lambda2_dna": 0.8089,
+      "fluorescence_rfu": 4031.1,
+      "status": "FLAGGED"
+    },
+    {
+      "well": "B10",
+      "nerve_type": "Ciatico_Humano",
+      "viability_mtt": 0.906,
+      "lambda2_dna": 0.69,
+      "fluorescence_rfu": 3456.5,
+      "status": "FLAGGED"
+    },
+    {
+      "well": "B11",
+      "nerve_type": "Ciatico_Humano",
+      "viability_mtt": 0.882,
+      "lambda2_dna": 0.6935,
+      "fluorescence_rfu": 3597.4,
+      "status": "FLAGGED"
+    },
+    {
+      "well": "B12",
+      "nerve_type": "Ciatico_Humano",
+      "viability_mtt": 0.841,
+      "lambda2_dna": 0.7339,
+      "fluorescence_rfu": 3812.5,
+      "status": "FLAGGED"
+    },
+    {
+      "well": "C1",
+      "nerve_type": "Controle",
+      "viability_mtt": 0.94,
+      "lambda2_dna": 0.8113,
+      "fluorescence_rfu": 3853.0,
+      "status": "FLAGGED"
+    },
+    {
+      "well": "C2",
+      "nerve_type": "Controle",
+      "viability_mtt": 0.899,
+      "lambda2_dna": 0.7969,
+      "fluorescence_rfu": 4144.9,
+      "status": "FLAGGED"
+    },
+    {
+      "well": "C3",
+      "nerve_type": "Controle",
+      "viability_mtt": 0.965,
+      "lambda2_dna": 0.7625,
+      "fluorescence_rfu": 3689.2,
+      "status": "FLAGGED"
+    },
+    {
+      "well": "C4",
+      "nerve_type": "Controle",
+      "viability_mtt": 0.898,
+      "lambda2_dna": 0.7981,
+      "fluorescence_rfu": 4029.3,
+      "status": "FLAGGED"
+    },
+    {
+      "well": "C5",
+      "nerve_type": "Controle",
+      "viability_mtt": 0.949,
+      "lambda2_dna": 0.8295,
+      "fluorescence_rfu": 4097.5,
+      "status": "FLAGGED"
+    },
+    {
+      "well": "C6",
+      "nerve_type": "Controle",
+      "viability_mtt": 0.885,
+      "lambda2_dna": 0.8031,
+      "fluorescence_rfu": 4080.7,
+      "status": "FLAGGED"
+    },
+    {
+      "well": "C7",
+      "nerve_type": "Controle",
+      "viability_mtt": 0.906,
+      "lambda2_dna": 0.7128,
+      "fluorescence_rfu": 3716.1,
+      "status": "FLAGGED"
+    },
+    {
+      "well": "C8",
+      "nerve_type": "Controle",
+      "viability_mtt": 0.93,
+      "lambda2_dna": 0.781,
+      "fluorescence_rfu": 3798.4,
+      "status": "FLAGGED"
+    },
+    {
+      "well": "C9",
+      "nerve_type": "Controle",
+      "viability_mtt": 0.931,
+      "lambda2_dna": 0.7645,
+      "fluorescence_rfu": 3795.9,
+      "status": "FLAGGED"
+    },
+    {
+      "well": "C10",
+      "nerve_type": "Controle",
+      "viability_mtt": 0.916,
+      "lambda2_dna": 0.7652,
+      "fluorescence_rfu": 3929.6,
+      "status": "FLAGGED"
+    },
+    {
+      "well": "C11",
+      "nerve_type": "Controle",
+      "viability_mtt": 0.944,
+      "lambda2_dna": 0.7489,
+      "fluorescence_rfu": 3717.7,
+      "status": "FLAGGED"
+    },
+    {
+      "well": "C12",
+      "nerve_type": "Controle",
+      "viability_mtt": 0.93,
+      "lambda2_dna": 0.8238,
+      "fluorescence_rfu": 4253.1,
+      "status": "FLAGGED"
+    },
+    {
+      "well": "D1",
+      "nerve_type": "Controle",
+      "viability_mtt": 0.974,
+      "lambda2_dna": 0.8185,
+      "fluorescence_rfu": 4087.1,
+      "status": "FLAGGED"
+    },
+    {
+      "well": "D2",
+      "nerve_type": "Controle",
+      "viability_mtt": 0.95,
+      "lambda2_dna": 0.8281,
+      "fluorescence_rfu": 4157.6,
+      "status": "FLAGGED"
+    },
+    {
+      "well": "D3",
+      "nerve_type": "Controle",
+      "viability_mtt": 0.962,
+      "lambda2_dna": 0.8308,
+      "fluorescence_rfu": 4049.7,
+      "status": "FLAGGED"
+    },
+    {
+      "well": "D4",
+      "nerve_type": "Controle",
+      "viability_mtt": 0.923,
+      "lambda2_dna": 0.7412,
+      "fluorescence_rfu": 3639.0,
+      "status": "FLAGGED"
+    },
+    {
+      "well": "D5",
+      "nerve_type": "Controle",
+      "viability_mtt": 0.835,
+      "lambda2_dna": 0.8121,
+      "fluorescence_rfu": 3966.7,
+      "status": "FLAGGED"
+    },
+    {
+      "well": "D6",
+      "nerve_type": "Controle",
+      "viability_mtt": 0.898,
+      "lambda2_dna": 0.7448,
+      "fluorescence_rfu": 3700.5,
+      "status": "FLAGGED"
+    },
+    {
+      "well": "D7",
+      "nerve_type": "Controle",
+      "viability_mtt": 0.911,
+      "lambda2_dna": 0.799,
+      "fluorescence_rfu": 4020.7,
+      "status": "FLAGGED"
+    },
+    {
+      "well": "D8",
+      "nerve_type": "Controle",
+      "viability_mtt": 0.908,
+      "lambda2_dna": 0.7675,
+      "fluorescence_rfu": 3775.6,
+      "status": "FLAGGED"
+    },
+    {
+      "well": "D9",
+      "nerve_type": "Controle",
+      "viability_mtt": 0.91,
+      "lambda2_dna": 0.6867,
+      "fluorescence_rfu": 3517.0,
+      "status": "FLAGGED"
+    },
+    {
+      "well": "D10",
+      "nerve_type": "Controle",
+      "viability_mtt": 0.955,
+      "lambda2_dna": 0.7015,
+      "fluorescence_rfu": 3570.7,
+      "status": "FLAGGED"
+    },
+    {
+      "well": "D11",
+      "nerve_type": "Controle",
+      "viability_mtt": 0.877,
+      "lambda2_dna": 0.7899,
+      "fluorescence_rfu": 3887.5,
+      "status": "FLAGGED"
+    },
+    {
+      "well": "D12",
+      "nerve_type": "Controle",
+      "viability_mtt": 0.906,
+      "lambda2_dna": 0.7381,
+      "fluorescence_rfu": 3792.7,
+      "status": "FLAGGED"
+    },
+    {
+      "well": "E1",
+      "nerve_type": "Controle",
+      "viability_mtt": 0.913,
+      "lambda2_dna": 0.7241,
+      "fluorescence_rfu": 3756.7,
+      "status": "FLAGGED"
+    },
+    {
+      "well": "E2",
+      "nerve_type": "Controle",
+      "viability_mtt": 0.926,
+      "lambda2_dna": 0.8031,
+      "fluorescence_rfu": 3975.7,
+      "status": "FLAGGED"
+    },
+    {
+      "well": "E3",
+      "nerve_type": "Controle",
+      "viability_mtt": 0.97,
+      "lambda2_dna": 0.7962,
+      "fluorescence_rfu": 3847.8,
+      "status": "FLAGGED"
+    },
+    {
+      "well": "E4",
+      "nerve_type": "Controle",
+      "viability_mtt": 0.924,
+      "lambda2_dna": 0.7993,
+      "fluorescence_rfu": 4034.6,
+      "status": "FLAGGED"
+    },
+    {
+      "well": "E5",
+      "nerve_type": "Controle",
+      "viability_mtt": 0.957,
+      "lambda2_dna": 0.7864,
+      "fluorescence_rfu": 3996.1,
+      "status": "FLAGGED"
+    },
+    {
+      "well": "E6",
+      "nerve_type": "Controle",
+      "viability_mtt": 0.943,
+      "lambda2_dna": 0.8335,
+      "fluorescence_rfu": 4210.9,
+      "status": "FLAGGED"
+    },
+    {
+      "well": "E7",
+      "nerve_type": "Controle",
+      "viability_mtt": 0.957,
+      "lambda2_dna": 0.6956,
+      "fluorescence_rfu": 3674.5,
+      "status": "FLAGGED"
+    },
+    {
+      "well": "E8",
+      "nerve_type": "Controle",
+      "viability_mtt": 0.892,
+      "lambda2_dna": 0.7931,
+      "fluorescence_rfu": 3841.0,
+      "status": "FLAGGED"
+    },
+    {
+      "well": "E9",
+      "nerve_type": "Controle",
+      "viability_mtt": 0.859,
+      "lambda2_dna": 0.7956,
+      "fluorescence_rfu": 4090.7,
+      "status": "FLAGGED"
+    },
+    {
+      "well": "E10",
+      "nerve_type": "Controle",
+      "viability_mtt": 0.932,
+      "lambda2_dna": 0.7108,
+      "fluorescence_rfu": 3594.4,
+      "status": "FLAGGED"
+    },
+    {
+      "well": "E11",
+      "nerve_type": "Controle",
+      "viability_mtt": 0.929,
+      "lambda2_dna": 0.69,
+      "fluorescence_rfu": 3580.3,
+      "status": "FLAGGED"
+    },
+    {
+      "well": "E12",
+      "nerve_type": "Controle",
+      "viability_mtt": 0.913,
+      "lambda2_dna": 0.6743,
+      "fluorescence_rfu": 3337.7,
+      "status": "FLAGGED"
+    },
+    {
+      "well": "F1",
+      "nerve_type": "Controle",
+      "viability_mtt": 0.958,
+      "lambda2_dna": 0.6599,
+      "fluorescence_rfu": 3245.5,
+      "status": "FLAGGED"
+    },
+    {
+      "well": "F2",
+      "nerve_type": "Controle",
+      "viability_mtt": 0.931,
+      "lambda2_dna": 0.79,
+      "fluorescence_rfu": 3934.5,
+      "status": "FLAGGED"
+    },
+    {
+      "well": "F3",
+      "nerve_type": "Controle",
+      "viability_mtt": 0.891,
+      "lambda2_dna": 0.7521,
+      "fluorescence_rfu": 3794.9,
+      "status": "FLAGGED"
+    },
+    {
+      "well": "F4",
+      "nerve_type": "Controle",
+      "viability_mtt": 0.943,
+      "lambda2_dna": 0.7403,
+      "fluorescence_rfu": 3934.1,
+      "status": "FLAGGED"
+    },
+    {
+      "well": "F5",
+      "nerve_type": "Controle",
+      "viability_mtt": 0.883,
+      "lambda2_dna": 0.804,
+      "fluorescence_rfu": 3952.6,
+      "status": "FLAGGED"
+    },
+    {
+      "well": "F6",
+      "nerve_type": "Controle",
+      "viability_mtt": 0.901,
+      "lambda2_dna": 0.691,
+      "fluorescence_rfu": 3472.4,
+      "status": "FLAGGED"
+    },
+    {
+      "well": "F7",
+      "nerve_type": "Controle",
+      "viability_mtt": 0.914,
+      "lambda2_dna": 0.6873,
+      "fluorescence_rfu": 3472.9,
+      "status": "FLAGGED"
+    },
+    {
+      "well": "F8",
+      "nerve_type": "Controle",
+      "viability_mtt": 0.892,
+      "lambda2_dna": 0.7711,
+      "fluorescence_rfu": 3873.6,
+      "status": "FLAGGED"
+    },
+    {
+      "well": "F9",
+      "nerve_type": "Controle",
+      "viability_mtt": 0.907,
+      "lambda2_dna": 0.8009,
+      "fluorescence_rfu": 4061.3,
+      "status": "FLAGGED"
+    },
+    {
+      "well": "F10",
+      "nerve_type": "Controle",
+      "viability_mtt": 0.902,
+      "lambda2_dna": 0.8241,
+      "fluorescence_rfu": 4126.3,
+      "status": "FLAGGED"
+    },
+    {
+      "well": "F11",
+      "nerve_type": "Controle",
+      "viability_mtt": 0.971,
+      "lambda2_dna": 0.8338,
+      "fluorescence_rfu": 4135.3,
+      "status": "FLAGGED"
+    },
+    {
+      "well": "F12",
+      "nerve_type": "Controle",
+      "viability_mtt": 0.852,
+      "lambda2_dna": 0.8089,
+      "fluorescence_rfu": 4288.1,
+      "status": "FLAGGED"
+    },
+    {
+      "well": "G1",
+      "nerve_type": "Controle",
+      "viability_mtt": 0.899,
+      "lambda2_dna": 0.7375,
+      "fluorescence_rfu": 3787.5,
+      "status": "FLAGGED"
+    },
+    {
+      "well": "G2",
+      "nerve_type": "Controle",
+      "viability_mtt": 0.981,
+      "lambda2_dna": 0.8244,
+      "fluorescence_rfu": 4028.3,
+      "status": "FLAGGED"
+    },
+    {
+      "well": "G3",
+      "nerve_type": "Controle",
+      "viability_mtt": 0.926,
+      "lambda2_dna": 0.812,
+      "fluorescence_rfu": 3882.4,
+      "status": "FLAGGED"
+    },
+    {
+      "well": "G4",
+      "nerve_type": "Controle",
+      "viability_mtt": 0.923,
+      "lambda2_dna": 0.6796,
+      "fluorescence_rfu": 3444.3,
+      "status": "FLAGGED"
+    },
+    {
+      "well": "G5",
+      "nerve_type": "Controle",
+      "viability_mtt": 0.965,
+      "lambda2_dna": 0.7761,
+      "fluorescence_rfu": 3937.8,
+      "status": "FLAGGED"
+    },
+    {
+      "well": "G6",
+      "nerve_type": "Controle",
+      "viability_mtt": 0.925,
+      "lambda2_dna": 0.7883,
+      "fluorescence_rfu": 3887.5,
+      "status": "FLAGGED"
+    },
+    {
+      "well": "G7",
+      "nerve_type": "Controle",
+      "viability_mtt": 0.94,
+      "lambda2_dna": 0.8089,
+      "fluorescence_rfu": 4144.7,
+      "status": "FLAGGED"
+    },
+    {
+      "well": "G8",
+      "nerve_type": "Controle",
+      "viability_mtt": 0.939,
+      "lambda2_dna": 0.7869,
+      "fluorescence_rfu": 3956.2,
+      "status": "FLAGGED"
+    },
+    {
+      "well": "G9",
+      "nerve_type": "Controle",
+      "viability_mtt": 0.901,
+      "lambda2_dna": 0.7689,
+      "fluorescence_rfu": 3849.0,
+      "status": "FLAGGED"
+    },
+    {
+      "well": "G10",
+      "nerve_type": "Controle",
+      "viability_mtt": 0.927,
+      "lambda2_dna": 0.6581,
+      "fluorescence_rfu": 3318.4,
+      "status": "FLAGGED"
+    },
+    {
+      "well": "G11",
+      "nerve_type": "Controle",
+      "viability_mtt": 0.947,
+      "lambda2_dna": 0.8027,
+      "fluorescence_rfu": 4133.8,
+      "status": "FLAGGED"
+    },
+    {
+      "well": "G12",
+      "nerve_type": "Controle",
+      "viability_mtt": 0.928,
+      "lambda2_dna": 0.6755,
+      "fluorescence_rfu": 3270.3,
+      "status": "FLAGGED"
+    },
+    {
+      "well": "H1",
+      "nerve_type": "Controle",
+      "viability_mtt": 0.922,
+      "lambda2_dna": 0.6991,
+      "fluorescence_rfu": 3548.0,
+      "status": "FLAGGED"
+    },
+    {
+      "well": "H2",
+      "nerve_type": "Controle",
+      "viability_mtt": 0.974,
+      "lambda2_dna": 0.8083,
+      "fluorescence_rfu": 4110.2,
+      "status": "FLAGGED"
+    },
+    {
+      "well": "H3",
+      "nerve_type": "Controle",
+      "viability_mtt": 0.854,
+      "lambda2_dna": 0.8246,
+      "fluorescence_rfu": 4095.3,
+      "status": "FLAGGED"
+    },
+    {
+      "well": "H4",
+      "nerve_type": "Controle",
+      "viability_mtt": 0.945,
+      "lambda2_dna": 0.6845,
+      "fluorescence_rfu": 3529.6,
+      "status": "FLAGGED"
+    },
+    {
+      "well": "H5",
+      "nerve_type": "Controle",
+      "viability_mtt": 0.931,
+      "lambda2_dna": 0.7356,
+      "fluorescence_rfu": 3661.4,
+      "status": "FLAGGED"
+    },
+    {
+      "well": "H6",
+      "nerve_type": "Controle",
+      "viability_mtt": 0.928,
+      "lambda2_dna": 0.7833,
+      "fluorescence_rfu": 3906.7,
+      "status": "FLAGGED"
+    },
+    {
+      "well": "H7",
+      "nerve_type": "Controle",
+      "viability_mtt": 0.893,
+      "lambda2_dna": 0.6658,
+      "fluorescence_rfu": 3452.2,
+      "status": "FLAGGED"
+    },
+    {
+      "well": "H8",
+      "nerve_type": "Controle",
+      "viability_mtt": 0.868,
+      "lambda2_dna": 0.8055,
+      "fluorescence_rfu": 3873.5,
+      "status": "FLAGGED"
+    },
+    {
+      "well": "H9",
+      "nerve_type": "Controle",
+      "viability_mtt": 0.915,
+      "lambda2_dna": 0.79,
+      "fluorescence_rfu": 3792.2,
+      "status": "FLAGGED"
+    },
+    {
+      "well": "H10",
+      "nerve_type": "Controle",
+      "viability_mtt": 0.885,
+      "lambda2_dna": 0.8119,
+      "fluorescence_rfu": 4119.0,
+      "status": "FLAGGED"
+    },
+    {
+      "well": "H11",
+      "nerve_type": "Controle",
+      "viability_mtt": 0.937,
+      "lambda2_dna": 0.8213,
+      "fluorescence_rfu": 4029.6,
+      "status": "FLAGGED"
+    },
+    {
+      "well": "H12",
+      "nerve_type": "Controle",
+      "viability_mtt": 0.941,
+      "lambda2_dna": 0.6923,
+      "fluorescence_rfu": 3515.5,
+      "status": "FLAGGED"
+    }
+  ]
+}
