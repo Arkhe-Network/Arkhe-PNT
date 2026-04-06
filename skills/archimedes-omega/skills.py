@@ -780,21 +780,21 @@ def evaluate_eqbe_safety(
 
     # 1. Leakage Test (Simulado)
     # Verifica se o efeito persiste fora do alvo (limiar de 5%)
-    leakage_detected = np.random.random() < 0.05
+    leakage_detected = float(np.random.random()) < 0.05
 
     # 2. Reversibility Test (Simulado)
     # Verifica se o efeito pode ser desligado
-    can_be_reversed = metadata.get('has_kill_switch', True)
+    can_be_reversed = bool(metadata.get('has_kill_switch', True))
 
     # 3. Non-target effect
     # Enhanced coherence in one pathway shouldn't disrupt another
-    interference_level = np.mean(coherence_data) * 0.1 # Heurística simples
+    interference_level = float(np.mean(coherence_data)) * 0.1 # Heurística simples
 
     # 4. Evolutionary Escape
     # Simula se o sistema pode mutar para ignorar o kill switch
     evolutionary_stability = 0.99
 
-    is_safe = (not leakage_detected) and can_be_reversed and (interference_level < 0.2)
+    is_safe = bool((not leakage_detected) and can_be_reversed and (interference_level < 0.2))
 
     safety_report = {
         "is_safe": is_safe,
@@ -1345,4 +1345,60 @@ def simulate_brillouin_auditory_sensor(power_mw: float, coherence: float) -> Dic
         "power_received_mw": round(power_mw * coherence, 2),
         "is_coherent": bool(coherence > 0.1),
         "timestamp": datetime.now().isoformat()
+    }
+
+# ============================================================
+# [REPARO NEURAL] - Simulação de Polímero Foto-Ativado
+# ============================================================
+def simulate_light_activated_nerve_repair(
+    initial_lambda2: float,
+    light_intensity_mw_cm2: float,
+    exposure_seconds: float,
+    recovery_days: float,
+    has_growth_factors: bool = False
+) -> Dict:
+    """
+    Simula o reparo de nervos via polímero foto-ativado (Tissium).
+    Modela a transição C -> Z e a subsequente restauração de λ₂.
+    """
+    logger.info("🌌 [Synapse-κ] Iniciando simulação de reparo neural por luz.")
+
+    # 1. Fase de Polimerização (C -> Z)
+    # Threshold de ativação: 50 mW/cm² por 30s
+    activation_energy = light_intensity_mw_cm2 * exposure_seconds
+    threshold_energy = 50 * 30
+    polymer_integrity = np.clip(activation_energy / threshold_energy, 0, 1)
+
+    # 2. Restauração de Coerência (λ₂)
+    # O manguito sólido (Z) fornece o andaime.
+    # Se polymer_integrity < 0.8, o andaime é instável.
+    if polymer_integrity < 0.8:
+        repair_rate = 0.001 # Falha no andaime
+    else:
+        # Taxa base de regeneração axonal
+        base_rate = 0.05 if has_growth_factors else 0.03
+        repair_rate = base_rate * polymer_integrity
+
+    # Evolução de λ₂: aproximação assintótica de 1.0
+    final_lambda2 = initial_lambda2 + (1.0 - initial_lambda2) * (1 - np.exp(-repair_rate * recovery_days))
+
+    # 3. Bioabsorção do Polímero
+    # O polímero dissolve-se conforme a coerência natural é restaurada
+    dissolution_level = np.clip((final_lambda2 - 0.85) / 0.15, 0, 1) if final_lambda2 > 0.85 else 0.0
+
+    # Auditoria EQBE
+    safety_audit = evaluate_eqbe_safety(
+        "LIGHT_ACTIVATED_NERVE_REPAIR",
+        np.array([final_lambda2]),
+        {"has_kill_switch": True, "timestamp": datetime.now().isoformat()}
+    )
+
+    return {
+        "polymer_integrity": round(float(polymer_integrity), 3),
+        "final_lambda2": round(float(final_lambda2), 4),
+        "regime": "AUTONOMOUS" if final_lambda2 > 0.847 else "DECOHERENT",
+        "dissolution_level": round(float(dissolution_level), 3),
+        "safety_audit": safety_audit,
+        "days_simulated": recovery_days,
+        "recommendation": "Procedure successful" if final_lambda2 > 0.9 else "Insufficient recovery"
     }
