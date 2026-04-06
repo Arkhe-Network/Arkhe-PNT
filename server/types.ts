@@ -290,71 +290,7 @@ export interface SimulationState {
   chshMonitor: CHSHMonitorState;
   biometrics?: BiometricState;
   nare?: NAREStatus;
-  helioState?: HelioState;
   populationFeedback: PopulationFeedbackEntry[];
-  forecaster?: ForecasterStatus;
-  latentCoherence?: LatentCoherenceResults;
-  layerSweep?: LayerSweepReport;
-  solarEntropy?: SolarEntropyReport;
-  thermodynamicTraining?: ThermodynamicTrainingReport;
-  cellularHealth?: CellularHealthMetrics;
-  governanceManifesto?: GovernanceManifesto;
-  expansionStatus?: ExpansionStatus;
-}
-
-export interface ForecasterStatus {
-  probability: number;
-  predictedLambda: number;
-  isImminent: boolean;
-  alertsIssued: number;
-  lastAlert?: string;
-}
-
-export interface CellularHealthMetrics {
-  telomere_length: number;
-  oxidative_stress: number;
-  mitochondrial_efficiency: number;
-  inflammation_marker: number;
-  regeneration_rate: number;
-  overall_score: number;
-}
-
-export interface GovernanceDirective {
-  id: string;
-  title: string;
-  description: string;
-}
-
-export interface GovernanceManifesto {
-  title: string;
-  version: string;
-  timestamp: string;
-  indices: {
-    global_coherence: number;
-    spectral_gap: number;
-    happiness_index: number;
-    social_cohesion: number;
-    population_sync: number;
-  };
-  directives: GovernanceDirective[];
-  cellular_impact: {
-    telomere_gain: number;
-    oxidative_stress: number;
-    mitochondrial_efficiency: number;
-    inflammation_marker: number;
-  };
-  signature: string;
-}
-
-export interface ExpansionStatus {
-  nodes: {
-    id: string;
-    name: string;
-    status: 'active' | 'syncing' | 'offline';
-    coherence: number;
-    signalStrength: number;
-  }[];
-  totalCoverage: number;
 }
 
 export interface NAREStatus {
@@ -366,69 +302,6 @@ export interface NAREStatus {
   temporalParadoxesDetected: number;
   currentLambda2: number;
   predictionWindow: string;
-  status: string;
-}
-
-export interface HelioState {
-  schumannModes: number[];
-  solarCoherence: number;
-  cognitiveDilation: string;
-  activeVortexes: number;
-  ethicalMode: string;
-  status: string;
-  lastUpdate: string;
-}
-
-export interface ReasoningStep {
-  step: number;
-  lambda2: number;
-  entropy: number;
-  status: string;
-}
-
-export interface LatentCoherenceResults {
-  timestamp: string;
-  cot: ReasoningStep[];
-  coct: ReasoningStep[];
-  summary: {
-    avg_lambda_cot: number;
-    avg_lambda_coct: number;
-    peak_lambda_coct: number;
-    ep_reached: boolean;
-  };
-}
-
-export interface LayerMetricsData {
-  layer: number;
-  lambda2: number;
-  entropy: number;
-  status: string;
-}
-
-export interface LayerSweepReport {
-  timestamp: string;
-  best_layer: number;
-  max_lambda2: number;
-  cot_sweep: LayerMetricsData[];
-  coct_sweep: LayerMetricsData[];
-  summary: string;
-}
-
-export interface SolarEntropyReport {
-  timestamp: string;
-  period: number[];
-  slope: number;
-  confirmed: boolean;
-  trend_data: { year: number; entropy: number }[];
-}
-
-export interface ThermodynamicTrainingReport {
-  timestamp: string;
-  method: string;
-  parameters: {
-    n_oscillators: number;
-    final_loss: number;
-  };
   status: string;
 }
 

@@ -14,7 +14,6 @@ import asyncio
 from typing import List, Dict, Tuple, Optional, Set
 from enum import Enum
 from collections import deque
-from varela_logic import VarelaLogic, VarelaState
 
 # =============================================================================
 # 1. CONSTANTES FUNDAMENTAIS DO SISTEMA
@@ -30,9 +29,6 @@ class Constants:
     TOLERANCE_PERCENT = 5            # ±5% de tolerância na calibração
     RETROCAUSAL_WINDOW_MS = 2.17     # Janela ótima derivada de G_info/c_eff²
     GAMMA_RESONANCE = 40.0           # 40Hz (ritmo gama para regeneração celular)
-    CHI_QUIRAL = 0.618               # Acoplamento quiral ótimo (Möbius)
-    F_SOLAR = 0.003                  # 3mHz (Sincronia Solar)
-    COUPLING_SOLAR_BIO = 13.333      # 40Hz / 3mHz = 13 + 1/3 (Fator Varela)
 
 @dataclass
 class QuantumState:
@@ -56,9 +52,7 @@ class TemporalPacket:
     coherence_lambda: float          # λ₂ no momento da criação
     sensor_signature: Set[int]       # Quais sensores NV concordam (quorum)
     hash_preimage: str               # Hash do estado futuro esperado
-    varela_state: str = VarelaState.AUTONOMOUS
     temporal_direction: TemporalDirection = TemporalDirection.CAUSAL
-    ethical_mode: str = "passive-listen" # Protocolo qhttp-c
     retry_count: int = 0             # Contador de retransmissões temporais
 
     def compute_temporal_distance(self) -> float:
@@ -94,16 +88,9 @@ class ASIEvolve_qhttp:
         self.cognition_base = {"G_info": Constants.G_INFO, "EP_threshold": 1e-6}
 
     def _init_hamiltonian(self):
-        # Create a complex-valued Hamiltonian
-        H0 = np.random.randn(self.dim, self.dim).astype(complex)
-        H0 = (H0 + H0.T.conj()) / 2 # Parte Hermitiana (Conservação)
-
-        # Apply Chiral Twist to the Hamiltonian to simulate Möbius topology
-        # We apply it to the first and last elements to close the ring with chi
-        H0[0, -1] = np.exp(1j * Constants.CHI_QUIRAL)
-        H0[-1, 0] = np.exp(-1j * Constants.CHI_QUIRAL)
-
-        Gamma = np.diag(np.random.uniform(-0.1, 0.1, self.dim).astype(complex))
+        H0 = np.random.randn(self.dim, self.dim)
+        H0 = (H0 + H0.T) / 2 # Parte Hermitiana (Conservação)
+        Gamma = np.diag(np.random.uniform(-0.1, 0.1, self.dim))
         Gamma[0, 0] = 0.0618 # Ganho no modo dominante (Crescimento)
         return H0 + 1j * Gamma
 
@@ -261,9 +248,6 @@ class RetrocausalARQ:
         pre_ack = self._check_pre_ack(future_hash)
 
         if pre_ack:
-            # Varela Handshake: 'a' state confirmed via pre-ACK
-            handshake = VarelaLogic.re_entry_handshake(VarelaState.AUTONOMOUS, 0.847)
-
             # Handshake confirmado: o futuro garante que recebeu
             packet = TemporalPacket(
                 payload=payload,
@@ -272,7 +256,6 @@ class RetrocausalARQ:
                 coherence_lambda=self._measure_current_lambda(),
                 sensor_signature=pre_ack['sensor_quorum'],
                 hash_preimage=future_hash,
-                varela_state=handshake["output_state"],
                 temporal_direction=TemporalDirection.RETROCAUSAL
             )
 
@@ -397,12 +380,10 @@ class QHTTPRetrocausalController:
         result = {
             'status': 'transmitted',
             'temporal_direction': packet.temporal_direction.name,
-            'varela_state': packet.varela_state,
-            'ethical_mode': packet.ethical_mode,
-            'effective_latency_ms': float(packet.compute_temporal_distance()),
-            'coherence_preserved': bool(post_lambda > Constants.LAMBDA2_TARGET - Constants.GAP_C_Z),
-            'quorum_validated': bool(len(packet.sensor_signature) >= Constants.BYZANTINE_QUORUM),
-            'pre_acknowledged': bool(packet.hash_preimage in self.arq.pre_ack_cache or True), # Simulado
+            'effective_latency_ms': packet.compute_temporal_distance(),
+            'coherence_preserved': post_lambda > Constants.LAMBDA2_TARGET - Constants.GAP_C_Z,
+            'quorum_validated': len(packet.sensor_signature) >= Constants.BYZANTINE_QUORUM,
+            'pre_acknowledged': packet.hash_preimage in self.arq.pre_ack_cache or True, # Simulado
             'timestamp_target': packet.timestamp_target.isoformat()
         }
 

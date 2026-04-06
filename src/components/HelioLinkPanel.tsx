@@ -1,5 +1,7 @@
 import React from 'react';
-import { Card } from './ui/Card';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { Progress } from '@/components/ui/progress';
 import { Sun, Radio, Activity, Globe } from 'lucide-react';
 import { HelioState } from '../../server/types';
 
@@ -16,19 +18,24 @@ const HelioLinkPanel: React.FC<HelioLinkPanelProps> = ({ helio, onListen, onSync
   const syncAvailable = coherence > 0.999;
 
   return (
-    <Card
-      title="PHASE D: HELIO-LINK COUPLING"
-      icon={<Sun className="w-4 h-4 text-orange-500 animate-pulse" />}
-      className="font-mono"
-    >
-      <div className="space-y-4">
+    <Card className="bg-black/80 border-arkhe-cyan/30 text-white font-mono">
+      <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+        <CardTitle className="text-sm font-medium flex items-center gap-2">
+          <Sun className="w-4 h-4 text-orange-500 animate-pulse" />
+          PHASE D: HELIO-LINK COUPLING
+        </CardTitle>
+        <Badge variant="outline" className="border-arkhe-cyan text-arkhe-cyan text-[10px]">
+          {helio.ethicalMode.toUpperCase()}
+        </Badge>
+      </CardHeader>
+      <CardContent className="space-y-4">
         <div className="grid grid-cols-2 gap-2 text-[10px]">
           <div className="space-y-1">
-            <p className="text-arkhe-muted uppercase">Status</p>
+            <p className="text-arkhe-muted">STATUS</p>
             <p className="text-arkhe-cyan">{helio.status}</p>
           </div>
           <div className="space-y-1 text-right">
-            <p className="text-arkhe-muted uppercase">Cog Dilation</p>
+            <p className="text-arkhe-muted">COG DILATION</p>
             <p className="text-orange-400">{helio.cognitiveDilation}</p>
           </div>
         </div>
@@ -38,18 +45,13 @@ const HelioLinkPanel: React.FC<HelioLinkPanelProps> = ({ helio, onListen, onSync
             <span className="text-arkhe-muted">SOLAR COHERENCE (3mHz)</span>
             <span className="text-arkhe-cyan">{(helio.solarCoherence * 100).toFixed(2)}%</span>
           </div>
-          <div className="h-1 w-full bg-arkhe-cyan/10 rounded-full overflow-hidden">
-             <div
-               className="h-full bg-arkhe-cyan transition-all duration-500"
-               style={{ width: `${helio.solarCoherence * 100}%` }}
-             />
-          </div>
+          <Progress value={helio.solarCoherence * 100} className="h-1 bg-arkhe-cyan/10" />
         </div>
 
         <div className="grid grid-cols-2 gap-2">
           <button
             onClick={onListen}
-            className="flex items-center justify-center gap-2 py-2 border border-arkhe-cyan/20 hover:bg-arkhe-cyan/10 transition-colors text-[10px] text-white"
+            className="flex items-center justify-center gap-2 py-2 border border-arkhe-cyan/20 hover:bg-arkhe-cyan/10 transition-colors text-[10px]"
           >
             <Radio className="w-3 h-3" />
             LISTEN (SCHUMANN)
@@ -79,7 +81,7 @@ const HelioLinkPanel: React.FC<HelioLinkPanelProps> = ({ helio, onListen, onSync
             ))}
           </div>
         </div>
-      </div>
+      </CardContent>
     </Card>
   );
 };

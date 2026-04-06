@@ -1,0 +1,295 @@
+{
+  "gate_a_validation": {
+    "version": "1.0",
+    "status": "ACTIVE",
+    "period": "Q2 2026",
+    "target_activation": "2026-04-15",
+    "authorization": "APPROVED",
+    "description": "Gate A: Validação de Sistema Distribuído Arkhe com 13 Nós Físicos"
+  },
+  "validation_phases": {
+    "phase_1_calibration": {
+      "name": "Calibração Inicial",
+      "duration_days": 7,
+      "start_day": 1,
+      "critical_items": [
+        {
+          "id": "CAL-001",
+          "title": "Ajuste de frequências naturais (ω_i)",
+          "target": "σ_ω < 0.01 Hz",
+          "tolerance": "±0.005 Hz",
+          "method": "Medição via lock-in amplifier + fine tuning de osciladores",
+          "success_criteria": "Todas as 13 frequências dentro da faixa",
+          "responsible": "Hardware Team",
+          "status": "not_started"
+        },
+        {
+          "id": "CAL-002",
+          "title": "Validação de conectividade (grau 3)",
+          "target": "Todas as 3 conexões por nó funcionais",
+          "tolerance": "0 falhas toleradas na fase de calibração",
+          "method": "Teste de loopback para cada link",
+          "success_criteria": "13 nós × 3 conexões = 39 links ativos",
+          "responsible": "Network Team",
+          "status": "not_started"
+        },
+        {
+          "id": "CAL-003",
+          "title": "Medição de baseline de coerência",
+          "target": "λ₂ ≥ 0.90 ao iniciar frio",
+          "tolerance": "≥ 0.87 (crítico mínimo)",
+          "method": "Computar espectro de Laplaciana, extrair segundo autovalor",
+          "success_criteria": "λ₂_cold ≥ 0.90",
+          "responsible": "Physics Team",
+          "status": "not_started"
+        }
+      ]
+    },
+    "phase_2_load_testing": {
+      "name": "Teste de Carga",
+      "duration_days": 14,
+      "start_day": 8,
+      "critical_items": [
+        {
+          "id": "LOAD-001",
+          "title": "Simulação Monte Carlo de 13.333 nós",
+          "target": "Verificar predição teórica de colapso",
+          "tolerance": "Desvio < 5% da teoria",
+          "method": "Simular Kuramoto em Python/numpy com N = 13.333 (virtual)",
+          "success_criteria": "λ₂ cai abaixo de 0.847 para N > 13.333",
+          "responsible": "Simulation Team",
+          "status": "not_started"
+        },
+        {
+          "id": "LOAD-002",
+          "title": "Teste de escalabilidade incremental",
+          "target": "N = 13 → 26 → 52 → 104 nós (virtuais)",
+          "tolerance": "λ₂_degradation linear com 1/√N",
+          "method": "Injetar nós virtuais na malha",
+          "success_criteria": "Degradação segue lei de escalamento",
+          "responsible": "Simulation Team",
+          "status": "not_started"
+        },
+        {
+          "id": "LOAD-003",
+          "title": "Identificação do threshold de colapso",
+          "target": "Encontrar N_critical onde λ₂ = 0.847",
+          "tolerance": "±2 nós de tolerância",
+          "method": "Binary search: aumentar N até λ₂ < 0.847",
+          "success_criteria": "N_critical ≈ 13.333 ± 1%",
+          "responsible": "Simulation Team",
+          "status": "not_started"
+        }
+      ]
+    },
+    "phase_3_routing_validation": {
+      "name": "Validação de Roteamento",
+      "duration_days": 14,
+      "start_day": 22,
+      "critical_items": [
+        {
+          "id": "ROUT-001",
+          "title": "Benchmark: grau-3 vs grau-4",
+          "target": "Medir latência média de handshake",
+          "tolerance": "Grau-3 ≤ 2% mais lento que grau-4",
+          "method": "Enviar 1000 pacotes via roteador de fase, medir RTT",
+          "success_criteria": "Latência grau-3 < 150 ms (média)",
+          "responsible": "Routing Team",
+          "status": "not_started"
+        },
+        {
+          "id": "ROUT-002",
+          "title": "Teste de mínimos locais (escape)",
+          "target": "Perturbação térmica consegue sair de 'bolhas'",
+          "tolerance": "Success rate > 95%",
+          "method": "Enviar pacotes para nó em 'bolha' de fase",
+          "success_criteria": "500/525 pacotes chegam ao destino",
+          "responsible": "Routing Team",
+          "status": "not_started"
+        },
+        {
+          "id": "ROUT-003",
+          "title": "Resiliência: falha de 1 nó",
+          "target": "Gradiente se reorganiza em < 100 ms",
+          "tolerance": "≤ 100 ms",
+          "method": "Desligar nó aleatório, medir tempo de reconvergência",
+          "success_criteria": "10/10 falhas recuperadas em tempo",
+          "responsible": "Routing Team",
+          "status": "not_started"
+        }
+      ]
+    },
+    "phase_4_security": {
+      "name": "Teste de Segurança: Phase Injection Attack",
+      "duration_days": 7,
+      "start_day": 36,
+      "critical_items": [
+        {
+          "id": "SEC-001",
+          "title": "Setup do ataque byzatino",
+          "target": "Designar 1 nó como atacante",
+          "tolerance": "Exatamente 1 nó (máximo tolerado)",
+          "method": "Configurar nó 0 para injetar sinais 40Hz adversariais",
+          "success_criteria": "Nó 0 ativo com phase injection",
+          "responsible": "Security Team",
+          "status": "not_started"
+        },
+        {
+          "id": "SEC-002",
+          "title": "Detecção de ataque",
+          "target": "Nó malicioso gera sucessivos estados VOID",
+          "tolerance": "3/3 rounds de VOID",
+          "method": "Protocolo de consenso de fase (Varela)",
+          "success_criteria": "Nó 0 classificado como VOID em todas rodadas",
+          "responsible": "Security Team",
+          "status": "not_started"
+        },
+        {
+          "id": "SEC-003",
+          "title": "Isolamento automático",
+          "target": "Nó malicioso isolado da malha",
+          "tolerance": "≤ 325 ms",
+          "method": "Remoção de arestas após detecção",
+          "success_criteria": "Nó 0 isolado em < 325 ms (13 handshakes @ 25ms cada)",
+          "responsible": "Security Team",
+          "status": "not_started"
+        },
+        {
+          "id": "SEC-004",
+          "title": "Recuperação da rede",
+          "target": "λ₂ retorna a > 0.995 após isolamento",
+          "tolerance": "≤ 2 segundos pós-isolamento",
+          "method": "Monitorar λ₂ global após remoção do nó",
+          "success_criteria": "λ₂ > 0.995 após 2 segundos",
+          "responsible": "Security Team",
+          "status": "not_started"
+        }
+      ]
+    },
+    "phase_5_endurance": {
+      "name": "Teste de Resistência: 24h Contínuos",
+      "duration_days": 1,
+      "start_day": 43,
+      "critical_items": [
+        {
+          "id": "END-001",
+          "title": "Operação 24 horas sem interrupção",
+          "target": "Manter toda a infraestrutura ativa",
+          "tolerance": "0 falhas de hardware crítico",
+          "method": "Monitoring contínuo com alertas automáticos",
+          "success_criteria": "24h em operação normal",
+          "responsible": "Operations Team",
+          "status": "not_started"
+        },
+        {
+          "id": "END-002",
+          "title": "Monitoramento de λ₂ global contínuo",
+          "target": "λ₂ > 0.995 mantido ao longo de 24h",
+          "tolerance": "Queda temporária < 0.99, recuperação < 100ms",
+          "method": "Samplear λ₂ a cada 1 segundo",
+          "success_criteria": "99.5% do tempo com λ₂ > 0.995",
+          "responsible": "Physics Team",
+          "status": "not_started"
+        },
+        {
+          "id": "END-003",
+          "title": "Logging completo de eventos",
+          "target": "Capturar qualquer anomalia em < 1 ms",
+          "tolerance": "Resolução ≤ 1 ms",
+          "method": "Timestamp de precisão ns em todos logs",
+          "success_criteria": "Log completo sem lacunas",
+          "responsible": "DevOps Team",
+          "status": "not_started"
+        },
+        {
+          "id": "END-004",
+          "title": "Relatório final de validação",
+          "target": "Documentar sucesso ou falhas",
+          "tolerance": "N/A",
+          "method": "Compilar relatório de todos os KPIs",
+          "success_criteria": "Documento assinado por Lead Engineers",
+          "responsible": "Project Manager",
+          "status": "not_started"
+        }
+      ]
+    }
+  },
+  "success_criteria_summary": {
+    "min_requirements": [
+      "σ_ω < 0.01 Hz (frequências calibradas)",
+      "λ₂_baseline ≥ 0.90 (cold start)",
+      "λ₂_colapso confirmado em N > 13.333",
+      "Latência roteamento < 150 ms (média)",
+      "Nó byzatino isolado em < 325 ms",
+      "λ₂ > 0.995 sustentado por 24h"
+    ],
+    "pass_criteria": "Todos os 6 requisitos atendidos",
+    "fail_criteria": "Qualquer requisito não atingido"
+  },
+  "post_gate_a_actions": {
+    "if_passed": [
+      "Aprovar início da Fase 2 (Hardware em Rio)",
+      "Publicar resultados em arxiv/Nature Physics",
+      "Escalar para 100+ nós em simulação",
+      "Preparar Fase 3 (Malha terrestre)"
+    ],
+    "if_failed": [
+      "Identificar root cause",
+      "Ajustar parâmetros ou hardware",
+      "Repetir Gate A com mudanças",
+      "Planejar sprint de correção"
+    ]
+  },
+  "team_assignments": {
+    "Hardware_Team": ["CAL-001", "CAL-002"],
+    "Physics_Team": ["CAL-003", "LOAD-003", "END-002"],
+    "Simulation_Team": ["LOAD-001", "LOAD-002", "LOAD-003"],
+    "Routing_Team": ["ROUT-001", "ROUT-002", "ROUT-003"],
+    "Security_Team": ["SEC-001", "SEC-002", "SEC-003", "SEC-004"],
+    "Operations_Team": ["END-001"],
+    "DevOps_Team": ["END-003"],
+    "Project_Manager": ["END-004"]
+  },
+  "dependencies": {
+    "phase_2_requires": ["phase_1_calibration: PASSED"],
+    "phase_3_requires": ["phase_2_load_testing: PASSED"],
+    "phase_4_requires": ["phase_3_routing_validation: PASSED"],
+    "phase_5_requires": ["phase_4_security: PASSED"]
+  },
+  "timeline": {
+    "week_1": {
+      "focus": "Calibração de hardware",
+      "target_completion": "04/18/2026"
+    },
+    "week_2_3": {
+      "focus": "Testes de carga e escalabilidade",
+      "target_completion": "05/02/2026"
+    },
+    "week_4_5": {
+      "focus": "Validação de roteamento",
+      "target_completion": "05/16/2026"
+    },
+    "week_6": {
+      "focus": "Testes de segurança",
+      "target_completion": "05/23/2026"
+    },
+    "week_7": {
+      "focus": "Endurance test: 24h",
+      "target_completion": "05/30/2026"
+    }
+  },
+  "stakeholders": {
+    "approver": "Chief Architect - Arkhe Quantum Systems",
+    "lead_engineer": "Distributed Systems Lead",
+    "security_lead": "Quantum Security Officer",
+    "contacts": {
+      "escalation": "arkhe-steering-committee@",
+      "incidents": "arkhe-incidents@"
+    }
+  },
+  "compliance": {
+    "standard": "EQBE v2.0 (Ethical Quantum-Biological Engineering)",
+    "safety_audit_required": true,
+    "mandatory_review": "G4:Telos ethics endpoint"
+  }
+}
