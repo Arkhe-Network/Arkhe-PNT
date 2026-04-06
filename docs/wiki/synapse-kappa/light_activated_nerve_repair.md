@@ -28,23 +28,10 @@ The light "chooses" the configuration to be realized, collapsing the disordered 
 
 ---
 
-## 🧪 Phase Surgery Isomorphism
-
-| Traditional Surgery | Phase Surgery (Arkhe) |
-|----------------------|-----------------------|
-| Mechanical Suture    | Phase Collapse (Light) |
-| High Inflammation    | Minimal Inflammation |
-| Permanent Residue    | Total Bioabsorption |
-| Months of Recovery   | Weeks of Recovery |
-| No Phase Monitoring  | Neural $\lambda_2$ Monitoring |
-| Collateral Damage    | Zero Collateral Damage |
-
----
-
 ## 📈 Clinical & Operational Implications
 
 ### Therapeutic Roadmap:
-1.  **Peripheral Nerves**: Immediate application for limb trauma (Median, Ulnar, Sciatic).
+1.  **Peripheral Nerves**: Immediate application for limb trauma.
 2.  **Cranial/Spinal Nerves**: Advanced optimization using growth factors within the polymer matrix.
 3.  **Solid Organs**: Principles applicable to vascular sealing and tissue grafts.
 
