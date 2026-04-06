@@ -289,6 +289,59 @@ export interface SimulationState {
   };
   chshMonitor: CHSHMonitorState;
   biometrics?: BiometricState;
+  governanceManifesto?: GovernanceManifesto;
+  grossHappiness: GrossHappinessState;
+  bioLinkSync: BioLinkSyncState;
+  temporalAudit: TemporalAuditState;
+  predictiveForecast: PredictiveForecastState;
+  sensors: SensorState[];
+}
+
+export interface GrossHappinessState {
+  globalIndex: number;
+  districts: DistrictHappiness[];
+}
+
+export interface DistrictHappiness {
+  name: string;
+  index: number;
+  lastPulse: string | null;
+}
+
+export interface SensorState {
+  id: number;
+  value: number; // complex magnitude
+  status: 'active' | 'isolated' | 'attacked';
+}
+
+export interface GovernanceManifesto {
+  year: number;
+  eigenvalues: number[];
+  sectors: Record<string, string>;
+  status: 'draft' | 'published';
+  timestamp: string;
+}
+
+export interface BioLinkSyncState {
+  active: boolean;
+  syncRatio: number;
+  frequencyHz: number;
+  coherenceGain: number;
+  regenerationProgress: number; // 0-100 over 24h
+}
+
+export interface TemporalAuditState {
+  events: number;
+  lockedEvents: number;
+  manipulationAttempts: number;
+  lastTII: number;
+}
+
+export interface PredictiveForecastState {
+  coherenceCollapseRisk: number; // 0-1
+  predictedLambda: number;
+  horizonMs: number;
+  anomaliesDetected: string[];
 }
 
 export interface BiometricState {

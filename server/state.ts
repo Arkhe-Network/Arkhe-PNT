@@ -312,7 +312,49 @@ export let state: SimulationState = {
     lastVerification: new Date().toISOString(),
     heartbeatCoherence: 0.985,
     phaseSignature: [0.12, 0.45, 0.78, 0.23, 0.56, 0.89, 0.11, 0.44]
-  }
+  },
+  bioLinkSync: {
+    active: true,
+    syncRatio: 0.65,
+    frequencyHz: 40,
+    coherenceGain: 1.0,
+    regenerationProgress: 0,
+  },
+  temporalAudit: {
+    events: 0,
+    lockedEvents: 0,
+    manipulationAttempts: 0,
+    lastTII: 0,
+  },
+  predictiveForecast: {
+    coherenceCollapseRisk: 0.02,
+    predictedLambda: 0.999,
+    horizonMs: 3600000,
+    anomaliesDetected: [],
+  },
+  grossHappiness: {
+    globalIndex: 0.65,
+    districts: [
+      { name: 'Urca', index: 0.88, lastPulse: null },
+      { name: 'Flamengo', index: 0.82, lastPulse: null },
+      { name: 'Botafogo', index: 0.75, lastPulse: null },
+      { name: 'Laranjeiras', index: 0.78, lastPulse: null },
+      { name: 'Cosme Velho', index: 0.81, lastPulse: null },
+      { name: 'Glória', index: 0.68, lastPulse: null },
+      { name: 'Catete', index: 0.71, lastPulse: null },
+      { name: 'Leme', index: 0.76, lastPulse: null },
+      { name: 'Leblon', index: 0.92, lastPulse: null },
+      { name: 'Ipanema', index: 0.89, lastPulse: null },
+      { name: 'Copacabana', index: 0.74, lastPulse: null },
+      { name: 'Lagoa', index: 0.87, lastPulse: null },
+      { name: 'Humaitá', index: 0.79, lastPulse: null }
+    ]
+  },
+  sensors: Array.from({ length: 168 }).map((_, i) => ({
+    id: i,
+    value: 1.0,
+    status: 'active'
+  }))
 };
 
 export const generateOrbId = () => {

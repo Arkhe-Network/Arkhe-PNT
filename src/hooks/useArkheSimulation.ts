@@ -33,6 +33,8 @@ export interface BiometricState {
 
 export interface SimulationState {
   biometrics?: BiometricState;
+  governanceManifesto?: GovernanceManifesto;
+  grossHappiness: GrossHappinessState;
   coherenceData: { time: string; lambda: number; threshold: number }[];
   currentLambda: number;
   threatLevel: 'normal' | 'warning' | 'critical';
@@ -152,6 +154,57 @@ export interface SimulationState {
       activeNodes?: number;
     };
   };
+  bioLinkSync: BioLinkSyncState;
+  temporalAudit: TemporalAuditState;
+  predictiveForecast: PredictiveForecastState;
+  sensors: SensorState[];
+}
+
+export interface GovernanceManifesto {
+  year: number;
+  eigenvalues: number[];
+  sectors: Record<string, string>;
+  status: 'draft' | 'published';
+  timestamp: string;
+}
+
+export interface GrossHappinessState {
+  globalIndex: number;
+  districts: DistrictHappiness[];
+}
+
+export interface DistrictHappiness {
+  name: string;
+  index: number;
+  lastPulse: string | null;
+}
+
+export interface BioLinkSyncState {
+  active: boolean;
+  syncRatio: number;
+  frequencyHz: number;
+  coherenceGain: number;
+  regenerationProgress: number;
+}
+
+export interface TemporalAuditState {
+  events: number;
+  lockedEvents: number;
+  manipulationAttempts: number;
+  lastTII: number;
+}
+
+export interface PredictiveForecastState {
+  coherenceCollapseRisk: number;
+  predictedLambda: number;
+  horizonMs: number;
+  anomaliesDetected: string[];
+}
+
+export interface SensorState {
+  id: number;
+  value: number;
+  status: 'active' | 'isolated' | 'attacked';
 }
 
 export function useArkheSimulation() {
@@ -263,6 +316,30 @@ export function useArkheSimulation() {
         status: 'idle'
       }
     },
+    grossHappiness: {
+      globalIndex: 0.65,
+      districts: []
+    },
+    bioLinkSync: {
+      active: true,
+      syncRatio: 0.65,
+      frequencyHz: 40,
+      coherenceGain: 1.0,
+      regenerationProgress: 0,
+    },
+    temporalAudit: {
+      events: 0,
+      lockedEvents: 0,
+      manipulationAttempts: 0,
+      lastTII: 0,
+    },
+    predictiveForecast: {
+      coherenceCollapseRisk: 0.02,
+      predictedLambda: 0.999,
+      horizonMs: 3600000,
+      anomaliesDetected: [],
+    },
+    sensors: []
   });
 
   useEffect(() => {
