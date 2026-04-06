@@ -55,10 +55,15 @@ class ArkheBraidEngine:
         self.omegas[STATIC_INDICES] = 0
 
         self.under_attack = []
+        self.vcsel_active = False
 
     def trigger_storm(self):
         """Simula falha bizantina em 24 filamentos ativos"""
         self.under_attack = np.random.choice(ACTIVE_INDICES, 24, replace=False)
+
+    def activate_vcsel_mode(self):
+        """Ativa o modo VCSEL (iluminação uniforme 5x5) para estabilização"""
+        self.vcsel_active = True
 
     def step(self, dt=0.05, eta=0.0): # Remover síndrome se estiver atrapalhando
         d_phases = np.zeros(N_TOTAL)
@@ -68,8 +73,12 @@ class ArkheBraidEngine:
 
         for i in ACTIVE_INDICES:
             if i in self.under_attack:
-                # Ruído Gaussiano Moderado
-                d_phases[i] = self.omegas[i] + np.random.normal(0, 1.0)
+                if self.vcsel_active:
+                    # VCSEL atua como trava de fase externa (diminui ruído)
+                    d_phases[i] = np.random.normal(0, 0.1)
+                else:
+                    # Ruído Gaussiano Moderado
+                    d_phases[i] = self.omegas[i] + np.random.normal(0, 1.0)
             else:
                 # Acoplamento Kuramoto + Termo de Correção η
                 coupling = np.sum(self.adj[i] * np.sin(self.phases - self.phases[i]))
@@ -87,10 +96,11 @@ class ArkheBraidEngine:
         return np.abs(z)
 
 def run_simulation():
-    print(f"🚀 Arkhe-Ω Braid Engine v2.6: Iniciando Stress Test...")
+    print(f"🚀 Arkhe-Ω Braid Engine v2.7: Iniciando Stress Test com VCSEL Integration...")
     engine = ArkheBraidEngine()
     history = []
     attack_t = 300
+    vcsel_t = 600
     total_steps = 1000
 
     for t in range(total_steps):
@@ -98,7 +108,12 @@ def run_simulation():
             print("⚠️ TEMPESTADE DE FASE INJETADA! Atacando 24 filamentos...")
             engine.trigger_storm()
 
-        engine.step()
+        if t == vcsel_t:
+            print("📡 ATIVANDO MATRIZ VCSEL (Safi v2.7)... Estabilizando fase via luz.")
+            engine.activate_vcsel_mode()
+
+        # Pass explicit eta=0.3 to activate syndrome correction
+        engine.step(dt=0.05, eta=0.3)
         coh = engine.coherence()
         history.append(coh)
 
