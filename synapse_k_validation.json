@@ -1,8 +1,8 @@
 {
   "eeg_validation": {
-    "syn_mean": 0.9959859999999999,
-    "ctrl_mean": 0.800754,
-    "p_value": 7.414420591792154e-104
+    "syn_mean": 0.996016,
+    "ctrl_mean": 0.803608,
+    "p_value": 7.97350135337315e-100
   },
   "tms_feasible": true,
   "ar_states": 210

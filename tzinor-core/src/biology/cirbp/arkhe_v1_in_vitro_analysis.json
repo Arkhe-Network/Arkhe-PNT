@@ -1,0 +1,80 @@
+{
+  "timestamp": "847.640",
+  "validation_results": {
+    "P1_fold_increase": 1.3581494576787088,
+    "P1_passed": true,
+    "P2_correlation": 0.853147240240269,
+    "P2_passed": true,
+    "P4_synergy_index": 1.0,
+    "P4_passed": false
+  },
+  "kinetics": {
+    "40Hz": {
+      "R_max": 0.7791351092020633,
+      "k_repair": 0.05316509984443514,
+      "lag_time": 1.707073317565975,
+      "half_time": 13.037635264264399,
+      "lambda2_steady": 0.8032984166016371
+    },
+    "baseline": {
+      "R_max": 0.3610369562580384,
+      "k_repair": 0.050639181228739734,
+      "lag_time": 1.7288582132742036e-13,
+      "half_time": 13.687961845768488,
+      "lambda2_steady": 0.5884610997787545
+    },
+    "peptide": {
+      "R_max": 0.8262213105171516,
+      "k_repair": 0.05253953187526788,
+      "lag_time": 3.123047425690603e-06,
+      "half_time": 13.192869365595412,
+      "lambda2_steady": 0.8299789605473065
+    },
+    "peptide+40Hz": {
+      "R_max": 0.9560928630121442,
+      "k_repair": 0.05978501061719069,
+      "lag_time": 1.1113978833691591,
+      "half_time": 11.593996110467137,
+      "lambda2_steady": 0.8856351134528406
+    },
+    "scramble": {
+      "R_max": 0.41631701550029815,
+      "k_repair": 0.050098499887336154,
+      "lag_time": 8.229365712584136e-08,
+      "half_time": 13.835687338318055,
+      "lambda2_steady": 0.6090289333275983
+    }
+  },
+  "critical_exponents": {
+    "baseline": {
+      "gamma": 0.0011056400066529128,
+      "c_crit": 26.043227714321834,
+      "r_squared": 0.012184378291926149,
+      "status": "DIVERGENT"
+    },
+    "40Hz": {
+      "gamma": 0.008010870154964501,
+      "c_crit": 25.94186083008267,
+      "r_squared": 0.13003953938082663,
+      "status": "DIVERGENT"
+    },
+    "peptide": {
+      "gamma": 0.008421079198549843,
+      "c_crit": 26.025862670258597,
+      "r_squared": 0.0807981828231312,
+      "status": "DIVERGENT"
+    },
+    "peptide+40Hz": {
+      "gamma": -0.014561370351568471,
+      "c_crit": 13.027338159947465,
+      "r_squared": 0.37322241845013066,
+      "status": "DIVERGENT"
+    },
+    "scramble": {
+      "gamma": -0.0018848488344197795,
+      "c_crit": 25.99719038525269,
+      "r_squared": 0.021058385590412468,
+      "status": "DIVERGENT"
+    }
+  }
+}
