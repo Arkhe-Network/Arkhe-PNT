@@ -289,6 +289,88 @@ export interface SimulationState {
   };
   chshMonitor: CHSHMonitorState;
   biometrics?: BiometricState;
+  nare?: NAREStatus;
+  populationFeedback: PopulationFeedbackEntry[];
+  forecaster?: ForecasterStatus;
+  cellularHealth?: CellularHealthMetrics;
+  governanceManifesto?: GovernanceManifesto;
+  expansionStatus?: ExpansionStatus;
+}
+
+export interface ForecasterStatus {
+  probability: number;
+  predictedLambda: number;
+  isImminent: boolean;
+  alertsIssued: number;
+  lastAlert?: string;
+}
+
+export interface CellularHealthMetrics {
+  telomere_length: number;
+  oxidative_stress: number;
+  mitochondrial_efficiency: number;
+  inflammation_marker: number;
+  regeneration_rate: number;
+  overall_score: number;
+}
+
+export interface GovernanceDirective {
+  id: string;
+  title: string;
+  description: string;
+}
+
+export interface GovernanceManifesto {
+  title: string;
+  version: string;
+  timestamp: string;
+  indices: {
+    global_coherence: number;
+    spectral_gap: number;
+    happiness_index: number;
+    social_cohesion: number;
+    population_sync: number;
+  };
+  directives: GovernanceDirective[];
+  cellular_impact: {
+    telomere_gain: number;
+    oxidative_stress: number;
+    mitochondrial_efficiency: number;
+    inflammation_marker: number;
+  };
+  signature: string;
+}
+
+export interface ExpansionStatus {
+  nodes: {
+    id: string;
+    name: string;
+    status: 'active' | 'syncing' | 'offline';
+    coherence: number;
+    signalStrength: number;
+  }[];
+  totalCoverage: number;
+}
+
+export interface NAREStatus {
+  epState: boolean;
+  calibrationRounds: number;
+  packetsTransmitted: number;
+  preAcksSuccess: number;
+  avgEffectiveLatencyMs: number;
+  temporalParadoxesDetected: number;
+  currentLambda2: number;
+  predictionWindow: string;
+  status: string;
+}
+
+export interface PopulationFeedbackEntry {
+  id: string;
+  residentName: string;
+  year: number;
+  message: string;
+  coherence: number;
+  timestamp: string;
 }
 
 export interface BiometricState {
