@@ -36,6 +36,7 @@ Welcome to the compounding knowledge base of the Bio-Quantum Cathedral.
 
 ## 🧪 Simulations (Synapse-κ)
 - [[wiki/synapse-kappa/cirbp_longevity_genomic_coherence|CIRBP Longevity & Genomic Coherence]]: BioFDTD model for Bowhead whale-inspired DNA repair.
+- [[wiki/synapse-kappa/light_activated_nerve_repair|Light-Activated Nerve Repair]]: Phase engineering model for sutureless surgery.
 
 ## 📂 Sources
 - [[wiki/sources/OSINT_BRAZIL|Brazil OSINT Toolkit]]: Synthesis of UNISHKA OSINT resources.

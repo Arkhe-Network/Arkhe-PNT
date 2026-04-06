@@ -26,5 +26,11 @@ Chronological record of knowledge base updates and maintenance.
 - Integrated genomic coherence (λ2_DNA) into Arkhe(n) framework.
 - Updated [[index.md]] with Synapse-κ Phase 2 section.
 
+## [2026-04-10] phase-surgery | Light-Activated Nerve Repair
+- Ingested Tissium FDA approval data.
+- Created [[synapse-kappa/light_activated_nerve_repair.md]].
+- Formulated the C→Z projection model for photo-crosslinking.
+- Integrated "Phase Surgery" concept into the longevity roadmap.
+
 ---
 *Log starts here.*

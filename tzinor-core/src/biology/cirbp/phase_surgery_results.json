@@ -1,0 +1,15 @@
+{
+  "timestamp": "847.680",
+  "model": "Photo-Crosslinking Projection",
+  "results": {
+    "Low (0.1)": {
+      "peak_l2": 0.7492438130968926
+    },
+    "Optimal (0.5)": {
+      "peak_l2": 0.9971785718841899
+    },
+    "High (2.0)": {
+      "peak_l2": 0.9996964522065959
+    }
+  }
+}
