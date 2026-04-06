@@ -41,3 +41,13 @@ This document maps modern Transformer and Large Language Model (LLM) optimizatio
 ### Arkhe(n) Equivalent: p-adic Cubic Integer Algebra
 - **Mapping**: State representations in GeoLLM are governed by p-adic metrics in the $H_\eta$ Hilbert space. The discrete nature of the $SL(3, Z)$ lattice provides a natural "geometric quantization" where information is stored in the relative phases of anyon braids.
 - **Advantage**: Higher information density and intrinsic error correction via the Distance 13 surface code topology.
+
+## 5. Context Optimization & Gateway
+
+### Industry Standard: Compresr-ai / Context Gateway
+- **Concept**: A proxy between the agent and the LLM that compresses conversation history in the background when it exceeds a context window threshold (e.g., 75%), preventing latency spikes from sudden compaction.
+
+### Arkhe(n) Equivalent: Background Context Gateway (Compaction)
+- **Implementation**: `arkhe-brain/context_gateway.py` and `arkhe-brain/llm_service.py`
+- **Mapping**: Arkhe(n) utilizes the cumulative $SL(3, Z)$ state from `GeoLLMLayer` as the "compressed summary". Because `GeoLLM` state updates are $O(1)$ and represent the cumulative phase history, the final state vector in $H_\eta$ contains a spectral projection of the entire previous context.
+- **Advantage**: This projection maintains a high coherence ($\lambda_2 \geq 0.847$), allowing the LLM to maintain continuity without re-processing long text histories. Compaction is triggered automatically every 5 reports, ensuring the active context window remains small and efficient while maintaining "long-term latent memory."

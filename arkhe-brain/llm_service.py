@@ -1,7 +1,10 @@
 import os
 import time
+import torch
+import numpy as np
 from langchain_openai import ChatOpenAI
-from langchain.prompts import PromptTemplate
+from langchain_core.prompts import PromptTemplate
+from context_gateway import ContextCompactor
 
 # Mock ChainClient for compilation
 class ChainClient:
@@ -44,12 +47,27 @@ def parse_response(content):
 # Inicialização
 llm = ChatOpenAI(model="gpt-4o", temperature=0.7) if os.getenv("OPENAI_API_KEY") else None
 chain_client = ChainClient("https://rpc.arkhe.network")
+analysis_history = []
+compactor = ContextCompactor(embed_dim=64)
+
+def _get_deterministic_embedding(text, dim):
+    """
+    Returns a deterministic mock embedding for simulation.
+    In production, this would be the actual embedding from the model.
+    """
+    import hashlib
+    seed = int(hashlib.sha256(text.encode()).hexdigest(), 16) % (2**32)
+    torch.manual_seed(seed)
+    return torch.randn(1, 1, dim)
 
 # Prompt de Análise
 analysis_prompt = PromptTemplate.from_template(
     """
     You are the Arkhe Brain, an autonomous AI monitoring a post-quantum blockchain.
     
+    Coherent History Projection (Compressed Context):
+    {history_summary}
+
     Current Network Status:
     - Global Coherence (Ω'): {omega}
     - Active Validators: {validators}
@@ -102,6 +120,7 @@ def run_storage_analysis_cycle():
     return report
 
 def run_analysis_cycle():
+    global analysis_history
     if not llm:
         print("OPENAI_API_KEY not set. Skipping analysis cycle.")
         return
@@ -109,24 +128,42 @@ def run_analysis_cycle():
     # 1. Coletar Dados On-Chain
     status = chain_client.get_network_status()
     
-    # 2. Alimentar LLM
+    # 2. Gerenciar Context Gateway (Compaction)
+    history_summary = "No previous context."
+    if len(analysis_history) >= 5:
+        # Simulate background compaction
+        embeddings = [_get_deterministic_embedding(str(h), 64) for h in analysis_history]
+        history_tensor = torch.cat(embeddings, dim=1) # (1, seq, 64)
+        compressed_state = compactor.compact(history_tensor)
+        history_summary = f"Arkhe-H_eta Projection: {compressed_state.detach().numpy().tolist()}"
+        print(f"Context Gateway: History compacted (len={len(analysis_history)})")
+
+        # Clear history after compaction to simulate window slide/reset
+        # In a real proxy, this would be an O(1) state update.
+        analysis_history = analysis_history[-2:]
+
+    # 3. Alimentar LLM
     chain = analysis_prompt | llm
     response = chain.invoke({
         "omega": status.omega,
         "validators": status.active_validators,
         "anomalies": status.recent_anomalies,
         "transaction_flow": status.transaction_flow,
-        "zk_proof_time_increase": status.zk_proof_time_increase
+        "zk_proof_time_increase": status.zk_proof_time_increase,
+        "history_summary": history_summary
     })
     
-    # 3. Processar Output
+    # 4. Processar Output
     report = parse_response(response.content)
     
-    # 4. Publicar Relatório (Nostr + Dashboard)
+    # 5. Adicionar ao histórico para próxima compactação
+    analysis_history.append(report)
+
+    # 6. Publicar Relatório (Nostr + Dashboard)
     publish_to_nostr(report['summary'])
     save_to_dashboard(report)
     
-    # 5. Se ação recomendada for crítica, alertar via Sentinel
+    # 7. Se ação recomendada for crítica, alertar via Sentinel
     if report['risk_assessment'] == 'HIGH':
         trigger_sentinel_alert(report['recommended_action'])
 
