@@ -143,7 +143,21 @@ main() {
         done
     done
 
-    echo "Simulation script execution complete."
+    log_header "POST-SIMULATION ANALYSIS: Arkhe(n) Hydration Stress Module"
+    info "Running calmodulin_hydration_stress.py..."
+    python3 "$BASE_DIR/calmodulin_hydration_stress.py" >> "$LOG_FILE" 2>&1
+    register_arkhe_chain "$RESULTS_DIR/hydration_stress_results.json" "Calmodulin Hydration Stress Results"
+    register_arkhe_chain "$RESULTS_DIR/calmodulin_hydration_stress.png" "Calmodulin 6-Panel Stress Analysis Plot"
+
+    info "Running hydration_phase_validation.py..."
+    python3 "$BASE_DIR/hydration_phase_validation.py" >> "$LOG_FILE" 2>&1
+    register_arkhe_chain "$RESULTS_DIR/hydration_phase_validation.png" "Hydration Phase Validation Plot"
+
+    info "Generating formal PDF Report..."
+    python3 "$BASE_DIR/generate_hydration_stress_pdf.py" >> "$LOG_FILE" 2>&1
+    register_arkhe_chain "$RESULTS_DIR/Analise-Stress-Hidratacao-CaM.pdf" "Formal Hydration Stress Report (PDF)"
+
+    echo "Simulation script and analysis execution complete."
 }
 
 main "$@"
