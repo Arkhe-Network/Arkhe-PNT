@@ -31,6 +31,8 @@ class Constants:
     RETROCAUSAL_WINDOW_MS = 2.17     # Janela ótima derivada de G_info/c_eff²
     GAMMA_RESONANCE = 40.0           # 40Hz (ritmo gama para regeneração celular)
     CHI_QUIRAL = 0.618               # Acoplamento quiral ótimo (Möbius)
+    F_SOLAR = 0.003                  # 3mHz (Sincronia Solar)
+    COUPLING_SOLAR_BIO = 13.333      # 40Hz / 3mHz = 13 + 1/3 (Fator Varela)
 
 @dataclass
 class QuantumState:
@@ -56,6 +58,7 @@ class TemporalPacket:
     hash_preimage: str               # Hash do estado futuro esperado
     varela_state: str = VarelaState.AUTONOMOUS
     temporal_direction: TemporalDirection = TemporalDirection.CAUSAL
+    ethical_mode: str = "passive-listen" # Protocolo qhttp-c
     retry_count: int = 0             # Contador de retransmissões temporais
 
     def compute_temporal_distance(self) -> float:
@@ -395,6 +398,7 @@ class QHTTPRetrocausalController:
             'status': 'transmitted',
             'temporal_direction': packet.temporal_direction.name,
             'varela_state': packet.varela_state,
+            'ethical_mode': packet.ethical_mode,
             'effective_latency_ms': float(packet.compute_temporal_distance()),
             'coherence_preserved': bool(post_lambda > Constants.LAMBDA2_TARGET - Constants.GAP_C_Z),
             'quorum_validated': bool(len(packet.sensor_signature) >= Constants.BYZANTINE_QUORUM),

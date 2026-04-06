@@ -290,6 +290,7 @@ export interface SimulationState {
   chshMonitor: CHSHMonitorState;
   biometrics?: BiometricState;
   nare?: NAREStatus;
+  helioState?: HelioState;
   populationFeedback: PopulationFeedbackEntry[];
   forecaster?: ForecasterStatus;
   cellularHealth?: CellularHealthMetrics;
@@ -362,6 +363,16 @@ export interface NAREStatus {
   currentLambda2: number;
   predictionWindow: string;
   status: string;
+}
+
+export interface HelioState {
+  schumannModes: number[];
+  solarCoherence: number;
+  cognitiveDilation: string;
+  activeVortexes: number;
+  ethicalMode: string;
+  status: string;
+  lastUpdate: string;
 }
 
 export interface PopulationFeedbackEntry {

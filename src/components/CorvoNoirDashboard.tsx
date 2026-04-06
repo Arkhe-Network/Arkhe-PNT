@@ -17,6 +17,7 @@ import ForecasterPanel from './ForecasterPanel';
 import CellularHealthPanel from './CellularHealthPanel';
 import GovernanceManifestoPanel from './GovernanceManifestoPanel';
 import ExpansionPanel from './ExpansionPanel';
+import HelioLinkPanel from './HelioLinkPanel';
 
 const CorvoNoirDashboard: React.FC = () => {
   const state = useArkheSimulation();
@@ -66,6 +67,12 @@ const CorvoNoirDashboard: React.FC = () => {
         <CellularHealthPanel state={state} />
         <GovernanceManifestoPanel state={state} />
         <ExpansionPanel state={state} />
+        <HelioLinkPanel
+          helio={state.helioState}
+          onListen={() => fetch('/api/helio/listen', { method: 'POST' })}
+          onSync={() => fetch('/api/helio/sync', { method: 'POST' })}
+          coherence={state.currentLambda}
+        />
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">

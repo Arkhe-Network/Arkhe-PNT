@@ -324,6 +324,15 @@ export let state: SimulationState = {
     predictionWindow: '1 year',
     status: 'Lente Temporal Estabilizada: Rio 2027 Visível'
   },
+  helioState: {
+    schumannModes: [7.83, 14.3, 20.8, 27.3, 33.8],
+    solarCoherence: 0.847,
+    cognitiveDilation: "1s : 3.7h",
+    activeVortexes: 0,
+    ethicalMode: 'passive-listen',
+    status: 'Phase D-0: Helio-Listen Active',
+    lastUpdate: new Date().toISOString()
+  },
   populationFeedback: [
     {
       id: 'fb_1',

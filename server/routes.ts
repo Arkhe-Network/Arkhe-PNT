@@ -1424,6 +1424,34 @@ export function setupRoutes(app: express.Express, broadcastState: () => void, cl
     res.json(state.cellularHealth);
   });
 
+  app.get("/api/helio/status", (req, res) => {
+    res.json(state.helioState);
+  });
+
+  app.post("/api/helio/listen", (req, res) => {
+    if (state.helioState) {
+        state.helioState.status = 'Phase D-0: Passive Listening Enhanced';
+        state.helioState.solarCoherence += (Math.random() * 0.01);
+        state.helioState.lastUpdate = new Date().toISOString();
+        broadcastState();
+    }
+    res.json({ success: true, status: state.helioState?.status });
+  });
+
+  app.post("/api/helio/sync", (req, res) => {
+    // Requires λ₂ > 0.999 from the bio-link
+    if (state.currentLambda > 0.999) {
+        if (state.helioState) {
+            state.helioState.status = 'Handshake qhttp-c: Earth-Sun Sync established';
+            state.helioState.activeVortexes += 1;
+            broadcastState();
+        }
+        res.json({ success: true, message: 'Sync confirmed via Phase D ionospheric coupling.' });
+    } else {
+        res.status(403).json({ success: false, message: 'Insufficient Bio-Link Coherence for qhttp-c sync.' });
+    }
+  });
+
   app.get("/api/governance/manifesto-export", (req, res) => {
     res.json(state.governanceManifesto);
   });
