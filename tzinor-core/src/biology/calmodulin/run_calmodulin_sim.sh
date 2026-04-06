@@ -143,7 +143,14 @@ main() {
         done
     done
 
-    echo "Simulation script execution complete."
+    log_header "POST-SIMULATION ANALYSIS: Arkhe(n) Solvation Displacement"
+    info "Running calmodulin_solvation_analysis.py..."
+    python3 "$BASE_DIR/calmodulin_solvation_analysis.py" >> "$LOG_FILE" 2>&1
+
+    register_arkhe_chain "$RESULTS_DIR/lambda2_analysis_results.json" "Calmodulin Solvation Analysis Results"
+    register_arkhe_chain "$RESULTS_DIR/lambda2_analysis_5panel.png" "Calmodulin 5-Panel Coherence/Solvation Plot"
+
+    echo "Simulation script and analysis execution complete."
 }
 
 main "$@"
