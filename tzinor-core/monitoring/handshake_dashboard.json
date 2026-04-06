@@ -1,0 +1,33 @@
+{
+  "dashboard_title": "Monitoramento Handshake T1 - Rede Tzinor",
+  "refresh_rate_ms": 1000,
+  "panels": [
+    {
+      "name": "Coerência λ₂",
+      "type": "gauge",
+      "min": 0.8,
+      "max": 1.0,
+      "thresholds": {
+        "green": 0.985,
+        "yellow": 0.950,
+        "red": 0.847
+      }
+    },
+    {
+      "name": "Latência (ns)",
+      "type": "line",
+      "unit": "ns",
+      "target": 20
+    },
+    {
+      "name": "Vibração (g)",
+      "type": "bar",
+      "threshold": 0.1
+    },
+    {
+      "name": "Status Handshake",
+      "type": "status",
+      "states": ["STANDBY", "ACTIVE", "FAILED"]
+    }
+  ]
+}
