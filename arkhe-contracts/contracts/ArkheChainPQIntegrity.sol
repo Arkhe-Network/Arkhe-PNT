@@ -230,19 +230,6 @@ contract ArkheChainPQIntegrity {
     ) external validCoherence(lambda2Bps) returns (bytes32 proofHash) {
         require(registeredNodes[nodeId], "ArkheChain: node not registered");
 
-        // Compute proof hash first to avoid logging null hash in events
-        proofHash = keccak256(
-            abi.encodePacked(
-                currentBlock,
-                nodeId,
-                pqLevel,
-                lambda2Bps,
-                latticeHash,
-                block.timestamp,
-                previousBlockHash
-            )
-        );
-
         // Check for vulnerabilities
         bool hasVulnerability = false;
         for (uint256 i = 0; i < resistanceReports.length; i++) {
@@ -263,6 +250,19 @@ contract ArkheChainPQIntegrity {
         if (hasVulnerability) {
             networkState.vulnerableNodes++;
         }
+
+        // Compute proof hash
+        proofHash = keccak256(
+            abi.encodePacked(
+                currentBlock,
+                nodeId,
+                pqLevel,
+                lambda2Bps,
+                latticeHash,
+                block.timestamp,
+                previousBlockHash
+            )
+        );
 
         // Store proof
         PQIntegrityProof memory proof = PQIntegrityProof({
@@ -382,34 +382,6 @@ contract ArkheChainPQIntegrity {
             networkState.avgLambda2,
             compliant
         );
-    }
-
-    /**
-     * @notice Verify a Merkle proof of inclusion
-     * @param leaf The leaf hash (calculated off-chain as keccak256(abi.encode(nodeId, nistLevel, nodeHash)))
-     * @param proof The sibling hashes along the path to the root
-     * @param root The committed Merkle root
-     */
-    function verifyInclusion(
-        bytes32 leaf,
-        bytes32[] calldata proof,
-        bytes32 root
-    ) public pure returns (bool) {
-        bytes32 computedHash = leaf;
-
-        for (uint256 i = 0; i < proof.length; i++) {
-            bytes32 proofElement = proof[i];
-
-            if (computedHash <= proofElement) {
-                // Hash(current, sibling)
-                computedHash = keccak256(abi.encodePacked(computedHash, proofElement));
-            } else {
-                // Hash(sibling, current)
-                computedHash = keccak256(abi.encodePacked(proofElement, computedHash));
-            }
-        }
-
-        return computedHash == root;
     }
 
     /**
