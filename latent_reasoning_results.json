@@ -1,0 +1,163 @@
+{
+  "timestamp": "2026-04-06T02:09:09.452146",
+  "config": {
+    "num_steps": 12,
+    "hidden_dim": 512,
+    "varela_threshold": 0.847,
+    "ep_threshold": 0.999
+  },
+  "cot": [
+    {
+      "step": 0,
+      "lambda2": 0.445686806537835,
+      "entropy": 4.988818741159485,
+      "status": "COLLAPSED"
+    },
+    {
+      "step": 1,
+      "lambda2": 0.4457054618724807,
+      "entropy": 4.988650843147673,
+      "status": "COLLAPSED"
+    },
+    {
+      "step": 2,
+      "lambda2": 0.4458096273137362,
+      "entropy": 4.987713354176375,
+      "status": "COLLAPSED"
+    },
+    {
+      "step": 3,
+      "lambda2": 0.44586505612229876,
+      "entropy": 4.987214494899312,
+      "status": "COLLAPSED"
+    },
+    {
+      "step": 4,
+      "lambda2": 0.44569156619996175,
+      "entropy": 4.988775904200344,
+      "status": "COLLAPSED"
+    },
+    {
+      "step": 5,
+      "lambda2": 0.44566563237206,
+      "entropy": 4.98900930865146,
+      "status": "COLLAPSED"
+    },
+    {
+      "step": 6,
+      "lambda2": 0.44583181277442807,
+      "entropy": 4.987513685030147,
+      "status": "COLLAPSED"
+    },
+    {
+      "step": 7,
+      "lambda2": 0.4458232873027508,
+      "entropy": 4.987590414275243,
+      "status": "COLLAPSED"
+    },
+    {
+      "step": 8,
+      "lambda2": 0.4456589579001323,
+      "entropy": 4.989069378898809,
+      "status": "COLLAPSED"
+    },
+    {
+      "step": 9,
+      "lambda2": 0.4458768422875359,
+      "entropy": 4.987108419412177,
+      "status": "COLLAPSED"
+    },
+    {
+      "step": 10,
+      "lambda2": 0.445726551192295,
+      "entropy": 4.988461039269345,
+      "status": "COLLAPSED"
+    },
+    {
+      "step": 11,
+      "lambda2": 0.4457054161392169,
+      "entropy": 4.988651254747048,
+      "status": "COLLAPSED"
+    }
+  ],
+  "coct": [
+    {
+      "step": 0,
+      "lambda2": 0.44578086724517696,
+      "entropy": 4.987972194793407,
+      "status": "COLLAPSED"
+    },
+    {
+      "step": 1,
+      "lambda2": 0.445687847299975,
+      "entropy": 4.988809374300225,
+      "status": "COLLAPSED"
+    },
+    {
+      "step": 2,
+      "lambda2": 0.4457063672117839,
+      "entropy": 4.988642695093945,
+      "status": "COLLAPSED"
+    },
+    {
+      "step": 3,
+      "lambda2": 0.4459288777058933,
+      "entropy": 4.9866401006469605,
+      "status": "COLLAPSED"
+    },
+    {
+      "step": 4,
+      "lambda2": 0.4470142886946997,
+      "entropy": 4.976871401747703,
+      "status": "COLLAPSED"
+    },
+    {
+      "step": 5,
+      "lambda2": 0.4677460077757494,
+      "entropy": 4.790285930018255,
+      "status": "COLLAPSED"
+    },
+    {
+      "step": 6,
+      "lambda2": 0.8837488459956352,
+      "entropy": 1.0462603860392834,
+      "status": "COHERENT"
+    },
+    {
+      "step": 7,
+      "lambda2": 0.8838142927367109,
+      "entropy": 1.0456713653696026,
+      "status": "COHERENT"
+    },
+    {
+      "step": 8,
+      "lambda2": 0.8831526923166187,
+      "entropy": 1.0516257691504312,
+      "status": "COHERENT"
+    },
+    {
+      "step": 9,
+      "lambda2": 0.8836606684372278,
+      "entropy": 1.0470539840649495,
+      "status": "COHERENT"
+    },
+    {
+      "step": 10,
+      "lambda2": 0.8847494026946856,
+      "entropy": 1.03725537574783,
+      "status": "COHERENT"
+    },
+    {
+      "step": 11,
+      "lambda2": 0.883855803381266,
+      "entropy": 1.0452977695686063,
+      "status": "COHERENT"
+    }
+  ],
+  "summary": {
+    "avg_lambda_cot": 0.4457539181678943,
+    "avg_lambda_coct": 0.666737163457952,
+    "peak_lambda_coct": 0.8847494026946856,
+    "ep_reached": false
+  }
+}

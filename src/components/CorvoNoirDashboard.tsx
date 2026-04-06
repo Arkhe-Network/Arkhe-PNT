@@ -11,10 +11,20 @@ import {
   Area
 } from 'recharts';
 import { useArkheSimulation } from '../hooks/useArkheSimulation';
-import { Activity, Shield, Zap, Cpu, Heart, Fingerprint } from 'lucide-react';
+import { Activity, Shield, Zap, Cpu, Heart, Fingerprint, TrendingDown, FileText } from 'lucide-react';
+import TemporalLensPanel from './TemporalLensPanel';
+import ForecasterPanel from './ForecasterPanel';
+import CellularHealthPanel from './CellularHealthPanel';
+import GovernanceManifestoPanel from './GovernanceManifestoPanel';
+import ExpansionPanel from './ExpansionPanel';
+import HelioLinkPanel from './HelioLinkPanel';
+import LatentCoherencePanel from './LatentCoherencePanel';
+import LayerSweepPanel from './LayerSweepPanel';
+import SolarEntropyPanel from './SolarEntropyPanel';
+import ThermodynamicTrainingPanel from './ThermodynamicTrainingPanel';
 
 const CorvoNoirDashboard: React.FC = () => {
-  const { state } = useArkheSimulation();
+  const state = useArkheSimulation();
 
   // Simulated time-series data for the Kuramoto R(t)
   const chartData = React.useMemo(() => {
@@ -49,6 +59,40 @@ const CorvoNoirDashboard: React.FC = () => {
             </p>
           </div>
         </div>
+
+        {/* Temporal Lens & Population Feedback */}
+        <div className="lg:col-span-1 space-y-4">
+          <TemporalLensPanel state={state} />
+          <ForecasterPanel state={state} />
+        </div>
+      </div>
+
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+        <CellularHealthPanel state={state} />
+        <GovernanceManifestoPanel state={state} />
+        <ExpansionPanel state={state} />
+        <LatentCoherencePanel
+          results={state.latentCoherence}
+          onRunExperiment={() => fetch('/api/ai/coct-experiment', { method: 'POST' })}
+        />
+        <LayerSweepPanel
+          report={state.layerSweep}
+          onRunSweep={() => fetch('/api/ai/layer-sweep', { method: 'POST' })}
+        />
+        <SolarEntropyPanel
+          report={state.solarEntropy}
+          onRunAnalysis={() => fetch('/api/helio/entropy-analysis', { method: 'POST' })}
+        />
+        <ThermodynamicTrainingPanel
+          report={state.thermodynamicTraining}
+          onRunTraining={() => fetch('/api/ai/thermodynamic-training', { method: 'POST' })}
+        />
+        <HelioLinkPanel
+          helio={state.helioState}
+          onListen={() => fetch('/api/helio/listen', { method: 'POST' })}
+          onSync={() => fetch('/api/helio/sync', { method: 'POST' })}
+          coherence={state.currentLambda}
+        />
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">

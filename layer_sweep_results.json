@@ -1,0 +1,398 @@
+{
+  "timestamp": "2026-04-06T02:09:10.397053",
+  "config": {
+    "num_layers": 32,
+    "hidden_dim": 4096
+  },
+  "best_layer": 22,
+  "max_lambda2": 0.8799301679963123,
+  "cot_sweep": [
+    {
+      "layer": 0,
+      "lambda2": 0.7328901514616301,
+      "entropy": 3.2053181824604393,
+      "status": "TRANSITIONAL"
+    },
+    {
+      "layer": 1,
+      "lambda2": 0.7387009271065388,
+      "entropy": 3.1355888747215346,
+      "status": "TRANSITIONAL"
+    },
+    {
+      "layer": 2,
+      "lambda2": 0.7113974804055015,
+      "entropy": 3.4632302351339814,
+      "status": "TRANSITIONAL"
+    },
+    {
+      "layer": 3,
+      "lambda2": 0.6918737101689187,
+      "entropy": 3.697515477972975,
+      "status": "TRANSITIONAL"
+    },
+    {
+      "layer": 4,
+      "lambda2": 0.6803519403014758,
+      "entropy": 3.83577671638229,
+      "status": "TRANSITIONAL"
+    },
+    {
+      "layer": 5,
+      "lambda2": 0.6934849556017831,
+      "entropy": 3.6781805327786024,
+      "status": "TRANSITIONAL"
+    },
+    {
+      "layer": 6,
+      "lambda2": 0.6758834190572984,
+      "entropy": 3.889398971312419,
+      "status": "TRANSITIONAL"
+    },
+    {
+      "layer": 7,
+      "lambda2": 0.6479683960385855,
+      "entropy": 4.224379247536975,
+      "status": "TRANSITIONAL"
+    },
+    {
+      "layer": 8,
+      "lambda2": 0.6325345561798635,
+      "entropy": 4.409585325841638,
+      "status": "TRANSITIONAL"
+    },
+    {
+      "layer": 9,
+      "lambda2": 0.6754767086548751,
+      "entropy": 3.894279496141499,
+      "status": "TRANSITIONAL"
+    },
+    {
+      "layer": 10,
+      "lambda2": 0.5854130962852708,
+      "entropy": 4.97504284457675,
+      "status": "COLLAPSED"
+    },
+    {
+      "layer": 11,
+      "lambda2": 0.5892576191920705,
+      "entropy": 4.928908569695153,
+      "status": "COLLAPSED"
+    },
+    {
+      "layer": 12,
+      "lambda2": 0.5551263504314892,
+      "entropy": 5.33848379482213,
+      "status": "COLLAPSED"
+    },
+    {
+      "layer": 13,
+      "lambda2": 0.5597216727529957,
+      "entropy": 5.283339926964052,
+      "status": "COLLAPSED"
+    },
+    {
+      "layer": 14,
+      "lambda2": 0.5803333241151509,
+      "entropy": 5.036000110618189,
+      "status": "COLLAPSED"
+    },
+    {
+      "layer": 15,
+      "lambda2": 0.5756227403844194,
+      "entropy": 5.092527115386967,
+      "status": "COLLAPSED"
+    },
+    {
+      "layer": 16,
+      "lambda2": 0.548417466232663,
+      "entropy": 5.418990405208044,
+      "status": "COLLAPSED"
+    },
+    {
+      "layer": 17,
+      "lambda2": 0.5492776252018848,
+      "entropy": 5.408668497577382,
+      "status": "COLLAPSED"
+    },
+    {
+      "layer": 18,
+      "lambda2": 0.5210358451938277,
+      "entropy": 5.747569857674067,
+      "status": "COLLAPSED"
+    },
+    {
+      "layer": 19,
+      "lambda2": 0.5200215537724393,
+      "entropy": 5.759741354730728,
+      "status": "COLLAPSED"
+    },
+    {
+      "layer": 20,
+      "lambda2": 0.5155080575732558,
+      "entropy": 5.8139033091209305,
+      "status": "COLLAPSED"
+    },
+    {
+      "layer": 21,
+      "lambda2": 0.484246814414255,
+      "entropy": 6.18903822702894,
+      "status": "COLLAPSED"
+    },
+    {
+      "layer": 22,
+      "lambda2": 0.49446022567211567,
+      "entropy": 6.066477291934612,
+      "status": "COLLAPSED"
+    },
+    {
+      "layer": 23,
+      "lambda2": 0.5161513571743803,
+      "entropy": 5.806183713907436,
+      "status": "COLLAPSED"
+    },
+    {
+      "layer": 24,
+      "lambda2": 0.4488925334783002,
+      "entropy": 6.613289598260397,
+      "status": "COLLAPSED"
+    },
+    {
+      "layer": 25,
+      "lambda2": 0.465664831612233,
+      "entropy": 6.412022020653205,
+      "status": "COLLAPSED"
+    },
+    {
+      "layer": 26,
+      "lambda2": 0.41610553271371187,
+      "entropy": 7.006733607435457,
+      "status": "COLLAPSED"
+    },
+    {
+      "layer": 27,
+      "lambda2": 0.43007069739666504,
+      "entropy": 6.83915163124002,
+      "status": "COLLAPSED"
+    },
+    {
+      "layer": 28,
+      "lambda2": 0.462646353435195,
+      "entropy": 6.44824375877766,
+      "status": "COLLAPSED"
+    },
+    {
+      "layer": 29,
+      "lambda2": 0.4187198705734813,
+      "entropy": 6.975361553118224,
+      "status": "COLLAPSED"
+    },
+    {
+      "layer": 30,
+      "lambda2": 0.3883478225075326,
+      "entropy": 7.33982612990961,
+      "status": "COLLAPSED"
+    },
+    {
+      "layer": 31,
+      "lambda2": 0.3981337435903088,
+      "entropy": 7.222395076916295,
+      "status": "COLLAPSED"
+    }
+  ],
+  "coct_sweep": [
+    {
+      "layer": 0,
+      "lambda2": 0.7042124849615471,
+      "entropy": 3.549450180461435,
+      "status": "TRANSITIONAL"
+    },
+    {
+      "layer": 1,
+      "lambda2": 0.6972963183143766,
+      "entropy": 3.6324441802274814,
+      "status": "TRANSITIONAL"
+    },
+    {
+      "layer": 2,
+      "lambda2": 0.716137889367195,
+      "entropy": 3.4063453275936597,
+      "status": "TRANSITIONAL"
+    },
+    {
+      "layer": 3,
+      "lambda2": 0.7168188357588646,
+      "entropy": 3.3981739708936245,
+      "status": "TRANSITIONAL"
+    },
+    {
+      "layer": 4,
+      "lambda2": 0.731047056379704,
+      "entropy": 3.2274353234435518,
+      "status": "TRANSITIONAL"
+    },
+    {
+      "layer": 5,
+      "lambda2": 0.7262528751973301,
+      "entropy": 3.2849654976320393,
+      "status": "TRANSITIONAL"
+    },
+    {
+      "layer": 6,
+      "lambda2": 0.7221790362867448,
+      "entropy": 3.333851564559062,
+      "status": "TRANSITIONAL"
+    },
+    {
+      "layer": 7,
+      "lambda2": 0.7523473809792277,
+      "entropy": 2.9718314282492675,
+      "status": "TRANSITIONAL"
+    },
+    {
+      "layer": 8,
+      "lambda2": 0.7716778775152651,
+      "entropy": 2.739865469816819,
+      "status": "TRANSITIONAL"
+    },
+    {
+      "layer": 9,
+      "lambda2": 0.766360557712721,
+      "entropy": 2.8036733074473474,
+      "status": "TRANSITIONAL"
+    },
+    {
+      "layer": 10,
+      "lambda2": 0.7622333878421574,
+      "entropy": 2.8531993458941107,
+      "status": "TRANSITIONAL"
+    },
+    {
+      "layer": 11,
+      "lambda2": 0.7727939348384116,
+      "entropy": 2.7264727819390604,
+      "status": "TRANSITIONAL"
+    },
+    {
+      "layer": 12,
+      "lambda2": 0.7782051874866303,
+      "entropy": 2.661537750160437,
+      "status": "TRANSITIONAL"
+    },
+    {
+      "layer": 13,
+      "lambda2": 0.7900471254653983,
+      "entropy": 2.51943449441522,
+      "status": "TRANSITIONAL"
+    },
+    {
+      "layer": 14,
+      "lambda2": 0.8044886502120893,
+      "entropy": 2.346136197454929,
+      "status": "TRANSITIONAL"
+    },
+    {
+      "layer": 15,
+      "lambda2": 0.8050702141337283,
+      "entropy": 2.339157430395261,
+      "status": "TRANSITIONAL"
+    },
+    {
+      "layer": 16,
+      "lambda2": 0.7968663325113412,
+      "entropy": 2.4376040098639056,
+      "status": "TRANSITIONAL"
+    },
+    {
+      "layer": 17,
+      "lambda2": 0.8137193448219355,
+      "entropy": 2.2353678621367736,
+      "status": "TRANSITIONAL"
+    },
+    {
+      "layer": 18,
+      "lambda2": 0.8167372067109283,
+      "entropy": 2.1991535194688603,
+      "status": "TRANSITIONAL"
+    },
+    {
+      "layer": 19,
+      "lambda2": 0.8275898490446238,
+      "entropy": 2.068921811464514,
+      "status": "TRANSITIONAL"
+    },
+    {
+      "layer": 20,
+      "lambda2": 0.8433158841215171,
+      "entropy": 1.8802093905417943,
+      "status": "TRANSITIONAL"
+    },
+    {
+      "layer": 21,
+      "lambda2": 0.8434361969653623,
+      "entropy": 1.8787656364156522,
+      "status": "TRANSITIONAL"
+    },
+    {
+      "layer": 22,
+      "lambda2": 0.8799301679963123,
+      "entropy": 1.4408379840442525,
+      "status": "COHERENT"
+    },
+    {
+      "layer": 23,
+      "lambda2": 0.8791554677461924,
+      "entropy": 1.4501343870456918,
+      "status": "COHERENT"
+    },
+    {
+      "layer": 24,
+      "lambda2": 0.8788798187496466,
+      "entropy": 1.4534421750042408,
+      "status": "COHERENT"
+    },
+    {
+      "layer": 25,
+      "lambda2": 0.8668617254970503,
+      "entropy": 1.5976592940353962,
+      "status": "COHERENT"
+    },
+    {
+      "layer": 26,
+      "lambda2": 0.8555318428926196,
+      "entropy": 1.7336178852885644,
+      "status": "COHERENT"
+    },
+    {
+      "layer": 27,
+      "lambda2": 0.8563032603638282,
+      "entropy": 1.7243608756340616,
+      "status": "COHERENT"
+    },
+    {
+      "layer": 28,
+      "lambda2": 0.8562802688810006,
+      "entropy": 1.7246367734279926,
+      "status": "COHERENT"
+    },
+    {
+      "layer": 29,
+      "lambda2": 0.8376129171834404,
+      "entropy": 1.9486449937987147,
+      "status": "TRANSITIONAL"
+    },
+    {
+      "layer": 30,
+      "lambda2": 0.8273026904905061,
+      "entropy": 2.072367714113927,
+      "status": "TRANSITIONAL"
+    },
+    {
+      "layer": 31,
+      "lambda2": 0.8244440235033407,
+      "entropy": 2.106671717959912,
+      "status": "TRANSITIONAL"
+    }
+  ],
+  "summary": "CoCT stabilizes coherence at Layer 24 (\u03bb\u2082=0.88). CoT exhibits linear decoherence."
+}

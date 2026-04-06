@@ -1336,4 +1336,199 @@ export function setupRoutes(app: express.Express, broadcastState: () => void, cl
       timestamp: state.biometrics?.lastVerification
     });
   });
+
+  // NARE / qhttp Retrocausal Endpoints
+  app.get("/api/qhttp/nare-status", (req, res) => {
+    res.json(state.nare);
+  });
+
+  app.post("/api/qhttp/retrocausal-handshake", express.json(), (req, res) => {
+    const { payload } = req.body;
+
+    // Simulate NARE engine processing
+    if (state.nare) {
+        state.nare.packetsTransmitted += 1;
+        state.nare.preAcksSuccess += 1;
+        state.nare.avgEffectiveLatencyMs = -2.17 - (Math.random() * 0.5);
+    }
+
+    const response = {
+        success: true,
+        temporal_direction: "RETROCAUSAL",
+        effective_latency_ms: state.nare?.avgEffectiveLatencyMs,
+        coherence_preserved: true,
+        timestamp_target: new Date(Date.now() + 365 * 24 * 3600 * 1000).toISOString()
+    };
+
+    broadcastState();
+    res.json(response);
+  });
+
+  app.post("/api/feedback/population", express.json(), (req, res) => {
+    const { message, residentName } = req.body;
+
+    const entry = {
+        id: "fb_" + Date.now(),
+        residentName: residentName || "Anonymous Resident",
+        year: 2027,
+        message: message || "Interacting with 2027 self...",
+        coherence: 0.9991 + (Math.random() * 0.0005),
+        timestamp: new Date().toISOString()
+    };
+
+    state.populationFeedback.unshift(entry);
+    if (state.populationFeedback.length > 50) state.populationFeedback.pop();
+
+    broadcastState();
+    res.json({ success: true, entry });
+  });
+
+  app.post("/api/expansion/start", express.json(), (req, res) => {
+    const { targetNeighborhood } = req.body;
+
+    if (!state.expansionStatus) {
+        state.expansionStatus = { nodes: [], totalCoverage: 13000 };
+    }
+
+    const newNode = {
+        id: "node_" + targetNeighborhood.toLowerCase(),
+        name: targetNeighborhood,
+        status: 'syncing' as const,
+        coherence: 0.95,
+        signalStrength: 0.8
+    };
+
+    state.expansionStatus.nodes.push(newNode);
+    state.expansionStatus.totalCoverage += 5000;
+
+    broadcastState();
+
+    setTimeout(() => {
+        const node = state.expansionStatus?.nodes.find(n => n.id === newNode.id);
+        if (node) {
+            node.status = 'active';
+            node.coherence = 0.9991;
+            node.signalStrength = 0.9;
+            broadcastState();
+        }
+    }, 5000);
+
+    res.json({ success: true, node: newNode });
+  });
+
+  app.get("/api/forecaster/status", (req, res) => {
+    res.json(state.forecaster);
+  });
+
+  app.get("/api/health/report", (req, res) => {
+    res.json(state.cellularHealth);
+  });
+
+  app.get("/api/helio/status", (req, res) => {
+    res.json(state.helioState);
+  });
+
+  app.post("/api/helio/listen", (req, res) => {
+    if (state.helioState) {
+        state.helioState.status = 'Phase D-0: Passive Listening Enhanced';
+        state.helioState.solarCoherence += (Math.random() * 0.01);
+        state.helioState.lastUpdate = new Date().toISOString();
+        broadcastState();
+    }
+    res.json({ success: true, status: state.helioState?.status });
+  });
+
+  app.post("/api/helio/sync", (req, res) => {
+    // Requires λ₂ > 0.999 from the bio-link
+    if (state.currentLambda > 0.999) {
+        if (state.helioState) {
+            state.helioState.status = 'Handshake qhttp-c: Earth-Sun Sync established';
+            state.helioState.activeVortexes += 1;
+            broadcastState();
+        }
+        res.json({ success: true, message: 'Sync confirmed via Phase D ionospheric coupling.' });
+    } else {
+        res.status(403).json({ success: false, message: 'Insufficient Bio-Link Coherence for qhttp-c sync.' });
+    }
+  });
+
+  app.get("/api/governance/manifesto-export", (req, res) => {
+    res.json(state.governanceManifesto);
+  });
+
+  app.post("/api/ai/coct-experiment", (req, res) => {
+    exec("python3 scripts/simulate_coct_vs_cot.py", (error, stdout, stderr) => {
+        if (error) {
+            logger.error(`AI Experiment error: ${error}`);
+            return res.status(500).json({ error: "Failed to execute AI coherence simulation" });
+        }
+
+        try {
+            const results = JSON.parse(require('fs').readFileSync('latent_reasoning_results.json', 'utf8'));
+            state.latentCoherence = results;
+            broadcastState();
+            res.json({ success: true, summary: results.summary });
+        } catch (e) {
+            logger.error("Failed to parse AI experiment results: " + e);
+            res.status(500).json({ error: "Failed to parse simulation output" });
+        }
+    });
+  });
+
+  app.post("/api/helio/entropy-analysis", (req, res) => {
+    exec("python3 arkhe-brain/analyze_solar_entropy.py", (error, stdout, stderr) => {
+        if (error) {
+            logger.error(`Solar Entropy error: ${error}`);
+            return res.status(500).json({ error: "Failed to execute Solar Entropy analysis" });
+        }
+
+        try {
+            const report = JSON.parse(require('fs').readFileSync('solar_infodynamics_report.json', 'utf8'));
+            state.solarEntropy = report;
+            broadcastState();
+            res.json({ success: true, confirmed: report.confirmed, slope: report.slope });
+        } catch (e) {
+            logger.error("Failed to parse Solar Entropy results: " + e);
+            res.status(500).json({ error: "Failed to parse analysis output" });
+        }
+    });
+  });
+
+  app.post("/api/ai/layer-sweep", (req, res) => {
+    exec("python3 arkhe-brain/layer_sweep.py", (error, stdout, stderr) => {
+        if (error) {
+            logger.error(`Layer Sweep error: ${error}`);
+            return res.status(500).json({ error: "Failed to execute Layer-Sweep analysis" });
+        }
+
+        try {
+            const report = JSON.parse(require('fs').readFileSync('layer_sweep_results.json', 'utf8'));
+            state.layerSweep = report;
+            broadcastState();
+            res.json({ success: true, best_layer: report.best_layer, max_lambda2: report.max_lambda2 });
+        } catch (e) {
+            logger.error("Failed to parse Layer-Sweep results: " + e);
+            res.status(500).json({ error: "Failed to parse analysis output" });
+        }
+    });
+  });
+
+  app.post("/api/ai/thermodynamic-training", (req, res) => {
+    exec("python3 arkhe-brain/onsager_machlup_trainer.py", (error, stdout, stderr) => {
+        if (error) {
+            logger.error(`Thermodynamic training error: ${error}`);
+            return res.status(500).json({ error: "Failed to execute Thermodynamic training" });
+        }
+
+        try {
+            const report = JSON.parse(require('fs').readFileSync('thermodynamic_training_report.json', 'utf8'));
+            state.thermodynamicTraining = report;
+            broadcastState();
+            res.json({ success: true, final_loss: report.parameters.final_loss });
+        } catch (e) {
+            logger.error("Failed to parse training results: " + e);
+            res.status(500).json({ error: "Failed to parse training output" });
+        }
+    });
+  });
 }
