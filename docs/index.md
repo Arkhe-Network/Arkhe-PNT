@@ -34,6 +34,9 @@ Welcome to the compounding knowledge base of the Bio-Quantum Cathedral.
 ## 📦 Entities
 *Currently no dedicated entity pages.*
 
+## 🧪 Simulations (Synapse-κ)
+- [[wiki/synapse-kappa/cirbp_longevity_genomic_coherence|CIRBP Longevity & Genomic Coherence]]: BioFDTD model for Bowhead whale-inspired DNA repair.
+
 ## 📂 Sources
 - [[wiki/sources/OSINT_BRAZIL|Brazil OSINT Toolkit]]: Synthesis of UNISHKA OSINT resources.
 - [[wiki/sources/OSINT_GLOBAL|Global OSINT Toolkit]]: Synthesis of Awesome OSINT repository resources.
