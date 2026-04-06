@@ -15,6 +15,7 @@ Welcome to the compounding knowledge base of the Bio-Quantum Cathedral.
 - [[systems/ARCHITECTURE|System Architecture]]: High-level diagrams and engine specifications.
 - [[systems/AGI_WEB3_ARCHITECTURE|AGI Web3 Architecture]]: Integration of AI agents and decentralized ledgers.
 - [[systems/LEARNED_SYSTEMS|Learned Systems]]: Engineering guide for standard CS technical domains.
+- [[systems/LLM_COHERENT_OPTIMIZATION|LLM Coherent Optimization]]: Mapping of modern LLM techniques to Arkhe(n) equivalents.
 - [[systems/QD_LOGIC_BOARD|Quantum Dot Logic Board]]: Hardware specifications for NV-center processing.
 - [[systems/cad-integration|CAD Integration]]: Mechanical design and hardware synthesis.
 

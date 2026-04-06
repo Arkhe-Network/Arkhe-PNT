@@ -120,6 +120,41 @@ class CoCTSimulator:
             tracker.add_step(h_mat, t)
         return tracker.history
 
+class CoherenceScalingController:
+    """
+    Implements 'Test-Time Coherence Scaling' (Arkhe's DeepSeek-R1 equivalent).
+    Dynamically allocates reasoning steps until target λ₂ is achieved.
+    """
+    def __init__(self, simulator: CoCTSimulator, target_lambda2: float = 0.847, max_steps: int = 20):
+        self.simulator = simulator
+        self.target = target_lambda2
+        self.max_steps = max_steps
+
+    def scale_reasoning(self, initial_coherence: float = 0.1) -> Tuple[List[ReasoningMetrics], bool]:
+        """
+        Scales CoCT iterations until coherence threshold is reached.
+        Returns: (history, target_reached)
+        """
+        tracker = CoherenceTracker(self.simulator.hidden_dim)
+        reached = False
+
+        # Current latent state (starting point)
+        current_coherence = initial_coherence
+
+        for t in range(self.max_steps):
+            # Increase coherence per step as the 'thought' clarifies
+            current_coherence = min(0.999, current_coherence + 0.1 * (1.1 - current_coherence))
+            noise = max(0.01, 1.0 - current_coherence)
+
+            h_mat = self.simulator._generate_state_matrix(current_coherence, noise=noise)
+            metrics = tracker.add_step(h_mat, t)
+
+            if metrics.lambda2 >= self.target:
+                reached = True
+                break
+
+        return tracker.history, reached
+
 if __name__ == "__main__":
     sim = CoCTSimulator()
     cot = sim.simulate_cot(10)
