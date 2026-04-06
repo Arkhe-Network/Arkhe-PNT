@@ -269,34 +269,16 @@ class ArkheFluorescenceAnalyzer:
     def check_viability_alerts(self, df: pd.DataFrame) -> List[str]:
         """
         Gatilhos de alerta para viabilidade celular (MTT).
-        Sistema de 'Traffic Light' conforme protocolo ARKHE-STAT-001.
+        Aciona alerta se a viabilidade cair abaixo de 85%.
         """
         alerts = []
-        if 'survival_rate' not in df.columns:
-            return alerts
-
-        viability_summary = df.groupby('condition')['survival_rate'].agg(['mean', 'std']).reset_index()
-
-        for idx, row in viability_summary.iterrows():
-            cond = row['condition']
-            mean_v = row['mean']
-
-            # 1. Limiares Absolutos
-            if mean_v < 0.50:
-                msg = f"⚫ [BLACK-001] Crítico: Condição '{cond}' viabilidade {mean_v*100:.1f}% < 50%. DESCARTAR LOTE."
-            elif mean_v < 0.70:
-                msg = f"🔴 [RED-001] Crítico: Condição '{cond}' viabilidade {mean_v*100:.1f}% < 70%. ABORTAR ENSAIO."
-            elif mean_v < 0.85:
-                msg = f"🟡 [YELLOW-001] Atenção: Condição '{cond}' viabilidade {mean_v*100:.1f}% < 85%. SUSPENDER ESCALONAMENTO."
-            else:
-                continue
-
-            alerts.append(msg)
-            print(msg)
-
-        # 2. Efeito dose-dependente inesperado (se aplicável)
-        # Placeholder para lógica mais complexa de comparação entre doses
-
+        if 'survival_rate' in df.columns:
+            viability_summary = df.groupby('condition')['survival_rate'].mean()
+            for condition, rate in viability_summary.items():
+                if rate < 0.85:
+                    msg = f"⚠️ [ALERTA DE VIABILIDADE] Condição '{condition}' apresenta viabilidade de {rate*100:.1f}% (< 85%)."
+                    alerts.append(msg)
+                    print(msg)
         return alerts
 
     def generate_report(self, df: pd.DataFrame, output_path: str = None):

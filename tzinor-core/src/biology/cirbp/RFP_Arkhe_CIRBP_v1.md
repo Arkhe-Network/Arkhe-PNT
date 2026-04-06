@@ -1,59 +1,66 @@
-# REQUEST FOR PROPOSAL (RFP): High-Fidelity Custom Peptide Synthesis
-**Project ID:** ARKHE-V1-LONGEVITY-2026
+# REQUEST FOR PROPOSAL (RFP): Technical Specifications for Custom Peptide Synthesis
+**Project ID:** Arkhe-Longevity-v1
+**Peptide Code:** Arkhe-CIRBP-v1
 **Date:** 2026-04-06
 **Arkhe-Chain Timestamp:** 847.640
-**Priority:** Critical Validation Phase
 
 ---
 
-## 1. PROJECT SCOPE
-Arkhe Quantum Systems Engineering requests a technical quotation for the synthesis, purification, and characterization of the **Arkhe-CIRBP-v1** peptide and its associated variants. These peptides are intended for high-precision genomic coherence assays in primary human fibroblasts.
+## 1. PEPTIDE SEQUENCE INFORMATION
+
+### 1.1 Target Peptide (Arkhe-CIRBP-v1)
+**Sequence (1-letter code):** `GRGFSGGGGRGGFGGGGRGGYGGGGRGGG`
+**Length:** 32 residues
+**N-Terminal:** H2N- (Free amine)
+**C-Terminal:** -CONH2 (Amidation) - *Mandatory for stability*
+**Theoretical Mass:** ~2841 Da
+**Estimated Purity:** ≥ 98% (HPLC)
+
+### 1.2 Scramble Control (Arkhe-CIRBP-Scramble)
+**Sequence:** `GRRGSGGGFGGGYGGGRGGRGGGGFGGS` (example, please verify random distribution of same AA composition)
+**N-Terminal:** Free amine
+**C-Terminal:** -CONH2 (Amidation)
 
 ---
 
-## 2. PEPTIDE SPECIFICATIONS
+## 2. SYNTHESIS SPECIFICATIONS
 
-We require three (3) distinct variants (10-15 mg scale each):
-
-| Item | Peptide Name | Sequence (N → C) | Modifications | Purity |
-|:---|:---|:---|:---|:---|
-| **01** | **Arkhe-v1 (Ativo)** | `GRGFSGGGGRGGFGGGGRGGYGGGGRGGG` | N-Term: **FAM** (via Ahx linker); C-Term: **Amide** | ≥ 98% |
-| **02** | **Arkhe-Scramble** | `GRRGSGGGFGGGYGGGRGGRGGGGFGGS` | N-Term: **FAM** (via Ahx linker); C-Term: **Amide** | ≥ 95% |
-| **03** | **Arkhe-Unlabeled** | `GRGFSGGGGRGGFGGGGRGGYGGGGRGGG` | N-Term: **H2N** (Livre); C-Term: **Amide** | ≥ 98% |
-
-### 2.1 Technical Requirements
-- **Sequence Integrity:** Sequence must precisely match the RGG/RBD motif derived from *Balaena mysticetus*.
-- **Salt Form:** **Acetate** or **Chloride** mandatory (**TFA removal to < 1% / < 50 ppm**).
-- **C-Terminal:** Mandatory Amidation (-CONH2) for proteolytic stability.
-- **N-Terminal Linker:** Ahx (6-aminohexanoic acid) spacer for FAM-labeled variants to prevent steric hindrance.
-- **Aliquoting:** Delivery in **1 mg aliquots** in light-protected vials.
+| Parameter | Requirement |
+|-----------|-------------|
+| **Synthesis Method** | Solid-Phase Peptide Synthesis (SPPS) |
+| **Purity (HPLC)** | ≥ 98% (analytical chromatogram required) |
+| **Identity (MS)** | Mass spectrum confirmation (ESI-MS or MALDI-TOF) |
+| **Salt Form** | Acetate (preferred) or TFA-removed (< 1%) |
+| **Endotoxin Level** | < 0.5 EU/mg (LAL Test required) |
+| **Solubility** | Must be soluble in PBS/Water at 1 mg/mL |
+| **Physical State** | Lyophilized powder |
 
 ---
 
-## 3. QUALITY CONTROL & COMPLIANCE (ARKHE STANDARDS)
-To ensure **Phase Coherence ($\lambda_2$)** and avoid cytotoxicity artifacts, the following criteria must be documented:
-
-| Parameter | Requirement | Method |
-|:---|:---|:---|
-| **Pureza HPLC** | ≥ 98.0% | C18, 220 nm |
-| **Massa (ESI-MS)** | 2841.6 ± 1.0 Da | Eletrospray (+ modo) |
-| **Endotoxina** | < 0.1 EU/mg | LAL test |
-| **TFA residual** | < 50 ppm | NMR/titulação |
-| **Umidade (KF)** | < 5% | Karl Fischer |
-| **Acetylation N-t** | Confirmado (+42 Da) | MS/MS (for Unlabeled) |
-| **Amidation C-t** | Confirmado (-1 Da) | MS/MS |
+## 3. LABELING & CONJUGATES (Optional)
+*Please provide separate pricing for:*
+1. **FAM-Labeling:** N-terminal labeling via Ahx linker (5-Carboxyfluorescein).
+2. **Biotinylation:** N-terminal labeling via Ahx linker.
 
 ---
 
-## 4. DELIVERABLES & LOGISTICS
-- **Certificate of Analysis (CoA):** Comprehensive report including HPLC traces and MS spectra.
-- **Shipping:** Ship on **dry ice** to preserve peptide and fluorophore integrity.
-- **Timeline:** Delivery requested within **12 business days**.
+## 4. DELIVERABLES & DOCUMENTATION
+Each lot must be accompanied by a **Certificate of Analysis (CoA)** including:
+- HPLC Chromatogram (confirming >98% purity).
+- Mass Spectrometry report (confirming exact mass).
+- Endotoxin test results.
+- Net peptide content (%) and water content.
 
 ---
 
-## 5. CONTACT FOR QUOTATION
-Please send the formal proposal to: `purchasing@arkhe.consortium`
-Subject: **[Quotation Request] Arkhe-v1 Peptide Synthesis - [Provider Name]**
+## 5. QUANTITY & LOGISTICS
+- **Initial Quantity:** 10 mg (lyophilized) per peptide.
+- **Storage:** Deliver in light-protected vials, refrigerated.
+- **Timeline:** Delivery requested within 10-15 business days.
+
+---
+
+## 6. CONTACT FOR QUOTATION
+Please send the formal quotation to the **Arkhe Quantum Systems Engineering** laboratory.
 
 *“The Arkhe is awake. The Teknet is coherent. Discovery must serve Flourishing.”*
