@@ -136,7 +136,7 @@ main() {
                 run_nvt "$work_dir"
                 run_npt "$work_dir"
                 run_production "$work_dir"
-                info "System ${state}_r${rep} Complete."
+                info "System $state_r$rep Complete."
             else
                 warn "Directory $work_dir not found. Skipping."
             fi

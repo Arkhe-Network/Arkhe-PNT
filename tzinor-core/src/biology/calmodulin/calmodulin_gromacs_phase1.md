@@ -29,53 +29,61 @@ Primeira validação experimental da métrica λ₂ em um sistema biológico rea
 | Pressão | 1 bar (Parrinello-Rahman) |
 | Hardware | Cluster GPU (~50.000 core-hours estimados) |
 
-## 3. Métrica λ₂ e Deslocamento de Solvatação
+## 3. Métrica λ₂ Conformacional
 
-### 3.1 Coerência Conformacional λ₂(t)
+### 3.1 Extração de Fase
 
-Extraída do ângulo diedro N–CA–C–N do resíduo 74 (dobradiça da hélice linker):
+Para cada frame da trajetória, a fase θ_i(t) de cada monômero i ∈ {A, B} é extraída do ângulo diedro N–CA–C–N do resíduo 74 (ponto de articulação central da hélice linker).
+
+### 3.2 Cálculo de λ₂
+
 ```
 λ₂(t) = (1/2) |exp(iθ₁(t)) + exp(iθ₂(t))|
 ```
 
-- λ₂-crit = 0.847: limiar de Varela para coerência funcional.
+- λ₂ = 1: monômeros em fase (coerência máxima)
+- λ₂ = 0: monômeros em antifase (coerência mínima)
+- λ₂-crit = 0.847: limiar de Varela para coerência funcional
 
-### 3.2 Deslocamento de Solvatação (ΔS_solv)
+## 4. Análise Estatística
 
-A ativação da calmodulina requer o deslocamento de moléculas de água da esfera de solvatação primária dos íons Ca²⁺. A análise quantifica a entropia configuracional (S_config) e a força termodinâmica de deslocamento (G_disp):
-```
-ΔG_displacement = ΔH_conformational - TΔS_solvation
-```
-
-## 4. Análise Estatística e Preditiva
-
-- **ANOVA**: Diferença significativa de λ₂ entre estados.
-- **Correlação de Pearson**: Relação entre [Ca²⁺], ΔS_solv e ⟨λ₂⟩.
-- **Diagrama de Fase**: Mapeamento da transição de regime térmico (λ₂ < 0.847) para regime coerente (λ₂ > 0.847).
+- **ANOVA**: Teste de diferença significativa entre os três estados
+- **Tukey HSD**: Comparações par a par
+- **Pearson**: Correlação entre [Ca²⁺] total e ⟨λ₂⟩
 
 ### 4.1 Critérios de Sucesso
 
 | Critério | Valor de Referência |
 |----------|-------------------|
 | Δλ₂ = ⟨λ₂⟩_sat - ⟨λ₂⟩_apo | > 0.3 |
-| r(ΔS_solv, ⟨λ₂⟩) | > 0.8 (Pearson) |
+| r([Ca²⁺], ⟨λ₂⟩) | > 0.8 (Pearson) |
 | ⟨λ₂⟩_apo | < 0.847 (abaixo do limiar) |
 | ⟨λ₂⟩_sat | > 0.847 (acima do limiar) |
 
 ## 5. Pipeline de Simulação
 
-Localizado em `tzinor-core/src/biology/calmodulin/`:
-- `prepare_calmodulin.py`: Preparação GROMACS.
-- `run_calmodulin_sim.sh`: Execução produção 15x100ns.
-- `calmodulin_lambda2_analysis.py`: Análise integrada λ₂ + Solvatação.
-- `generate_calmodulin_pdf.py`: Relatório formal PDF.
+Os scripts para execução estão localizados em `tzinor-core/src/biology/calmodulin/`:
+- `prepare_calmodulin.py`: Preparação dos sistemas.
+- `run_calmodulin_sim.sh`: Execução GROMACS.
+- `calmodulin_lambda2_analysis.py`: Análise λ₂ e estatísticas.
+- `generate_calmodulin_pdf.py`: Geração de relatório formal.
 
-## 6. Integração com o Arcabouço Arkhe(n)
+## 6. Cronograma
 
-Esta simulação estabelece a **ponte termodinâmica** entre a física de fase e a biologia. O deslocamento de solvatação é o custo entrópico para atingir a coerência conformacional (λ₂) necessária para a função biológica. Se validada, estende o arcabouço para redes de proteínas e bio-interfaces em 2027.
+| Marco | Data Prevista |
+|-------|--------------|
+| Preparação dos sistemas | 6–7 de abril de 2026 |
+| Minimização + Equilibração | 8 de abril |
+| Simulações de produção (100ns × 15) | 9–15 de abril |
+| Análise de fases e λ₂ | 16–17 de abril |
+| Relatório final | 18 de abril |
 
-Arkhe-Chain: **847.621** | Status: **SIMULAÇÃO_EM_EXECUÇÃO**
+## 7. Integração com o Arcabouço Arkhe(n)
 
-*"O deslocamento de solvatação é o preço da entrada. A coerência λ₂ é a mercadoria comprada."*
+Esta simulação é a primeira ponte entre a métrica λ₂ (originalmente definida para sistemas físicos) e um sistema biológico. Se bem-sucedida, a mesma metodologia será estendida para redes de proteínas (interactoma) e oscilações de cálcio intracelular como osciladores de fase em acoplamento Kuramoto.
+
+Arkhe-Chain: **847.621** | Status: **SIMULAÇÃO_INICIADA**
+
+*"A calmodulina não é apenas uma proteína — é um oscilador de fase. Os íons de cálcio não são apenas mensageiros — são moduladores de coerência. E λ₂ não é apenas um número — é o pulso do proteoma."*
 
 **Synapse-κ** | Coerência: λ₂ = 0,999
