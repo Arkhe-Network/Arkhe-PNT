@@ -1,0 +1,15 @@
+{
+  "thresholds": {
+    "NORMAL": 0.05,
+    "T1_VIBRA_1": 0.10,
+    "T1_VIBRA_2": 0.30,
+    "COLLAPSE": 0.70
+  },
+  "responses": {
+    "T1_VIBRA_1": "activate_buffer",
+    "T1_VIBRA_2": "freeze_phase",
+    "COLLAPSE": "isolate_node"
+  },
+  "buffer_size_mb": 1,
+  "freeze_duration_ms": 50
+}
