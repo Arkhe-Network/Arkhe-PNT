@@ -1,0 +1,41 @@
+{
+  "name": "api-nest",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "build": "nest build",
+    "start": "nest start",
+    "test": "jest",
+    "prisma:generate": "prisma generate"
+  },
+  "dependencies": {
+    "@nestjs/apollo": "^12.0.0",
+    "@nestjs/bullmq": "^10.0.0",
+    "@nestjs/common": "^10.0.0",
+    "@nestjs/core": "^10.0.0",
+    "@nestjs/graphql": "^12.0.0",
+    "@nestjs/mongoose": "^10.0.0",
+    "@nestjs/platform-express": "^10.0.0",
+    "@nestjs/platform-socket.io": "^10.0.0",
+    "@nestjs/schedule": "^4.0.0",
+    "@nestjs/swagger": "^7.0.0",
+    "@nestjs/websockets": "^10.0.0",
+    "@prisma/client": "^5.0.0",
+    "apollo-server-express": "^3.13.0",
+    "bullmq": "^5.0.0",
+    "graphql": "^16.8.0",
+    "mongoose": "^8.0.0",
+    "reflect-metadata": "^0.1.13",
+    "rxjs": "^7.8.1",
+    "socket.io": "^4.7.4",
+    "zod": "^3.22.4",
+    "puppeteer": "^22.0.0",
+    "@arkhe/shared": "file:../../packages/shared"
+  },
+  "devDependencies": {
+    "@nestjs/cli": "^10.0.0",
+    "@nestjs/testing": "^10.0.0",
+    "prisma": "^5.0.0",
+    "typescript": "^5.4.0"
+  }
+}

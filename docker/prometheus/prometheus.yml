@@ -1,0 +1,12 @@
+global:
+  scrape_interval: 15s
+  evaluation_interval: 15s
+
+scrape_configs:
+  - job_name: 'arkhe-node'
+    static_configs:
+      - targets: ['node-backend:3000']
+
+  - job_name: 'cuda-reconciler'
+    static_configs:
+      - targets: ['cuda-reconciler:5001']
