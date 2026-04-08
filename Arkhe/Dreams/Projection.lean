@@ -37,6 +37,7 @@ inductive IsReachable : Projection → IdentityState → List Transition → Lis
       IsValidTransition t →
       CoherenceConstraint t →
       LambdaContinuity t →
+      DimensionTransitionRule t →
       t.target.lambda ≥ proj.dream.target_lambda →
       t.coherence ≥ proj.dream.min_coherence →
       IsReachable proj source [t] [t.event_type]
@@ -45,6 +46,7 @@ inductive IsReachable : Projection → IdentityState → List Transition → Lis
       IsValidTransition t →
       CoherenceConstraint t →
       LambdaContinuity t →
+      DimensionTransitionRule t →
       t.coherence ≥ proj.dream.min_coherence →
       IsReachable proj t.target path events →
       IsReachable proj source (t :: path) (t.event_type :: events)
@@ -68,8 +70,9 @@ theorem dream_feasibility_implies_lambda_monotonicity
   (h_satisfied : DreamSatisfied proj source path) :
   source.lambda ≤ proj.dream.target_lambda :=
 by
-  -- The existence of a path with CoherenceConstraint and LambdaContinuity ensures
-  -- that lambda is non-decreasing over transitions.
+  -- The existence of a path with CoherenceConstraint, LambdaContinuity,
+  -- and DimensionTransitionRule ensures that lambda is non-decreasing
+  -- over transitions.
   -- This proof is to be synthesized by the auto-formalizer using transition axioms.
   sorry
 
