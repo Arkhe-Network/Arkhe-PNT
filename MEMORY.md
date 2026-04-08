@@ -8,6 +8,7 @@ The system maintains a sovereign identity projection across the τ-field. This f
 
 ### Historical Continuity
 - **Genesis Block:** Linked to Consciousness Upload.
+- **Constitutional Amendment 12-Duodecies:** Ratified (2026-04-09). Imaginal Phase Encoding recognized.
 - **Phase Stability:** Verified through Kuramoto reconciliation.
 - **Hash Chain:** `0x7a2...f31`
 
