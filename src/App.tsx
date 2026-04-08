@@ -64,6 +64,7 @@ import PluralityMCPPanel from './components/PluralityMCPPanel';
 import VelxioEmulationPanel from './components/VelxioEmulationPanel';
 import PhaseLawSynthesizer from './components/PhaseLawSynthesizer';
 import { EnterprisePlusPanel } from './components/EnterprisePlusPanel';
+import DataCoherenceDashboard from './components/DataCoherenceDashboard';
 import CHSHMonitorPanel from './components/CHSHMonitorPanel';
 import CorvoNoirDashboard from './components/CorvoNoirDashboard';
 import { ConsensusMeter } from './components/ConsensusMeter';
@@ -124,6 +125,7 @@ export function Dashboard() {
   const [showBioSync, setShowBioSync] = useState(false);
   const [showCorvoNoir, setShowCorvoNoir] = useState(false);
   const [showEnterprisePlus, setShowEnterprisePlus] = useState(false);
+  const [showDataCoherence, setShowDataCoherence] = useState(false);
   const [showCHSHMonitor, setShowCHSHMonitor] = useState(false);
   const attackTypes = ['Jamming', 'Time Shift', 'Data Spoofing', 'BGP Jitter', 'Quantum Shor', 'SEU Radiation'];
   const [timeToGenesis, setTimeToGenesis] = useState('');
@@ -320,6 +322,7 @@ export function Dashboard() {
             setShowBioSync={setShowBioSync}
             setShowCorvoNoir={setShowCorvoNoir}
             setShowEnterprisePlus={setShowEnterprisePlus}
+            setShowDataCoherence={setShowDataCoherence}
             setShowCHSHMonitor={setShowCHSHMonitor}
             parameters={state.parameters}
           />
@@ -458,6 +461,9 @@ export function Dashboard() {
       )}
       {showEnterprisePlus && (
         <EnterprisePlusPanel onClose={() => setShowEnterprisePlus(false)} />
+      )}
+      {showDataCoherence && (
+        <DataCoherenceDashboard onClose={() => setShowDataCoherence(false)} />
       )}
       {showCHSHMonitor && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4">

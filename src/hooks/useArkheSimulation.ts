@@ -148,6 +148,10 @@ export interface SimulationState {
     retrocausalIntegrity: number;
     invariantsVerified: number;
   };
+  scaData: ScaDataState;
+  enterpriseSubagents?: any;
+  chshMonitor?: any;
+  ramsey?: any;
   x402Wallet: {
     address: string;
     network: string;
@@ -198,6 +202,18 @@ export interface DistrictHappiness {
   name: string;
   index: number;
   lastPulse: string | null;
+}
+
+export interface ScaDomain {
+  name: string;
+  lambda2: number;
+  action: string;
+  health: 'STABLE' | 'CRITICAL';
+}
+
+export interface ScaDataState {
+  domains: ScaDomain[];
+  overallHealth: number;
 }
 
 export interface BioLinkSyncState {
@@ -321,6 +337,14 @@ export function useArkheSimulation() {
       activeTask: 'Aguardando Intenção (Fase ℂ)',
       retrocausalIntegrity: 100,
       invariantsVerified: 0,
+    },
+    scaData: {
+      domains: [
+        { name: 'Finance', lambda2: 0.982, action: 'MAINTAIN', health: 'STABLE' },
+        { name: 'Marketing', lambda2: 0.891, action: 'CIRCUIT_BREAK', health: 'CRITICAL' },
+        { name: 'Operations', lambda2: 0.956, action: 'MAINTAIN', health: 'STABLE' }
+      ],
+      overallHealth: 0.943
     },
     x402Wallet: {
       address: '0xbf7da1f568684889a69a5bed9f1311f703985590',

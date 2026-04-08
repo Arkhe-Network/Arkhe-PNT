@@ -288,6 +288,7 @@ export interface SimulationState {
     interoperability: EnterpriseSubagentState[];
   };
   chshMonitor: CHSHMonitorState;
+  scaData: ScaDataState;
   biometrics?: BiometricState;
   nare?: NAREStatus;
   populationFeedback: PopulationFeedbackEntry[];
@@ -433,4 +434,16 @@ export interface CHSHMonitorState {
     time: string;
     action: string;
   };
+}
+
+export interface ScaDomain {
+  name: string;
+  lambda2: number;
+  action: string;
+  health: 'STABLE' | 'CRITICAL';
+}
+
+export interface ScaDataState {
+  domains: ScaDomain[];
+  overallHealth: number;
 }
