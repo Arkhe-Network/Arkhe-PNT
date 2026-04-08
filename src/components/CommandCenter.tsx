@@ -53,6 +53,7 @@ interface CommandCenterProps {
   setShowBioSync?: (show: boolean) => void;
   setShowCorvoNoir?: (show: boolean) => void;
   setShowEnterprisePlus?: (show: boolean) => void;
+  setShowDataCoherence?: (show: boolean) => void;
   setShowCHSHMonitor?: (show: boolean) => void;
   parameters: any;
 }
@@ -108,6 +109,7 @@ export function CommandCenter({
   setShowVelxioEmulation,
   setShowCorvoNoir,
   setShowEnterprisePlus,
+  setShowDataCoherence,
   setShowCHSHMonitor,
   parameters,
 }: CommandCenterProps) {
@@ -299,6 +301,12 @@ export function CommandCenter({
               className="w-full py-2 border border-arkhe-cyan/50 text-arkhe-cyan hover:bg-arkhe-cyan/10 rounded transition-colors uppercase tracking-widest"
             >
               Simulate Coherence Field
+            </button>
+            <button
+              onClick={() => setShowDataCoherence && setShowDataCoherence(true)}
+              className="w-full py-2 border border-blue-500/50 text-blue-500 hover:bg-blue-500/10 rounded transition-colors uppercase tracking-widest font-bold shadow-[0_0_10px_rgba(59,130,246,0.2)] animate-pulse"
+            >
+              SCA-Data Coherence
             </button>
             <button 
               onClick={() => setShowHybridArch(true)}
