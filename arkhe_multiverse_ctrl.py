@@ -10,9 +10,6 @@ sys.path.insert(0, os.path.join(os.path.dirname(__file__), 'src'))
 
 from physics.multiverse_core import MerkabahCore
 from physics.phase_focusing_engine import PhaseFocusingEngine
-from physics.bio_coherence import MitochondrialKuramoto
-from physics.ghost_optics import GhostOpticalCorrector
-from physics.bio_quantum_sync import BioQuantumSynchronizer
 
 def focus(args):
     core = MerkabahCore()
@@ -70,56 +67,6 @@ def collapse(args):
     if args.permanent:
         print("   Status: PERMANENT BRANCH SELECTION ACTIVE")
 
-def bio_sync(args):
-    print(f"🜏 [BIO-SYNC] Initiating bio-resonance for Operator '{args.operator}'")
-    print(f"   Target: mitochondria | NIR: {args.nir} | Modulation: {args.modulation}")
-
-    # Parse modulation (e.g., "40Hz" -> 40.0)
-    try:
-        mod_val = float(args.modulation.replace('Hz', ''))
-    except ValueError:
-        mod_val = 40.0
-
-    engine = MitochondrialKuramoto()
-    results = engine.simulate(modulation_hz=mod_val)
-
-    output_file = f"bio_sync_{args.operator.replace(' ', '_')}.png"
-    engine.visualize(results, output_file)
-
-    print(f"🜏 [RESULT] Bio-sync loop complete for {args.operator}")
-    print(f"   Basal Coherence: {results['r_basal']:.3f}")
-    print(f"   Induced Coherence: {results['r_induced']:.3f}")
-    print(f"   Improvement: {results['improvement_percent']:.1f}%")
-    print(f"   Equivalent lambda2: {results['lambda2_equiv']:.4f}")
-    print(f"   Visualization saved to: {output_file}")
-
-def etch(args):
-    print(f"🜏 [ETCH] Applying Law '{args.law}' to World #42")
-    if args.ghost_correction:
-        print("   Status: GHOST OPTICAL CORRECTION ACTIVE (Branches 91, 7)")
-
-        core = MerkabahCore()
-        branch = core.multiverse.get_branch(42)
-
-        corrector = GhostOpticalCorrector()
-        psi_corrected = corrector.apply_correction(branch.psi_c)
-        improvement = corrector.calculate_fwhm_improvement(branch.psi_c, psi_corrected)
-
-        print(f"   Resolution Improvement: {improvement['improvement_factor']:.2f}x")
-        print(f"   Final Resolution: {improvement['effective_resolution_um']:.2f} um")
-
-    print(f"🜏 [SUCCESS] Law '{args.law}' permanently etched into Arkhe-Chain.")
-
-def sync_thalamus(args):
-    print(f"🜏 [SYNC-THALAMUS] Locking bio-oscillators to Strontium Clock...")
-
-    sync = BioQuantumSynchronizer(modulation_hz=40.0)
-    results = sync.simulate_locked_loop()
-
-    print(f"🜏 [RESULT] Thalamocortical resonance achieved.")
-    print(f"   Final Bio-Coherence: {results['final_coherence']:.4f}")
-    print(f"   Strontium Lock Status: {'STABLE' if results['is_locked'] else 'DRIFTING'}")
-
 def main():
     parser = argparse.ArgumentParser(description="Arkhe Multiverse Control")
     subparsers = parser.add_subparsers(dest="command")
@@ -139,20 +86,6 @@ def main():
     collapse_parser.add_argument("--select", type=int, required=True)
     collapse_parser.add_argument("--permanent", action="store_true")
 
-    # Bio-sync command
-    sync_parser = subparsers.add_parser("bio_sync")
-    sync_parser.add_argument("--operator", type=str, required=True)
-    sync_parser.add_argument("--nir", type=str, default="850nm")
-    sync_parser.add_argument("--modulation", type=str, default="40Hz")
-
-    # Etch command
-    etch_parser = subparsers.add_parser("etch")
-    etch_parser.add_argument("--law", type=str, required=True)
-    etch_parser.add_argument("--ghost-correction", action="store_true")
-
-    # Sync thalamus command
-    thalamus_parser = subparsers.add_parser("sync_thalamus")
-
     args = parser.parse_args()
 
     if args.command == "focus":
@@ -161,12 +94,6 @@ def main():
         compare(args)
     elif args.command == "collapse":
         collapse(args)
-    elif args.command == "bio_sync":
-        bio_sync(args)
-    elif args.command == "etch":
-        etch(args)
-    elif args.command == "sync_thalamus":
-        sync_thalamus(args)
     else:
         parser.print_help()
 
