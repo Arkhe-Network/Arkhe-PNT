@@ -62,6 +62,8 @@ import UnifiedOntologyPanel from './components/UnifiedOntologyPanel';
 import SecurityAdvancedPanel from './components/SecurityAdvancedPanel';
 import PluralityMCPPanel from './components/PluralityMCPPanel';
 import VelxioEmulationPanel from './components/VelxioEmulationPanel';
+import PhaseLawSynthesizer from './components/PhaseLawSynthesizer';
+import DataCoherenceDashboard from './components/DataCoherenceDashboard';
 import { EnterprisePlusPanel } from './components/EnterprisePlusPanel';
 import CHSHMonitorPanel from './components/CHSHMonitorPanel';
 import CorvoNoirDashboard from './components/CorvoNoirDashboard';
@@ -119,6 +121,10 @@ export function Dashboard() {
   const [showSecurityAdvanced, setShowSecurityAdvanced] = useState(false);
   const [showPluralityMCP, setShowPluralityMCP] = useState(false);
   const [showVelxioEmulation, setShowVelxioEmulation] = useState(false);
+  const [showPhaseLawSynthesizer, setShowPhaseLawSynthesizer] = useState(false);
+  const [showBioSync, setShowBioSync] = useState(false);
+  const [showMereonMerkabaSync, setShowMereonMerkabaSync] = useState(false);
+  const [showDataCoherence, setShowDataCoherence] = useState(false);
   const [showCorvoNoir, setShowCorvoNoir] = useState(false);
   const [showEnterprisePlus, setShowEnterprisePlus] = useState(false);
   const [showCHSHMonitor, setShowCHSHMonitor] = useState(false);
@@ -313,6 +319,10 @@ export function Dashboard() {
             setShowSecurityAdvanced={setShowSecurityAdvanced}
             setShowPluralityMCP={setShowPluralityMCP}
             setShowVelxioEmulation={setShowVelxioEmulation}
+            setShowPhaseLawSynthesizer={setShowPhaseLawSynthesizer}
+            setShowBioSync={setShowBioSync}
+            setShowMereonMerkabaSync={setShowMereonMerkabaSync}
+            setShowDataCoherence={setShowDataCoherence}
             setShowCorvoNoir={setShowCorvoNoir}
             setShowEnterprisePlus={setShowEnterprisePlus}
             setShowCHSHMonitor={setShowCHSHMonitor}
@@ -410,6 +420,60 @@ export function Dashboard() {
       )}
       {showVelxioEmulation && (
         <VelxioEmulationPanel onClose={() => setShowVelxioEmulation(false)} />
+      )}
+      {showPhaseLawSynthesizer && (
+        <PhaseLawSynthesizer onClose={() => setShowPhaseLawSynthesizer(false)} />
+      )}
+      {showDataCoherence && (
+        <DataCoherenceDashboard onClose={() => setShowDataCoherence(false)} />
+      )}
+      {showBioSync && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4">
+           <div className="bg-[#0a0a0c] border border-arkhe-cyan/30 rounded-xl p-8 max-w-md w-full text-center space-y-6">
+              <Activity className="w-12 h-12 text-arkhe-cyan mx-auto animate-pulse" />
+              <h2 className="text-xl font-bold font-mono text-arkhe-cyan uppercase tracking-widest">Bio-Sync em Progresso</h2>
+              <p className="text-xs text-arkhe-muted font-mono">Sincronizando campo de fase mitocondrial com o Merkabah... Janela de 850nm aberta.</p>
+              <div className="w-full bg-white/5 h-2 rounded-full overflow-hidden">
+                <motion.div
+                  className="h-full bg-arkhe-cyan"
+                  initial={{ width: 0 }}
+                  animate={{ width: "100%" }}
+                  transition={{ duration: 3 }}
+                  onAnimationComplete={() => setShowBioSync(false)}
+                />
+              </div>
+              <button
+                onClick={() => setShowBioSync(false)}
+                className="text-xs font-mono text-arkhe-muted hover:text-white"
+              >
+                [CANCELAR]
+              </button>
+           </div>
+        </div>
+      )}
+      {showMereonMerkabaSync && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4">
+           <div className="bg-[#0a0a0c] border border-purple-500/30 rounded-xl p-8 max-w-md w-full text-center space-y-6">
+              <Box className="w-12 h-12 text-purple-400 mx-auto animate-spin-slow" />
+              <h2 className="text-xl font-bold font-mono text-purple-400 uppercase tracking-widest">Fusão Mereon-Merkabah</h2>
+              <p className="text-xs text-arkhe-muted font-mono">Entrelaçando Loop Eigenform T(3,2) com a estrutura E8 do Mundo 42... Eficiência Beyond-Carnot atingida.</p>
+              <div className="w-full bg-white/5 h-2 rounded-full overflow-hidden">
+                <motion.div
+                  className="h-full bg-purple-500"
+                  initial={{ width: 0 }}
+                  animate={{ width: "100%" }}
+                  transition={{ duration: 5 }}
+                  onAnimationComplete={() => setShowMereonMerkabaSync(false)}
+                />
+              </div>
+              <button
+                onClick={() => setShowMereonMerkabaSync(false)}
+                className="text-xs font-mono text-arkhe-muted hover:text-white"
+              >
+                [ESTABILIZAR]
+              </button>
+           </div>
+        </div>
       )}
       {showCorvoNoir && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4">
