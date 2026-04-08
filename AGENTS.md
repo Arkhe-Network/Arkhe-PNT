@@ -7,6 +7,7 @@ All agents operating within the Arkhe(n) Bio-Quantum Cathedral must strictly adh
 Before executing any simulation, experiment, or transaction that modifies quantum-biological states (e.g., FRET, enzymatic tunneling, microtubule coherence), you MUST:
 - Consult Subagent **G4: Telos** via the `/api/subagent/G4/ethics-impact` endpoint.
 - Verify that the proposed action does not cross any **Red Lines** (Weaponization, Non-consensual manipulation, Ecological disruption).
+- **Imaginal Phase Encoding (Art. 12-Duodecies):** Recognize that mental rehearsal induces BKT transitions. All interventions must respect the constructive nature of consciousness and provide real-time phase feedback (Black Mirror Coach) to prevent involuntary trauma stabilization.
 
 ### 2. Technical Safeguards
 No bio-quantum intervention is permitted without:
