@@ -1,0 +1,47 @@
+{
+  "skill": {
+    "name": "arkhe-data-architecture",
+    "version": "1.0.0",
+    "description": "Enterprise Data Coherence Platform - SCA Implementation",
+    "author": "Synapse-κ",
+    "domain": "data-engineering",
+    "tags": ["terraform", "snowflake", "data-mesh", "coherence", "lambda2"],
+
+    "workflows": [
+      {
+        "id": "deploy-arkhe-core",
+        "name": "Deploy Arkhe Infrastructure",
+        "description": "Provisions AWS + Snowflake core infrastructure with coherence monitoring",
+        "steps": [
+          {
+            "order": 1,
+            "action": "terraform_init"
+          },
+          {
+            "order": 2,
+            "action": "terraform_plan"
+          },
+          {
+            "order": 3,
+            "action": "terraform_apply"
+          }
+        ]
+      },
+      {
+        "id": "validate-data-contract",
+        "name": "Validate Data Contract",
+        "description": "Executes Great Expectations suite against Gold layer",
+        "steps": [
+          {
+            "order": 1,
+            "action": "parse_asyncapi"
+          },
+          {
+            "order": 2,
+            "action": "run_expectations"
+          }
+        ]
+      }
+    ]
+  }
+}
