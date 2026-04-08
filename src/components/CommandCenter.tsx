@@ -49,6 +49,8 @@ interface CommandCenterProps {
   setShowSecurityAdvanced: (show: boolean) => void;
   setShowPluralityMCP: (show: boolean) => void;
   setShowVelxioEmulation: (show: boolean) => void;
+  setShowPhaseLawSynthesizer?: (show: boolean) => void;
+  setShowBioSync?: (show: boolean) => void;
   setShowCorvoNoir?: (show: boolean) => void;
   setShowEnterprisePlus?: (show: boolean) => void;
   setShowCHSHMonitor?: (show: boolean) => void;
@@ -411,6 +413,12 @@ export function CommandCenter({
             >
               Multiversal Expansion
             </button>
+            <button
+              onClick={() => setShowPhaseLawSynthesizer && setShowPhaseLawSynthesizer(true)}
+              className="w-full py-2 border border-indigo-500/50 text-indigo-400 hover:bg-indigo-500/10 rounded transition-colors uppercase tracking-widest font-bold shadow-[0_0_10px_rgba(99,102,241,0.2)] animate-pulse"
+            >
+              Sintetizador de Leis de Fase
+            </button>
             <button 
               onClick={() => setShowConsciousness(true)}
               className="w-full py-2 border border-arkhe-purple/50 text-arkhe-purple hover:bg-arkhe-purple/10 rounded transition-colors uppercase tracking-widest"
@@ -432,6 +440,12 @@ export function CommandCenter({
               className="w-full py-2 border border-arkhe-cyan/50 text-arkhe-cyan hover:bg-arkhe-cyan/10 rounded transition-colors uppercase tracking-widest"
             >
               Google Bridge
+            </button>
+            <button
+              onClick={() => setShowBioSync && setShowBioSync(true)}
+              className="w-full py-2 border border-arkhe-cyan/50 text-arkhe-cyan hover:bg-arkhe-cyan/10 rounded transition-colors uppercase tracking-widest font-bold shadow-[0_0_10px_rgba(0,255,170,0.2)] animate-pulse"
+            >
+              Protocolo Bio-Sync (NIR)
             </button>
             <button 
               onClick={() => setShowTimechain(true)}
