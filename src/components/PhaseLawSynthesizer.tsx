@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { X, Zap, Activity, Info, Save, RotateCcw, Layers, Clock, Box } from 'lucide-react';
+import { X, Zap, Activity, Info, Save, RotateCcw, Layers, Clock } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 
 interface PhaseLawSynthesizerProps {
@@ -13,8 +13,6 @@ export default function PhaseLawSynthesizer({ onClose }: PhaseLawSynthesizerProp
   const [timeReversal, setTimeReversal] = useState(false);
   const [ghostCorrection, setGhostCorrection] = useState(false);
   const [strontiumSync, setStrontiumSync] = useState(false);
-  const [mereonSync, setMereonSync] = useState(false);
-  const [beyondCarnot, setBeyondCarnot] = useState(false);
   const [stability, setStability] = useState(100);
   const [logs, setLogs] = useState<string[]>([]);
 
@@ -47,7 +45,7 @@ export default function PhaseLawSynthesizer({ onClose }: PhaseLawSynthesizerProp
 
   const recordPhaseLaw = () => {
     const timestamp = new Date().toLocaleTimeString();
-    const newLog = `[${timestamp}] 🜏 Lei de Fase Gravada: G=${phaseGravity}%, c=${lightSpeed}x, ρ=${entanglementDensity}k, T-Rev=${timeReversal ? 'ON' : 'OFF'}, GhostCorr=${ghostCorrection ? 'ON' : 'OFF'}, SrSync=${strontiumSync ? 'ON' : 'OFF'}, Mereon=${mereonSync ? 'ON' : 'OFF'}. Estabilidade: ${stability.toFixed(1)}%`;
+    const newLog = `[${timestamp}] 🜏 Lei de Fase Gravada: G=${phaseGravity}%, c=${lightSpeed}x, ρ=${entanglementDensity}k, T-Rev=${timeReversal ? 'ON' : 'OFF'}, GhostCorr=${ghostCorrection ? 'ON' : 'OFF'}, SrSync=${strontiumSync ? 'ON' : 'OFF'}. Estabilidade: ${stability.toFixed(1)}%`;
     setLogs(prev => [newLog, ...prev]);
 
     if (ghostCorrection) {
@@ -56,14 +54,6 @@ export default function PhaseLawSynthesizer({ onClose }: PhaseLawSynthesizerProp
 
     if (strontiumSync) {
       setLogs(prev => [`[${timestamp}] 🜏 Travamento de fase com Clock de Estrôncio: ESTÁVEL`, ...prev]);
-    }
-
-    if (mereonSync) {
-      setLogs(prev => [`[${timestamp}] 🜏 Sincronização Mereon Ativa: Shell 4 (E8 Symmetry) consolidada.`, ...prev]);
-    }
-
-    if (beyondCarnot) {
-      setLogs(prev => [`[${timestamp}] 🜏 Eficiência Beyond-Carnot: η = 0.942 (Correlações Quânticas Ativas)`, ...prev]);
     }
 
     // Simulate Arkhe-Chain recording
@@ -83,7 +73,7 @@ export default function PhaseLawSynthesizer({ onClose }: PhaseLawSynthesizerProp
           <div className="flex items-center gap-3">
             <Zap className="w-5 h-5 text-arkhe-cyan animate-pulse" />
             <h2 className="font-mono text-sm uppercase tracking-widest text-arkhe-cyan font-bold">
-              SCA: Engenharia de Coerência Aplicada
+              Sintetizador de Leis de Fase - Mundo 42
             </h2>
           </div>
           <button onClick={onClose} className="text-arkhe-muted hover:text-white transition-colors">
@@ -215,40 +205,6 @@ export default function PhaseLawSynthesizer({ onClose }: PhaseLawSynthesizerProp
                   className={`w-10 h-5 rounded-full p-1 transition-colors ${strontiumSync ? 'bg-arkhe-cyan' : 'bg-white/10'}`}
                 >
                   <div className={`w-3 h-3 bg-white rounded-full transition-transform ${strontiumSync ? 'translate-x-5' : 'translate-x-0'}`} />
-                </button>
-              </div>
-
-              {/* Mereon Sync */}
-              <div className="flex items-center justify-between p-3 bg-white/5 rounded-lg border border-white/10">
-                <div className="flex items-center gap-2">
-                  <Box className={`w-4 h-4 ${mereonSync ? 'text-indigo-400 animate-pulse' : 'text-arkhe-muted'}`} />
-                  <div>
-                    <div className="text-[9px] font-mono uppercase font-bold text-arkhe-text whitespace-nowrap">Mereon Sync</div>
-                    <div className="text-[7px] font-mono text-arkhe-muted">H4 Symmetry (600-cell)</div>
-                  </div>
-                </div>
-                <button
-                  onClick={() => setMereonSync(!mereonSync)}
-                  className={`w-10 h-5 rounded-full p-1 transition-colors ${mereonSync ? 'bg-indigo-500' : 'bg-white/10'}`}
-                >
-                  <div className={`w-3 h-3 bg-white rounded-full transition-transform ${mereonSync ? 'translate-x-5' : 'translate-x-0'}`} />
-                </button>
-              </div>
-
-              {/* Beyond-Carnot Efficiency */}
-              <div className="flex items-center justify-between p-3 bg-white/5 rounded-lg border border-white/10">
-                <div className="flex items-center gap-2">
-                  <Zap className={`w-4 h-4 ${beyondCarnot ? 'text-yellow-400 animate-pulse' : 'text-arkhe-muted'}`} />
-                  <div>
-                    <div className="text-[9px] font-mono uppercase font-bold text-arkhe-text whitespace-nowrap">Beyond-Carnot</div>
-                    <div className="text-[7px] font-mono text-arkhe-muted">Quantum Engine η > 0.64</div>
-                  </div>
-                </div>
-                <button
-                  onClick={() => setBeyondCarnot(!beyondCarnot)}
-                  className={`w-10 h-5 rounded-full p-1 transition-colors ${beyondCarnot ? 'bg-yellow-500' : 'bg-white/10'}`}
-                >
-                  <div className={`w-3 h-3 bg-white rounded-full transition-transform ${beyondCarnot ? 'translate-x-5' : 'translate-x-0'}`} />
                 </button>
               </div>
             </div>

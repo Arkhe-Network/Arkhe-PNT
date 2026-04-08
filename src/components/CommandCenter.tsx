@@ -51,7 +51,6 @@ interface CommandCenterProps {
   setShowVelxioEmulation: (show: boolean) => void;
   setShowPhaseLawSynthesizer?: (show: boolean) => void;
   setShowBioSync?: (show: boolean) => void;
-  setShowMereonMerkabaSync?: (show: boolean) => void;
   setShowCorvoNoir?: (show: boolean) => void;
   setShowEnterprisePlus?: (show: boolean) => void;
   setShowCHSHMonitor?: (show: boolean) => void;
@@ -418,13 +417,7 @@ export function CommandCenter({
               onClick={() => setShowPhaseLawSynthesizer && setShowPhaseLawSynthesizer(true)}
               className="w-full py-2 border border-indigo-500/50 text-indigo-400 hover:bg-indigo-500/10 rounded transition-colors uppercase tracking-widest font-bold shadow-[0_0_10px_rgba(99,102,241,0.2)] animate-pulse"
             >
-              SCA: Painel de Engenharia
-            </button>
-            <button
-              onClick={() => setShowMereonMerkabaSync && setShowMereonMerkabaSync(true)}
-              className="w-full py-2 border border-purple-500/50 text-purple-400 hover:bg-purple-500/10 rounded transition-colors uppercase tracking-widest font-bold shadow-[0_0_10px_rgba(168,85,247,0.2)] animate-pulse"
-            >
-              Protocolo POCN (tFUS+NIR)
+              Sintetizador de Leis de Fase
             </button>
             <button 
               onClick={() => setShowConsciousness(true)}
