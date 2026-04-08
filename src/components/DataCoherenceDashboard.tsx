@@ -1,26 +1,15 @@
-import React, { useState, useEffect } from 'react';
-import { X, Database, Activity, TrendingUp, AlertCircle, RefreshCcw, Layout } from 'lucide-react';
+import React from 'react';
+import { X, Database, Activity, AlertCircle, RefreshCcw, Layout } from 'lucide-react';
 import { motion } from 'motion/react';
-
-interface DomainStatus {
-  name: string;
-  lambda2: number;
-  action: string;
-  health: 'STABLE' | 'CRITICAL';
-}
+import { useArkheSimulation } from '../hooks/useArkheSimulation';
 
 interface DataCoherenceDashboardProps {
   onClose: () => void;
 }
 
 export default function DataCoherenceDashboard({ onClose }: DataCoherenceDashboardProps) {
-  const [domains, setDomains] = useState<DomainStatus[]>([
-    { name: 'Finance', lambda2: 0.982, action: 'MAINTAIN', health: 'STABLE' },
-    { name: 'Marketing', lambda2: 0.891, action: 'CIRCUIT_BREAK', health: 'CRITICAL' },
-    { name: 'Operations', lambda2: 0.956, action: 'MAINTAIN', health: 'STABLE' }
-  ]);
-
-  const [overallHealth, setOverallHealth] = useState(0.943);
+  const state = useArkheSimulation();
+  const { domains, overallHealth } = state.scaData;
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm">

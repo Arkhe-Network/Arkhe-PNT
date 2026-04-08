@@ -306,6 +306,14 @@ export let state: SimulationState = {
       action: "First CHSH reading"
     }
   },
+  scaData: {
+    domains: [
+      { name: 'Finance', lambda2: 0.982, action: 'MAINTAIN', health: 'STABLE' },
+      { name: 'Marketing', lambda2: 0.891, action: 'CIRCUIT_BREAK', health: 'CRITICAL' },
+      { name: 'Operations', lambda2: 0.956, action: 'MAINTAIN', health: 'STABLE' }
+    ],
+    overallHealth: 0.943
+  },
   biometrics: {
     livenessScore: 0.99,
     isAuthentic: true,
