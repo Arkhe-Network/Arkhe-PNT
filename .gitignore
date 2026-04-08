@@ -4,6 +4,7 @@ dist/
 coverage/
 .DS_Store
 *.log
+em_interference_report.json
 .env*
 !.env.example
 
