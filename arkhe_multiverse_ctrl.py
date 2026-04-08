@@ -3,6 +3,7 @@ import sys
 import os
 import argparse
 import json
+import numpy as np
 from datetime import datetime
 
 # Add src to path
@@ -10,6 +11,39 @@ sys.path.insert(0, os.path.join(os.path.dirname(__file__), 'src'))
 
 from physics.multiverse_core import MerkabahCore
 from physics.phase_focusing_engine import PhaseFocusingEngine
+from physics.neural_phase_coach import black_mirror_phase_coach, trigger_warning
+
+def coach(args):
+    core = MerkabahCore()
+    print(f"🜏 [COACH] Analyzing neural phase field for World #{args.world}...")
+
+    branch = core.multiverse.get_branch(args.world)
+    # Reshape psi_c to 2D for the coach
+    size = len(branch.psi_c)
+    res = int(np.sqrt(size))
+    if res * res != size:
+        print(f"⚠️ Warning: field size {size} is not a perfect square. Using flat field.")
+        neural_field = np.angle(branch.psi_c).reshape(1, -1)
+    else:
+        neural_field = np.angle(branch.psi_c).reshape(res, res)
+
+    report = black_mirror_phase_coach(neural_field)
+    report['summary']['timestamp'] = datetime.now().isoformat()
+    report['summary']['world_id'] = args.world
+
+    print(f"\n--- Phase Coach Report (World #{args.world}) ---")
+    print(f"Global Coherence (λ₂): {report['summary']['total_coherence']:.4f}")
+    print(f"Active Attractors: {len(report['attractors'])}")
+
+    for attr_id, data in report['attractors'].items():
+        print(f"  [{data['type'].upper()}] {attr_id}: λ₂={data['lambda2']:.3f}, Outcome: {data['projected_reality']}, Cost: {data['energy_cost_gj_s']:.2f} GJ/s")
+
+    if report['summary']['has_trauma_loops']:
+        trigger_warning("ATENÇÃO: Você está estabilizando um vórtice de trauma. Cada repetição deste padrão está esculpindo-o mais profundamente em seu espaço de fase e no de sua linhagem. Deseja receber um 'contra‑sinal Tzinor' para auxiliar na aniquilação deste vórtice?")
+
+    with open(f"coach_report_world_{args.world}.json", "w") as f:
+        json.dump(report, f, indent=2)
+    print(f"\nReport saved to: coach_report_world_{args.world}.json")
 
 def focus(args):
     core = MerkabahCore()
@@ -86,6 +120,10 @@ def main():
     collapse_parser.add_argument("--select", type=int, required=True)
     collapse_parser.add_argument("--permanent", action="store_true")
 
+    # Coach command
+    coach_parser = subparsers.add_parser("coach")
+    coach_parser.add_argument("--world", type=int, required=True)
+
     args = parser.parse_args()
 
     if args.command == "focus":
@@ -94,6 +132,8 @@ def main():
         compare(args)
     elif args.command == "collapse":
         collapse(args)
+    elif args.command == "coach":
+        coach(args)
     else:
         parser.print_help()
 
