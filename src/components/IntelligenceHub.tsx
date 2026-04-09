@@ -1,5 +1,5 @@
 import React from 'react';
-import { Activity, AlertTriangle, Brain, Map as MapIcon, Database, Zap, Satellite, Cpu, MessageSquare } from 'lucide-react';
+import { Activity, AlertTriangle, Brain, Map as MapIcon, Database, Zap, Satellite, Cpu, MessageSquare, Library, Phone } from 'lucide-react';
 import { useArkheSimulation } from '../hooks/useArkheSimulation';
 
 interface ValidatorData {
@@ -247,8 +247,75 @@ export const IntelligenceHub: React.FC<IntelligenceHubProps> = ({ onClose }) => 
                 </div>
               </div>
             </div>
+            {/* 8. External Agent Intelligence (awesome-ai-apps) */}
+            <div className="bg-[#1a1b1e] border border-[#2a2b30] rounded-lg p-5">
+              <div className="flex items-center space-x-2 mb-4">
+                <Library className="w-5 h-5 text-emerald-400" />
+                <h3 className="text-sm font-semibold text-white uppercase tracking-wider">Agent Intelligence Catalog</h3>
+              </div>
+              <p className="text-xs text-white/50 mb-4">80+ Practical AI Agent Recipes & Tutorials</p>
+              <div className="h-48 bg-black/40 rounded-lg border border-emerald-500/30 p-4 overflow-y-auto custom-scrollbar">
+                <div className="space-y-3">
+                  <div className="flex flex-col gap-1">
+                    <span className="text-[10px] text-emerald-400 font-bold uppercase tracking-tighter">Featured Blueprints</span>
+                    <ul className="text-[10px] text-white/70 list-disc list-inside space-y-1">
+                      <li>Deep Researcher (Agno + ScrapeGraph)</li>
+                      <li>AI Hedgefund Analysis Workflow</li>
+                      <li>Multi-agent Research Crews (CrewAI)</li>
+                      <li>LiveKit + Gemini Voice Assistants</li>
+                    </ul>
+                  </div>
+                  <div className="pt-2 border-t border-emerald-500/20">
+                    <a
+                      href="https://github.com/Arindam200/awesome-ai-apps"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-[10px] text-emerald-500 hover:text-emerald-400 flex items-center gap-1"
+                    >
+                      View Source Repository <Library className="w-3 h-3" />
+                    </a>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* 9. Voice Intelligence Infrastructure (RustPBX) */}
+            <div className="bg-[#1a1b1e] border border-[#2a2b30] rounded-lg p-5">
+              <div className="flex items-center space-x-2 mb-4">
+                <Phone className="w-5 h-5 text-arkhe-cyan" />
+                <h3 className="text-sm font-semibold text-white uppercase tracking-wider">Voice Infrastructure</h3>
+              </div>
+              <p className="text-xs text-white/50 mb-4">RustPBX Software-Defined Communication</p>
+              <div className="h-48 bg-black/40 rounded-lg border border-arkhe-cyan/30 p-4 relative overflow-hidden">
+                <div className="absolute inset-0 opacity-10 bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-arkhe-cyan/50 via-transparent to-transparent"></div>
+                <div className="z-10 w-full">
+                  <div className="flex justify-between items-center mb-3">
+                    <span className="text-[10px] font-mono text-arkhe-cyan">SIP Proxy Status</span>
+                    <span className="text-[10px] font-mono text-green-400">ONLINE</span>
+                  </div>
+
+                  <div className="space-y-2">
+                    <div className="p-2 bg-[#3d3a39]/20 rounded border border-[#3d3a39]/30">
+                      <div className="text-[8px] text-[#8b949e] uppercase">Active RWI Channels</div>
+                      <div className="text-xs font-mono text-white">42 Concurrent Streams</div>
+                    </div>
+                    <div className="p-2 bg-[#3d3a39]/20 rounded border border-[#3d3a39]/30">
+                      <div className="text-[8px] text-[#8b949e] uppercase">Protocol Load</div>
+                      <div className="w-full bg-black/40 h-1 rounded-full mt-1 overflow-hidden">
+                        <div className="bg-arkhe-cyan h-full" style={{ width: '12%' }}></div>
+                      </div>
+                    </div>
+                    <div className="pt-2">
+                      <span className="text-[8px] text-[#8b949e] uppercase block mb-1">Last SenseVoice Event</span>
+                      <span className="text-[9px] font-mono text-arkhe-cyan/70 truncate block italic">"Query resolved via P2P ResearchDAG..."</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
             {/* 7. Arkhe-QPU & Timechain */}
-            <div className="bg-[#1a1b1e] border border-[#2a2b30] rounded-lg p-5 lg:col-span-3">
+            <div className="bg-[#1a1b1e] border border-[#2a2b30] rounded-lg p-5 lg:col-span-1 xl:col-span-2">
               <div className="flex items-center space-x-2 mb-4">
                 <Cpu className="w-5 h-5 text-indigo-400" />
                 <h3 className="text-sm font-semibold text-white uppercase tracking-wider">Arkhe-QPU & Timechain</h3>
