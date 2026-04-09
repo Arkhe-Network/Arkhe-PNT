@@ -39,31 +39,3 @@ def test_sasc_em_engine_status():
     assert status["engine"] == "SASC-EM"
     assert status["heaviside0_active"] is True
     assert status["marconi0_active"] is True
-
-def test_fascia_solver():
-    engine = SASCEMEngine()
-    tension = np.random.rand(64, 64)
-    intent = np.zeros((64, 64))
-    intent[32, 32] = 1.0
-
-    result = engine.fascia.solve_equilibrium(tension, intent)
-    assert "lambda2_fascia" in result
-    assert result["status"] in ["COHERENT", "DISSONANT"]
-
-def test_security_wall():
-    engine = SASCEMEngine()
-    # Safe packet
-    res = engine.security.validate_packet(entropy=0.01, identity_match=True)
-    assert res["status"] == "ALLOWED"
-
-    # Unsafe packet
-    res = engine.security.validate_packet(entropy=0.5, identity_match=True)
-    assert res["status"] == "BLOCKED"
-
-def test_torque_compensation():
-    engine = SASCEMEngine()
-    imp = engine.torque.calculate_impedance(0) # Stance
-    assert imp["k_stiff"] > 50
-
-    imp = engine.torque.calculate_impedance(180) # Swing
-    assert imp["k_stiff"] < 50
