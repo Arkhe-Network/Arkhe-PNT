@@ -2,6 +2,7 @@
   "name": "Arkhe Mainnet (The Timechain)",
   "chain": "ARKHE",
   "rpc": [
+    "http://rpc.a1.hyper.space:8545",
     "https://tzinor.arkhe.network",
     "wss://kuramoto.arkhe.network"
   ],
