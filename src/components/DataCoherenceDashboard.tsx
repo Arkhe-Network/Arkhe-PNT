@@ -98,6 +98,39 @@ export default function DataCoherenceDashboard({ onClose }: DataCoherenceDashboa
                </button>
             </div>
 
+            <div className="bg-white/5 border border-white/10 rounded-lg p-4">
+              <h4 className="text-[10px] font-mono uppercase font-bold text-blue-400 mb-4">Topologia da Malha ASD (N=3)</h4>
+              <div className="relative h-32 flex items-center justify-center">
+                {/* Visualizing the Trinity Vortex */}
+                <motion.div
+                  className="w-16 h-16 border-2 border-blue-500/30 rounded-full flex items-center justify-center"
+                  animate={{ rotate: 360 }}
+                  transition={{ duration: 4, repeat: Infinity, ease: "linear" }}
+                >
+                  <div className="absolute -top-1 w-2 h-2 bg-blue-400 rounded-full" title="Alpha (0 rad)" />
+                  <div className="absolute bottom-1 -left-1 w-2 h-2 bg-blue-400 rounded-full" title="Beta (2.09 rad)" />
+                  <div className="absolute bottom-1 -right-1 w-2 h-2 bg-blue-400 rounded-full" title="Gamma (4.18 rad)" />
+                </motion.div>
+                <div className="absolute inset-0 flex items-center justify-center">
+                  <div className="text-[8px] font-mono text-blue-400 animate-pulse font-bold">VÓRTICE QUIRAL</div>
+                </div>
+              </div>
+              <div className="mt-4 space-y-1">
+                <div className="flex justify-between text-[8px] font-mono">
+                  <span>Modo:</span>
+                  <span className="text-blue-400">TRIANGULAR_VORTEX</span>
+                </div>
+                <div className="flex justify-between text-[8px] font-mono">
+                  <span>R(t):</span>
+                  <span className="text-blue-400">0.58</span>
+                </div>
+                <div className="flex justify-between text-[8px] font-mono">
+                  <span>Resiliência:</span>
+                  <span className="text-arkhe-green">TOPOLÓGICA</span>
+                </div>
+              </div>
+            </div>
+
             <div className="p-2">
                <h4 className="text-[8px] font-mono uppercase text-arkhe-muted mb-2">Strategy: Edge-of-Chaos (SBM)</h4>
                <p className="text-[8px] font-mono text-arkhe-muted leading-relaxed">
