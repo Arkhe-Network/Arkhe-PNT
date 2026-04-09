@@ -50,7 +50,6 @@ interface CommandCenterProps {
   setShowPluralityMCP: (show: boolean) => void;
   setShowVelxioEmulation: (show: boolean) => void;
   setShowProofOfIntelligence?: (show: boolean) => void;
-  setShowQubitPipeline?: (show: boolean) => void;
   setShowPhaseLawSynthesizer?: (show: boolean) => void;
   setShowBioSync?: (show: boolean) => void;
   setShowCorvoNoir?: (show: boolean) => void;
@@ -587,13 +586,6 @@ export function CommandCenter({
             >
               <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-brain"><path d="M12 5a3 3 0 1 0-5.997.125 4 4 0 0 0-2.526 5.77 4 4 0 0 0 .556 6.588A4 4 0 1 0 12 18Z"/><path d="M12 5a3 3 0 1 1 5.997.125 4 4 0 0 1 2.526 5.77 4 4 0 0 1-.556 6.588A4 4 0 1 1 12 18Z"/><path d="M15 13a4.5 4.5 0 0 1-3-4 4.5 4.5 0 0 1-3 4"/><path d="M17.599 6.5a3 3 0 0 0 .399-1.375"/></svg>
               <span>Proof of Intelligence</span>
-            </button>
-            <button
-              onClick={() => setShowQubitPipeline && setShowQubitPipeline(true)}
-              className="w-full py-2 border border-arkhe-cyan/50 text-arkhe-cyan hover:bg-arkhe-cyan/10 rounded transition-colors uppercase tracking-widest font-bold shadow-[0_0_10px_rgba(0,255,170,0.2)] animate-pulse flex items-center justify-center space-x-2"
-            >
-              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-cpu"><rect width="16" height="16" x="4" y="4" rx="2"/><rect width="6" height="6" x="9" y="9" rx="1"/><path d="M15 2v2"/><path d="M15 20v2"/><path d="M2 15h2"/><path d="M2 9h2"/><path d="M20 15h2"/><path d="M20 9h2"/><path d="M9 2v2"/><path d="M9 20v2"/></svg>
-              <span>Qubit Sovereignty Pipeline</span>
             </button>
           </div>
         )}
