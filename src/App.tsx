@@ -62,6 +62,8 @@ import UnifiedOntologyPanel from './components/UnifiedOntologyPanel';
 import SecurityAdvancedPanel from './components/SecurityAdvancedPanel';
 import PluralityMCPPanel from './components/PluralityMCPPanel';
 import VelxioEmulationPanel from './components/VelxioEmulationPanel';
+import ProofOfIntelligencePanel from './components/ProofOfIntelligencePanel';
+import QubitPipelinePanel from './components/QubitPipelinePanel';
 import PhaseLawSynthesizer from './components/PhaseLawSynthesizer';
 import { EnterprisePlusPanel } from './components/EnterprisePlusPanel';
 import DataCoherenceDashboard from './components/DataCoherenceDashboard';
@@ -121,6 +123,8 @@ export function Dashboard() {
   const [showSecurityAdvanced, setShowSecurityAdvanced] = useState(false);
   const [showPluralityMCP, setShowPluralityMCP] = useState(false);
   const [showVelxioEmulation, setShowVelxioEmulation] = useState(false);
+  const [showProofOfIntelligence, setShowProofOfIntelligence] = useState(false);
+  const [showQubitPipeline, setShowQubitPipeline] = useState(false);
   const [showPhaseLawSynthesizer, setShowPhaseLawSynthesizer] = useState(false);
   const [showBioSync, setShowBioSync] = useState(false);
   const [showCorvoNoir, setShowCorvoNoir] = useState(false);
@@ -318,6 +322,8 @@ export function Dashboard() {
             setShowSecurityAdvanced={setShowSecurityAdvanced}
             setShowPluralityMCP={setShowPluralityMCP}
             setShowVelxioEmulation={setShowVelxioEmulation}
+            setShowProofOfIntelligence={setShowProofOfIntelligence}
+            setShowQubitPipeline={setShowQubitPipeline}
             setShowPhaseLawSynthesizer={setShowPhaseLawSynthesizer}
             setShowBioSync={setShowBioSync}
             setShowCorvoNoir={setShowCorvoNoir}
@@ -418,6 +424,12 @@ export function Dashboard() {
       )}
       {showVelxioEmulation && (
         <VelxioEmulationPanel onClose={() => setShowVelxioEmulation(false)} />
+      )}
+      {showProofOfIntelligence && (
+        <ProofOfIntelligencePanel onClose={() => setShowProofOfIntelligence(false)} />
+      )}
+      {showQubitPipeline && (
+        <QubitPipelinePanel onClose={() => setShowQubitPipeline(false)} />
       )}
       {showPhaseLawSynthesizer && (
         <PhaseLawSynthesizer onClose={() => setShowPhaseLawSynthesizer(false)} />

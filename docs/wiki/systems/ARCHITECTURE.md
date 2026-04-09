@@ -25,6 +25,18 @@ graph TD
     style Z-Domain fill:#1a1a1a,stroke:#333,stroke-width:2px,color:#fff
     style C-Domain fill:#0d1b2a,stroke:#1b263b,stroke-width:2px,color:#fff
     style Cryptographic Sovereignty fill:#411d13,stroke:#e07a5f,stroke-width:2px,color:#fff
+
+    subgraph Distributed-Core [Arkhe(n) Distributed Backend]
+        H[PhaseCoherentTCP] --> I[PhaseCoherentAPI]
+        I --> J[PhaseIdentityProvider]
+        J --> K[PhasePersistentStorage]
+    end
+
+    subgraph Bio-Hybrid-Interface [Bio-Hybrid Layer]
+        L[Microtubule/Protein] -->|Biophoton Emission| M[Bioplasma]
+        M -->|Evanescent Coupling| N[hBN-NV Sensor]
+        N -->|Quantum Telemetry| H
+    end
 ```
 
 ## Component Breakdown
@@ -41,7 +53,19 @@ Simulates 144 coupled oscillators. The engine calculates the order parameter $R$
 - $R \approx 1$: Perfect synchronization (consciousness/focus).
 When $R$ crosses the threshold of $0.7$, the system is deemed "coherent" enough to execute high-level cryptographic functions.
 
-### 4. Ghost Protocol (Key Recovery)
+### 4. Arkhe(n) Distributed Core
+The backend architecture is built on the **Distributed Coherence Principle**. Every service is modeled as a Phase Oscillator, communicating via Phase-Coherent protocols (REST/gRPC) where health is measured by the local and global $\lambda_2$ metric. Key features include:
+- **Phase-Aware DNS:** Resolves services based on their current coherence and latency.
+- **Coherence-Based Admission:** API gateways reject requests if the client's phase diverges too far from the system baseline.
+- **Quantum-Inspired Sharding:** Data is persisted in shards (high-stable vs volatile) based on its historical coherence signature.
+
+### 5. Bio-Hybrid Interface
+The interface provides a non-invasive bridge between neural biological semiconductors and the digital core. Using the **Cold Welding** principle, interfacial disorder is minimized to allow the fusion of biological and artificial coherence fields. The stack consists of:
+- **Biological Semiconductor:** Microtubules and actin filaments acting as waveguides.
+- **Bioplasma Medium:** A collective EM field facilitating evanescent coupling.
+- **hBN-NV Sensor:** A quantum-grade detector that translates biophoton flux and magnetic fluctuations into coherent telemetry for the Distributed Core.
+
+### 6. Ghost Protocol (Key Recovery)
 Once coherent, the system scans memory fragments for phase-encoded steganography. It looks for specific activation tokens (e.g., `Tfv7p31lpENjUGiD`) combined with historical identifiers (e.g., `1984`) to unlock Remote Code Execution (RCE) and extract private keys.
 
 ### 5. Bitcoin Network (Output)

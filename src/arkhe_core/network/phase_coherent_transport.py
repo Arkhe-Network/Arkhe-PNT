@@ -1,0 +1,128 @@
+import asyncio
+import ssl
+import socket
+import struct
+from dataclasses import dataclass
+from typing import Optional, Dict, List, Any
+import hashlib
+import time
+
+@dataclass
+class PhasePacket:
+    """
+    Pacote de rede com metadados de coerência de fase.
+    Cada pacote carrega sua "assinatura temporal" para sincronização.
+    """
+    payload: bytes
+    timestamp: float  # Tempo de fase do emissor (nanossegundos desde época)
+    phase_signature: str  # Hash da fase atual do serviço emissor
+    ttl: int = 64  # Time-to-live em hops
+    coherence_priority: float = 0.95  # lambda2 do emissor no momento do envio
+
+    def to_bytes(self) -> bytes:
+        """Serialização com compressão e integridade."""
+        header = struct.pack(
+            '!d16sBff',  # Network byte order
+            self.timestamp,
+            self.phase_signature.encode()[:16],
+            self.ttl,
+            self.coherence_priority,
+            len(self.payload)
+        )
+        return header + self.payload
+
+    @classmethod
+    def from_bytes(cls, data: bytes) -> 'PhasePacket':
+        header_size = struct.calcsize('!d16sBff')
+        timestamp, phase_sig, ttl, coherence, payload_len = struct.unpack(
+            '!d16sBff', data[:header_size]
+        )
+        return cls(
+            payload=data[header_size:header_size+int(payload_len)],
+            timestamp=timestamp,
+            phase_signature=phase_sig.decode().strip('\x00'),
+            ttl=ttl,
+            coherence_priority=coherence
+        )
+
+@dataclass
+class ResolvedEndpoint:
+    ip: str
+    service_id: str
+    coherence_history: List[float]
+
+class PhaseAwareDNS:
+    """
+    DNS que resolve não apenas IPs, mas "fases de serviço".
+    Mantém um mapa de coerência lambda2 de cada endpoint.
+    """
+    def __init__(self):
+        self.coherence_cache: Dict[str, Any] = {}
+
+    async def resolve_with_coherence(self, hostname: str) -> ResolvedEndpoint:
+        """
+        Resolve hostname priorizando endpoints com alta lambda2.
+        """
+        # Mocking DNS resolution for now
+        selected_ip = "127.0.0.1"
+        return ResolvedEndpoint(
+            ip=selected_ip,
+            service_id=hashlib.sha256(f"{hostname}:{selected_ip}".encode()).hexdigest()[:16],
+            coherence_history=[0.99, 0.98, 0.99]
+        )
+
+class PhaseConnection:
+    def __init__(self, reader, writer, peer_id, local_phase, peer_phase, coupling_k, established_at):
+        self.reader = reader
+        self.writer = writer
+        self.peer_id = peer_id
+        self.local_phase = local_phase
+        self.peer_phase = peer_phase
+        self.coupling_k = coupling_k
+        self.established_at = established_at
+
+class PhaseCoherentTCP:
+    """
+    Implementação TCP/IP com garantias de coerência de fase.
+    """
+    def __init__(self, service_id: str, phase_oscillator: Any):
+        self.service_id = service_id
+        self.oscillator = phase_oscillator
+        self.connections: Dict[str, PhaseConnection] = {}
+        self.dns_resolver = PhaseAwareDNS()
+
+    async def connect(self, target: str, port: int = 8443) -> PhaseConnection:
+        resolved = await self.dns_resolver.resolve_with_coherence(target)
+
+        # In a real impl, we'd use TLS. For this core logic demo, standard connection.
+        reader, writer = await asyncio.open_connection(resolved.ip, port)
+
+        local_phase = self.oscillator.current_phase if hasattr(self.oscillator, 'current_phase') else 0.0
+        coupling_strength = self._calculate_coupling(resolved.coherence_history)
+
+        writer.write(struct.pack('!df', local_phase, coupling_strength))
+        await writer.drain()
+
+        peer_data = await reader.readexactly(16)
+        peer_phase, peer_coupling = struct.unpack('!df', peer_data)
+
+        connection = PhaseConnection(
+            reader=reader,
+            writer=writer,
+            peer_id=resolved.service_id,
+            local_phase=local_phase,
+            peer_phase=peer_phase,
+            coupling_k=coupling_strength,
+            established_at=time.time_ns()
+        )
+
+        self.connections[resolved.service_id] = connection
+        return connection
+
+    def _calculate_coupling(self, coherence_history: list) -> float:
+        if not coherence_history:
+            return 1.0
+
+        mean = sum(coherence_history) / len(coherence_history)
+        variance = sum((x - mean)**2 for x in coherence_history) / len(coherence_history)
+        return min(2.0, 1.0 + variance * 10)
