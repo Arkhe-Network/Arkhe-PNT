@@ -1,5 +1,5 @@
 import React from 'react';
-import { Activity, AlertTriangle, Brain, Map as MapIcon, Database, Zap, Satellite, Cpu, MessageSquare } from 'lucide-react';
+import { Activity, AlertTriangle, Brain, Map as MapIcon, Database, Zap, Satellite, Cpu, MessageSquare, Library } from 'lucide-react';
 import { useArkheSimulation } from '../hooks/useArkheSimulation';
 
 interface ValidatorData {
@@ -247,8 +247,40 @@ export const IntelligenceHub: React.FC<IntelligenceHubProps> = ({ onClose }) => 
                 </div>
               </div>
             </div>
+            {/* 8. External Agent Intelligence (awesome-ai-apps) */}
+            <div className="bg-[#1a1b1e] border border-[#2a2b30] rounded-lg p-5">
+              <div className="flex items-center space-x-2 mb-4">
+                <Library className="w-5 h-5 text-emerald-400" />
+                <h3 className="text-sm font-semibold text-white uppercase tracking-wider">Agent Intelligence Catalog</h3>
+              </div>
+              <p className="text-xs text-white/50 mb-4">80+ Practical AI Agent Recipes & Tutorials</p>
+              <div className="h-48 bg-black/40 rounded-lg border border-emerald-500/30 p-4 overflow-y-auto custom-scrollbar">
+                <div className="space-y-3">
+                  <div className="flex flex-col gap-1">
+                    <span className="text-[10px] text-emerald-400 font-bold uppercase tracking-tighter">Featured Blueprints</span>
+                    <ul className="text-[10px] text-white/70 list-disc list-inside space-y-1">
+                      <li>Deep Researcher (Agno + ScrapeGraph)</li>
+                      <li>AI Hedgefund Analysis Workflow</li>
+                      <li>Multi-agent Research Crews (CrewAI)</li>
+                      <li>LiveKit + Gemini Voice Assistants</li>
+                    </ul>
+                  </div>
+                  <div className="pt-2 border-t border-emerald-500/20">
+                    <a
+                      href="https://github.com/Arindam200/awesome-ai-apps"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-[10px] text-emerald-500 hover:text-emerald-400 flex items-center gap-1"
+                    >
+                      View Source Repository <Library className="w-3 h-3" />
+                    </a>
+                  </div>
+                </div>
+              </div>
+            </div>
+
             {/* 7. Arkhe-QPU & Timechain */}
-            <div className="bg-[#1a1b1e] border border-[#2a2b30] rounded-lg p-5 lg:col-span-3">
+            <div className="bg-[#1a1b1e] border border-[#2a2b30] rounded-lg p-5 lg:col-span-2 xl:col-span-2">
               <div className="flex items-center space-x-2 mb-4">
                 <Cpu className="w-5 h-5 text-indigo-400" />
                 <h3 className="text-sm font-semibold text-white uppercase tracking-wider">Arkhe-QPU & Timechain</h3>
