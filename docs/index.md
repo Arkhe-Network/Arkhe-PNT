@@ -42,6 +42,7 @@ Welcome to the compounding knowledge base of the Bio-Quantum Cathedral.
 ## 📂 Sources
 - [[wiki/sources/OSINT_BRAZIL|Brazil OSINT Toolkit]]: Synthesis of UNISHKA OSINT resources.
 - [[wiki/sources/OSINT_GLOBAL|Global OSINT Toolkit]]: Synthesis of Awesome OSINT repository resources.
+- [[wiki/sources/AWESOME_AI_APPS|Awesome AI Apps]]: Curated collection of 80+ practical AI agent recipes.
 
 ---
 *Wiki maintained by Arkhe-AI Agents following the [[SCHEMA|LM Wiki Pattern]].*
