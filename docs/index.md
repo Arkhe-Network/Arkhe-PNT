@@ -9,6 +9,7 @@ Welcome to the compounding knowledge base of the Bio-Quantum Cathedral.
 - [[concepts/ONTOLOGY|Ontology]]: Theoretical physics of quantum-biological coherence.
 - [[concepts/RNA_COMPUTING|RNA Computing]]: Molecular logic gates and biological processing.
 - [[concepts/antspace_analysis|Antspace Analysis]]: Swarm intelligence and collective cognitive frameworks.
+- [[concepts/BIOLOGICAL_COHERENCE|Biological Coherence]]: The body as a living crystal and biophoton emitter.
 - [[concepts/rna_mechanisms|RNA Mechanisms]]: Biological substrate details for molecular compute.
 
 ## 🏗️ Systems
