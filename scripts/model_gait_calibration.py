@@ -21,9 +21,6 @@ def model_gait_calibration():
     for step in steps:
         print(f"    - Ritual: {step['ritual']} -> Status: {step['status']}")
 
-    # Added Fascia Integration Step
-    print("    - Ritual: Fascia Sync -> Status: REPUBLIC_OF_TENSION_READY")
-
     print("\n[*] Calibration Summary:")
     print(f"    - Global Stability Margin: {steps[2]['stability_margin']}")
     print(f"    - Phase Error (Void Step): {steps[3]['error_rad']} rad")

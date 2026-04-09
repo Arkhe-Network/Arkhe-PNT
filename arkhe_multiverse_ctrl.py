@@ -12,6 +12,32 @@ sys.path.insert(0, os.path.join(os.path.dirname(__file__), 'src'))
 from physics.multiverse_core import MerkabahCore
 from physics.phase_focusing_engine import PhaseFocusingEngine
 from physics.neural_phase_coach import black_mirror_phase_coach, trigger_warning
+from physics.dqd_search_sim import StanzaDQDSimulator
+
+def dqd_tune(args):
+    print(f"🜏 [DQD] Initializing Stanza Tuning for Device '{args.device}' (World #{args.world})")
+    sim = StanzaDQDSimulator(args.device)
+    report = sim.run_full_tuning()
+
+    print("\n--- DQD Tuning Report ---")
+    print(f"Device: {report['device']}")
+    print(f"Status: {report['status']}")
+    print(f"DQDs Found: {report['dqd_count']}")
+
+    if report['status'] == "SUCCESS":
+        print(f"Max Coherence λ₂: {report['best_lambda2']:.4f}")
+        # Optionally update world coherence
+        core = MerkabahCore()
+        branch = core.multiverse.get_branch(args.world)
+        old_lambda = branch.lambda_2
+        branch.lambda_2 = max(old_lambda, report['best_lambda2'])
+        print(f"World #{args.world} coherence updated: {old_lambda:.4f} -> {branch.lambda_2:.4f}")
+    elif 'error' in report:
+        print(f"Error: {report['error']}")
+
+    with open(f"dqd_report_{args.device}_w{args.world}.json", "w") as f:
+        json.dump(report, f, indent=2)
+    print(f"\nReport saved to: dqd_report_{args.device}_w{args.world}.json")
 
 def coach(args):
     core = MerkabahCore()
@@ -124,6 +150,11 @@ def main():
     coach_parser = subparsers.add_parser("coach")
     coach_parser.add_argument("--world", type=int, required=True)
 
+    # DQD command
+    dqd_parser = subparsers.add_parser("dqd")
+    dqd_parser.add_argument("--world", type=int, required=True)
+    dqd_parser.add_argument("--device", type=str, default="QD-CORE-847")
+
     args = parser.parse_args()
 
     if args.command == "focus":
@@ -134,6 +165,8 @@ def main():
         collapse(args)
     elif args.command == "coach":
         coach(args)
+    elif args.command == "dqd":
+        dqd_tune(args)
     else:
         parser.print_help()
 
