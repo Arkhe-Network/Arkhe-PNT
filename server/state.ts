@@ -312,7 +312,17 @@ export let state: SimulationState = {
       { name: 'Marketing', lambda2: 0.891, action: 'CIRCUIT_BREAK', health: 'CRITICAL' },
       { name: 'Operations', lambda2: 0.956, action: 'MAINTAIN', health: 'STABLE' }
     ],
-    overallHealth: 0.943
+    overallHealth: 0.943,
+    topology: 'KAGOME',
+    globalOrderR: 0.00,
+    topologicalState: 'KAGOME_SPIN_LIQUID',
+    entanglementMode: 'Long-Range (Macro)',
+    atpConsumptionCps: 22000,
+    isSeedingActive: false,
+    isIgnited: true,
+    activeProtocol: 'NONE',
+    protocolLogs: [],
+    lastGateResult: ''
   },
   biometrics: {
     livenessScore: 0.99,
@@ -341,7 +351,25 @@ export let state: SimulationState = {
       coherence: 0.9992,
       timestamp: new Date().toISOString()
     }
-  ]
+  ],
+  networkInfra: {
+    tor: {
+      status: 'CIRCUIT_ESTABLISHING',
+      nodes: ['EntryNode-DE', 'MiddleRelay-BR', 'ExitNode-CH'],
+      latencyMs: 124.5
+    },
+    broker: {
+      status: 'ACTIVE',
+      messagesProcessed: 1042,
+      queueDepth: 0,
+      activeTopics: ['mesh.phase', 'mesh.topology']
+    },
+    redis: {
+      status: 'READY',
+      cacheHits: 8541,
+      memoryUsageMb: 42.8
+    }
+  }
 };
 
 export const generateOrbId = () => {
