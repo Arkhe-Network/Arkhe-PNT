@@ -49,6 +49,16 @@ class ILFMPLLModel:
 
         return float(jitter_rms * 1e15) # to fs
 
+    def calculate_temporal_conductivity(self, kinetic_resistivity: float) -> float:
+        """
+        Temporal Conductivity (Ct) represents the efficiency of synchronization.
+        Ct = 1 / (Jitter * KineticResistivity)
+        """
+        jitter_fs = self.calculate_jitter()
+        # Normalize jitter to a stability factor
+        stability = 1.0 / (1.0 + jitter_fs / 50.0)
+        return float(stability / (1.0 + kinetic_resistivity))
+
     def status(self) -> Dict[str, Any]:
         jitter = self.calculate_jitter()
         return {

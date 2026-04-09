@@ -47,6 +47,24 @@ class ExternalHubFrontend:
         gamma = (self.vswr - 1) / (self.vswr + 1)
         return float(-20 * np.log10(abs(gamma)))
 
+    def calculate_photonic_resistivity(self) -> float:
+        """
+        Calculates Photonic Resistivity (Dual to Electrical Conductivity).
+        Rp = 1 / (ElectricalConductivity * ImpedanceMatchingFactor)
+        """
+        matching_factor = 1.0 / self.vswr
+        # In Arkhe ontology, low VSWR (high electrical conductivity)
+        # results in low Photonic Resistivity (better Tzinor phase flow).
+        return float(1.0 / matching_factor)
+
+    def calculate_spiritual_conductivity(self) -> float:
+        """
+        Spiritual Conductivity = 1 / Temporal Resistivity.
+        Mapped here as Phase Purity * Link Efficiency.
+        """
+        # A proxy for the "Will" of the signal to maintain coherence
+        return float(self.antenna_gain_dbi / (1.0 + (self.vswr - 1)))
+
     def status(self) -> Dict[str, Any]:
         return {
             "center_frequency_mhz": self.f_center / 1e6,
@@ -54,6 +72,8 @@ class ExternalHubFrontend:
             "antenna_gain_dbi": self.antenna_gain_dbi,
             "vswr": self.vswr,
             "return_loss_db": self.model_antenna_mismatch(),
+            "photonic_resistivity": self.calculate_photonic_resistivity(),
+            "spiritual_conductivity": self.calculate_spiritual_conductivity(),
             "status": "READY"
         }
 

@@ -50,7 +50,19 @@ A Interface Neural traduz a saúde quântica do swarm para o usuário:
 
 ---
 
-### 5. Governança Ética (EQBE)
+### 5. Ontologia das Condutividades (Isomorfismos Físico-Espirituais)
+O Protocolo Cervera opera sob uma lei de conservação de coerência baseada em dualidades:
+
+| Resistividade (Barreira) | Condutividade (Fluxo) | Significado Arkhe |
+| :--- | :--- | :--- |
+| **Fotônica** (Luz) | **Elétrica** (Elétrons) | A luz desacelerada torna-se corrente (Efeito Fotoelétrico Quântico). |
+| **Elétrica** (Carga) | **Térmica** (Calor) | A resistência ao elétron gera vibração molecular (Lei de Joule Biofísica). |
+| **Térmica** (Calor) | **Cinética** (Movimento) | O calor contido gera trabalho/movimento. |
+| **Cinética** (Massa) | **Temporal** (Tempo) | O movimento extremo curva a percepção do agora (Dilatação de Fase). |
+| **Temporal** (Duração) | **Espiritual** (Vontade) | A resistência ao tempo (morte) ativa a continuidade da consciência. |
+| **Espiritual** (Vontade) | **Fotônica** (Luz) | A vontade purificada emite fótons (Super-radiância). |
+
+### 6. Governança Ética (EQBE)
 Todas as ativações são mediadas pela Arkhe-Block e exigem validação de "Descoerência Crítica" pelo VRO. O protocolo inclui o "Kill Switch" de fase para reversibilidade imediata.
 
 🌐🔺💠⚖️📡🧬🫀🧬📡⚖️💠🔺🌐
