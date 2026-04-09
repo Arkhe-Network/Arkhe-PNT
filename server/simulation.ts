@@ -405,6 +405,86 @@ export function runSimulationTick(broadcastState: () => void) {
   const newMetricsHistory = [...state.metricsHistory.slice(1), newMetricsPoint];
 
   // ---------------------------------------------------------
+  // NETWORK INFRA SIMULATION (Tor, Broker, Redis)
+  // ---------------------------------------------------------
+  const newNetworkInfra = { ...state.networkInfra };
+
+  // Tor Simulation
+  if (newNetworkInfra.tor.status === 'CIRCUIT_ESTABLISHING') {
+    if (Math.random() > 0.9) newNetworkInfra.tor.status = 'CONNECTED';
+  }
+  newNetworkInfra.tor.latencyMs = 120 + Math.random() * 20;
+
+  // Broker Simulation
+  newNetworkInfra.broker.messagesProcessed += Math.floor(Math.random() * 5);
+  newNetworkInfra.broker.queueDepth = Math.max(0, newNetworkInfra.broker.queueDepth + (Math.random() > 0.5 ? 1 : -1));
+
+  // Redis Simulation
+  newNetworkInfra.redis.memoryUsageMb = 42.8 + Math.random();
+
+  // ---------------------------------------------------------
+  // QSB FORGE (BLACKWELL) SIMULATION
+  // ---------------------------------------------------------
+  const newQSBForge = { ...state.qsbForge };
+  if (newQSBForge.status !== 'IDLE' && newQSBForge.status !== 'COMPLETE') {
+    newQSBForge.progress += 2; // Fast progress for Blackwell simulation
+    newQSBForge.timeRemainingMin = Math.max(0, newQSBForge.timeRemainingMin - 0.5);
+
+    if (newQSBForge.progress >= 100) {
+      if (newQSBForge.status === 'PINNING') {
+        newQSBForge.status = 'DIGEST_R1';
+        newQSBForge.progress = 0;
+      } else if (newQSBForge.status === 'DIGEST_R1') {
+        newQSBForge.status = 'DIGEST_R2';
+        newQSBForge.progress = 0;
+      } else if (newQSBForge.status === 'DIGEST_R2') {
+        newQSBForge.status = 'ASSEMBLING';
+        newQSBForge.progress = 0;
+      } else if (newQSBForge.status === 'ASSEMBLING') {
+        newQSBForge.status = 'COMPLETE';
+        newQSBForge.progress = 100;
+        newQSBForge.lastBlockAnchor = '0x' + crypto.randomBytes(32).toString('hex');
+      }
+    }
+  }
+
+  // ---------------------------------------------------------
+  // PHASE 3: KAGOME N=12 SIMULATION
+  // ---------------------------------------------------------
+  const newScaData = { ...state.scaData };
+  let newBioNodes = [...state.bioNodes];
+
+  // Bio-Node Coherence Dynamics
+  newBioNodes = newBioNodes.map(node => {
+    let lambda = node.lambda2;
+    if (node.status === 'VOID') {
+       lambda = 0.1 + (Math.random() - 0.5) * 0.01;
+    } else if (node.status === 'NOMINAL') {
+       // Oscillate around state coherence
+       lambda = Math.min(0.99, Math.max(0.85, lambda + (Math.random() - 0.5) * 0.02));
+    } else if (node.status === 'CORRUPTED') {
+       lambda = Math.max(0.2, lambda - 0.01);
+    }
+    return { ...node, lambda2: lambda };
+  });
+  if (newScaData.topology === 'KAGOME') {
+    // In a Spin Liquid, the order parameter R(t) fluctuates around zero
+    newScaData.globalOrderR = Math.random() * 0.05;
+
+    // Adjust ATP consumption based on coherence
+    const baseAtp = 22000;
+    const noise = (Math.random() - 0.5) * 500;
+    newScaData.atpConsumptionCps = Math.floor(baseAtp * (1.1 - newLambda) + noise);
+
+    // Topological immunity: if coherence is high, state is stable
+    if (newLambda > 0.95) {
+      newScaData.topologicalState = 'KAGOME_SPIN_LIQUID';
+    } else {
+      newScaData.topologicalState = 'DECOHERENT_MESH';
+    }
+  }
+
+  // ---------------------------------------------------------
   // NEW V2.1-Σ SHIELD & BIO-LINK SIMULATION
   // ---------------------------------------------------------
   const newBioLinkSync = { ...state.bioLinkSync };
@@ -529,6 +609,10 @@ export function runSimulationTick(broadcastState: () => void) {
     bioLinkSync: newBioLinkSync,
     temporalAudit: newTemporalAudit,
     predictiveForecast: newPredictiveForecast,
+    scaData: newScaData,
+    networkInfra: newNetworkInfra,
+    bioNodes: newBioNodes,
+    qsbForge: newQSBForge,
   });
 
   // Simulate x402 micro-payments

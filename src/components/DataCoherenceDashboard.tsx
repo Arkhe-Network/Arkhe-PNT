@@ -1,6 +1,6 @@
-import React from 'react';
-import { X, Database, Activity, AlertCircle, RefreshCcw, Layout } from 'lucide-react';
-import { motion } from 'motion/react';
+import React, { useState } from 'react';
+import { X, Database, Activity, AlertCircle, RefreshCcw, Layout, Shield, Network, Server, Microscope, Zap, Settings, Cpu, Clock, DollarSign } from 'lucide-react';
+import { motion, AnimatePresence } from 'motion/react';
 import { useArkheSimulation } from '../hooks/useArkheSimulation';
 
 interface DataCoherenceDashboardProps {
@@ -31,7 +31,7 @@ export default function DataCoherenceDashboard({ onClose }: DataCoherenceDashboa
           </button>
         </div>
 
-        <div className="p-6 grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div className="p-6 grid grid-cols-1 md:grid-cols-3 gap-6 overflow-y-auto max-h-[85vh] custom-scrollbar">
           {/* Main Score */}
           <div className="md:col-span-2 space-y-6">
             <div className="bg-white/5 border border-white/10 rounded-lg p-6">
@@ -44,6 +44,122 @@ export default function DataCoherenceDashboard({ onClose }: DataCoherenceDashboa
                   className="h-full bg-blue-500"
                   animate={{ width: `${overallHealth * 100}%` }}
                 />
+              </div>
+            </div>
+
+            <div className="bg-white/5 border border-white/10 rounded-lg p-4">
+              <h3 className="text-[10px] font-mono uppercase tracking-widest text-arkhe-muted mb-4 flex items-center gap-2">
+                <Network className="w-3 h-3" />
+                Network Infrastructure Layer
+              </h3>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-3 mb-6">
+                <div className="bg-black/40 border border-white/5 p-3 rounded">
+                  <div className="flex justify-between items-start mb-1">
+                    <span className="text-[8px] font-mono text-arkhe-muted uppercase">Tor Circuit</span>
+                    <Shield className={`w-3 h-3 ${state.networkInfra.tor.status === 'CONNECTED' ? 'text-arkhe-green' : 'text-blue-400'}`} />
+                  </div>
+                  <div className="text-xs font-mono font-bold">{state.networkInfra.tor.status}</div>
+                  <div className="text-[7px] font-mono text-arkhe-muted mt-1">Latency: {state.networkInfra.tor.latencyMs.toFixed(1)}ms</div>
+                </div>
+                <div className="bg-black/40 border border-white/5 p-3 rounded">
+                  <div className="flex justify-between items-start mb-1">
+                    <span className="text-[8px] font-mono text-arkhe-muted uppercase">Message Broker</span>
+                    <Server className="w-3 h-3 text-arkhe-green" />
+                  </div>
+                  <div className="text-xs font-mono font-bold">{state.networkInfra.broker.status}</div>
+                  <div className="text-[7px] font-mono text-arkhe-muted mt-1">Processed: {state.networkInfra.broker.messagesProcessed}</div>
+                </div>
+                <div className="bg-black/40 border border-white/5 p-3 rounded">
+                  <div className="flex justify-between items-start mb-1">
+                    <span className="text-[8px] font-mono text-arkhe-muted uppercase">Redis Cache</span>
+                    <Database className="w-3 h-3 text-arkhe-green" />
+                  </div>
+                  <div className="text-xs font-mono font-bold">{state.networkInfra.redis.status}</div>
+                  <div className="text-[7px] font-mono text-arkhe-muted mt-1">Hits: {state.networkInfra.redis.cacheHits}</div>
+                </div>
+              </div>
+            </div>
+
+            <div className="bg-white/5 border border-white/10 rounded-lg p-4">
+              <div className="flex justify-between items-center mb-4">
+                <h3 className="text-[10px] font-mono uppercase tracking-widest text-arkhe-muted flex items-center gap-2">
+                  <Cpu className="w-3 h-3" />
+                  QSB Blackwell Forge
+                </h3>
+                {state.qsbForge.status === 'COMPLETE' && (
+                  <span className="text-[8px] font-mono text-arkhe-green font-bold bg-arkhe-green/10 px-2 py-0.5 rounded">ANCHORED</span>
+                )}
+              </div>
+
+              <div className="space-y-4">
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-1">
+                    <div className="text-[7px] font-mono text-arkhe-muted uppercase">Fleet Utilization</div>
+                    <div className="text-xs font-mono font-bold flex items-center gap-1">
+                      <Cpu className="w-2.5 h-2.5 text-blue-400" />
+                      {state.qsbForge.gpuCount}x {state.qsbForge.gpuFleet.split(' ')[1]}
+                    </div>
+                  </div>
+                  <div className="space-y-1 text-right">
+                    <div className="text-[7px] font-mono text-arkhe-muted uppercase">Global Hashrate</div>
+                    <div className="text-xs font-mono font-bold text-blue-400">{(state.qsbForge.hashRateMs / 1000).toFixed(1)} G/s</div>
+                  </div>
+                </div>
+
+                <div className="bg-black/40 border border-white/5 p-3 rounded space-y-2">
+                  <div className="flex justify-between items-center">
+                    <div className="text-[8px] font-mono font-bold text-blue-400 uppercase tracking-tighter">
+                      Phase: {state.qsbForge.status}
+                    </div>
+                    <div className="text-[8px] font-mono text-arkhe-muted">
+                      {state.qsbForge.progress.toFixed(0)}%
+                    </div>
+                  </div>
+                  <div className="w-full bg-white/5 h-1.5 rounded-full overflow-hidden">
+                    <motion.div
+                      className="h-full bg-blue-500"
+                      initial={{ width: 0 }}
+                      animate={{ width: `${state.qsbForge.progress}%` }}
+                    />
+                  </div>
+                  <div className="flex justify-between items-center pt-1">
+                    <div className="flex items-center gap-1 text-[7px] font-mono text-arkhe-muted">
+                      <Clock className="w-2 h-2" /> {state.qsbForge.timeRemainingMin.toFixed(1)}m remaining
+                    </div>
+                    <div className="flex items-center gap-1 text-[7px] font-mono text-arkhe-muted">
+                      <DollarSign className="w-2 h-2" /> Est. Cost: ${state.qsbForge.estimatedCostUsd.toFixed(2)}
+                    </div>
+                  </div>
+                </div>
+
+                {state.qsbForge.lastBlockAnchor && (
+                  <div className="text-[7px] font-mono text-arkhe-green truncate border-t border-white/5 pt-2">
+                    L1_ANCHOR: {state.qsbForge.lastBlockAnchor}
+                  </div>
+                )}
+              </div>
+            </div>
+
+            <div className="bg-white/5 border border-white/10 rounded-lg p-4">
+              <h3 className="text-[10px] font-mono uppercase tracking-widest text-arkhe-muted mb-4 flex items-center gap-2">
+                <Microscope className="w-3 h-3" />
+                Bio-Node Mesh Integrity (N=12)
+              </h3>
+              <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 gap-2">
+                {state.bioNodes.map(node => (
+                  <motion.button
+                    key={node.id}
+                    onClick={() => node.status === 'CORRUPTED' && fetch(`/api/bio-nodes/void/${node.id}`, { method: 'POST' })}
+                    className={`p-2 rounded border flex flex-col items-center justify-center gap-1 transition-all ${
+                      node.status === 'VOID' ? 'bg-black border-white/20 text-arkhe-muted opacity-50' :
+                      node.status === 'CORRUPTED' ? 'bg-arkhe-red/10 border-arkhe-red/40 text-arkhe-red animate-pulse cursor-pointer hover:bg-arkhe-red/20' :
+                      'bg-blue-500/5 border-blue-500/20 text-blue-400'
+                    }`}
+                  >
+                    <div className="text-[7px] font-mono font-bold">{node.name}</div>
+                    <div className="text-[9px] font-mono">{(node.lambda2 * 100).toFixed(0)}%</div>
+                  </motion.button>
+                ))}
               </div>
             </div>
 
@@ -88,48 +204,145 @@ export default function DataCoherenceDashboard({ onClose }: DataCoherenceDashboa
 
             <div className="bg-white/5 border border-white/10 rounded-lg p-4 space-y-3">
                <h4 className="text-[10px] font-mono uppercase font-bold text-arkhe-muted">Operational Controls</h4>
-               <button className="w-full py-2 bg-blue-500 text-black font-mono text-[9px] uppercase font-bold rounded hover:bg-white transition-colors flex items-center justify-center gap-2">
+               <button
+                onClick={() => fetch('/api/sca-data/seed', { method: 'POST' })}
+                className="w-full py-2 bg-blue-500 text-black font-mono text-[9px] uppercase font-bold rounded hover:bg-white transition-colors flex items-center justify-center gap-2">
+                 <Database className="w-3 h-3" />
+                 Holographic Seeding
+               </button>
+               <button
+                onClick={() => fetch('/api/sca-data/ignite', { method: 'POST' })}
+                className="w-full py-2 bg-arkhe-green text-black font-mono text-[9px] uppercase font-bold rounded hover:bg-white transition-colors flex items-center justify-center gap-2">
+                 <Activity className="w-3 h-3" />
+                 Global Ignition
+               </button>
+               <div className="grid grid-cols-2 gap-2">
+                 <button
+                  onClick={() => fetch('/api/sca-data/protocol', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ protocol: 'BRAID' }) })}
+                  className="py-2 border border-blue-500/30 text-blue-400 font-mono text-[8px] uppercase rounded hover:bg-blue-500/10 transition-colors">
+                   Protocol [BRAID]
+                 </button>
+                 <button
+                  onClick={() => fetch('/api/sca-data/protocol', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ protocol: 'COMPUTE' }) })}
+                  className="py-2 border border-blue-500/30 text-blue-400 font-mono text-[8px] uppercase rounded hover:bg-blue-500/10 transition-colors">
+                   Protocol [COMPUTE]
+                 </button>
+                 <button
+                  onClick={() => fetch('/api/sca-data/protocol', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ protocol: 'HEAL' }) })}
+                  className="py-2 border border-arkhe-green/30 text-arkhe-green font-mono text-[8px] uppercase rounded hover:bg-arkhe-green/10 transition-colors">
+                   Protocol [HEAL]
+                 </button>
+                 <button
+                  onClick={() => fetch('/api/sca-data/protocol', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ protocol: 'SEAL' }) })}
+                  className="py-2 border border-arkhe-green/30 text-arkhe-green font-mono text-[8px] uppercase rounded hover:bg-arkhe-green/10 transition-colors">
+                   Protocol [SEAL]
+                 </button>
+               </div>
+
+               <div className="pt-2 border-t border-white/5 space-y-2">
+                 <button
+                  onClick={() => fetch('/api/qsb/anchor-cycle', { method: 'POST' })}
+                  disabled={state.qsbForge.status !== 'IDLE'}
+                  className={`w-full py-1.5 font-mono text-[8px] uppercase rounded transition-colors flex items-center justify-center gap-2 ${
+                    state.qsbForge.status === 'IDLE'
+                    ? 'bg-blue-600 text-white hover:bg-blue-500'
+                    : 'bg-white/5 text-arkhe-muted cursor-not-allowed'
+                  }`}>
+                   <Cpu className="w-2 h-2" />
+                   Initiate Blackwell Anchor
+                 </button>
+                 <button
+                  onClick={() => fetch('/api/bio-nodes/scan', { method: 'POST' })}
+                  className="w-full py-1.5 bg-black border border-blue-500/30 text-blue-400 font-mono text-[8px] uppercase rounded hover:bg-blue-500/5 transition-colors flex items-center justify-center gap-2">
+                   <Microscope className="w-2 h-2" />
+                   Scan Bio-Nodes
+                 </button>
+                 <button
+                  onClick={() => fetch('/api/kuramoto/calibrate', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ coupling: 0.3, dispersion: 0.05 }) })}
+                  className="w-full py-1.5 bg-black border border-arkhe-green/30 text-arkhe-green font-mono text-[8px] uppercase rounded hover:bg-arkhe-green/5 transition-colors flex items-center justify-center gap-2">
+                   <Settings className="w-2 h-2" />
+                   Calibrate Engine
+                 </button>
+                 <button
+                  onClick={() => fetch('/api/tzinor/inject', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ payload: 'INITIATE_ARKHE_SEQUENCE', coherence: 0.98 }) })}
+                  className="w-full py-1.5 bg-black border border-arkhe-green/30 text-arkhe-green font-mono text-[8px] uppercase rounded hover:bg-arkhe-green/5 transition-colors flex items-center justify-center gap-2">
+                   <Zap className="w-2 h-2" />
+                   Inject Arkhe Sequence
+                 </button>
+               </div>
+               <button className="w-full py-2 border border-white/10 text-arkhe-text font-mono text-[9px] uppercase rounded hover:bg-white/5 transition-colors flex items-center justify-center gap-2">
                  <RefreshCcw className="w-3 h-3" />
                  Trigger Remediation
-               </button>
-               <button className="w-full py-2 border border-white/10 text-arkhe-text font-mono text-[9px] uppercase rounded hover:bg-white/5 transition-colors flex items-center justify-center gap-2">
-                 <Layout className="w-3 h-3" />
-                 View Lineage
                </button>
             </div>
 
             <div className="bg-white/5 border border-white/10 rounded-lg p-4">
-              <h4 className="text-[10px] font-mono uppercase font-bold text-blue-400 mb-4">Topologia da Malha ASD (N=3)</h4>
-              <div className="relative h-32 flex items-center justify-center">
-                {/* Visualizing the Trinity Vortex */}
-                <motion.div
-                  className="w-16 h-16 border-2 border-blue-500/30 rounded-full flex items-center justify-center"
-                  animate={{ rotate: 360 }}
-                  transition={{ duration: 4, repeat: Infinity, ease: "linear" }}
-                >
-                  <div className="absolute -top-1 w-2 h-2 bg-blue-400 rounded-full" title="Alpha (0 rad)" />
-                  <div className="absolute bottom-1 -left-1 w-2 h-2 bg-blue-400 rounded-full" title="Beta (2.09 rad)" />
-                  <div className="absolute bottom-1 -right-1 w-2 h-2 bg-blue-400 rounded-full" title="Gamma (4.18 rad)" />
-                </motion.div>
-                <div className="absolute inset-0 flex items-center justify-center">
-                  <div className="text-[8px] font-mono text-blue-400 animate-pulse font-bold">VÓRTICE QUIRAL</div>
+              <h4 className="text-[10px] font-mono uppercase font-bold text-blue-400 mb-4">
+                Topologia da Malha ASD (N=12)
+              </h4>
+              <div className="relative h-40 flex items-center justify-center">
+                {/* Visualizing the Kagome Lattice */}
+                <div className="grid grid-cols-3 gap-2 p-2">
+                  {[...Array(12)].map((_, i) => (
+                    <motion.div
+                      key={i}
+                      className="w-4 h-4 border border-blue-500/50 rounded-sm"
+                      animate={{
+                        opacity: [0.3, 1, 0.3],
+                        scale: [1, 1.1, 1],
+                        borderColor: ['#3b82f650', '#00d992', '#3b82f650']
+                      }}
+                      transition={{
+                        duration: 2,
+                        repeat: Infinity,
+                        delay: i * 0.1,
+                      }}
+                    />
+                  ))}
+                </div>
+                <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+                  <div className="text-[8px] font-mono text-blue-400 animate-pulse font-bold bg-black/60 px-2">
+                    {state.scaData.topologicalState}
+                  </div>
                 </div>
               </div>
               <div className="mt-4 space-y-1">
                 <div className="flex justify-between text-[8px] font-mono">
                   <span>Modo:</span>
-                  <span className="text-blue-400">TRIANGULAR_VORTEX</span>
+                  <span className="text-blue-400 font-bold">{state.scaData.entanglementMode}</span>
                 </div>
                 <div className="flex justify-between text-[8px] font-mono">
-                  <span>R(t):</span>
-                  <span className="text-blue-400">0.58</span>
+                  <span>R(t) Global:</span>
+                  <span className="text-blue-400">{state.scaData.globalOrderR.toFixed(3)}</span>
+                </div>
+                <div className="flex justify-between text-[8px] font-mono">
+                  <span>ATP Cons.:</span>
+                  <span className="text-arkhe-green">{state.scaData.atpConsumptionCps} cps</span>
                 </div>
                 <div className="flex justify-between text-[8px] font-mono">
                   <span>Resiliência:</span>
-                  <span className="text-arkhe-green">TOPOLÓGICA</span>
+                  <span className="text-arkhe-green font-bold">TOPOLÓGICA (QSL)</span>
                 </div>
               </div>
             </div>
+
+            {state.scaData.protocolLogs.length > 0 && (
+              <div className="p-2 bg-black/40 rounded border border-white/5">
+                <h4 className="text-[8px] font-mono uppercase text-blue-400 mb-2">Protocol Output: {state.scaData.activeProtocol}</h4>
+                <div className="space-y-1 max-h-32 overflow-y-auto custom-scrollbar">
+                  {state.scaData.protocolLogs.map((log, i) => (
+                    <div key={i} className="text-[7px] font-mono text-arkhe-muted border-l border-white/10 pl-2 leading-tight">
+                      {log}
+                    </div>
+                  ))}
+                </div>
+                {state.scaData.lastGateResult && (
+                  <div className="mt-2 text-[8px] font-mono text-arkhe-green font-bold">
+                    RESULT: {state.scaData.lastGateResult}
+                  </div>
+                )}
+              </div>
+            )}
 
             <div className="p-2">
                <h4 className="text-[8px] font-mono uppercase text-arkhe-muted mb-2">Strategy: Edge-of-Chaos (SBM)</h4>

@@ -39,8 +39,9 @@ export let state: SimulationState = {
   },
   parameters: {
     autoMitigate: true,
-    couplingStrength: 0.5,
+    couplingStrength: 0.3,
     lambdaThreshold: 0.618,
+    frequencyDispersion: 0.05,
   },
   thermodynamics: {
     coherenceC: 0.98,
@@ -312,7 +313,17 @@ export let state: SimulationState = {
       { name: 'Marketing', lambda2: 0.891, action: 'CIRCUIT_BREAK', health: 'CRITICAL' },
       { name: 'Operations', lambda2: 0.956, action: 'MAINTAIN', health: 'STABLE' }
     ],
-    overallHealth: 0.943
+    overallHealth: 0.943,
+    topology: 'KAGOME',
+    globalOrderR: 0.00,
+    topologicalState: 'KAGOME_SPIN_LIQUID',
+    entanglementMode: 'Long-Range (Macro)',
+    atpConsumptionCps: 22000,
+    isSeedingActive: false,
+    isIgnited: true,
+    activeProtocol: 'NONE',
+    protocolLogs: [],
+    lastGateResult: ''
   },
   biometrics: {
     livenessScore: 0.99,
@@ -341,7 +352,48 @@ export let state: SimulationState = {
       coherence: 0.9992,
       timestamp: new Date().toISOString()
     }
-  ]
+  ],
+  networkInfra: {
+    tor: {
+      status: 'CIRCUIT_ESTABLISHING',
+      nodes: ['EntryNode-DE', 'MiddleRelay-BR', 'ExitNode-CH'],
+      latencyMs: 124.5
+    },
+    broker: {
+      status: 'ACTIVE',
+      messagesProcessed: 1042,
+      queueDepth: 0,
+      activeTopics: ['mesh.phase', 'mesh.topology']
+    },
+    redis: {
+      status: 'READY',
+      cacheHits: 8541,
+      memoryUsageMb: 42.8
+    }
+  },
+  bioNodes: [
+    { id: 'MT_ALPHA_001', name: 'Alpha', lambda2: 0.98, status: 'NOMINAL', zStructure: 'VALID', phaseSignature: '0xAlpha' },
+    { id: 'MT_ALPHA_002', name: 'Beta', lambda2: 0.95, status: 'NOMINAL', zStructure: 'VALID', phaseSignature: '0xBeta' },
+    { id: 'MT_ALPHA_003', name: 'Gamma', lambda2: 0.94, status: 'NOMINAL', zStructure: 'VALID', phaseSignature: '0xGamma' },
+    { id: 'MT_ALPHA_004', name: 'Delta', lambda2: 0.94, status: 'NOMINAL', zStructure: 'VALID', phaseSignature: '0xDelta' },
+    { id: 'MT_ALPHA_005', name: 'Epsilon', lambda2: 0.93, status: 'NOMINAL', zStructure: 'VALID', phaseSignature: '0xEpsilon' },
+    { id: 'MT_ALPHA_006', name: 'Zeta', lambda2: 0.95, status: 'NOMINAL', zStructure: 'VALID', phaseSignature: '0xZeta' },
+    { id: 'MT_ALPHA_007', name: 'Eta', lambda2: 0.92, status: 'NOMINAL', zStructure: 'VALID', phaseSignature: '0xEta' },
+    { id: 'MT_ALPHA_008', name: 'Theta', lambda2: 0.96, status: 'NOMINAL', zStructure: 'VALID', phaseSignature: '0xTheta' },
+    { id: 'MT_ALPHA_009', name: 'Iota', lambda2: 0.94, status: 'NOMINAL', zStructure: 'VALID', phaseSignature: '0xIota' },
+    { id: 'MT_ALPHA_010', name: 'Kappa', lambda2: 0.93, status: 'NOMINAL', zStructure: 'VALID', phaseSignature: '0xKappa' },
+    { id: 'MT_ALPHA_011', name: 'Lambda', lambda2: 0.95, status: 'NOMINAL', zStructure: 'VALID', phaseSignature: '0xLambda' },
+    { id: 'MT_ALPHA_012', name: 'Mu', lambda2: 0.68, status: 'CORRUPTED', zStructure: 'INVALID', phaseSignature: '0xMu' }
+  ],
+  qsbForge: {
+    status: 'IDLE',
+    progress: 0,
+    gpuFleet: 'RTX PRO 6000 (Blackwell)',
+    gpuCount: 32,
+    hashRateMs: 7616, // 32 * 238 M/s
+    estimatedCostUsd: 45.0,
+    timeRemainingMin: 0
+  }
 };
 
 export const generateOrbId = () => {
