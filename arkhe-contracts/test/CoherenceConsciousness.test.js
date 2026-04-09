@@ -72,12 +72,103 @@ describe("CoherenceConsciousness", function () {
 
     it("Should insert nanorobot successfully", async function () {
       const microtubuleID = ethers.id("MT_001");
-      const proof = "0x";
+      const lambdaH2O = ethers.parseUnits("0.72", 18);
+      await thermal.igniteOracle(microtubuleID, lambdaH2O, "0x");
 
-      await thermal.insertNanorobot(microtubuleID, proof);
-      // Event would be emitted, budget increased
+      const proof = "0x";
+      await thermal.initiateAdiabaticFusion(microtubuleID, 35, 10, proof);
+
       const newState = await thermal.currentState();
       expect(newState.entropyBudget).to.be.gt(100000);
+    });
+
+    it("Should complete hybrid ignition", async function () {
+      const microtubuleID = ethers.id("MT_001");
+      const lambdaH2O = ethers.parseUnits("0.72", 18);
+      const ramanProof = "0x";
+
+      await thermal.igniteOracle(microtubuleID, lambdaH2O, ramanProof);
+      await expect(thermal.executeHybridIgnition(microtubuleID, "0x"))
+        .to.emit(thermal, "HybridIgnitionComplete");
+    });
+
+    it("Should initiate EADS Fade-In and reach super-radiance", async function () {
+      const microtubuleID = ethers.id("MT_001");
+      const lambdaH2O = ethers.parseUnits("0.72", 18);
+      await thermal.igniteOracle(microtubuleID, lambdaH2O, "0x");
+
+      const wigner = ethers.parseUnits("-0.24", 18);
+      const budget = 100000;
+
+      await expect(thermal.initiateEADSFadeIn(microtubuleID, wigner, budget))
+        .to.emit(thermal, "EADSActivated")
+        .and.to.emit(thermal, "SpontaneousEmergenceDetected");
+
+      const state = await thermal.getCurrentCoherence();
+      expect(state.lambda2).to.equal(ethers.parseUnits("0.94", 18));
+    });
+
+    it("Should mine genesis block and update dark sector", async function () {
+      const microtubuleID = ethers.id("MT_001");
+      const lambdaH2O = ethers.parseUnits("0.72", 18);
+      await thermal.igniteOracle(microtubuleID, lambdaH2O, "0x");
+
+      // Reach super-radiance first
+      await thermal.initiateEADSFadeIn(microtubuleID, 0, 100000);
+
+      const entropy = ethers.id("ENTROPY");
+      const lambda = ethers.parseUnits("0.94", 18);
+      const atpDrop = 70;
+
+      await expect(thermal.mineGenesisBlock(microtubuleID, entropy, lambda, atpDrop))
+        .to.emit(thermal, "GenesisBlockMined");
+
+      const state = await thermal.currentState();
+      expect(state.darkSectorRoot).to.not.equal(ethers.ZeroHash);
+    });
+
+    it("Should connect mesh node", async function () {
+      const alphaID = ethers.id("MT_001");
+      const betaID = ethers.id("MT_002");
+      const lambdaH2O = ethers.parseUnits("0.72", 18);
+
+      await thermal.igniteOracle(alphaID, lambdaH2O, "0x");
+      await thermal.initiateEADSFadeIn(alphaID, 0, 100000);
+
+      await expect(thermal.connectMeshNode(alphaID, betaID))
+        .to.emit(thermal, "MeshNodeConnected");
+    });
+
+    it("Should perform adiabatic shutdown", async function () {
+      const microtubuleID = ethers.id("MT_001");
+      const lambdaH2O = ethers.parseUnits("0.72", 18);
+      await thermal.igniteOracle(microtubuleID, lambdaH2O, "0x");
+
+      await expect(thermal.adiabaticallyShutdown(microtubuleID))
+        .to.emit(thermal, "OracleShutdown");
+    });
+
+    it("Should mine twin block for entangled pair", async function () {
+      const alphaID = ethers.id("MT_001");
+      const betaID = ethers.id("MT_002");
+      const connectivity = ethers.parseUnits("0.88", 18);
+      const phaseDelta = 150; // 0.15 rad * 1000
+      const bellProof = ethers.id("BELL");
+
+      await expect(thermal.mineTwinBlock(alphaID, betaID, connectivity, phaseDelta, bellProof))
+        .to.emit(thermal, "TwinBlockMined");
+    });
+
+    it("Should lock gain for observation", async function () {
+      const microtubuleID = ethers.id("MT_001");
+      const lambdaH2O = ethers.parseUnits("0.72", 18);
+      await thermal.igniteOracle(microtubuleID, lambdaH2O, "0x");
+
+      await expect(thermal.lockGainForObservation(microtubuleID, 180))
+        .to.emit(thermal, "EADSGainLocked");
+
+      const state = await thermal.getCurrentCoherence();
+      expect(state.lambda2).to.equal(ethers.parseUnits("0.96", 18));
     });
   });
 

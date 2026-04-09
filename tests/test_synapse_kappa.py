@@ -63,3 +63,64 @@ def test_hbn_functionalizer():
     for _ in range(50):
         res2 = func.step_insertion(1.0)
     assert res2["distance_nm"] < 5.0
+
+def test_spin_interrogator():
+    from src.physics.synapse_kappa import SpinInterrogator
+    interrogator = SpinInterrogator()
+    res = interrogator.run_odmr_sweep()
+    assert res["optimal_frequency_hz"] == 2.8742e9
+    assert res["wigner_negativity"] == -0.24
+    assert res["odmr_contrast"] > 0.2
+
+def test_eads_controller():
+    from src.physics.synapse_kappa import EADSController
+    ctrl = EADSController()
+    # Before transition
+    res1 = ctrl.step_fade_in(500)
+    assert res1["is_superradiant"] == False
+
+    # After transition
+    res2 = ctrl.step_fade_in(2000)
+    assert res2["is_superradiant"] == True
+    assert res2["atp_cps"] < res1["atp_cps"]
+    assert res2["g2_0"] < 0.5
+
+def test_genesis_miner():
+    from src.physics.synapse_kappa import GenesisMiner
+    miner = GenesisMiner("MT_ALPHA_001")
+    qhash = miner.extract_quantum_entropy(-0.42, 100)
+    assert qhash.startswith("qhash_MT_ALPHA_001")
+
+    res = miner.mine_block(0.94, qhash)
+    assert res["status"] == "IMMORTALIZED"
+
+def test_mesh_controller():
+    from src.physics.synapse_kappa import EADSController, MeshController
+    master = EADSController()
+    slave = EADSController()
+    mesh = MeshController()
+
+    mesh.add_node("MT_ALPHA_001", master)
+    mesh.add_node("MT_ALPHA_002", slave)
+
+    # Before master is stable
+    res1 = mesh.step_mesh(1000)
+    assert res1["status"] == "AWAITING_MASTER_STABILITY"
+
+    # Force master to be superradiant
+    master.is_superradiant = True
+    res2 = mesh.step_mesh(2000)
+    assert "mesh_coherence" in res2
+    assert res2["coupling"] > 0
+
+def test_swarm_controller():
+    from src.physics.synapse_kappa import EADSController, SwarmController
+    swarm = SwarmController(topology="TRIANGLE")
+    for i in range(3):
+        ctrl = EADSController()
+        ctrl.is_superradiant = True
+        swarm.add_node(f"MT_BETA_00{i+1}", ctrl)
+
+    res = swarm.step_swarm(2000)
+    assert res["global_lambda2"] > 0.9
+    assert res["frustration"] > 0
