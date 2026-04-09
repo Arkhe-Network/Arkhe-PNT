@@ -183,6 +183,26 @@ export interface SimulationState {
   temporalAudit: TemporalAuditState;
   predictiveForecast: PredictiveForecastState;
   sensors: SensorState[];
+  networkInfra: NetworkInfraState;
+}
+
+export interface NetworkInfraState {
+  tor: {
+    status: 'CONNECTED' | 'DISCONNECTED' | 'CIRCUIT_ESTABLISHING';
+    nodes: string[];
+    latencyMs: number;
+  };
+  broker: {
+    status: 'ACTIVE' | 'IDLE' | 'ERROR';
+    messagesProcessed: number;
+    queueDepth: number;
+    activeTopics: string[];
+  };
+  redis: {
+    status: 'READY' | 'FAILOVER' | 'OFFLINE';
+    cacheHits: number;
+    memoryUsageMb: number;
+  };
 }
 
 export interface GovernanceManifesto {
@@ -214,6 +234,16 @@ export interface ScaDomain {
 export interface ScaDataState {
   domains: ScaDomain[];
   overallHealth: number;
+  topology: 'TRINITY' | 'KAGOME';
+  globalOrderR: number;
+  topologicalState: string;
+  entanglementMode: string;
+  atpConsumptionCps: number;
+  isSeedingActive: boolean;
+  isIgnited: boolean;
+  activeProtocol: 'NONE' | 'BRAID' | 'COMPUTE' | 'HEAL' | 'SEAL';
+  protocolLogs: string[];
+  lastGateResult: string;
 }
 
 export interface BioLinkSyncState {
@@ -344,7 +374,14 @@ export function useArkheSimulation() {
         { name: 'Marketing', lambda2: 0.891, action: 'CIRCUIT_BREAK', health: 'CRITICAL' },
         { name: 'Operations', lambda2: 0.956, action: 'MAINTAIN', health: 'STABLE' }
       ],
-      overallHealth: 0.943
+      overallHealth: 0.943,
+      topology: 'KAGOME',
+      globalOrderR: 0.0,
+      topologicalState: 'KAGOME_SPIN_LIQUID',
+      entanglementMode: 'Long-Range (Macro)',
+      atpConsumptionCps: 22000,
+      isSeedingActive: false,
+      isIgnited: true
     },
     x402Wallet: {
       address: '0xbf7da1f568684889a69a5bed9f1311f703985590',
@@ -361,7 +398,12 @@ export function useArkheSimulation() {
         status: 'idle'
       }
     },
-    populationFeedback: []
+    populationFeedback: [],
+    networkInfra: {
+      tor: { status: 'CIRCUIT_ESTABLISHING', nodes: [], latencyMs: 0 },
+      broker: { status: 'IDLE', messagesProcessed: 0, queueDepth: 0, activeTopics: [] },
+      redis: { status: 'READY', cacheHits: 0, memoryUsageMb: 0 }
+    }
   });
 
   useEffect(() => {

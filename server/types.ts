@@ -292,6 +292,26 @@ export interface SimulationState {
   biometrics?: BiometricState;
   nare?: NAREStatus;
   populationFeedback: PopulationFeedbackEntry[];
+  networkInfra: NetworkInfraState;
+}
+
+export interface NetworkInfraState {
+  tor: {
+    status: 'CONNECTED' | 'DISCONNECTED' | 'CIRCUIT_ESTABLISHING';
+    nodes: string[];
+    latencyMs: number;
+  };
+  broker: {
+    status: 'ACTIVE' | 'IDLE' | 'ERROR';
+    messagesProcessed: number;
+    queueDepth: number;
+    activeTopics: string[];
+  };
+  redis: {
+    status: 'READY' | 'FAILOVER' | 'OFFLINE';
+    cacheHits: number;
+    memoryUsageMb: number;
+  };
 }
 
 export interface NAREStatus {
@@ -446,4 +466,14 @@ export interface ScaDomain {
 export interface ScaDataState {
   domains: ScaDomain[];
   overallHealth: number;
+  topology: 'TRINITY' | 'KAGOME';
+  globalOrderR: number;
+  topologicalState: string;
+  entanglementMode: string;
+  atpConsumptionCps: number;
+  isSeedingActive: boolean;
+  isIgnited: boolean;
+  activeProtocol: 'NONE' | 'BRAID' | 'COMPUTE' | 'HEAL' | 'SEAL';
+  protocolLogs: string[];
+  lastGateResult: string;
 }

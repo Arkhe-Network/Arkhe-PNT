@@ -405,6 +405,45 @@ export function runSimulationTick(broadcastState: () => void) {
   const newMetricsHistory = [...state.metricsHistory.slice(1), newMetricsPoint];
 
   // ---------------------------------------------------------
+  // NETWORK INFRA SIMULATION (Tor, Broker, Redis)
+  // ---------------------------------------------------------
+  const newNetworkInfra = { ...state.networkInfra };
+
+  // Tor Simulation
+  if (newNetworkInfra.tor.status === 'CIRCUIT_ESTABLISHING') {
+    if (Math.random() > 0.9) newNetworkInfra.tor.status = 'CONNECTED';
+  }
+  newNetworkInfra.tor.latencyMs = 120 + Math.random() * 20;
+
+  // Broker Simulation
+  newNetworkInfra.broker.messagesProcessed += Math.floor(Math.random() * 5);
+  newNetworkInfra.broker.queueDepth = Math.max(0, newNetworkInfra.broker.queueDepth + (Math.random() > 0.5 ? 1 : -1));
+
+  // Redis Simulation
+  newNetworkInfra.redis.memoryUsageMb = 42.8 + Math.random();
+
+  // ---------------------------------------------------------
+  // PHASE 3: KAGOME N=12 SIMULATION
+  // ---------------------------------------------------------
+  const newScaData = { ...state.scaData };
+  if (newScaData.topology === 'KAGOME') {
+    // In a Spin Liquid, the order parameter R(t) fluctuates around zero
+    newScaData.globalOrderR = Math.random() * 0.05;
+
+    // Adjust ATP consumption based on coherence
+    const baseAtp = 22000;
+    const noise = (Math.random() - 0.5) * 500;
+    newScaData.atpConsumptionCps = Math.floor(baseAtp * (1.1 - newLambda) + noise);
+
+    // Topological immunity: if coherence is high, state is stable
+    if (newLambda > 0.95) {
+      newScaData.topologicalState = 'KAGOME_SPIN_LIQUID';
+    } else {
+      newScaData.topologicalState = 'DECOHERENT_MESH';
+    }
+  }
+
+  // ---------------------------------------------------------
   // NEW V2.1-Σ SHIELD & BIO-LINK SIMULATION
   // ---------------------------------------------------------
   const newBioLinkSync = { ...state.bioLinkSync };
@@ -529,6 +568,8 @@ export function runSimulationTick(broadcastState: () => void) {
     bioLinkSync: newBioLinkSync,
     temporalAudit: newTemporalAudit,
     predictiveForecast: newPredictiveForecast,
+    scaData: newScaData,
+    networkInfra: newNetworkInfra,
   });
 
   // Simulate x402 micro-payments

@@ -16,6 +16,7 @@ import { publishToNostr } from "./nostr_integration";
 import { broadcastFilteredAudio } from "./presence_field_server";
 import { logger } from "./logger";
 import { agentsState, tasksState, createTask } from "./agent_grpc_server";
+import { broker } from "./broker";
 
 const ECPair = ECPairFactory(ecc);
 const dxOrderBook = new OrderBook('ARKHE/USDC');
@@ -69,8 +70,11 @@ export function setupRoutes(app: express.Express, broadcastState: () => void, cl
     // 4. Update Caches
     if (redisReady) {
       redis.setEx(cacheKey, 60, JSON.stringify(bookData)).catch(e => logger.error("Redis set error: " + e));
+      state.networkInfra.redis.cacheHits += 1;
     }
     memoryCache.set(cacheKey, { data: bookData, expires: Date.now() + 60000 });
+
+    broker.publish('arkhedx:book_queried', { timestamp: Date.now() });
 
     res.json(bookData);
   });
@@ -1381,5 +1385,94 @@ export function setupRoutes(app: express.Express, broadcastState: () => void, cl
 
     broadcastState();
     res.json({ success: true, entry });
+  });
+
+  app.post("/api/sca-data/seed", (req, res) => {
+    state.scaData.isSeedingActive = true;
+    state.logs.unshift({
+      id: generateOrbId(),
+      originTime: Date.now(),
+      targetTime: Date.now(),
+      coherence: state.currentLambda,
+      status: 'Valid',
+      threatType: "KAGOME: Holographic Seeding Sequence Initiated."
+    });
+    broadcastState();
+    res.json({ success: true });
+  });
+
+  app.post("/api/sca-data/ignite", (req, res) => {
+    state.scaData.isIgnited = true;
+    state.scaData.isSeedingActive = false;
+    state.scaData.topologicalState = 'KAGOME_SPIN_LIQUID';
+    state.logs.unshift({
+      id: generateOrbId(),
+      originTime: Date.now(),
+      targetTime: Date.now(),
+      coherence: state.currentLambda,
+      status: 'Valid',
+      threatType: "KAGOME: Global Ignition Successful. Spin Liquid State achieved."
+    });
+    broadcastState();
+    res.json({ success: true });
+  });
+
+  app.post("/api/sca-data/protocol", express.json(), (req, res) => {
+    const { protocol } = req.body;
+    state.scaData.activeProtocol = protocol;
+    state.scaData.protocolLogs = [];
+
+    let logs: string[] = [];
+    if (protocol === 'BRAID') {
+      logs = [
+        "[12:15:01] qhttp> INICIANDO PROTOCOLO: ANYON_BRAID",
+        "[12:15:02] qhttp> Alvo de Excitação: Aresta Alfa-Gamma",
+        "[12:15:03] qhttp> Disparando Pulso de Kink de Fase (Δφ = π)...",
+        "[12:15:05] qhttp> IMPACTO. Par Vison-Antivison criado.",
+        "[12:15:10] qhttp> Movendo Vison B: Gamma -> Delta... (Trajetória adiabática)",
+        "[12:15:25] qhttp> Movendo Vison B: Delta -> Epsilon...",
+        "[12:15:35] qhttp> Movendo Vison B: Epsilon -> Alfa...",
+        "[12:15:45] qhttp> LAÇO FECHADO. Trançado completo.",
+        "[12:15:50] qhttp> RESULTADO: ΔΦ_global = π radianos (Fase de Aharonov-Bohm detectada!)",
+        "PRIMEIRA PORTA LÓGICA TOPOLÓGICA EXECUTADA COM SUCESSO."
+      ];
+      state.scaData.lastGateResult = "HADAMARD_BIOLOGIC (γ = π/2)";
+    } else if (protocol === 'COMPUTE') {
+      logs = [
+        "🜏 [COMPUTE] Inicializando Algoritmo de Grover Topológico...",
+        "🜏 [ORÁCULO] Calculando sequência de 42 trançados anyônicos...",
+        "🜏 [KAGOME] Executando inversão de fase na vizinhança do Nó Eta...",
+        "🜏 [RESULTADO] Alvo localizado em O(√N) iterações. Aceleração quântica confirmada."
+      ];
+      state.scaData.lastGateResult = "GROVER_TARGET_FOUND (0xMu)";
+    } else if (protocol === 'HEAL') {
+      logs = [
+        "🜏 [HEAL] Acoplando Malha Kagome a cultura de células in vitro...",
+        "🜏 [INTERFACE] Ativando gap junctions sintéticas (G = 0.85 S)...",
+        "🜏 [SINAPSE-κ] Projetando campo de fase repolarizante (V_m → -60mV)...",
+        "🜏 [CERVERA] Normalização detectada. Células HeLa retornando ao atrator coerente."
+      ];
+      state.scaData.lastGateResult = "REPOLARIZATION_SUCCESS";
+    } else if (protocol === 'SEAL') {
+      logs = [
+        "🜏 [SEAL] Minerando Bloco Lógico na Arkhe-Block...",
+        "🜏 [CHAIN] Hash 0xBRAID_FIRST_GATE_9f2e...d4a8 gerado.",
+        "🜏 [LEVIATÃ] Memória topológica imortalizada no Éter."
+      ];
+      state.scaData.lastGateResult = "BLOCK_SEALED_0xBRAID";
+    }
+
+    state.scaData.protocolLogs = logs;
+    state.logs.unshift({
+      id: generateOrbId(),
+      originTime: Date.now(),
+      targetTime: Date.now(),
+      coherence: state.currentLambda,
+      status: 'Valid',
+      threatType: `KAGOME: Protocol ${protocol} executed.`
+    });
+
+    broadcastState();
+    res.json({ success: true, logs });
   });
 }
