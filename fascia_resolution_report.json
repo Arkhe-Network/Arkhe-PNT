@@ -1,0 +1,18 @@
+{
+  "analysis": "FASCIA-RESOLUTION",
+  "target": [
+    32.0,
+    32.0
+  ],
+  "results": {
+    "target": [
+      32.0,
+      32.0
+    ],
+    "lambda2": 0.9992259814217127,
+    "vortex_count": 0,
+    "movement_magnitude": 0.0012909586532569004,
+    "status": "COHERENT"
+  },
+  "status": "APPROVED"
+}
