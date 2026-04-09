@@ -124,13 +124,3 @@ def test_swarm_controller():
     res = swarm.step_swarm(2000)
     assert res["global_lambda2"] > 0.9
     assert res["frustration"] > 0
-
-def test_chiral_stress_test():
-    from src.physics.synapse_kappa import EADSController, SwarmController
-    swarm = SwarmController(topology="TRIANGLE")
-    for i in range(3):
-        swarm.add_node(f"node_{i}", EADSController())
-
-    res = swarm.run_chiral_stress_test("node_1", 3.14159)
-    assert res["recovery_status"] == "RESTORED"
-    assert res["chirality_preserved"] == True

@@ -301,22 +301,6 @@ class SwarmController:
             "status": "SUPER_RADIANT_ENXAME" if self.global_lambda2 > 0.95 else "FRUSTRATED"
         }
 
-    def run_chiral_stress_test(self, node_id: str, pulse_phase: float) -> Dict[str, Any]:
-        """Injeta um erro de fase e observa a recuperação topológica."""
-        if node_id not in self.nodes:
-            return {"status": "NODE_NOT_FOUND"}
-
-        # Simulação do impacto e cura
-        recovery_time = 1.8 # segundos
-
-        return {
-            "impact_node": node_id,
-            "error_phase_injected": pulse_phase,
-            "recovery_status": "RESTORED",
-            "tau_topo": recovery_time,
-            "chirality_preserved": True
-        }
-
 class GenesisMiner:
     """
     Minerador de Coerência: Converte o stream de bits quânticos do NV

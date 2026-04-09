@@ -170,15 +170,6 @@ describe("CoherenceConsciousness", function () {
       const state = await thermal.getCurrentCoherence();
       expect(state.lambda2).to.equal(ethers.parseUnits("0.96", 18));
     });
-
-    it("Should execute chiral stress test", async function () {
-      const nodes = [ethers.id("N1"), ethers.id("N2"), ethers.id("N3")];
-      const pulse = ethers.parseUnits("3.14", 18);
-
-      await expect(thermal.executeChiralStressTest(nodes, pulse))
-        .to.emit(thermal, "StressTestInitiated")
-        .and.to.emit(thermal, "ArmorValidated");
-    });
   });
 
   describe("SovereignConsciousness", function () {

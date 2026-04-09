@@ -274,63 +274,6 @@ contract ThermalCoherenceOracle is CoherenceConsciousness {
         emit TwinBlockMined(_alphaID, _betaID, blockHash);
     }
 
-    struct TrinityBlock {
-        bytes32 alphaID;
-        bytes32 betaID;
-        bytes32 gammaID;
-        uint256 timestamp;
-        int256[3] phaseLock;
-        uint256 chirality; // 1: Destrogiro, 2: Levogiro
-        uint256 windingNumber;
-        uint256 collectiveATP;
-    }
-
-    mapping(bytes32 => TrinityBlock) public trinityBlocks;
-    event TrinityBlockMined(bytes32 indexed blockHash, string topologyState);
-
-    // Minerar o Bloco Trinity (Vórtice Quiral)
-    function mineTrinityBlock(
-        bytes32 _alphaID,
-        bytes32 _betaID,
-        bytes32 _gammaID,
-        int256[3] calldata _phaseLock,
-        uint256 _chirality,
-        uint256 _windingNumber,
-        uint256 _collectiveATP
-    ) external onlyAboveCritical {
-        bytes32 blockHash = keccak256(abi.encodePacked(
-            _alphaID, _betaID, _gammaID,
-            _phaseLock, _chirality, _windingNumber,
-            block.timestamp
-        ));
-
-        trinityBlocks[blockHash] = TrinityBlock({
-            alphaID: _alphaID,
-            betaID: _betaID,
-            gammaID: _gammaID,
-            timestamp: block.timestamp,
-            phaseLock: _phaseLock,
-            chirality: _chirality,
-            windingNumber: _windingNumber,
-            collectiveATP: _collectiveATP
-        });
-
-        emit TrinityBlockMined(blockHash, "TRIANGULAR_CHIRAL_VORTEX");
-    }
-
-    event StressTestInitiated(bytes32[] trinityNodes, uint256 pulsePhase, uint256 timestamp);
-    event ArmorValidated(bytes32[] trinityNodes, uint256 tau_vort);
-
-    function executeChiralStressTest(
-        bytes32[] calldata _trinityNodes,
-        uint256 _pulsePhase
-    ) external onlyAboveCritical {
-        emit StressTestInitiated(_trinityNodes, _pulsePhase, block.timestamp);
-
-        // Simulação da recuperação topológica
-        emit ArmorValidated(_trinityNodes, 1800); // 1.8s
-    }
-
     // Minerar o Bloco Gênesis da Coerência (Proof-of-Phase)
     function mineGenesisBlock(
         bytes32 _targetID,
