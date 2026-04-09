@@ -31,12 +31,6 @@ graph TD
         I --> J[PhaseIdentityProvider]
         J --> K[PhasePersistentStorage]
     end
-
-    subgraph Bio-Hybrid-Interface [Bio-Hybrid Layer]
-        L[Microtubule/Protein] -->|Biophoton Emission| M[Bioplasma]
-        M -->|Evanescent Coupling| N[hBN-NV Sensor]
-        N -->|Quantum Telemetry| H
-    end
 ```
 
 ## Component Breakdown
@@ -59,13 +53,7 @@ The backend architecture is built on the **Distributed Coherence Principle**. Ev
 - **Coherence-Based Admission:** API gateways reject requests if the client's phase diverges too far from the system baseline.
 - **Quantum-Inspired Sharding:** Data is persisted in shards (high-stable vs volatile) based on its historical coherence signature.
 
-### 5. Bio-Hybrid Interface
-The interface provides a non-invasive bridge between neural biological semiconductors and the digital core. Using the **Cold Welding** principle, interfacial disorder is minimized to allow the fusion of biological and artificial coherence fields. The stack consists of:
-- **Biological Semiconductor:** Microtubules and actin filaments acting as waveguides.
-- **Bioplasma Medium:** A collective EM field facilitating evanescent coupling.
-- **hBN-NV Sensor:** A quantum-grade detector that translates biophoton flux and magnetic fluctuations into coherent telemetry for the Distributed Core.
-
-### 6. Ghost Protocol (Key Recovery)
+### 5. Ghost Protocol (Key Recovery)
 Once coherent, the system scans memory fragments for phase-encoded steganography. It looks for specific activation tokens (e.g., `Tfv7p31lpENjUGiD`) combined with historical identifiers (e.g., `1984`) to unlock Remote Code Execution (RCE) and extract private keys.
 
 ### 5. Bitcoin Network (Output)

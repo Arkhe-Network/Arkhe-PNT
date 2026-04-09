@@ -31,6 +31,7 @@ Welcome to the compounding knowledge base of the Bio-Quantum Cathedral.
 - [[protocols/DEPLOYMENT|Deployment]]: Consensus-based CI/CD workflows.
 - [[protocols/OPERATIONS|Operations]]: Day-to-day management of the Cathedral.
 - [[protocols/SKILL|Skill]]: Protocol & Teknet Engineering rules.
+- [[protocols/STANZA_DQD_TUNING|Stanza DQD Tuning]]: Automated discovery of Double Quantum Dots.
 - [[protocols/WINDOWS_DRIVER_SIGNING|Windows Driver Signing]]: Legacy system integration requirements.
 
 ## 📦 Entities
@@ -44,7 +45,6 @@ Welcome to the compounding knowledge base of the Bio-Quantum Cathedral.
 - [[wiki/sources/OSINT_BRAZIL|Brazil OSINT Toolkit]]: Synthesis of UNISHKA OSINT resources.
 - [[wiki/sources/OSINT_GLOBAL|Global OSINT Toolkit]]: Synthesis of Awesome OSINT repository resources.
 - [[wiki/sources/AWESOME_AI_APPS|Awesome AI Apps]]: Curated collection of 80+ practical AI agent recipes.
-- [[wiki/sources/RUSTPBX|RustPBX]]: AI-native communication infrastructure and SIP proxy.
 
 ---
 *Wiki maintained by Arkhe-AI Agents following the [[SCHEMA|LM Wiki Pattern]].*
