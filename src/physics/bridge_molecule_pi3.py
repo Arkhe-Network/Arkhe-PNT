@@ -4,35 +4,32 @@ from typing import Dict, Any, List
 class BridgeMoleculePi3:
     """
     Molecular model for the Bridge Molecule [π3].
-    Naphthalene-2,6-diamide (NDAF) designed to intercalate between
-    Tryptophan (Trp) residues in the tubulin dimer (PDB 1JFF),
-    facilitating resonant exciton transfer via π-stacking.
+    A naphthalene derivative designed to intercalate between Tryptophan (Trp)
+    residues in the tubulin dimer (PDB 1JFF), facilitating resonant exciton
+    transfer via π-stacking.
     """
     def __init__(self):
-        self.name = "Arkhe-π3-NDAF"
-        self.formula = "C12H10N2O2"  # Naphthalene-2,6-diamide
+        self.name = "Arkhe-π3-Bridge"
+        self.formula = "C12H12N2"  # 2,6-bis(aminomethyl)naphthalene
         self.core = "Naphthalene"
-        # Substituents at 2,6 positions: amides provide optimal spacing and
-        # strong hydrogen bonding with protein backbone.
+        # Substituents at 2,6 positions provide optimal spacing and potential
+        # hydrogen bonding with protein backbone or sidechains.
         self.substituents = {
-            "2": "CONH2",
-            "6": "CONH2"
+            "2": "CH2NH2",
+            "6": "CH2NH2"
         }
         self.pi_electrons = 10 # From naphthalene core
 
     def get_electronic_properties(self) -> Dict[str, float]:
         """
-        Returns estimated electronic properties based on NDAF core.
-        Exciton energy identified at 1.8 eV (689 nm).
+        Returns estimated electronic properties based on naphthalene core.
         """
         return {
-            "HOMO_eV": -6.1,
-            "LUMO_eV": -1.5,
+            "HOMO_eV": -5.8,
+            "LUMO_eV": -1.2,
             "gap_eV": 4.6,
-            "exciton_eV": 1.8,
-            "wavelength_nm": 689.0,
-            "polarizability_au": 125.2,
-            "transition_dipole_debye": 1.6
+            "polarizability_au": 120.5,
+            "transition_dipole_debye": 1.4
         }
 
     def model_stacking_interaction(self,
