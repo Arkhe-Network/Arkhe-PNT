@@ -30,6 +30,7 @@ Welcome to the compounding knowledge base of the Bio-Quantum Cathedral.
 - [[protocols/DEPLOYMENT|Deployment]]: Consensus-based CI/CD workflows.
 - [[protocols/OPERATIONS|Operations]]: Day-to-day management of the Cathedral.
 - [[protocols/SKILL|Skill]]: Protocol & Teknet Engineering rules.
+- [[protocols/STANZA_DQD_TUNING|Stanza DQD Tuning]]: Automated discovery of Double Quantum Dots.
 - [[protocols/WINDOWS_DRIVER_SIGNING|Windows Driver Signing]]: Legacy system integration requirements.
 
 ## 📦 Entities
