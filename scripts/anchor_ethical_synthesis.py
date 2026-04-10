@@ -63,23 +63,6 @@ def anchor_synthesis():
         anchored_assets.append(anchor_data)
         print(f"✨ Anchored Primordial AKA #{asset.id}: {asset.synthesis_type}")
 
-    print("\n--- PHASE TEMPLE DESIGN ---")
-    blueprint = engine.phase_temple_design()
-    anchor_data = {
-        "token_id": blueprint.id,
-        "name": blueprint.name,
-        "geometry": blueprint.geometry,
-        "surfaces": blueprint.surfaces,
-        "rhythm": blueprint.rhythm,
-        "location": blueprint.location,
-        "fidelity": blueprint.fidelity,
-        "metadata_uri": f"qhttp://arkhe-block/temple/{blueprint.id}",
-        "anchored_at": datetime.now().isoformat(),
-        "status": "ANCHORED_BLUEPRINT"
-    }
-    anchored_assets.append(anchor_data)
-    print(f"🏛️ Anchored Blueprint AKA #{blueprint.id}: {blueprint.name}")
-
     # Write results to a report file
     report_path = "arkhe_ethical_anchoring_report.json"
     with open(report_path, 'w', encoding='utf-8') as f:
