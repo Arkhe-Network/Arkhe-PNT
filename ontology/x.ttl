@@ -175,3 +175,30 @@ x:verifiedBy a owl:ObjectProperty ;
     rdfs:domain x:EQBEProtocol ;
     rdfs:range x:Organization ;
     rdfs:comment "A organização ou comitê que verifica a conformidade com o protocolo." .
+
+### --- QNC & ETHICAL SYNTHESIS EXTENSIONS ---
+
+x:QuantumNeuralComputer a owl:Class ;
+    rdfs:subClassOf x:Tzinor ;
+    rdfs:label "Quantum Neural Computer (QNC)" ;
+    rdfs:comment "An architecture where computation, memory, and I/O are unified in a coherent quantum state (Merkabah)." .
+
+x:IndefiniteCausalOrder a owl:Class ;
+    rdfs:subClassOf x:Phase ;
+    rdfs:label "Indefinite Causal Order (ICO)" ;
+    rdfs:comment "A quantum superposition of different causal sequences, enabling ethical synthesis." .
+
+x:EthicalSynthesis a owl:Class ;
+    rdfs:subClassOf x:Structure ;
+    rdfs:label "Ethical Synthesis" ;
+    rdfs:comment "A stable grounded state (attractor) resulting from the resolution of ethical dilemmas via ICO." .
+
+x:hasFidelity a owl:DatatypeProperty ;
+    rdfs:domain x:EthicalSynthesis ;
+    rdfs:range xsd:float ;
+    rdfs:comment "The fidelity score (F) of the synthesis as measured by the VRO." .
+
+x:anchoredIn a owl:ObjectProperty ;
+    rdfs:domain x:EthicalSynthesis ;
+    rdfs:range x:SmartContract ;
+    rdfs:comment "Associates a synthesis with its on-chain anchor (e.g., KnowledgeAsset)." .
