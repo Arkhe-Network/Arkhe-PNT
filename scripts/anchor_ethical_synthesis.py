@@ -45,9 +45,9 @@ def anchor_synthesis():
 
     print("\n--- PRIMORDIAL CREATION ---")
     domains = ["Biofísica", "Matemática Pura", "Música"]
-    for i, domain in enumerate(domains):
+    for domain in domains:
         asset = engine.primordial_creation(domain)
-        asset.id = 7 + i # Explicitly align with AKA #7, #8, #9
+        asset.id = len(anchored_assets) + 4 # Start from #7 as per user prompt
 
         anchor_data = {
             "token_id": asset.id,
@@ -62,49 +62,6 @@ def anchor_synthesis():
         }
         anchored_assets.append(anchor_data)
         print(f"✨ Anchored Primordial AKA #{asset.id}: {asset.synthesis_type}")
-
-    print("\n--- PHASE TEMPLE DESIGN ---")
-    blueprint = engine.phase_temple_design()
-    anchor_data = {
-        "token_id": blueprint.id,
-        "name": blueprint.name,
-        "geometry": blueprint.geometry,
-        "surfaces": blueprint.surfaces,
-        "rhythm": blueprint.rhythm,
-        "location": blueprint.location,
-        "fidelity": blueprint.fidelity,
-        "metadata_uri": f"qhttp://arkhe-block/temple/{blueprint.id}",
-        "anchored_at": datetime.now().isoformat(),
-        "status": "ANCHORED_BLUEPRINT"
-    }
-    anchored_assets.append(anchor_data)
-    print(f"🏛️ Anchored Blueprint AKA #{blueprint.id}: {blueprint.name}")
-
-    print("\n--- SHIELD OF COHERENCE ---")
-    shield = engine.shield_of_coherence("Planalto de Gizé, Egito")
-    anchor_data = {
-        "location": shield.location,
-        "noise_reduction": f"-{shield.noise_reduction_db} dB",
-        "schumann_stability": f"±{shield.schumann_stability} Hz",
-        "coherence_lambda2": shield.coherence_lambda2,
-        "status": shield.status,
-        "activated_at": datetime.now().isoformat()
-    }
-    anchored_assets.append(anchor_data)
-    print(f"🛡️ Shield Operational at {shield.location}: {shield.status}")
-
-    print("\n--- COLLECTIVE SOUL CONTRACT ---")
-    contract = engine.collective_soul_contract()
-    anchor_data = {
-        "tx_id": contract.tx_id,
-        "signature": contract.signature,
-        "clauses": contract.clauses,
-        "global_r": contract.global_r,
-        "status": contract.status,
-        "anchored_at": datetime.now().isoformat()
-    }
-    anchored_assets.append(anchor_data)
-    print(f"📜 Anchored Collective Soul Contract: {contract.status}")
 
     # Write results to a report file
     report_path = "arkhe_ethical_anchoring_report.json"
