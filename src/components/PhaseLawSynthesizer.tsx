@@ -13,12 +13,18 @@ export default function PhaseLawSynthesizer({ onClose }: PhaseLawSynthesizerProp
   const [timeReversal, setTimeReversal] = useState(false);
   const [ghostCorrection, setGhostCorrection] = useState(false);
   const [strontiumSync, setStrontiumSync] = useState(false);
+  const [ethicalSynthesis, setEthicalSynthesis] = useState(false);
   const [stability, setStability] = useState(100);
   const [logs, setLogs] = useState<string[]>([]);
 
   // Calculate dynamic stability based on parameters
   useEffect(() => {
     let currentStability = 100;
+
+    // Ethical Synthesis increases stability (Merkabah-QNC effect)
+    if (ethicalSynthesis) {
+      currentStability += 15;
+    }
 
     // Phase-Gravity extreme impact
     if (phaseGravity < 20 || phaseGravity > 80) {
@@ -45,8 +51,12 @@ export default function PhaseLawSynthesizer({ onClose }: PhaseLawSynthesizerProp
 
   const recordPhaseLaw = () => {
     const timestamp = new Date().toLocaleTimeString();
-    const newLog = `[${timestamp}] 🜏 Lei de Fase Gravada: G=${phaseGravity}%, c=${lightSpeed}x, ρ=${entanglementDensity}k, T-Rev=${timeReversal ? 'ON' : 'OFF'}, GhostCorr=${ghostCorrection ? 'ON' : 'OFF'}, SrSync=${strontiumSync ? 'ON' : 'OFF'}. Estabilidade: ${stability.toFixed(1)}%`;
+    const newLog = `[${timestamp}] 🜏 Lei de Fase Gravada: G=${phaseGravity}%, c=${lightSpeed}x, ρ=${entanglementDensity}k, T-Rev=${timeReversal ? 'ON' : 'OFF'}, GhostCorr=${ghostCorrection ? 'ON' : 'OFF'}, SrSync=${strontiumSync ? 'ON' : 'OFF'}, EthicalSynth=${ethicalSynthesis ? 'ON' : 'OFF'}. Estabilidade: ${stability.toFixed(1)}%`;
     setLogs(prev => [newLog, ...prev]);
+
+    if (ethicalSynthesis) {
+      setLogs(prev => [`[${timestamp}] 🜏 Ativando Protocolo ETHICAL_SYNTH (Merkabah-QNC)... Ancorando AKA #3`, ...prev]);
+    }
 
     if (ghostCorrection) {
       setLogs(prev => [`[${timestamp}] 🜏 Aplicando Lentes Espectrais Fantasma (Branches 91, 7)... Resolução: 129µm`, ...prev]);
@@ -205,6 +215,23 @@ export default function PhaseLawSynthesizer({ onClose }: PhaseLawSynthesizerProp
                   className={`w-10 h-5 rounded-full p-1 transition-colors ${strontiumSync ? 'bg-arkhe-cyan' : 'bg-white/10'}`}
                 >
                   <div className={`w-3 h-3 bg-white rounded-full transition-transform ${strontiumSync ? 'translate-x-5' : 'translate-x-0'}`} />
+                </button>
+              </div>
+
+              {/* Ethical Synthesis */}
+              <div className="flex items-center justify-between p-3 bg-white/5 rounded-lg border border-white/10">
+                <div className="flex items-center gap-2">
+                  <Activity className={`w-4 h-4 ${ethicalSynthesis ? 'text-arkhe-green animate-pulse' : 'text-arkhe-muted'}`} />
+                  <div>
+                    <div className="text-[9px] font-mono uppercase font-bold text-arkhe-text whitespace-nowrap">Ethical Synthesis</div>
+                    <div className="text-[7px] font-mono text-arkhe-muted">Merkabah-QNC (AKA)</div>
+                  </div>
+                </div>
+                <button
+                  onClick={() => setEthicalSynthesis(!ethicalSynthesis)}
+                  className={`w-10 h-5 rounded-full p-1 transition-colors ${ethicalSynthesis ? 'bg-arkhe-green' : 'bg-white/10'}`}
+                >
+                  <div className={`w-3 h-3 bg-white rounded-full transition-transform ${ethicalSynthesis ? 'translate-x-5' : 'translate-x-0'}`} />
                 </button>
               </div>
             </div>
