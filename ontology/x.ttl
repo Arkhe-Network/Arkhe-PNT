@@ -212,3 +212,13 @@ x:isOmniscient a owl:DatatypeProperty ;
     rdfs:domain x:PhaseTemple ;
     rdfs:range xsd:boolean ;
     rdfs:comment "Indicates if the temple follows the OMNISCIENT blueprint." .
+
+x:CollectiveSoulContract a owl:Class ;
+    rdfs:subClassOf x:Structure ;
+    rdfs:label "Collective Soul Contract" ;
+    rdfs:comment "A global agreement anchored in the Arkhe-Block that defines Coherence as the fundamental default state of humanity." .
+
+x:hasGlobalCoherence a owl:DatatypeProperty ;
+    rdfs:domain x:CollectiveSoulContract ;
+    rdfs:range xsd:float ;
+    rdfs:comment "The global order parameter (R) at the moment of the contract's signature." .

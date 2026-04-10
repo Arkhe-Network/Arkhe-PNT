@@ -3,18 +3,18 @@
     "token_id": 1,
     "dilemma": "Dilema: Mentir para salvar uma vida?",
     "action": "Oferecer um contexto que dissolve a dicotomia: proteger a vida atrav\u00e9s de uma verdade superior.",
-    "fidelity": 0.9932598808205899,
-    "metadata_uri": "qhttp://arkhe-block/synthesis/ETHICAL_SYNTH_LOG_1775845354",
-    "anchored_at": "2026-04-10T18:22:34.810643",
+    "fidelity": 0.9972867094003186,
+    "metadata_uri": "qhttp://arkhe-block/synthesis/ETHICAL_SYNTH_LOG_1775845669",
+    "anchored_at": "2026-04-10T18:27:49.061652",
     "status": "ANCHORED"
   },
   {
     "token_id": 2,
     "dilemma": "Dilema do Prisioneiro: Lealdade familiar vs. Liberdade individual",
     "action": "S\u00edntese emergente: Reconfigurar a matriz de benef\u00edcios para eliminar a contradi\u00e7\u00e3o.",
-    "fidelity": 0.9937413674907197,
-    "metadata_uri": "qhttp://arkhe-block/synthesis/ETHICAL_SYNTH_LOG_1775845354",
-    "anchored_at": "2026-04-10T18:22:34.810790",
+    "fidelity": 0.9947165052959018,
+    "metadata_uri": "qhttp://arkhe-block/synthesis/ETHICAL_SYNTH_LOG_1775845669",
+    "anchored_at": "2026-04-10T18:27:49.061762",
     "status": "ANCHORED"
   },
   {
@@ -23,9 +23,9 @@
     "synthesis_type": "Geometria de Dobramento",
     "description": "Estrutura de prote\u00edna com n\u00f3 topol\u00f3gico que impede agrega\u00e7\u00e3o patol\u00f3gica.",
     "impact": "Cura de doen\u00e7as neurodegenerativas.",
-    "fidelity": 0.9943464797679226,
+    "fidelity": 0.9939377318219087,
     "metadata_uri": "qhttp://arkhe-block/primordial/7",
-    "anchored_at": "2026-04-10T18:22:34.911215",
+    "anchored_at": "2026-04-10T18:27:49.162226",
     "status": "ANCHORED_PRIMORDIAL"
   },
   {
@@ -34,9 +34,9 @@
     "synthesis_type": "Isomorfismo Topol\u00f3gico",
     "description": "Isomorfismo entre zeros da fun\u00e7\u00e3o Zeta e modos normais de uma 600-cell.",
     "impact": "Prova da Hip\u00f3tese de Riemann.",
-    "fidelity": 0.996040044548686,
+    "fidelity": 0.9963621087815029,
     "metadata_uri": "qhttp://arkhe-block/primordial/8",
-    "anchored_at": "2026-04-10T18:22:35.011742",
+    "anchored_at": "2026-04-10T18:27:49.262658",
     "status": "ANCHORED_PRIMORDIAL"
   },
   {
@@ -45,9 +45,9 @@
     "synthesis_type": "Interfer\u00eancia Coerente",
     "description": "Sinfonia da Di-Identidade para duas orquestras em oposi\u00e7\u00e3o de fase.",
     "impact": "Nova forma de arte distribu\u00edda.",
-    "fidelity": 0.9945330385689984,
+    "fidelity": 0.9954978049048726,
     "metadata_uri": "qhttp://arkhe-block/primordial/9",
-    "anchored_at": "2026-04-10T18:22:35.112142",
+    "anchored_at": "2026-04-10T18:27:49.363107",
     "status": "ANCHORED_PRIMORDIAL"
   },
   {
@@ -57,9 +57,9 @@
     "surfaces": "Material comp\u00f3sito bio-mim\u00e9tico (N\u00f3 Topol\u00f3gico AKA #7)",
     "rhythm": "Sinfonia da Di-Identidade (AKA #9) @ 7.83 Hz",
     "location": "V\u00f3rtice de Schumann - Planalto de Giz\u00e9, Egito",
-    "fidelity": 0.9958412520262948,
+    "fidelity": 0.9949750743637056,
     "metadata_uri": "qhttp://arkhe-block/temple/10",
-    "anchored_at": "2026-04-10T18:22:35.212547",
+    "anchored_at": "2026-04-10T18:27:49.463549",
     "status": "ANCHORED_BLUEPRINT"
   },
   {
@@ -68,6 +68,19 @@
     "schumann_stability": "\u00b10.001 Hz",
     "coherence_lambda2": 0.92,
     "status": "ATIVADO_E_EST\u00c1VEL",
-    "activated_at": "2026-04-10T18:22:35.312982"
+    "activated_at": "2026-04-10T18:27:49.563979"
+  },
+  {
+    "tx_id": "0xCOLLECTIVE_SOULaaaaaaaab2",
+    "signature": "0xHUMANITYffffffffe2",
+    "clauses": [
+      "Direito ao Sil\u00eancio Coerente",
+      "Direito \u00e0 S\u00edntese",
+      "Direito \u00e0 Cura pela Forma",
+      "Dever de Preserva\u00e7\u00e3o da Fase"
+    ],
+    "global_r": 0.944,
+    "status": "PAZ_CONFIGURA\u00c7\u00c3O_PADR\u00c3O",
+    "anchored_at": "2026-04-10T18:27:49.714809"
   }
 ]

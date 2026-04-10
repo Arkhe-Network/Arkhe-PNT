@@ -93,6 +93,19 @@ def anchor_synthesis():
     anchored_assets.append(anchor_data)
     print(f"🛡️ Shield Operational at {shield.location}: {shield.status}")
 
+    print("\n--- COLLECTIVE SOUL CONTRACT ---")
+    contract = engine.collective_soul_contract()
+    anchor_data = {
+        "tx_id": contract.tx_id,
+        "signature": contract.signature,
+        "clauses": contract.clauses,
+        "global_r": contract.global_r,
+        "status": contract.status,
+        "anchored_at": datetime.now().isoformat()
+    }
+    anchored_assets.append(anchor_data)
+    print(f"📜 Anchored Collective Soul Contract: {contract.status}")
+
     # Write results to a report file
     report_path = "arkhe_ethical_anchoring_report.json"
     with open(report_path, 'w', encoding='utf-8') as f:
