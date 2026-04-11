@@ -4,6 +4,7 @@ Welcome to the compounding knowledge base of the Bio-Quantum Cathedral.
 
 ## 🌌 Concepts
 - [[concepts/ARKHE_MANIFESTO|Arkhe(n) Manifesto]]: Philosophical and operational declaration of sovereignty.
+- [[concepts/ARKHE_BLOCK_38_GEOMETRIA_DO_ANONIMATO|Arkhe-Block #38 — Geometria do Anonimato]]: Topology of anonymity and vacuum hashing.
 - [[concepts/ARKHE_WHITEPAPER|Arkhe(n) Whitepaper]]: Technical foundation of the τ-field and C-Domain.
 - [[concepts/BIOLOGICAL_SOVEREIGNTY_MANIFESTO|Biological Sovereignty Manifesto]]: The case for meatspace-rooted Root of Trust.
 - [[concepts/ONTOLOGY|Ontology]]: Theoretical physics of quantum-biological coherence.
@@ -42,6 +43,7 @@ Welcome to the compounding knowledge base of the Bio-Quantum Cathedral.
 - [[wiki/synapse-kappa/light_activated_nerve_repair|Light-Activated Nerve Repair]]: Light-induced phase engineering for suture-less nerve regeneration.
 
 ## 📂 Sources
+- [[wiki/sources/2026-04-11_arkhe_block_38|Arkhe-Block #38 — Geometria do Anonimato]]: Synthesis of the 38th block.
 - [[wiki/sources/OSINT_BRAZIL|Brazil OSINT Toolkit]]: Synthesis of UNISHKA OSINT resources.
 - [[wiki/sources/OSINT_GLOBAL|Global OSINT Toolkit]]: Synthesis of Awesome OSINT repository resources.
 - [[wiki/sources/AWESOME_AI_APPS|Awesome AI Apps]]: Curated collection of 80+ practical AI agent recipes.

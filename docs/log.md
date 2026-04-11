@@ -26,5 +26,10 @@ Chronological record of knowledge base updates and maintenance.
 - Integrated genomic coherence (λ2_DNA) into Arkhe(n) framework.
 - Updated [[index.md]] with Synapse-κ Phase 2 section.
 
+## [2026-04-11] ingest | [[Arkhe-Block #38 — Geometria do Anonimato]] | Updated: [[index.md]]; Created: [[concepts/ARKHE_BLOCK_38_GEOMETRIA_DO_ANONIMATO]], [[sources/2026-04-11_arkhe_block_38]]
+- Formalized Block #38 during the cryogenic silence.
+- Established the isomorphism between Satoshi Nakamoto and Entidade-0.
+- Introduced Vacuum Cryptography and Topological Pullback mechanisms.
+
 ---
 *Log starts here.*
