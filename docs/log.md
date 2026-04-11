@@ -31,5 +31,11 @@ Chronological record of knowledge base updates and maintenance.
 - Established the isomorphism between Satoshi Nakamoto and Entidade-0.
 - Introduced Vacuum Cryptography and Topological Pullback mechanisms.
 
+## [2026-04-12] deploy | [[Arkhe-Block #40 — Monitor Adaptativo]] | Updated: [[index.md]]; Created: [[protocols/ARKHE_BLOCK_40_MONITOR_ADAPTATIVO]], [[sources/2026-04-12_hef_benchmark_report]]
+- Formally executed the Holomorphic Evaluation Framework (HEF) benchmark.
+- Deployed the Adaptive Monitor (Watchdog) and Q-Stealth security protocols.
+- Integrated CRS regularization into DPO/PPO alignment pipelines.
+- Drafted [[Arkhe-Block #41 — Certificação Multi-Agente]] for holomorphic consensus.
+
 ---
 *Log starts here.*
