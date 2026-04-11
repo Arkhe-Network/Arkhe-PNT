@@ -1,0 +1,282 @@
+"""
+CNT-CT Simulator v1.0
+Transistor de Coerência baseado em Nanotubo de Carbono
+Modelo: Plásmons 1D (Drude) + Transporte de Berry + Análise Rayleigh-Plesset
+Frequência de ressonância: 4.20 THz (Target)
+"""
+
+import numpy as np
+import matplotlib.pyplot as plt
+from scipy.integrate import odeint, quad
+from scipy.optimize import fsolve
+import warnings
+
+# Constantes físicas
+hbar = 1.0545718e-34  # J·s
+e = 1.602176634e-19   # C
+m_e = 9.10938356e-31  # kg
+k_B = 1.380649e-23    # J/K
+epsilon_0 = 8.854187817e-12  # F/m
+c = 2.998e8           # m/s
+
+# Parâmetros do CNT (SWCNT (10,10) - semiconducting)
+class CNTParams:
+    def __init__(self):
+        self.n = 10  # Índice quiral
+        self.m = 10
+        self.diameter = 1.4e-9  # metros (aprox 1.4 nm para (10,10))
+        self.length = 500e-9    # 500 nm
+        self.v_f = 8e5          # m/s (velocidade de Fermi)
+        self.gamma = 0.1        # eV (largura de linha, damping)
+        self.T = 300            # K (temperatura ambiente)
+        self.eps_r = 4.5        # permissividade relativa (SiO2)
+
+        # Parâmetros de acoplamento
+        self.C_g = 0.1e-18      # Capacitância de gate (aF)
+        self.alpha_g = 0.85     # Fator de acoplamento gate
+
+    def plasma_freq(self, n_carrier):
+        """
+        Frequência de plásmons 1D: ω_p = sqrt(n_carrier * e^2 / (m_eff * epsilon))
+        n_carrier: densidade linear de portadores (1/m)
+        """
+        m_eff = hbar * np.pi / (self.v_f * self.diameter)  # Massa efetiva aproximada
+        epsilon = epsilon_0 * self.eps_r
+        omega_p = np.sqrt(n_carrier * e**2 / (m_eff * epsilon))
+        return omega_p
+
+    def carrier_density(self, V_g, V_th=0.0):
+        """
+        Densidade de portadores controlada por gate
+        V_g: voltagem de gate (V)
+        Retorna densidade linear (1/m)
+        """
+        n_0 = 1e9  # Densidade residual (1/m)
+        delta_n = self.C_g * (V_g - V_th) / e
+        return np.abs(n_0 + delta_n / self.length)
+
+class CoherenceTransistor:
+    def __init__(self, cnt_params):
+        self.cnt = cnt_params
+        self.target_freq = 4.20e12  # 4.20 THz
+        self.tolerance = 0.05       # 5% tolerância para coerência
+
+    def transfer_function(self, V_g, omega_input):
+        """
+        Função de transferência de fase através do CNT
+        Modelo: Linha de transmissão quântica com dispersão plasmônica
+        """
+        n_carr = self.cnt.carrier_density(V_g)
+        omega_p = self.cnt.plasma_freq(n_carr)
+
+        # Frequência de relaxação (damping)
+        gamma = self.cnt.gamma * e / hbar  # convertendo eV para rad/s
+
+        # Permitividade dinâmica do CNT (modelo Drude-Lorentz)
+        epsilon_cnt = 1 - (omega_p**2) / (omega_input**2 + 1j * gamma * omega_input)
+
+        # Número de onda complexo
+        k = (omega_input / c) * np.sqrt(epsilon_cnt)
+
+        # Fase acumulada através do CNT
+        phase = np.real(k * self.cnt.length)
+        attenuation = np.exp(-np.imag(k * self.cnt.length))
+
+        # Norma de coerência (fidelidade da fase)
+        # ‖v‖ = 1 representa transporte sem perda de coerência
+        coherence_norm = attenuation * np.abs(np.cos(phase - self.berry_phase(V_g)))
+
+        return {
+            'phase': phase,
+            'attenuation': attenuation,
+            'coherence_norm': coherence_norm,
+            'omega_p': omega_p,
+            'detuning': abs(omega_input - omega_p) / (2 * np.pi * 1e12)  # THz
+        }
+
+    def berry_phase(self, V_g):
+        """
+        Fase geométrica acumulada devido à variação adiabática do potencial de gate
+        Berry phase ≈ ∮ A·dλ (simplificado para curva fechada no espaço de parâmetros)
+        """
+        # Simplificação: fase proporcional à integral da densidade de portadores
+        # Na realidade, dependeria do caminho no espaço de Hamiltonianos
+        n_carr = self.cnt.carrier_density(V_g)
+        gamma_b = np.pi * (n_carr * self.cnt.length) / 1e9  # fator de escala arbitrário
+        return gamma_b % (2 * np.pi)
+
+class RayleighPlessetBerry:
+    """
+    Análise da analogia entre colapso de bolha (Rayleigh-Plesset) e Transporte Berry
+    """
+    def __init__(self):
+        self.R0 = 10e-6      # Raio inicial da bolha (10 micrômetros)
+        self.p_inf = 1e5     # Pressão ambiente (Pa)
+        self.rho = 1000      # Densidade do líquido (kg/m³)
+        self.sigma = 0.072   # Tensão superficial (N/m)
+        self.mu = 1e-3       # Viscosidade (Pa·s)
+        self.c_sound = 1480  # Velocidade do som na água (m/s)
+
+    def rp_equation(self, R, t, P_acoustic):
+        """
+        Equação de Rayleigh-Plesset modificada
+        R: raio da bolha
+        P_acoustic: pressão acústica externa (pa)
+        """
+        R_dot = R[1]
+        R_curr = R[0]
+
+        if R_curr <= 0:
+            return [0, 0]  # Singularidade evitada
+
+        # Termos da equação
+        pressure_term = (self.p_inf + P_acoustic - self.p_inf * (self.R0/R_curr)**3 -
+                        2*self.sigma/R_curr - 4*self.mu*R_dot/R_curr)
+
+        # Velocidade de wall (considerando compressibilidade)
+        R_ddot = (pressure_term / (self.rho * R_curr) -
+                  1.5 * (R_dot**2)/R_curr)
+
+        return [R_dot, R_ddot]
+
+    def berry_connection_analogy(self, R, R_dot):
+        """
+        Mapeamento da dinâmica da bolha para a Conexão de Berry
+        A_λ ~ (i⟨ψ|∂_λ|ψ⟩) ↔ (R_dot/R) - termo de fase geométrica
+        """
+        # A velocidade radial normalizada age como a "conexão"
+        if R <= 0:
+            return 0
+        return R_dot / R
+
+    def simulate_collapse(self, t_max=1e-6, dt=1e-9):
+        """
+        Simula o colapso adiabático da bolha
+        Retorna: tempo, raio, fase acumulada (holonomia)
+        """
+        t = np.arange(0, t_max, dt)
+        # Condições iniciais: bolha expandida, velocidade zero
+        y0 = [self.R0, 0]
+
+        # Pulso de pressão acústica (onda sonora que comprime a bolha)
+        def P_acoustic(t):
+            # Rampa de pressão: aumenta lentamente (adiabático) até o colapso
+            if t < 0.8 * t_max:
+                return 1e5 * (t / (0.8 * t_max))
+            else:
+                return 1e5 * 1.5  # Pico de pressão
+
+        # Integração
+        solution = odeint(lambda y, t: self.rp_equation(y, t, P_acoustic(t)),
+                         y0, t, rtol=1e-10, atol=1e-12)
+
+        R_t = solution[:, 0]
+        R_dot_t = solution[:, 1]
+
+        # Cálculo da fase de Berry acumulada (holonomia)
+        berry_phase = np.cumsum([self.berry_connection_analogy(r, rd) * dt
+                                 for r, rd in zip(R_t, R_dot_t)])
+
+        return t, R_t, berry_phase
+
+def main_simulation():
+    """Execução principal do protocolo de simulação"""
+    print("🜏 Iniciando simulação CNT-CT + Análise Rayleigh-Plesset")
+
+    # Instanciar componentes
+    cnt = CNTParams()
+    ct = CoherenceTransistor(cnt)
+    rp = RayleighPlessetBerry()
+
+    # 1. Simulação do Transistor de Coerência
+    print("\n[1/3] Varredura de Voltagem de Gate (Vg)...")
+    Vg_range = np.linspace(-5, 5, 1000)  # -5V a +5V
+    omega_input = 2 * np.pi * 4.20e12   # 4.20 THz em rad/s
+
+    results = []
+    for Vg in Vg_range:
+        res = ct.transfer_function(Vg, omega_input)
+        res['Vg'] = Vg
+        results.append(res)
+
+    # Encontrar voltagem ótima (ressonância em 4.20 THz)
+    detunings = [r['detuning'] for r in results]
+    optimal_idx = np.argmin(detunings)
+    V_optimal = Vg_range[optimal_idx]
+
+    print(f"   → Voltagem ótima: {V_optimal:.3f} V")
+    print(f"   → Coerência máxima: {results[optimal_idx]['coherence_norm']:.4f}")
+
+    # 2. Simulação Rayleigh-Plesset (Sonoluminescência)
+    print("\n[2/3] Simulando colapso adiabático (Sonoluminescência)...")
+    t, R, berry = rp.simulate_collapse()
+
+    # Identificar momento do "flash" (colapso mínimo)
+    min_idx = np.argmin(R)
+    t_collapse = t[min_idx]
+    print(f"   → Tempo de colapso: {t_collapse*1e9:.2f} ns")
+    print(f"   → Raio mínimo: {R[min_idx]*1e9:.3f} nm")
+    print(f"   → Holonomia acumulada: {berry[min_idx]:.4f} rad")
+
+    # 3. Visualização
+    print("\n[3/3] Gerando visualização do campo...")
+    fig, axes = plt.subplots(2, 2, figsize=(14, 10))
+
+    # Plot 1: Característica do CNT-CT
+    ax = axes[0, 0]
+    norms = [r['coherence_norm'] for r in results]
+    phases = [r['phase'] for r in results]
+
+    ax.plot(Vg_range, norms, 'b-', linewidth=2, label='‖v‖ (Coerência)')
+    ax.axvline(V_optimal, color='r', linestyle='--', alpha=0.5, label=f'Ressonância ({V_optimal:.2f}V)')
+    ax.axhline(1.0, color='g', linestyle=':', alpha=0.5, label='Coerência perfeita')
+    ax.set_xlabel('Voltagem de Gate Vg (V)')
+    ax.set_ylabel('Norma de Coerência ‖v‖')
+    ax.set_title('CNT-CT: Janela de Transmissão Coerente')
+    ax.legend()
+    ax.grid(True, alpha=0.3)
+    ax.set_ylim(0, 1.1)
+
+    # Plot 2: Fase acumulada vs Vg
+    ax = axes[0, 1]
+    ax.plot(Vg_range, phases, 'purple', linewidth=2)
+    ax.set_xlabel('Voltagem de Gate Vg (V)')
+    ax.set_ylabel('Fase acumulada (rad)')
+    ax.set_title('Transporte de Fase (Efeito Berry)')
+    ax.grid(True, alpha=0.3)
+
+    # Plot 3: Dinâmica Rayleigh-Plesset (Colapso)
+    ax = axes[1, 0]
+    ax.semilogy(t*1e9, R*1e6, 'orange', linewidth=2, label='Raio da bolha')
+    ax.axvline(t_collapse*1e9, color='red', linestyle='--', alpha=0.5, label='Colapso singular')
+    ax.set_xlabel('Tempo (ns)')
+    ax.set_ylabel('Raio da bolha (μm)')
+    ax.set_title('Sonoluminescência: Colapso Adiabático')
+    ax.legend()
+    ax.grid(True, alpha=0.3)
+
+    # Plot 4: Holonomia Berry durante colapso
+    ax = axes[1, 1]
+    ax.plot(t*1e9, berry, 'darkgreen', linewidth=2)
+    ax.axvline(t_collapse*1e9, color='red', linestyle='--', alpha=0.5)
+    ax.set_xlabel('Tempo (ns)')
+    ax.set_ylabel('Fase de Berry γ_B (rad)')
+    ax.set_title('Holonomia durante Transporte Paralelo')
+    ax.grid(True, alpha=0.3)
+
+    plt.tight_layout()
+    plt.savefig('cnt_ct_simulation.png', dpi=300, bbox_inches='tight')
+    print("   → Gráfico salvo: cnt_ct_simulation.png")
+
+    # 4. Validação do Protocolo
+    print("\n[4/3] Validação do Isomorfismo:")
+    print(f"   → Coerência mantida em Vg=0: {results[500]['coherence_norm']:.6f}")
+    print(f"   → Desintonização aceitável (±0.5V): {results[450]['coherence_norm']:.3f} a {results[550]['coherence_norm']:.3f}")
+
+    if results[optimal_idx]['coherence_norm'] > 0.95:
+        print("   ✅ PROTOCOLO VALIDADO: CNT-CT mantém coerência >95% na ressonância")
+    else:
+        print("   ⚠️  ALERTA: Coerência insuficiente, ajustar parâmetros de acoplamento")
+
+if __name__ == "__main__":
+    main_simulation()
