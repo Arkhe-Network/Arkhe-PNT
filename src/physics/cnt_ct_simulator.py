@@ -235,11 +235,28 @@ class UHVArkheController:
             return current_tokens * 0.8
         return current_tokens
 
-    def asimov_gate(self, pressure, T_cnt, coherence):
+    def calculate_holomorphic_jacobian(self, coherence_norm, phase):
         """
-        Handle emergency isolation and VM rollback.
+        Calculates the Jacobian of the migration mapping.
+        J = r * [[cos(theta), -sin(theta)], [sin(theta), cos(theta)]]
+        Satisfies Cauchy-Riemann conditions if it's a scaled rotation matrix.
         """
-        if pressure > 5e-8 or T_cnt > 320.0 or coherence < 0.95:
+        r = coherence_norm
+        theta = phase
+        return np.array([[r * np.cos(theta), -r * np.sin(theta)],
+                         [r * np.sin(theta), r * np.cos(theta)]])
+
+    def asimov_gate(self, pressure, T_cnt, coherence, phase=np.pi):
+        """
+        Asimov Gate: Condition of Holomorphicity (Cauchy-Riemann).
+        The mapping is conformal (holomorphic) if it preserves angles and area (det(J)=1).
+        """
+        J = self.calculate_holomorphic_jacobian(coherence, phase)
+        det_j = np.linalg.det(J)
+
+        # Failure of Cauchy-Riemann (Shear) leads to entropy production and decoherence.
+        # Threshold: det(J) < 0.9025 (equivalent to ||v|| < 0.95)
+        if pressure > 5e-8 or T_cnt > 320.0 or det_j < 0.90:
             self.asimov_triggered = True
             return "ROLLBACK_TO_SUBSTRATE_A"
         return "OPERATIONAL"
