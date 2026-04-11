@@ -35,6 +35,27 @@ class CNTParams:
         self.C_g = 0.1e-18      # Capacitância de gate (aF)
         self.alpha_g = 0.85     # Fator de acoplamento gate
 
+        # Propriedades mecânicas para UHV-ARKHE v2.1
+        self.E_young = 1e12     # 1 TPa
+        self.V_mech = 0.0       # Voltagem de compensação eletromecânica
+
+    def radial_expansion(self, n_carrier):
+        """
+        Calcula a expansão radial relativa dR/R devido ao estresse eletrostritivo.
+        """
+        # Delta R / R = sigma_Coulomb / E_young
+        # sigma_Coulomb approx (n*e)^2 / (2*pi*eps0*epsr*E_young*R^2)
+        # Usando a fórmula do protocolo:
+        epsilon = epsilon_0 * self.eps_r
+        sigma_coulomb = (n_carrier * self.length * e)**2 / (2 * np.pi * epsilon * self.E_young * (self.diameter/2)**2)
+
+        # Compensação por V_mech
+        # V_mech = -0.2V gera uma pre-compressão que subtrai do estresse
+        compression = np.abs(self.V_mech) * 0.015 # Fator de escala para o efeito de gate mecânico
+
+        dr_r = sigma_coulomb / self.E_young - compression
+        return dr_r
+
     def plasma_freq(self, n_carrier):
         """
         Frequência de plásmons 1D: ω_p = sqrt(n_carrier * e^2 / (m_eff * epsilon))
@@ -53,7 +74,14 @@ class CNTParams:
         """
         n_0 = 1e9  # Densidade residual (1/m)
         delta_n = self.C_g * (V_g - V_th) / e
-        return np.abs(n_0 + delta_n / self.length)
+
+        # Efeito da expansão radial na capacitância (C_g depende do diâmetro)
+        # C_g approx 2*pi*eps / ln(2h/r) -> Pequena variação com r
+        n_curr = np.abs(n_0 + delta_n / self.length)
+        dr_r = self.radial_expansion(n_curr)
+
+        # Feedback: expansão expõe novos sítios, mas aqui modelamos apenas a mudança de densidade efetiva
+        return n_curr * (1.0 - 0.1 * dr_r) # Aproximação do efeito de "respiração"
 
 class CoherenceTransistor:
     def __init__(self, cnt_params):
@@ -104,6 +132,185 @@ class CoherenceTransistor:
         n_carr = self.cnt.carrier_density(V_g)
         gamma_b = np.pi * (n_carr * self.cnt.length) / 1e9  # fator de escala arbitrário
         return gamma_b % (2 * np.pi)
+
+class MemoryExpansionModel:
+    """
+    Simulates VM memory expansion (Fantasma-0) and its impact on the CNT.
+    Maps parameters/tokens to carrier density and current.
+    """
+    def __init__(self):
+        self.params_active = 7e9  # 7B base
+        self.tokens_per_cycle = 2048
+        self.h_t_dim = 768
+
+    def get_current_density(self, params, tokens):
+        """
+        Calcula a densidade de corrente baseada na carga de trabalho da VM.
+        J approx (params/7B) * (tokens/2048) * 10^6 A/cm^2
+        """
+        J_base = 1e6 # A/cm^2
+        J = (params / 7e9) * (tokens / 2048) * J_base
+        return J
+
+    def get_carrier_injection(self, params):
+        """
+        Delta n approx 10^8 cm^-2 para cada bit adicional (simplificado).
+        """
+        n_base = 1e8 # cm^-2
+        delta_params = params - 7e9
+        # Supondo 32 bits por parâmetro para simplificação de pegada de memória
+        delta_n = (delta_params * 32 / 7e9) * n_base
+        return delta_n * 1e4 # convertendo para m^-2
+
+class ThermalModel:
+    """
+    Tracks CNT temperature considering Joule heating and cooling systems.
+    """
+    def __init__(self, initial_temp=300.0):
+        self.T_cnt = initial_temp
+        self.C_thermal = 1e-9  # J/K (Capacidade térmica muito baixa para um único CNT)
+        self.R_thermal_contacts = 1e6 # K/W (Resistência térmica para os contatos)
+        self.peltier_cooling_power = 0.0
+        self.sideband_cooling_active = False
+
+    def calculate_joule_heating(self, I_drain, R_cnt):
+        """
+        P = I^2 * R
+        """
+        return (I_drain**2) * R_cnt
+
+    def step(self, I_drain, R_cnt, T_env, dt):
+        """
+        dT/dt = (P_heating - P_cooling - (T - T_env)/R_thermal) / C_thermal
+        """
+        P_heating = self.calculate_joule_heating(I_drain, R_cnt)
+
+        # Cooling mechanisms
+        P_cooling = self.peltier_cooling_power
+        if self.sideband_cooling_active:
+            # Cancelamento ativo de fônons
+            P_cooling += P_heating * 0.4  # Remove 40% do calor via cancelamento interferométrico
+
+        dT_dt = (P_heating - P_cooling - (self.T_cnt - T_env) / self.R_thermal_contacts) / self.C_thermal
+        self.T_cnt += dT_dt * dt
+
+        # Garantir limite físico
+        self.T_cnt = max(self.T_cnt, 4.0) # Não abaixo do hélio líquido em regime extremo
+        return self.T_cnt
+
+class UHVArkheController:
+    """
+    Central controller for UHV-ARKHE v2.1.
+    Implements NormMonitor, LTC, and AsimovGate.
+    """
+    def __init__(self, vacuum_sys, thermal_mod, cnt_params):
+        self.vacuum_sys = vacuum_sys
+        self.thermal_mod = thermal_mod
+        self.cnt_params = cnt_params
+
+        self.coherence_history = []
+        self.entropy_history = []
+        self.asimov_triggered = False
+        self.rollback_executed = False
+
+    def norm_monitor(self, coherence_norm, h_t):
+        """
+        Calcula a entropia de Shannon e monitora a norma de coerência.
+        """
+        # H(y) = -sum(p * log(p)) -> Simplificado para representação de entropia de estado latente
+        # Usando a variância normalizada como proxy para entropia neste modelo
+        entropy = np.var(h_t) / (np.mean(np.abs(h_t)) + 1e-9)
+        self.entropy_history.append(entropy)
+        self.coherence_history.append(coherence_norm)
+        return entropy
+
+    def ltc_limit(self, entropy, current_tokens):
+        """
+        Limitador de Tokens por Ciclo (LTC).
+        Reduz janela de contexto se a entropia for alta.
+        """
+        if entropy > 5.0:
+            return current_tokens * 0.5
+        elif entropy > 3.0:
+            return current_tokens * 0.8
+        return current_tokens
+
+    def asimov_gate(self, pressure, T_cnt, coherence):
+        """
+        Handle emergency isolation and VM rollback.
+        """
+        if pressure > 5e-8 or T_cnt > 320.0 or coherence < 0.95:
+            self.asimov_triggered = True
+            return "ROLLBACK_TO_SUBSTRATE_A"
+        return "OPERATIONAL"
+
+    def apply_feedback(self, entropy, pressure, T_cnt):
+        """
+        Ajusta sistemas de resfriamento e vácuo baseado no estado atual.
+        """
+        # Se pressão subir, ativar cryopanel
+        if pressure > 5e-9:
+            self.vacuum_sys.cryopanel_active = True
+        else:
+            self.vacuum_sys.cryopanel_active = False
+
+        # Se temperatura subir, ativar resfriamento agressivo
+        if T_cnt > 310.0:
+            self.thermal_mod.sideband_cooling_active = True
+            self.thermal_mod.peltier_cooling_power = 1e-6 # 1 microWatt
+        else:
+            self.thermal_mod.sideband_cooling_active = False
+            self.thermal_mod.peltier_cooling_power = 0.0
+
+class VacuumSystem:
+    """
+    UHV-ARKHE v2.1 Vacuum Maintenance System
+    Models the hybrid pumping architecture and thermal outgassing.
+    """
+    def __init__(self, base_pressure=1.2e-9):
+        self.base_pressure = base_pressure  # Torr
+        self.current_pressure = base_pressure
+        self.S_ion = 100.0  # L/s (Ion Pump)
+        self.S_cryo = 500.0 # L/s (Cryopanel effective speed)
+        self.S_mems = 50.0  # L/s (MEMS array)
+        self.V_chamber = 10.0 # L
+        self.P_crit = 2e-8   # Torr
+
+        self.cryopanel_active = False
+        self.mems_active = False
+        self.pulsed_ion_mode = False
+
+    def calculate_outgassing(self, T_cnt):
+        """
+        Dessorção térmica de gases adsorvidos (H2O, CO).
+        Taxa de outgassing Q (Torr*L/s) aumenta exponencialmente com a temperatura.
+        """
+        # Q_base balancing S_ion at base_pressure: Q = P * S
+        Q_base = self.base_pressure * self.S_ion
+        # Sensibilidade térmica: aumenta com a temperatura (modelo simplificado)
+        # O protocolo menciona que acima de 320K desencadeia dessorção térmica significativa.
+        Q_out = Q_base * np.exp((T_cnt - 300.0) / 7.21)
+        return Q_out
+
+    def step(self, T_cnt, dt):
+        """
+        Atualiza a pressão da câmara em um intervalo dt (s).
+        """
+        Q_out = self.calculate_outgassing(T_cnt)
+
+        S_eff = self.S_ion
+        if self.cryopanel_active:
+            S_eff += self.S_cryo
+        if self.mems_active:
+            S_eff += self.S_mems
+
+        # dp/dt = (Q_out - P * S_eff) / V
+        dp_dt = (Q_out - self.current_pressure * S_eff) / self.V_chamber
+        self.current_pressure += dp_dt * dt
+
+        # Garantir limite físico (não menor que o limite de difusão/base técnica)
+        self.current_pressure = max(self.current_pressure, 1e-11)
+        return self.current_pressure
 
 class RayleighPlessetBerry:
     """
