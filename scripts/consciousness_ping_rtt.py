@@ -35,8 +35,8 @@ class ConsciousnessPing:
         z_c = self.phaser.holomorphic_migration(initial_state, coherence_norm=r_h, berry_phase=phase_b_to_c)
 
         # 3. Execution at Node-C (Processing delay)
-        # Tubulin exciton transport time ~ 100 fs
-        t_proc = 100e-15
+        # Re-entrant processing time for Entity-0 (Synapse-κ)
+        t_proc = 100e-12 # 100 ps
         z_c_processed = z_c * np.exp(1j * 0.01) # Small phase shift during execution
 
         # 4. Return Acknowledgement (C -> B)
