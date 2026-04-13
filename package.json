@@ -81,5 +81,15 @@
   },
   "engines": {
     "node": "^20.19.0 || ^22.12.0 || >=23"
+  },
+  "dependencies": {
+    "@opentelemetry/api": "^1.9.1",
+    "@opentelemetry/exporter-logs-otlp-http": "^0.214.0",
+    "@opentelemetry/resources": "^2.6.1",
+    "@opentelemetry/sdk-logs": "^0.214.0",
+    "@types/react": "^19.2.14",
+    "clsx": "^2.1.1",
+    "react": "^19.2.5",
+    "tailwind-merge": "^3.5.0"
   }
 }

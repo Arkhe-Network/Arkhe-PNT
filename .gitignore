@@ -146,6 +146,12 @@ dist
 # Build output directory
 build/
 
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
 log.txt
 
 .DS_Store

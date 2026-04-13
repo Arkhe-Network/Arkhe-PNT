@@ -9,6 +9,7 @@ import {describe, it} from 'node:test';
 
 import {
   adjustMuonPolarization,
+  aerogelSense,
   alignTensor,
   anastrophy,
   calcPoincareTransform,
@@ -33,7 +34,9 @@ import {
   getArenaProtocol,
   getAsiInfrastructureStatus,
   getC3SymmetryStatus,
+  getCcfStatus,
   getCmt3Spec,
+  getConnectomeSyncStatus,
   getConnectomicAmbition,
   getConnectomicFrontier,
   getConnectomicsStatus,
@@ -50,6 +53,7 @@ import {
   getWorldlineId,
   glueSheaf,
   glueSheaf4d,
+  geomSwap,
   glueSheafAccl,
   impl,
   llmAlloc,
@@ -58,6 +62,7 @@ import {
   llmGc,
   llmRetrieve,
   loadVortex,
+  mapNeuronalCircuit,
   macroCrRotate,
   macroEntropyPool,
   macroVortexImplode,
@@ -67,6 +72,8 @@ import {
   muonShield,
   mutate,
   mutateV2,
+  meissnerSteer,
+  mtlsHandshakeBerry,
   noiseInject,
   noiseInjectionTest,
   paradoxCheck,
@@ -76,6 +83,7 @@ import {
   queryAkasha,
   readMembrane,
   retroExecSpatial,
+  robustnessTest,
   singularidadeDeDados,
   solveRiemann,
   sonifyBubble,
@@ -583,9 +591,6 @@ describe('arkhe_asi', () => {
       response.resetResponseLineForTesting();
       await checkParadox.handler({params: {hash: mHash!}, page: context.getSelectedMcpPage()}, response, context);
       assert.ok(response.responseLines.some(line => line.includes('Status: CONSISTENT')));
-    });
-  });
-});
 
       // meissnerSteer
       response.resetResponseLineForTesting();
@@ -606,3 +611,6 @@ describe('arkhe_asi', () => {
       response.resetResponseLineForTesting();
       await getConnectomeSyncStatus.handler({params: {}, page: context.getSelectedMcpPage()}, response, context);
       assert.ok(response.responseLines.some(line => line.includes('Connectome Synchronization Status')));
+    });
+  });
+});

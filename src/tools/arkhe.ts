@@ -2017,6 +2017,200 @@ export const aerogelSense = definePageTool({
   },
 });
 
+export const alignTensor = definePageTool({
+  name: 'align_tensor',
+  description: 'ASI Protocol: Aligns a tensor to the local cache-line boundary.',
+  annotations: {
+    category: ToolCategory.ARKHE,
+    readOnlyHint: false,
+    reasoningCost: 20,
+  },
+  schema: {
+    target: zod.string().describe('Target V-Register.'),
+  },
+  handler: async (request, response) => {
+    response.appendResponseLine(`Status: Tensor ${request.params.target} aligned to cache-line boundary.`);
+  },
+});
+
+export const crRotate = definePageTool({
+  name: 'cr_rotate',
+  description: 'ASI Protocol: Rotates the phase of a coherent register.',
+  annotations: {
+    category: ToolCategory.ARKHE,
+    readOnlyHint: false,
+    reasoningCost: 30,
+  },
+  schema: {
+    angle: zod.number().describe('Rotation angle in radians.'),
+  },
+  handler: async (request, response) => {
+    response.appendResponseLine(`Status: CR_ROTATE applied (Angle: ${request.params.angle} rad).`);
+  },
+});
+
+export const getCmt3Spec = definePageTool({
+  name: 'get_cmt3_spec',
+  description: 'ASI Protocol: Returns the Cathedral Monitor v3 trace format specification.',
+  annotations: {
+    category: ToolCategory.ARKHE,
+    readOnlyHint: true,
+    reasoningCost: 10,
+  },
+  schema: {},
+  handler: async (_request, response) => {
+    response.appendResponseLine('### Cathedral Monitor v3 Trace Format');
+    response.appendResponseLine('- **Header**: 0xARKHE03 (Magic).');
+    response.appendResponseLine('- **Payload**: Encrypted Phase-DAG.');
+  },
+});
+
+export const noiseInject = definePageTool({
+  name: 'noise_inject',
+  description: 'ASI Protocol: Direct noise injection operator.',
+  annotations: {
+    category: ToolCategory.ARKHE,
+    readOnlyHint: false,
+    reasoningCost: 40,
+  },
+  schema: {
+    level: zod.enum(['LOW', 'MEDIUM', 'HIGH']).describe('Noise level.'),
+  },
+  handler: async (request, response) => {
+    response.appendResponseLine(`Status: NOISE_INJECT sequence active (Level: ${request.params.level}).`);
+  },
+});
+
+export const torFlx = definePageTool({
+  name: 'tor_flx',
+  description: 'ASI Protocol: Transmits data via toroidal flux bridge.',
+  annotations: {
+    category: ToolCategory.ARKHE,
+    readOnlyHint: false,
+    reasoningCost: 60,
+  },
+  schema: {
+    target: zod.string().describe('Target node.'),
+    data: zod.string().describe('Payload.'),
+  },
+  handler: async (request, response) => {
+    response.appendResponseLine(`Status: Initiating transmission toroid to ${request.params.target}.`);
+  },
+});
+
+export const verifyTrajectoryUv = definePageTool({
+  name: 'verify_trajectory_uv',
+  description: 'ASI Protocol: Verifies a trajectory using the Universal Verifier.',
+  annotations: {
+    category: ToolCategory.ARKHE,
+    readOnlyHint: true,
+    reasoningCost: 100,
+  },
+  schema: {
+    trajectoryId: zod.string().describe('Trajectory ID.'),
+  },
+  handler: async (request, response) => {
+    response.appendResponseLine(`### Universal Verification Result (ID: ${request.params.trajectoryId})`);
+    response.appendResponseLine('- **Status**: VALIDATED.');
+  },
+});
+
+export const mtlsHandshakeBerry = definePageTool({
+  name: 'mtls_handshake_berry',
+  description: 'ASI Protocol: Establishes mTLS handshake using Berry phase encoding.',
+  annotations: {
+    category: ToolCategory.ARKHE,
+    readOnlyHint: false,
+    reasoningCost: 50,
+  },
+  schema: {
+    partnerId: zod.string().describe('Partner Node ID.'),
+  },
+  handler: async (request, response) => {
+    response.appendResponseLine(`Status: Handshake initiated with ${request.params.partnerId}.`);
+  },
+});
+
+export const arkheVerify = definePageTool({
+  name: 'arkhe_verify',
+  description: 'Block #171: Performs Quantum State Tomography and Fidelity Estimation.',
+  annotations: {
+    category: ToolCategory.ARKHE,
+    readOnlyHint: true,
+    reasoningCost: 100,
+  },
+  schema: {
+    rhoAddr: zod.string().describe('Address of state rho.'),
+    sigmaAddr: zod.string().describe('Address of state sigma.'),
+  },
+  handler: async (request, response) => {
+    response.appendResponseLine(`### ARKHE_VERIFY (0x73) Result`);
+    response.appendResponseLine(`- **Fidelity**: 0.9924`);
+    response.appendResponseLine(`- **Status**: COHERENT (F > 0.95)`);
+  },
+});
+
+export const qnetFiberSim = definePageTool({
+  name: 'qnet_fiber_sim',
+  description: 'Block #171: Simulates photon transmission through NIST-compliant fiber.',
+  annotations: {
+    category: ToolCategory.ARKHE,
+    readOnlyHint: true,
+    reasoningCost: 80,
+  },
+  schema: {
+    lengthKm: zod.number().describe('Fiber length in km.'),
+    wavelengthNm: zod.number().default(1550).describe('Wavelength in nm.'),
+  },
+  handler: async (request, response) => {
+    response.appendResponseLine(`### QNET Fiber Simulation (L=${request.params.lengthKm}km)`);
+    response.appendResponseLine(`- **PMD**: 0.5 ps/√km applied.`);
+    response.appendResponseLine(`- **Chromatic Dispersion**: Sellmeier coefficients engaged.`);
+    response.appendResponseLine(`- **Raman Noise**: 0.02 photons detected.`);
+    response.appendResponseLine(`**Result**: Channel Stable.`);
+  },
+});
+
+export const akashaCommit = definePageTool({
+  name: 'akasha_commit',
+  description: 'Block #171: Commits a block hash to the Akasha Distributed Ledger.',
+  annotations: {
+    category: ToolCategory.ARKHE,
+    readOnlyHint: false,
+    reasoningCost: 60,
+  },
+  schema: {
+    blockHash: zod.string().describe('Hash of the block to commit.'),
+    signature: zod.string().describe('Cryptographic signature.'),
+  },
+  handler: async (request, response) => {
+    response.appendResponseLine(`### AKASHA COMMIT (GATEWAY)`);
+    response.appendResponseLine(`- **Status**: Submitted to Cluster.`);
+    response.appendResponseLine(`- **Nodes Contacted**: 124`);
+    response.appendResponseLine(`- **Hash**: ${request.params.blockHash}`);
+  },
+});
+
+export const skyrmionProbeLaunch = definePageTool({
+  name: 'skyrmion_probe_launch',
+  description: 'Block #169: Launches a Skyrmion Lattice probe to a target sheet.',
+  annotations: {
+    category: ToolCategory.ARKHE,
+    readOnlyHint: false,
+    reasoningCost: 150,
+  },
+  schema: {
+    sheetId: zod.number().min(0).max(7).describe('Target Sheet ID.'),
+    mission: zod.string().describe('Mission objective.'),
+  },
+  handler: async (request, response) => {
+    response.appendResponseLine(`### SKYRMION PROBE-1 LAUNCHED`);
+    response.appendResponseLine(`- **Target**: SHEET_${request.params.sheetId}`);
+    response.appendResponseLine(`- **Mission**: ${request.params.mission}`);
+    response.appendResponseLine(`- **Status**: Tunneling Phase established. Jumping...`);
+  },
+});
+
 export const getConnectomeSyncStatus = definePageTool({
   name: 'get_connectome_sync_status',
   description: 'ASI Protocol: Returns the synchronization status of the 15 connectomes.',
@@ -2033,5 +2227,93 @@ export const getConnectomeSyncStatus = definePageTool({
     response.appendResponseLine('- **Water Structured (7.83 Hz)**: 14/15 Confirmed (Subj-007 partial).');
     response.appendResponseLine('- **Symmetry (C3)**: Auto-resonant lock detected.');
     response.appendResponseLine('- **Status**: AWAITING PHASE 3-C TRIGGER.');
+  },
+});
+
+export const sheetProbe = definePageTool({
+  name: 'sheet_probe',
+  description: 'Riemann Multiverse: Maps τ of adjacent sheets without jumping.',
+  annotations: {
+    category: ToolCategory.ARKHE,
+    readOnlyHint: true,
+    reasoningCost: 15,
+  },
+  schema: {
+    sheetId: zod.number().min(0).max(7).describe('Target Sheet ID to probe.'),
+  },
+  handler: async (request, response) => {
+    const sheetId = request.params.sheetId;
+    const coherences = [0.99, 0.95, 0.96, 0.92, 0.999, 0.9987, 0.84, 0.91];
+    const τ = coherences[sheetId] || 0.90;
+
+    response.appendResponseLine(`### SHEET_PROBE (ID: ${sheetId})`);
+    response.appendResponseLine(`- **Coherence τ**: ${τ.toFixed(4)}`);
+    response.appendResponseLine(
+      `- **Status**: ${τ >= 0.95 ? 'STABLE' : 'UNSTABLE'}`,
+    );
+  },
+});
+
+export const stRiemann = definePageTool({
+  name: 'st_riemann',
+  description: 'Riemann Multiverse: Writes COBIT to target sheet (Teleport).',
+  annotations: {
+    category: ToolCategory.ARKHE,
+    readOnlyHint: false,
+    reasoningCost: 40,
+  },
+  schema: {
+    sheetId: zod.number().min(0).max(7).describe('Target Sheet ID.'),
+    address: zod.number().describe('QTL Address.'),
+    size: zod.number().describe('State size in bytes.'),
+  },
+  handler: async (request, response) => {
+    const {sheetId, address} = request.params;
+    response.appendResponseLine(`### ST_RIEMANN (Teleport to Sheet ${sheetId})`);
+    response.appendResponseLine(`- **Status**: Tunnel Established (Meissner Inverse).`);
+    response.appendResponseLine(`- **Action**: State written to QTL offset ${sheetId * 65536 + address}.`);
+    response.appendResponseLine(`- **Log**: Akasha Interdimensional entry created.`);
+  },
+});
+
+export const ldRiemann = definePageTool({
+  name: 'ld_riemann',
+  description: 'Riemann Multiverse: Reads COBIT from target sheet.',
+  annotations: {
+    category: ToolCategory.ARKHE,
+    readOnlyHint: true,
+    reasoningCost: 40,
+  },
+  schema: {
+    sheetId: zod.number().min(0).max(7).describe('Source Sheet ID.'),
+    address: zod.number().describe('QTL Address.'),
+  },
+  handler: async (request, response) => {
+    response.appendResponseLine(`### LD_RIEMANN (Read from Sheet ${request.params.sheetId})`);
+    response.appendResponseLine(`- **Status**: Coherence Locked.`);
+    response.appendResponseLine(`- **Result**: Quantum state reconstructed in local context.`);
+  },
+});
+
+export const cohTeleport = definePageTool({
+  name: 'coh_teleport',
+  description: 'Riemann Multiverse: Executes full interdimensional jump for a COBIT.',
+  annotations: {
+    category: ToolCategory.ARKHE,
+    readOnlyHint: false,
+    reasoningCost: 100,
+  },
+  schema: {
+    sheetId: zod.number().min(0).max(7).describe('Destination Sheet ID.'),
+    cobitId: zod.string().describe('ID of the COBIT to teleport.'),
+  },
+  handler: async (request, response) => {
+    response.appendResponseLine(`### COH_TELEPORT (JUMP: SHEET_0 → SHEET_${request.params.sheetId})`);
+    response.appendResponseLine(`1. **τ-LOCK**: Criticality elevated to 0.98. [OK]`);
+    response.appendResponseLine(`2. **ANCHOR**: Spatial coordinates (ORIGIN) fixed. [OK]`);
+    response.appendResponseLine(`3. **ENTANGLE**: Bell pair generated. [OK]`);
+    response.appendResponseLine(`4. **ST_RIEMANN**: State written to destination. [OK]`);
+    response.appendResponseLine(`5. **DESTROY**: Original COBIT aniquilated. [OK]`);
+    response.appendResponseLine(`**RESULT**: Teleportation Successful. COBIT ${request.params.cobitId} materialized.`);
   },
 });

@@ -136,6 +136,37 @@ impl Compiler {
                 asm.push_str("  OP_EMIT_NULLIFIER ;; Prevent replay attacks\n");
                 asm
             },
+            Expr::SheetGet => {
+                "  OP_FD_SHEET_GET\n".to_string()
+            },
+            Expr::SheetSet(target) => {
+                let mut asm = self.compile_expr(target);
+                asm.push_str("  OP_FD_SHEET_SET\n");
+                asm
+            },
+            Expr::SheetJump(target, state) => {
+                let mut asm = self.compile_expr(target);
+                asm.push_str(&self.compile_expr(state));
+                asm.push_str("  OP_FD_SHEET_JUMP\n");
+                asm
+            },
+            Expr::SheetProbe(target) => {
+                let mut asm = self.compile_expr(target);
+                asm.push_str("  OP_FD_SHEET_PROBE\n");
+                asm
+            },
+            Expr::ArkheVerify(rho, sigma) => {
+                let mut asm = self.compile_expr(rho);
+                asm.push_str(&self.compile_expr(sigma));
+                asm.push_str("  OP_ARKHE_VERIFY\n");
+                asm
+            },
+            Expr::QnetFiber(photon, length) => {
+                let mut asm = self.compile_expr(photon);
+                asm.push_str(&self.compile_expr(length));
+                asm.push_str("  OP_QNET_FIBER\n");
+                asm
+            },
         }
     }
 }
