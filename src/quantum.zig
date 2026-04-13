@@ -28,6 +28,13 @@ pub const Opcode = enum(u8) {
     TUNNEL_OPEN = 0x184,
     KEK_SCAN = 0x190,
     CHIRAL_FLIP = 0x194,
+    GEOM_SWAP = 0x195,
+    META_COMPILE = 0x196,
+    COH_ORCH_OR = 0x197,
+    COGN_INFER = 0x198,
+    NET_BROADCAST = 0x199,
+    MPS_COMPRESS = 0x19F,
+    QTCI = 0x19B,
     _,
 };
 
@@ -77,4 +84,12 @@ pub const Vault = struct {
     pub fn cohEntangle(self: *Vault, cobit: COBIT, mode: enum{BELL_PAIR}) !struct{a: COBIT, b: COBIT} { _ = self; _ = cobit; _ = mode; return .{ .a = COBIT{.id=1}, .b = COBIT{.id=2} }; }
     pub fn cohDestroy(self: *Vault, cobit: COBIT) void { _ = self; _ = cobit; }
     pub fn akaLog(self: *Vault, params: anytype) !void { _ = self; _ = params; }
+
+    pub fn getMosaic(self: *Vault, sheet: SheetID) !anytype { _ = self; _ = sheet; return struct { domains: struct { items: []u8 = &[_]u8{} } }{}; }
+    pub fn getGlobalPhase(self: *Vault) f64 { _ = self; return 0.0; }
+    pub fn thermalInjectHeat(self: *Vault, entropy: f64) !void { _ = self; _ = entropy; }
+    pub fn getT20State(self: *Vault) !anytype { _ = self; return struct { pub fn expand(s: anytype) !anytype { _ = s; return .{}; } pub fn processLayer(s: anytype, f: anytype) !void { _ = s; _ = f; } }{}; }
+    pub fn updateT20State(self: *Vault, state: anytype) void { _ = self; _ = state; }
+    pub fn getGlobalR(self: *Vault) f64 { _ = self; return 0.999; }
+    pub fn applyGlobalCorrection(self: *Vault, drift: f64) !void { _ = self; _ = drift; }
 };
