@@ -14,6 +14,7 @@ pub const Opcode = enum(u16) {
     COH_BRAID = 0x07,
     COH_FREEZE = 0x08,
     COH_COPY = 0x0A,
+    GEOM_SWAP = 0x0B,
     COH_ENTANGLE = 0x0D,
     COH_AMPLIFY = 0x12,
     COH_RESONATE = 0x14,
@@ -111,6 +112,14 @@ pub const Opcode = enum(u16) {
     // SENSE (0x110-0x11F)
     SENSE_FUSION_START = 0x110,
     SENSE_ATTENTION = 0x114,
+
+    // KEKULÉ GROUP (0x190-0x19F)
+    KEK_SCAN = 0x190,
+    VALLEY_INIT = 0x191,
+    VALLEY_EXCHANGE = 0x192,
+    KEKULE_MODULATE = 0x193,
+    CHIRAL_FLIP = 0x194,
+    DIRAC_MASS_TUNING = 0x195,
 
     // QNET (0x100+)
     QNET_FIBER = 0x100,
