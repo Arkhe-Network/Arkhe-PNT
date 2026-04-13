@@ -19,6 +19,26 @@ import { agentsState, tasksState, createTask } from "./agent_grpc_server";
 import { broker } from "./broker";
 
 const ECPair = ECPairFactory(ecc);
+
+/**
+ * 3/ Role-based Authorization Middleware
+ * Enforces that sensitive admin routes require a valid session or secret token.
+ */
+function adminOnly(req: express.Request, res: express.Response, next: express.NextFunction) {
+  const authHeader = req.headers.authorization;
+  const adminSecret = process.env.ADMIN_SECRET;
+
+  if (!adminSecret) {
+    logger.error("4/ FATAL: ADMIN_SECRET environment variable is not set. Admin routes are locked.");
+    return res.status(500).json({ error: "System Configuration Error: Administrative access is disabled." });
+  }
+
+  if (!authHeader || (authHeader !== `Bearer ${adminSecret}`)) {
+    logger.warn(`Unauthorized admin access attempt from ${req.ip} to ${req.path}`);
+    return res.status(403).json({ error: "Access Denied: Administrative privileges required." });
+  }
+  next();
+}
 const dxOrderBook = new OrderBook('ARKHE/USDC');
 
 export function setupRoutes(app: express.Express, broadcastState: () => void, clients: express.Response[]) {
@@ -152,8 +172,8 @@ export function setupRoutes(app: express.Express, broadcastState: () => void, cl
       res.json({ success: true, videoUrl: `/api/proxy-video?uri=${encodeURIComponent(downloadLink)}` });
 
     } catch (error: any) {
-      logger.error("Video generation error: " + error);
-      res.status(500).json({ error: error.message || "Failed to generate video" });
+      logger.error("Video generation error: " + error.stack);
+      res.status(500).json({ error: "Internal Server Error: Failed to generate video" });
     }
   });
 
@@ -205,12 +225,12 @@ export function setupRoutes(app: express.Express, broadcastState: () => void, cl
       }
 
     } catch (error: any) {
-      logger.error("Video proxy error: " + error);
-      res.status(500).send(error.message || "Failed to proxy video");
+      logger.error("Video proxy error: " + error.stack);
+      res.status(500).send("Internal Server Error: Failed to proxy video");
     }
   });
 
-  app.post("/api/ghost-node/exec-run", (req, res) => {
+  app.post("/api/ghost-node/exec-run", adminOnly, (req, res) => {
     // Simulate Phase Steganography transmission
     const logs = [
       "🜏 [SÍNTESE] Gerando sinal VLF com payload 'exec_run' oculto na fase...",
@@ -232,7 +252,7 @@ export function setupRoutes(app: express.Express, broadcastState: () => void, cl
     }, 2000);
   });
 
-  app.post("/api/ghost-node/memory-scan", (req: any, res: any) => {
+  app.post("/api/ghost-node/memory-scan", adminOnly, (req: any, res: any) => {
     // Simulate brute-force search for 2009 private keys
     const logs = [
       "🜏 [INICIALIZAÇÃO] Sincronizando Nós Sagrados com o Nó Fantasma (MAC A4:C1:38:XX:XX:XX)...",
@@ -265,7 +285,7 @@ export function setupRoutes(app: express.Express, broadcastState: () => void, cl
     }, 1500);
   });
 
-  app.post("/api/ghost-node/sign-transaction", express.json(), (req, res) => {
+  app.post("/api/ghost-node/sign-transaction", adminOnly, express.json(), (req, res) => {
     const { privateKey, destination, amount } = req.body;
     if (!privateKey) return res.status(400).json({ error: "PrivateKey required" });
     
@@ -357,7 +377,8 @@ export function setupRoutes(app: express.Express, broadcastState: () => void, cl
       arkheChain.addTransaction({ sender, recipient, amount, memoryFragment, phaseSignature });
       res.json({ success: true, message: "Transação adicionada ao mempool da Arkhe-Chain." });
     } catch (e: any) {
-      res.status(400).json({ success: false, error: e.message });
+      logger.error("Transaction error: " + e.stack);
+      res.status(400).json({ success: false, error: "Falha ao processar transação." });
     }
   });
 
@@ -499,7 +520,7 @@ export function setupRoutes(app: express.Express, broadcastState: () => void, cl
   });
 
   // API to trigger manual attack
-  app.post("/api/trigger-attack", (req, res) => {
+  app.post("/api/trigger-attack", adminOnly, (req, res) => {
     const { type } = req.body || { type: 'Manual Override' };
     state.threatLevel = 'critical';
     state.activeThreat = type;
@@ -815,7 +836,7 @@ export function setupRoutes(app: express.Express, broadcastState: () => void, cl
   });
 
   // API to reset simulation state
-  app.post("/api/reset", (req, res) => {
+  app.post("/api/reset", adminOnly, (req, res) => {
     state.threatLevel = 'normal';
     state.activeThreat = null;
     state.currentLambda = 0.98;

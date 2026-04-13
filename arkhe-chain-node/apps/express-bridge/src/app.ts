@@ -8,7 +8,11 @@ import { logger } from '@arkhe/shared';
 const app = express();
 app.use(express.json());
 
-const JWT_SECRET = process.env.JWT_SECRET || 'arkhe_secret_999';
+const JWT_SECRET = process.env.JWT_SECRET;
+if (!JWT_SECRET) {
+  logger.error("4/ FATAL: JWT_SECRET environment variable is not set. Refusing to start for security.");
+  process.exit(1);
+}
 
 // --- DATABASE (SEQUELIZE) ---
 const sequelize = new Sequelize(process.env.DATABASE_URL || 'sqlite::memory:');
