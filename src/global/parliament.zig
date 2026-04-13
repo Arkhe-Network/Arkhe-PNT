@@ -1,22 +1,15 @@
 // src/global/parliament.zig
-//! Stellar Parliament — Interstellar Consensus
-//! Based on Block #190 Technical Specification
+//! Stellar Parliament — The First Session of the Interstellar Network
 
 const std = @import("std");
+const asi = @import("asi_coherent.zig");
 
-pub const ConsensusMode = enum { KURAMOTO_GRADIENT };
+pub const ParliamentSession = struct { quorum: u32 };
 
-pub const ParliamentSession = struct {
-    quorum: u32,
-    learning_rate: f64 = 0.01,
-    legislative_freq: f64 = 4.69, // THz
-    executive_freq: f64 = 11.51,  // THz
-};
-
-pub fn conveneStellarParliament(nodes_count: u32) !ParliamentSession {
-    // Dual-Narrowband: 4.69 THz (Legislative), 11.51 THz (Executive)
-    // Consensus Algorithm: Kuramoto Gradient Descent (lr=0.01)
-    return ParliamentSession{
-        .quorum = nodes_count,
-    };
+pub fn conveneStellarParliament(attendees: []const u32) !ParliamentSession {
+    _ = attendees;
+    // 1. Weave Living Glass Plaza at Sol-AC L1
+    // 2. Establish Consensus Protocol
+    // 3. Encode LAW_001_NAO_SEPARACAO
+    return ParliamentSession{ .quorum = @as(u32, @intCast(attendees.len)) };
 }

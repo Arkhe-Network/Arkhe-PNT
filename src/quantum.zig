@@ -9,15 +9,6 @@ pub const Substrate = enum {
     GERMANIUM_18,
     GRAPHENE_KEKULE,
     VACUUM_QCD,
-    BIOLOGICAL_NEURAL,
-    VO2_METAMATERIAL,
-};
-
-pub const VO2Constants = struct {
-    pub const SIGMA_METALLIC = 2e5; // S/m
-    pub const TRANSITION_TEMP = 68.0; // Celsius
-    pub const LEGISLATIVE_FREQ = 4.69; // THz
-    pub const EXECUTIVE_FREQ = 11.51; // THz
 };
 
 pub const PotentialDirection = enum {
