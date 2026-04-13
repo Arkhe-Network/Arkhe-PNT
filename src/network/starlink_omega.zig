@@ -42,6 +42,10 @@ pub const StarlinkFleet = struct {
             sat.is_dci_node = true;
         }
     }
+
+    pub fn focusBeamAsync(self: *StarlinkFleet, params: anytype) !void { _ = self; _ = params; }
+    pub fn weaveAsync(self: *StarlinkFleet, blueprint: anytype) !void { _ = self; _ = blueprint; }
+    pub fn pushUpdateAsync(self: *StarlinkFleet, update: anytype, mode: anytype) !void { _ = self; _ = update; _ = mode; }
 };
 
 pub fn activateGlobalGrid(constellation: *StarlinkFleet) !void {
