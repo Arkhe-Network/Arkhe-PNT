@@ -134,6 +134,11 @@ pub const Opcode = enum(u16) {
     PHYS_SYNTH = 0x1C0,
     BIO_RESTORE = 0x1C1,
     ASTRO_SYNC = 0x1C2,
+    ORBITAL_UNFOLD = 0x1C3,
+
+    // ORBITAL GROUP (0x1D0-0x1DF)
+    ORBITAL_SEED = 0x1D0,
+    MESH_WEAVE = 0x1D1,
 
     // KEKULÉ GROUP (0x190-0x19F)
     KEK_SCAN = 0x190,
@@ -145,6 +150,7 @@ pub const Opcode = enum(u16) {
 
     // QNET (0x100+)
     QNET_FIBER = 0x100,
+    COH_SYNC = 0x101,
 
     pub fn cycles(self: Opcode) u32 {
         return switch (self) {
