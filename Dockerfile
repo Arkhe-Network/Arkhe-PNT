@@ -26,6 +26,11 @@ COPY . .
 # Gerar Prisma Client
 RUN cd arkhe-chain-node/apps/api-nest && npx prisma generate
 
+# 13/ Run as non-root user
+RUN addgroup -S arkhe && adduser -S arkhe -G arkhe
+RUN chown -R arkhe:arkhe /app
+USER arkhe
+
 EXPOSE 3000 3001
 
 CMD ["npm", "run", "dev", "--prefix", "arkhe-chain-node"]
