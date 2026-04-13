@@ -1,0 +1,125 @@
+// src/isa/opcodes.zig
+//! ARKHE(N) ISA — Tabela de Opcodes Canônicos
+//! Versão v2140.137.∞ — Bloco #180
+
+const std = @import("std");
+
+pub const Opcode = enum(u16) {
+    // COHERENCE (0x00-0x1F)
+    COH_INIT = 0x01,
+    COH_MEASURE = 0x02,
+    COH_TUNE_TAU = 0x03,
+    COH_MERGE = 0x05,
+    COH_SPLIT = 0x06,
+    COH_BRAID = 0x07,
+    COH_FREEZE = 0x08,
+    COH_COPY = 0x0A,
+    COH_ENTANGLE = 0x0D,
+    COH_AMPLIFY = 0x12,
+    COH_RESONATE = 0x14,
+    COH_DAMP = 0x15,
+    COH_SYNCHRONIZE = 0x16,
+    COH_LOCK = 0x18,
+    COH_VERIFY = 0x1A,
+    COH_REPAIR = 0x1B,
+    COH_KURAMOTO_TICK = 0x1C,
+    COH_GET_R = 0x1D,
+    COH_SET_OMEGA = 0x1E,
+    COH_DESTROY = 0x1F,
+
+    // PHASE (0x20-0x3F)
+    PHASE_SET = 0x20,
+    QPU_EXEC = 0x21,
+    PHASE_ADD = 0x22,
+    PHASE_SHIFT = 0x30,
+    PHASE_ROTATE = 0x31,
+    PHASE_INTERPOLATE = 0x34,
+    PHASE_FFT = 0x36,
+    PHASE_CONVOLVE = 0x38,
+    PHASE_FILTER = 0x3A,
+
+    // TIME (0x40-0x5F)
+    TIME_NOW = 0x40,
+    TIME_DILATE = 0x44,
+    TIME_LOOP = 0x49,
+    TIME_ANCHOR = 0x4D,
+    TIME_PREDICT = 0x4E,
+    TIME_RETRODICT = 0x4F,
+    TIME_CACHE = 0x5D,
+    TIME_EXPIRE = 0x5F,
+
+    // AKASHA / MEMORY (0x60-0x7F)
+    MEM_ALLOC = 0x60,
+    MEM_FREE = 0x61,
+    MEM_READ = 0x62,
+    COH_SHIELD = 0x64,
+    MEM_MOVE = 0x65,
+    COH_INVOKE = 0x66, // Alias for 0x65 often used in financial context
+    MEM_CMP = 0x67,
+    MEM_PROTECT = 0x6B,
+    AKA_LOG = 0x70,
+    AKA_QUERY = 0x71,
+    ARKH_VERIFY = 0x73,
+    ARKH_RESTORE = 0x74,
+    AKA_ARCHIVE = 0x75,
+    AKA_SIGN = 0x7A,
+    AKA_AGGREGATE = 0x7E,
+
+    // NETWORK / CONSENSUS (0x80-0x9F)
+    NET_SEND = 0x80,
+    NET_RECV = 0x81,
+    NET_BROADCAST = 0x82,
+    NET_SYNC = 0x86,
+    CONSENSUS_COMMIT = 0x8C,
+    CONSENSUS_VALIDATE = 0x8E,
+    QTL_SHARD = 0x99,
+    COH_PROPAGATE = 0x9A,
+
+    // MATH (0xA0-0xBF)
+    QMUL = 0xB0,
+    QROT = 0xB1,
+
+    // CONTROL (0xC0-0xDF)
+    JMP = 0xC0,
+    YIELD = 0xDD,
+
+    // EXTENSIONS (0xE0-0xFF)
+    MEM_DOM = 0xE0,
+    MEM_ARC = 0xE1,
+    PHASE_ANIMATE = 0xE3,
+    MEM_GPU = 0xE5,
+    TIME_TIMEOUT = 0xE6,
+    ST_RIEMANN = 0xF1,
+    LD_RIEMANN = 0xF2,
+    META_MODIFY = 0xF3, // Resolved overlap
+    META_COMPILE = 0xF4,
+    META_TRANSCEND = 0xFF,
+
+    // COGNITION (0x160-0x17F)
+    COGN_INFER = 0x160,
+    COGN_LEARN_ONLINE = 0x161,
+    COGN_MULTI_EST = 0x162,
+
+    // MOVE / ROBOTICS (0x120-0x15F)
+    MOVE_WHOLE_BODY = 0x12B,
+    MOVE_INVERSE_KIN = 0x132,
+    MOVE_DYNAMICS = 0x135,
+    MOVE_RECOVER = 0x13F,
+    GRASP_ADAPT = 0x145,
+    MANIP_SLIP_DETECT = 0x15B,
+
+    // SENSE (0x110-0x11F)
+    SENSE_FUSION_START = 0x110,
+    SENSE_ATTENTION = 0x114,
+
+    // QNET (0x100+)
+    QNET_FIBER = 0x100,
+
+    pub fn cycles(self: Opcode) u32 {
+        return switch (self) {
+            .COH_INIT => 10,
+            .PHASE_FFT => 100,
+            else => 1,
+        };
+    }
+};
