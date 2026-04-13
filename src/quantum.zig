@@ -9,7 +9,6 @@ pub const Substrate = enum {
     GERMANIUM_18,
     GRAPHENE_KEKULE,
     VACUUM_QCD,
-    BIOLOGICAL_NEURAL,
 };
 
 pub const PotentialDirection = enum {

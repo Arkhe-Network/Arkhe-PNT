@@ -41,7 +41,7 @@ pub const GrooveDriver = struct {
         const neighbors = self.getNeighbors(center_qubit);
         for (neighbors) |neighbor| {
             // dPhi = K * dist * E (Conforme visualização STM)
-            const dist = calculateDistance(center_qubit, neighbor);
+            const dist = 0.246; // nm (simplificado)
             const energy_bias = self.getEnergyLevel();
 
             const phase_shift = spiral_constant * dist * energy_bias;
