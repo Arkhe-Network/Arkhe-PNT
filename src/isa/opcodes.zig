@@ -14,6 +14,7 @@ pub const Opcode = enum(u16) {
     COH_BRAID = 0x07,
     COH_FREEZE = 0x08,
     COH_COPY = 0x0A,
+    GEOM_SWAP = 0x0B,
     COH_ENTANGLE = 0x0D,
     COH_AMPLIFY = 0x12,
     COH_RESONATE = 0x14,
