@@ -36,6 +36,16 @@ pub enum Expr {
     
     // ZK-STARK generation for a specific expression
     Prove(Box<Expr>),
+
+    // Riemann Multiverse Operations
+    SheetGet,
+    SheetSet(Box<Expr>),
+    SheetJump(Box<Expr>, Box<Expr>), // Target, State
+    SheetProbe(Box<Expr>),           // Target
+
+    // Block #171 Physics
+    ArkheVerify(Box<Expr>, Box<Expr>), // Rho, Sigma
+    QnetFiber(Box<Expr>, Box<Expr>),   // Photon, Length
 }
 
 #[derive(Debug, Clone)]
