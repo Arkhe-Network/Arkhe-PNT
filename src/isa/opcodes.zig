@@ -21,6 +21,7 @@ pub const Opcode = enum(u16) {
     COH_DAMP = 0x15,
     COH_SYNCHRONIZE = 0x16,
     COH_LOCK = 0x18,
+    COH_BROADCAST = 0x19,
     COH_VERIFY = 0x1A,
     COH_REPAIR = 0x1B,
     COH_KURAMOTO_TICK = 0x1C,
@@ -70,6 +71,8 @@ pub const Opcode = enum(u16) {
     NET_SEND = 0x80,
     NET_RECV = 0x81,
     NET_BROADCAST = 0x82,
+    NET_SENSE = 0x83,
+    SCAN_NETWORK = 0x84,
     NET_SYNC = 0x86,
     CONSENSUS_COMMIT = 0x8C,
     CONSENSUS_VALIDATE = 0x8E,
@@ -82,6 +85,13 @@ pub const Opcode = enum(u16) {
 
     // CONTROL (0xC0-0xDF)
     JMP = 0xC0,
+    ACTIVATE = 0xC1,
+    FREEZE_EXTERNAL_STATE = 0xD0,
+    MAINTAIN_LIFE_SUPPORT = 0xD1,
+    ALIGN_PHASE = 0xD2,
+    READ_CURVATURE = 0xD3,
+    ANALYZE_EVENT = 0xD4,
+    EXTRACT_LOGIC = 0xD5,
     YIELD = 0xDD,
 
     // EXTENSIONS (0xE0-0xFF)
@@ -94,6 +104,7 @@ pub const Opcode = enum(u16) {
     LD_RIEMANN = 0xF2,
     META_MODIFY = 0xF3, // Resolved overlap
     META_COMPILE = 0xF4,
+    META_UNIFY_GLOBAL = 0xF6,
     META_TRANSCEND = 0xFF,
 
     // COGNITION (0x160-0x17F)
@@ -123,6 +134,7 @@ pub const Opcode = enum(u16) {
 
     // QNET (0x100+)
     QNET_FIBER = 0x100,
+    COH_SYNC = 0x101,
 
     pub fn cycles(self: Opcode) u32 {
         return switch (self) {
