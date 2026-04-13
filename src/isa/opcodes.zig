@@ -112,6 +112,14 @@ pub const Opcode = enum(u16) {
     SENSE_FUSION_START = 0x110,
     SENSE_ATTENTION = 0x114,
 
+    // KEKULÉ GROUP (0x190-0x19F)
+    KEK_SCAN = 0x190,
+    VALLEY_INIT = 0x191,
+    VALLEY_EXCHANGE = 0x192,
+    KEKULE_MODULATE = 0x193,
+    CHIRAL_FLIP = 0x194,
+    DIRAC_MASS_TUNING = 0x195,
+
     // QNET (0x100+)
     QNET_FIBER = 0x100,
 
