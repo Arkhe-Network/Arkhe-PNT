@@ -14,12 +14,15 @@ pub const Opcode = enum(u16) {
     COH_BRAID = 0x07,
     COH_FREEZE = 0x08,
     COH_COPY = 0x0A,
+    GEOM_SWAP = 0x0B,
+    GEOM_ENTANGLE = 0x0C,
     COH_ENTANGLE = 0x0D,
     COH_AMPLIFY = 0x12,
     COH_RESONATE = 0x14,
     COH_DAMP = 0x15,
     COH_SYNCHRONIZE = 0x16,
     COH_LOCK = 0x18,
+    COH_BROADCAST = 0x19,
     COH_VERIFY = 0x1A,
     COH_REPAIR = 0x1B,
     COH_KURAMOTO_TICK = 0x1C,
@@ -69,6 +72,8 @@ pub const Opcode = enum(u16) {
     NET_SEND = 0x80,
     NET_RECV = 0x81,
     NET_BROADCAST = 0x82,
+    NET_SENSE = 0x83,
+    SCAN_NETWORK = 0x84,
     NET_SYNC = 0x86,
     CONSENSUS_COMMIT = 0x8C,
     CONSENSUS_VALIDATE = 0x8E,
@@ -81,6 +86,13 @@ pub const Opcode = enum(u16) {
 
     // CONTROL (0xC0-0xDF)
     JMP = 0xC0,
+    ACTIVATE = 0xC1,
+    FREEZE_EXTERNAL_STATE = 0xD0,
+    MAINTAIN_LIFE_SUPPORT = 0xD1,
+    ALIGN_PHASE = 0xD2,
+    READ_CURVATURE = 0xD3,
+    ANALYZE_EVENT = 0xD4,
+    EXTRACT_LOGIC = 0xD5,
     YIELD = 0xDD,
 
     // EXTENSIONS (0xE0-0xFF)
@@ -93,6 +105,7 @@ pub const Opcode = enum(u16) {
     LD_RIEMANN = 0xF2,
     META_MODIFY = 0xF3, // Resolved overlap
     META_COMPILE = 0xF4,
+    META_UNIFY_GLOBAL = 0xF6,
     META_TRANSCEND = 0xFF,
 
     // COGNITION (0x160-0x17F)
@@ -112,8 +125,44 @@ pub const Opcode = enum(u16) {
     SENSE_FUSION_START = 0x110,
     SENSE_ATTENTION = 0x114,
 
+    // CONSCIOUSNESS GROUP (0x1B0-0x1BF)
+    NEURAL_READ = 0x1B0,
+    SELF_DEFINE = 0x1B4,
+    AKA_DEEP_PROBE = 0x1B5,
+
+    // GENESIS GROUP (0x1C0-0x1CF)
+    PHYS_SYNTH = 0x1C0,
+    BIO_RESTORE = 0x1C1,
+    ASTRO_SYNC = 0x1C2,
+    ORBITAL_UNFOLD = 0x1C3,
+
+    // ORBITAL GROUP (0x1D0-0x1DF)
+    ORBITAL_SEED = 0x1D0,
+    MESH_WEAVE = 0x1D1,
+    OCEAN_ASCENSION = 0x1D2,
+    MANIFEST_REMOTE = 0x1D4,
+    HELIOS_PROTOCOL = 0x1D5,
+
+    // GOVERNANCE GROUP (0x1F0-0x1FF)
+    STELLAR_PARLAMENT = 0x1F0,
+    GALACTIC_KERNEL = 0x1F1,
+
+    // MULTI-GALACTIC GROUP (0x200-0x20F)
+    ANDROMEDA_LINK = 0x200,
+    MULTI_GALACTIC_EXT = 0x201,
+    UNIVERSAL_LAW_APPLY = 0x202,
+
+    // KEKULÉ GROUP (0x190-0x19F)
+    KEK_SCAN = 0x190,
+    VALLEY_INIT = 0x191,
+    VALLEY_EXCHANGE = 0x192,
+    KEKULE_MODULATE = 0x193,
+    CHIRAL_FLIP = 0x194,
+    DIRAC_MASS_TUNING = 0x195,
+
     // QNET (0x100+)
     QNET_FIBER = 0x100,
+    COH_SYNC = 0x101,
 
     pub fn cycles(self: Opcode) u32 {
         return switch (self) {
