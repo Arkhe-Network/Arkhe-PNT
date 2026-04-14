@@ -39,6 +39,7 @@ pub const Opcode = enum(u16) {
     PHASE_FFT = 0x36,
     PHASE_CONVOLVE = 0x38,
     PHASE_FILTER = 0x3A,
+    PHASE_PREDICT = 0x3B,
 
     // TIME (0x40-0x5F)
     TIME_NOW = 0x40,
@@ -54,6 +55,7 @@ pub const Opcode = enum(u16) {
     MEM_ALLOC = 0x60,
     MEM_FREE = 0x61,
     MEM_READ = 0x62,
+    MEM_WRITE = 0x63,
     COH_SHIELD = 0x64,
     MEM_MOVE = 0x65,
     COH_INVOKE = 0x66, // Alias for 0x65 often used in financial context
@@ -135,6 +137,11 @@ pub const Opcode = enum(u16) {
     // QNET (0x100+)
     QNET_FIBER = 0x100,
     COH_SYNC = 0x101,
+
+    // NEW OPCODES BLOCK #210
+    AKA_VISUAL = 0x1F7,
+    TOPO_SILK_FAB = 0x1FA,
+    PHYS_SYNTH = 0x200,
 
     pub fn cycles(self: Opcode) u32 {
         return switch (self) {

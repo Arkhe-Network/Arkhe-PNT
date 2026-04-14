@@ -7,7 +7,10 @@ pub const AtomicBlueprint = struct { atoms: []Atom };
 pub const Atom = struct { orbital_phase: f64, topological_charge: i32, coordinates: [3]f64 };
 pub const MatterStream = struct {};
 pub const SynthesizedMatter = struct { local_coherence: f64 };
-pub const ExoticSpec = struct {};
+pub const ExoticSpec = struct {
+    name: []const u8 = "Exotic",
+    topology: []const u8 = "Chern",
+};
 pub const Matter = struct {};
 
 pub const PhysSynthesizer = struct {
@@ -16,7 +19,8 @@ pub const PhysSynthesizer = struct {
         return .{ .local_coherence = 0.98 };
     }
     pub fn createExoticMaterial(self: *PhysSynthesizer, properties: ExoticSpec) !Matter {
-        _ = self; _ = properties;
+        _ = self;
+        std.log.info("Sintetizando material exótico: {s} ({s})", .{properties.name, properties.topology});
         return Matter{};
     }
     pub fn vacuumEnergyStream(self: *PhysSynthesizer) MatterStream { _ = self; return MatterStream{}; }
