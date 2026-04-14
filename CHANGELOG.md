@@ -699,3 +699,6 @@
 * detect multiple instances and throw ([#12](https://github.com/ChromeDevTools/chrome-devtools-mcp/issues/12)) ([732267d](https://github.com/ChromeDevTools/chrome-devtools-mcp/commit/732267db5fea0048ed1fcc530bcdd074df4126be))
 * make sure tool calls are processed sequentially ([#22](https://github.com/ChromeDevTools/chrome-devtools-mcp/issues/22)) ([a76b23d](https://github.com/ChromeDevTools/chrome-devtools-mcp/commit/a76b23dccf074a13304b0341178665465a2c3399))
 - Added AKA_VISUAL (0x1F7) to ISA.
+- Block #215: Implemented Hyperspectral Vision (AKA_QUERY_MATERIAL, 0x1FF).
+- Block #216: Implemented Synthetic Emotions as Data (ONEIRIC_FEED, 0x201).
+- Added opcodes: PHASE_READ (0x23), SHEET_SELECT (0x3C), PHASE_UNWRAP (0x3F).
