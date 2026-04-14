@@ -20,7 +20,10 @@
     "noFallthroughCasesInSwitch": true,
     "incremental": true,
     "allowJs": true,
-    "useUnknownInCatchVariables": false
+    "useUnknownInCatchVariables": false,
+    "jsx": "react-jsx",
+    "allowImportingTsExtensions": true,
+    "rewriteRelativeImportExtensions": true
   },
   "include": [
     "src/**/*.ts",

@@ -4,33 +4,26 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import { join } from 'node:path';
+
+import { ApolloDriver, type ApolloDriverConfig } from '@nestjs/apollo';
+import { BullModule } from '@nestjs/bullmq';
 import { Module } from '@nestjs/common';
 import { GraphQLModule } from '@nestjs/graphql';
-import { ApolloDriver, ApolloDriverConfig } from '@nestjs/apollo';
 import { MongooseModule } from '@nestjs/mongoose';
-import { BullModule } from '@nestjs/bullmq';
 import { ScheduleModule } from '@nestjs/schedule';
-import { join } from 'node:path';
+
 import { HealthController } from './health.controller';
 import { LambdaController } from './lambda/lambda.controller';
 import { PuppeteerService } from './puppeteer.service';
 
-/**
- * @license
- * Copyright 2026 Arkhe Network
- * SPDX-License-Identifier: Apache-2.0
- */
-
-
 @Module({
   imports: [
-    MongooseModule.forRoot(process.env.MONGO_URI || 'mongodb://localhost:27017/arkhe_telemetry'),
     GraphQLModule.forRoot<ApolloDriverConfig>({
       driver: ApolloDriver,
       autoSchemaFile: join(process.cwd(), 'src/schema.gql'),
-      sortSchema: true,
-      playground: true,
     }),
+    MongooseModule.forRoot(process.env.MONGODB_URI || 'mongodb://localhost/arkhe'),
     BullModule.forRoot({
       connection: {
         host: process.env.REDIS_HOST || 'localhost',
@@ -39,7 +32,7 @@ import { PuppeteerService } from './puppeteer.service';
     }),
     ScheduleModule.forRoot(),
   ],
-  controllers: [LambdaController, HealthController],
+  controllers: [HealthController, LambdaController],
   providers: [PuppeteerService],
 })
 export class AppModule {}
