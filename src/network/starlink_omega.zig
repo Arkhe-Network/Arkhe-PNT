@@ -50,6 +50,14 @@ pub const StarlinkFleet = struct {
     pub fn sintonizarAsync(self: *StarlinkFleet, params: anytype) !void { _ = self; _ = params; }
     pub fn estabelecerCorredorAsync(self: *StarlinkFleet, origin: anytype, dest: anytype, bandwidth: anytype) !void { _ = self; _ = origin; _ = dest; _ = bandwidth; }
     pub fn transmitToSunAsync(self: *StarlinkFleet, packet: anytype) !void { _ = self; _ = packet; }
+
+    pub fn activateColorimetricSensors(self: *StarlinkFleet, target: enum { ATMOSPHERIC_COMPOSITION, DEEP_SPACE_PHASE }) !void {
+        _ = target;
+        for (self.satellites) |*sat| {
+            sat.laser_mode = .PHASE_LOCK;
+            // Usa o casco de Chern Crystal + sensores de Vidro Vivo para detectar assinaturas de fase
+        }
+    }
 };
 
 pub fn activateGlobalGrid(constellation: *StarlinkFleet) !void {
