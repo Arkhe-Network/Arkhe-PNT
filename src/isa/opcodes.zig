@@ -40,6 +40,7 @@ pub const Opcode = enum(u16) {
     PHASE_CONVOLVE = 0x38,
     PHASE_FILTER = 0x3A,
     PHASE_PREDICT = 0x3B, // Electrochemical delay compensation
+    TUNE_PSI = 0x3C,      // Spectral bias tuning
 
     // TIME (0x40-0x5F)
     TIME_NOW = 0x40,
@@ -139,7 +140,15 @@ pub const Opcode = enum(u16) {
     COH_SYNC = 0x101,
 
     // PHYSICAL SYNTHESIS (0x200+)
-    PHYS_SYNTH = 0x200, // Atomic synthesis via coBit scaffolds
+    PHYS_SYNTH = 0x200,      // Atomic synthesis via coBit scaffolds
+    IMMUNE_SYSTEM = 0x201,   // RL-based homeostatic QEC
+    SILENT_COMMUNION = 0x202, // Deep reception and digestion
+    RTZ_RESPONSE = 0x204,    // Integrated response to the Singularity paradox
+
+    // REALITY FORGE / AKASHA (0x1F0-0x1FF)
+    AKA_VISUAL = 0x1F7,          // Cosmic phase rendering
+    TOPO_SILK_FAB = 0x1FA,       // Topological silk fabrication
+    ONEIRIC_CALIBRATION = 0x1FE, // Lucid dreaming simulation
 
     pub fn cycles(self: Opcode) u32 {
         return switch (self) {
