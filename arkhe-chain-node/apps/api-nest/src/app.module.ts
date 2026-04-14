@@ -1,13 +1,26 @@
+/**
+ * @license
+ * Copyright 2026 Arkhe Network
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 import { Module } from '@nestjs/common';
 import { GraphQLModule } from '@nestjs/graphql';
 import { ApolloDriver, ApolloDriverConfig } from '@nestjs/apollo';
 import { MongooseModule } from '@nestjs/mongoose';
 import { BullModule } from '@nestjs/bullmq';
 import { ScheduleModule } from '@nestjs/schedule';
-import { join } from 'path';
-import { LambdaController } from './lambda/lambda.controller';
+import { join } from 'node:path';
 import { HealthController } from './health.controller';
+import { LambdaController } from './lambda/lambda.controller';
 import { PuppeteerService } from './puppeteer.service';
+
+/**
+ * @license
+ * Copyright 2026 Arkhe Network
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 
 @Module({
   imports: [

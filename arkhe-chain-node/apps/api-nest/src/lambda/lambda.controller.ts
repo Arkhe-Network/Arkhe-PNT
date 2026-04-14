@@ -1,3 +1,9 @@
+/**
+ * @license
+ * Copyright 2026 Arkhe Network
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 import { Controller, Post, Get, Body } from '@nestjs/common';
 import { ApiTags, ApiOperation } from '@nestjs/swagger';
 import { logger } from '@arkhe/shared';
