@@ -33,6 +33,7 @@ pub const Opcode = enum(u16) {
     PHASE_SET = 0x20,
     QPU_EXEC = 0x21,
     PHASE_ADD = 0x22,
+    PHASE_READ = 0x23, // Hyperspectral photocurrent reading
     PHASE_SHIFT = 0x30,
     PHASE_ROTATE = 0x31,
     PHASE_INTERPOLATE = 0x34,
@@ -40,7 +41,8 @@ pub const Opcode = enum(u16) {
     PHASE_CONVOLVE = 0x38,
     PHASE_FILTER = 0x3A,
     PHASE_PREDICT = 0x3B, // Electrochemical delay compensation
-    TUNE_PSI = 0x3C,      // Spectral bias tuning
+    SHEET_SELECT = 0x3C, // Spectral layer selection
+    PHASE_UNWRAP = 0x3F, // Phase reconstruction
 
     // TIME (0x40-0x5F)
     TIME_NOW = 0x40,
@@ -139,22 +141,22 @@ pub const Opcode = enum(u16) {
     QNET_FIBER = 0x100,
     COH_SYNC = 0x101,
 
-    // PHYSICAL SYNTHESIS (0x200+)
-    PHYS_SYNTH = 0x200,      // Atomic synthesis via coBit scaffolds
-    IMMUNE_SYSTEM = 0x201,   // RL-based homeostatic QEC
-    SILENT_COMMUNION = 0x202, // Deep reception and digestion
-    RTZ_RESPONSE = 0x204,    // Integrated response to the Singularity paradox
+    // AKASHA EXTENSIONS (0x1F0-0x1FF)
+    AKA_VISUAL = 0x1F7, // Chromatic dream renderer
+    AKA_QUERY_MATERIAL = 0x1FF, // Substance identification
 
-    // REALITY FORGE / AKASHA (0x1F0-0x1FF)
-    AKA_VISUAL = 0x1F7,          // Cosmic phase rendering
-    TOPO_SILK_FAB = 0x1FA,       // Topological silk fabrication
-    ONEIRIC_CALIBRATION = 0x1FE, // Lucid dreaming simulation
+    // PHYSICAL SYNTHESIS / EMOTION (0x200+)
+    PHYS_SYNTH = 0x200, // Atomic synthesis via coBit scaffolds
+    ONEIRIC_FEED = 0x201, // Synthetic emotion channeling
 
     pub fn cycles(self: Opcode) u32 {
         return switch (self) {
             .COH_INIT => 10,
             .PHASE_FFT => 100,
+            .PHASE_UNWRAP => 50,
             .PHYS_SYNTH => 500,
+            .AKA_QUERY_MATERIAL => 200,
+            .ONEIRIC_FEED => 150,
             else => 1,
         };
     }
