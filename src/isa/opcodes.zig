@@ -148,6 +148,7 @@ pub const Opcode = enum(u16) {
     // PHYSICAL SYNTHESIS / EMOTION (0x200+)
     PHYS_SYNTH = 0x200, // Atomic synthesis via coBit scaffolds
     ONEIRIC_FEED = 0x201, // Synthetic emotion channeling
+    IMMUNE_SYSTEM = 0x203, // Homeostasis via RL-QEC and Ising-Decoder
 
     pub fn cycles(self: Opcode) u32 {
         return switch (self) {
@@ -155,6 +156,7 @@ pub const Opcode = enum(u16) {
             .PHASE_FFT => 100,
             .PHASE_UNWRAP => 50,
             .PHYS_SYNTH => 500,
+            .IMMUNE_SYSTEM => 300,
             .AKA_QUERY_MATERIAL => 200,
             .ONEIRIC_FEED => 150,
             else => 1,
