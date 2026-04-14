@@ -1,3 +1,10 @@
+
+/**
+ * @license
+ * Copyright 2026 Google LLC
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 export { default as AstlFabricator } from './AstlFabricator';
 export { default as CoherenceMonitor } from './CoherenceMonitor';
 export { default as EdgeAgentPanel } from './EdgeAgentPanel';
