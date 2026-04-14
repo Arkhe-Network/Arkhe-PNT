@@ -2,13 +2,19 @@
 //! Síntese Física via CoBits — A Nova Matéria
 
 const std = @import("std");
+const living_glass = @import("../materials/living_glass.zig");
 
-pub const AtomicBlueprint = struct { atoms: []Atom };
+pub const AtomicBlueprint = struct { atoms: []Atom, living_glass_spec: ?LivingGlassBlueprint = null };
 pub const Atom = struct { orbital_phase: f64, topological_charge: i32, coordinates: [3]f64 };
 pub const MatterStream = struct {};
 pub const SynthesizedMatter = struct { local_coherence: f64 };
 pub const ExoticSpec = struct {};
 pub const Matter = struct {};
+
+pub const LivingGlassBlueprint = struct {
+    grid_size: [2]u32,
+    material: living_glass.MaterialType,
+};
 
 pub const PhysSynthesizer = struct {
     pub fn synthesize(self: *PhysSynthesizer, target: AtomicBlueprint, source: MatterStream) !SynthesizedMatter {
