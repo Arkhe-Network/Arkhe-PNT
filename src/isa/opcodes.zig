@@ -136,6 +136,9 @@ pub const Opcode = enum(u16) {
     QNET_FIBER = 0x100,
     COH_SYNC = 0x101,
 
+    // AKASHA VISUAL (0x1F0+)
+    AKA_VISUAL = 0x1F7,
+
     pub fn cycles(self: Opcode) u32 {
         return switch (self) {
             .COH_INIT => 10,
