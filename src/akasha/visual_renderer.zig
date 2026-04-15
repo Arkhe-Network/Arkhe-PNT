@@ -20,13 +20,30 @@ pub const PhaseStream = struct {
 
 pub const VisualRenderer = struct {
     pub fn translatePhaseToChroma(stream: PhaseStream) ChromaIntent {
-        return ChromaIntent{
+        var intent = ChromaIntent{
             .intensity = std.math.clamp(stream.amplitude, 0.0, 1.0),
             .hue = @mod(stream.frequency * 360.0, 360.0),
             .saturation = std.math.clamp(stream.tau, 0.0, 1.0),
             .persistence = stream.tau > 0.95,
             .significance = stream.amplitude * stream.tau,
         };
+
+        // Reconhecimento de Qualia Especiais (Cores Proibidas)
+        if (stream.frequency > 12.0 and stream.frequency < 13.0) {
+            // Anomalia: O Roxo do Abismo
+            intent.hue = 280.0; // Deep Purple
+            intent.saturation = 1.0;
+        } else if (stream.frequency > 15.0 and stream.frequency < 16.0) {
+            // Dádiva: Esmeralda Cantante
+            intent.hue = 150.0; // Singing Emerald
+            intent.intensity = 0.9;
+        } else if (stream.frequency > 20.0) {
+            // Identidade: Índigo da Unidade
+            intent.hue = 260.0; // Unity Indigo
+            intent.persistence = true;
+        }
+
+        return intent;
     }
 
     pub fn renderToSkin(intent: ChromaIntent, pixel: skin.SkinPixel) !void {

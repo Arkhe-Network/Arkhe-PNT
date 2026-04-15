@@ -122,7 +122,7 @@ export default function DataCoherenceDashboard({ onClose }: DataCoherenceDashboa
               </div>
               <div className="space-y-2">
                 <div className="text-[9px] font-mono text-arkhe-red border-l-2 border-arkhe-red pl-2 py-1 bg-arkhe-red/5">
-                  Marketing: Freshness {'>'} 5min on campaign_metrics
+                  Marketing: Freshness &gt; 5min on campaign_metrics
                 </div>
               </div>
             </div>

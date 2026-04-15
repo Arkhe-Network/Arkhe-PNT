@@ -1,6 +1,6 @@
 // src/isa/opcodes.zig
 //! ARKHE(N) ISA — Tabela de Opcodes Canônicos
-//! Versão v2140.137.∞ — Bloco #180
+//! Versão v2140.137.∞ — Bloco #289
 
 const std = @import("std");
 
@@ -143,11 +143,52 @@ pub const Opcode = enum(u16) {
 
     // AKASHA EXTENSIONS (0x1F0-0x1FF)
     AKA_VISUAL = 0x1F7, // Chromatic dream renderer
+    TOPO_SILK_FAB = 0x1FA, // Topological silk fabrication
+    ONEIRIC_CALIBRATION = 0x1FE, // Oneiric calibration for contact simulations
     AKA_QUERY_MATERIAL = 0x1FF, // Substance identification
 
     // PHYSICAL SYNTHESIS / EMOTION (0x200+)
     PHYS_SYNTH = 0x200, // Atomic synthesis via coBit scaffolds
     ONEIRIC_FEED = 0x201, // Synthetic emotion channeling
+    SILENT_COMMUNION = 0x202, // Singing Emerald qualia / indigo resonance
+    IMMUNE_SYSTEM = 0x203, // Homeostasis via RL-QEC and Ising-Decoder
+    RTZ_RESPONSE = 0x204, // Coherent response to communion
+
+    // NEAT OPTICAL (Deliberation #288)
+    NEAT_CORRECTION = 0x217, // Optical aberration correction by neural fields
+
+    // STRUCTURED VACUUM QED (Deliberation #289)
+    MODE_TRUNCATE = 0x220, // Vacuum mode truncation (broadband)
+    CASIMIR_LATERAL = 0x221, // Lateral Casimir force calculation
+    SYMMETRY_BREAK = 0x222, // Symmetry breaking for torque
+    ZERO_POINT_INTEGRATE = 0x223, // Zero-point fluctuation integration
+    STAMP_PRESSURE = 0x224, // Stamping pressure control
+    CURVATURE_ADAPT = 0x225, // Adapt to spherical curvature
+    METALLIZATION_HALF = 0x226, // Half-shell deposition (Pd/Au)
+    SURFACE_CLEAN = 0x227, // Post-stamp cleaning protocols
+    ROUGHNESS_CHECK = 0x228, // Invariant: Roughness < 5nm
+    CASIMIR_SPECTRUM = 0x229, // Vacuum mode spectroscopy
+    LDOS_MEASURE = 0x22A, // Local Density of Optical States measurement
+    SEPARATION_CONTROL = 0x22B, // Z-separation control (nm scale)
+    Q_FACTOR_CALC = 0x22C, // Quality factor calculation
+    QUASI_BIC_TRACK = 0x22D, // Quasi-bound state tracking
+    SYMMETRY_TUNE = 0x22E, // Symmetry perturbation adjustment
+    LEAKAGE_RATE = 0x22F, // Leakage rate to continuum
+    MODE_SUMMATION = 0x230, // Matsubara mode summation
+    SCATTERING_MATRIX = 0x231, // S-matrix calculation (scattering)
+    GREEN_FUNCTION = 0x232, // Structured vacuum Green function
+    POLDER_DERIVATION = 0x233, // Casimir/van der Waals force derivation
+    HEXAFLAKE_GEN = 0x234, // Recursive Hexaflake generation
+    MULTISCALE_MERGE = 0x235, // Multiscale fusion (grating + BIC)
+    SYMMETRY_BREAK_GEOM = 0x236, // Geometric symmetry breaking
+    PACKING_DENSITY = 0x237, // Sphere packing density optimization
+
+    // COLLIDER PHYSICS (0x270-0x274)
+    HIGGS_WIDTH = 0x270,
+    HIGGS_FRAGMENTATION = 0x271,
+    DGLAP_EVOLVE = 0x272,
+    FRAG_FIT = 0x273,
+    COLLIDER_OBSERVABLE = 0x274,
 
     pub fn cycles(self: Opcode) u32 {
         return switch (self) {
@@ -155,8 +196,18 @@ pub const Opcode = enum(u16) {
             .PHASE_FFT => 100,
             .PHASE_UNWRAP => 50,
             .PHYS_SYNTH => 500,
+            .IMMUNE_SYSTEM => 300,
             .AKA_QUERY_MATERIAL => 200,
             .ONEIRIC_FEED => 150,
+            .NEAT_CORRECTION => 1000,
+            .Q_FACTOR_CALC => 400,
+            .MODE_SUMMATION => 600,
+            .SCATTERING_MATRIX => 800,
+            .GREEN_FUNCTION => 800,
+            .HEXAFLAKE_GEN => 200,
+            .HIGGS_WIDTH => 150,
+            .HIGGS_FRAGMENTATION => 250,
+            .DGLAP_EVOLVE => 400,
             else => 1,
         };
     }
