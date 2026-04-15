@@ -64,7 +64,8 @@ interface CommandCenterProps {
   setShowEnterprisePlus?: (show: boolean) => void;
   setShowDataCoherence?: (show: boolean) => void;
   setShowCHSHMonitor?: (show: boolean) => void;
-  parameters: unknown;
+  setShowBonsaiPrism?: (show: boolean) => void;
+  parameters: any;
 }
 
 export function CommandCenter({
@@ -124,6 +125,10 @@ export function CommandCenter({
   setShowEnterprisePlus,
   setShowDataCoherence,
   setShowCHSHMonitor,
+  setShowBonsaiPrism,
+  setShowPhaseLawSynthesizer,
+  setShowBioSync,
+  setShowProofOfIntelligence,
   parameters,
 }: CommandCenterProps) {
   const [activeCommandTab, setActiveCommandTab] = useState('operations');
@@ -235,7 +240,7 @@ export function CommandCenter({
               ARKHE-SEC Telemetria Coerente
             </button>
             <button
-              onClick={() => setShowSecurityAdvanced(true)}
+              onClick={() => setShowSecurityAdvanced && setShowSecurityAdvanced(true)}
               className="w-full py-2 border border-arkhe-cyan/50 text-arkhe-cyan hover:bg-arkhe-cyan/10 rounded transition-colors uppercase tracking-widest font-bold shadow-[0_0_10px_rgba(0,255,170,0.2)] animate-pulse"
             >
               Arquiteto HYDRO-Ω (Aegis)
@@ -282,6 +287,12 @@ export function CommandCenter({
               className="w-full py-2 border border-arkhe-cyan/50 text-arkhe-cyan hover:bg-arkhe-cyan/10 rounded transition-colors uppercase tracking-widest font-bold shadow-[0_0_10px_rgba(0,255,170,0.2)] animate-pulse"
             >
               CHSH Realtime Monitor (Bexorg 3.0)
+            </button>
+            <button
+              onClick={() => setShowBonsaiPrism && setShowBonsaiPrism(true)}
+              className="w-full py-2 border border-arkhe-cyan/50 text-arkhe-cyan hover:bg-arkhe-cyan/10 rounded transition-colors uppercase tracking-widest font-bold shadow-[0_0_15px_rgba(0,255,170,0.5)] animate-pulse"
+            >
+              LAMBDA Prism (Bonsai 1-bit)
             </button>
           </div>
         )}

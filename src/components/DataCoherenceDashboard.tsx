@@ -1,6 +1,14 @@
-import React from 'react';
+
+/**
+ * @license
+ * Copyright 2026 Google LLC
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 import { X, Database, Activity, AlertCircle, RefreshCcw, Layout, Shield, Network, Server } from 'lucide-react';
 import { motion } from 'motion/react';
+import React from 'react';
+
 import { useArkheSimulation } from '../hooks/useArkheSimulation';
 
 interface DataCoherenceDashboardProps {

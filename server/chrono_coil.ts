@@ -1,4 +1,11 @@
-import crypto from 'crypto';
+
+/**
+ * @license
+ * Copyright 2026 Google LLC
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+import crypto from 'node:crypto';
 
 export interface CalibrationResult {
     success: boolean;
@@ -32,7 +39,7 @@ export function calibrateChronoCoil(): CalibrationResult {
     // Simula a descida de frequência (ramping down)
     while (currentFreq > targetFreq) {
         currentFreq -= 15e-6;
-        if (currentFreq < targetFreq) currentFreq = targetFreq;
+        if (currentFreq < targetFreq) {currentFreq = targetFreq;}
         logs.push(`🜏 [W7-X] Ajustando bobinas NbTi... Frequência atual: ${currentFreq * 1e6} µHz`);
     }
     
