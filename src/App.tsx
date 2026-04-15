@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, Link, useLocation } from 'react-router-dom';
 import { Shield, Activity, Clock, Radio, Cpu, Network, AlertTriangle, CheckCircle2 } from 'lucide-react';
+import { motion } from 'framer-motion';
 import CoherenceMonitor from './components/CoherenceMonitor';
 import ThreatDetection from './components/ThreatDetection';
 import NetworkStatus from './components/NetworkStatus';
@@ -42,6 +43,7 @@ import IntelligencePanel from './components/IntelligencePanel';
 import { IntelligenceHub } from './components/IntelligenceHub';
 import OrchestrationLayerPanel from './components/OrchestrationLayerPanel';
 import AIP005SynapticBridgePanel from './components/AIP005SynapticBridgePanel';
+import ResearchAgentsPanel from './components/ResearchAgentsPanel';
 import SepoliaIntegrationPanel from './components/SepoliaIntegrationPanel';
 import ArkheCliPanel from './components/ArkheCliPanel';
 import P2PNetworkPanel from './components/P2PNetworkPanel';
@@ -103,6 +105,7 @@ export function Dashboard() {
   const [showIntelligenceHub, setShowIntelligenceHub] = useState(false);
   const [showOrchestrationLayer, setShowOrchestrationLayer] = useState(false);
   const [showAIP005, setShowAIP005] = useState(false);
+  const [showResearchAgents, setShowResearchAgents] = useState(false);
   const [showSepoliaIntegration, setShowSepoliaIntegration] = useState(false);
   const [showArkheCli, setShowArkheCli] = useState(false);
   const [showP2PNetwork, setShowP2PNetwork] = useState(false);
@@ -302,6 +305,7 @@ export function Dashboard() {
             setShowIntelligenceHub={setShowIntelligenceHub}
             setShowOrchestrationLayer={setShowOrchestrationLayer}
             setShowAIP005={setShowAIP005}
+            setShowResearchAgents={setShowResearchAgents}
             setShowSepoliaIntegration={setShowSepoliaIntegration}
             setShowArkheCli={setShowArkheCli}
             setShowP2PNetwork={setShowP2PNetwork}
@@ -359,6 +363,19 @@ export function Dashboard() {
       {showIntelligenceHub && <IntelligenceHub onClose={() => setShowIntelligenceHub(false)} />}
       {showOrchestrationLayer && <OrchestrationLayerPanel onClose={() => setShowOrchestrationLayer(false)} />}
       {showAIP005 && <AIP005SynapticBridgePanel onClose={() => setShowAIP005(false)} />}
+      {showResearchAgents && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4">
+          <div className="w-full max-w-4xl relative">
+            <button
+              onClick={() => setShowResearchAgents(false)}
+              className="absolute -top-8 right-0 text-zinc-400 hover:text-white font-mono text-xs"
+            >
+              [X] CLOSE
+            </button>
+            <ResearchAgentsPanel />
+          </div>
+        </div>
+      )}
       {showSepoliaIntegration && <SepoliaIntegrationPanel onClose={() => setShowSepoliaIntegration(false)} />}
       {showArkheCli && <ArkheCliPanel onClose={() => setShowArkheCli(false)} />}
       {showP2PNetwork && <P2PNetworkPanel onClose={() => setShowP2PNetwork(false)} />}

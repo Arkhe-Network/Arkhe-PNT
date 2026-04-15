@@ -36,6 +36,7 @@ interface CommandCenterProps {
   setShowIntelligenceHub: (show: boolean) => void;
   setShowOrchestrationLayer: (show: boolean) => void;
   setShowAIP005: (show: boolean) => void;
+  setShowResearchAgents: (show: boolean) => void;
   setShowSepoliaIntegration: (show: boolean) => void;
   setShowArkheCli: (show: boolean) => void;
   setShowP2PNetwork: (show: boolean) => void;
@@ -96,6 +97,7 @@ export function CommandCenter({
   setShowIntelligenceHub,
   setShowOrchestrationLayer,
   setShowAIP005,
+  setShowResearchAgents,
   setShowSepoliaIntegration,
   setShowArkheCli,
   setShowP2PNetwork,
@@ -116,6 +118,9 @@ export function CommandCenter({
   setShowSecurityAdvanced,
   setShowPluralityMCP,
   setShowVelxioEmulation,
+  setShowProofOfIntelligence,
+  setShowPhaseLawSynthesizer,
+  setShowBioSync,
   setShowCorvoNoir,
   setShowEnterprisePlus,
   setShowDataCoherence,
@@ -535,6 +540,13 @@ export function CommandCenter({
               className="w-full py-2 border border-yellow-500/50 text-yellow-500 hover:bg-yellow-500/10 rounded transition-colors uppercase tracking-widest font-bold shadow-[0_0_10px_rgba(234,179,8,0.2)] animate-pulse"
             >
               AIP-005: Synaptic Links
+            </button>
+            <button
+              onClick={() => setShowResearchAgents(true)}
+              className="w-full py-2 border border-arkhe-cyan/50 text-arkhe-cyan hover:bg-arkhe-cyan/10 rounded transition-colors uppercase tracking-widest font-bold shadow-[0_0_10px_rgba(0,255,170,0.2)] animate-pulse flex items-center justify-center space-x-2"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-microscope"><path d="M6 18h8"/><path d="M3 22h18"/><path d="M14 22a7 7 0 1 0-14 0"/><path d="M9 14h2"/><path d="M9 12a2 2 0 1 1-4 0V6a2 2 0 1 1 4 0v6Z"/><path d="M12 6a3 3 0 0 0-3-3H6"/><path d="M14 13h1a4 4 0 0 0 4-4V6"/><path d="M20 3h2v2"/><path d="M20 5v2h-2"/></svg>
+              <span>Research Agents</span>
             </button>
             <button 
               onClick={() => setShowSepoliaIntegration(true)}

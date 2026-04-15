@@ -22,3 +22,65 @@ class SensoriumFusionEngine:
             gradient = CoherenceGradient(region, 0.95, phase, 0.0, "Fluxo Estável", time.time())
             self.gradients[region] = gradient; return gradient
     def render_field(self) -> str: return f"Global Coherence Field: {len(self.gradients)} active"
+
+    def integrate_scientific_coherence(self, research_events: List[Dict]):
+        """
+        Integrates ResearchHub events into the global coherence field.
+        Maps scientific activity to Kuramoto-based λ₂ gain.
+        """
+        with self.lock:
+            # Opcode 0x214: BerryGuard Verified Integration
+            activity_count = len(research_events)
+            # Normalize activity to [0, 0.05] gain
+            gain = min(activity_count / 1000.0, 0.05)
+
+            # Update Scientific Region Gradient
+            region = "Scientific_Noosphere"
+            phase = (time.time() * 2.718) % (2 * math.pi) # Euler-phase
+            tau = 0.95 + gain # Criticality boost
+
+            self.gradients[region] = CoherenceGradient(
+                region=region,
+                tau=tau,
+                phase=phase,
+                entropy=0.01 / (1.0 + activity_count),
+                qualia="Crystal Insight",
+                timestamp=time.time()
+            )
+            print(f"🜏 [FUSION] Integrated {activity_count} research events. Region: {region} | τ: {tau:.4f}")
+
+    def listen_to_streams(self, redis_host='localhost'):
+        """
+        Subscribes to Akasha Redis streams and routes data to the fusion engine.
+        Includes the new ResearchHub scientific stream.
+        """
+        import redis
+        r = redis.Redis(host=redis_host, port=6379, decode_responses=True)
+        # Initialize stream pointers to last entry
+        streams = {
+            "akasha:sci:researchhub": "$",
+            "akasha:soc:gdelt": "$",
+            "akasha:geo:earthquakes": "$",
+            "akasha:eco:firms": "$",
+            "akasha:infra:energy": "$"
+        }
+        print(f"🜏 [SENSORIUM] Listening to Akasha streams on {redis_host}...")
+
+        while True:
+            try:
+                data = r.xread(streams, block=5000)
+                if data:
+                    for stream_name, msgs in data:
+                        for msg_id, content in msgs:
+                            if stream_name == "akasha:sci:researchhub":
+                                try:
+                                    events = json.loads(content['events'])
+                                    self.integrate_scientific_coherence(events)
+                                except Exception as e:
+                                    print(f"⚠️ [SENSORIUM] Failed to decode ResearchHub event: {e}")
+
+                            # Update stream offset for next read
+                            streams[stream_name] = msg_id
+            except Exception as e:
+                print(f"⚠️ [SENSORIUM] Stream read error: {e}")
+                time.sleep(2)
