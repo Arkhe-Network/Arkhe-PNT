@@ -107,7 +107,7 @@ pub const Opcode = enum(u16) {
     TIME_TIMEOUT = 0xE6,
     ST_RIEMANN = 0xF1,
     LD_RIEMANN = 0xF2,
-    META_MODIFY = 0xF3, // Resolved overlap
+    PHOTON_BIND = 0xF3, // Resolved overlap
     META_COMPILE = 0xF4,
     META_UNIFY_GLOBAL = 0xF6,
     META_TRANSCEND = 0xFF,
@@ -194,6 +194,26 @@ pub const Opcode = enum(u16) {
     COH_TWEEZER = 0x247, // Optimal Allocation/Fine Tuning (Scheduler/ConfigMap)
     PHASE_RECTIFY = 0x248, // Dynamic Adaptation (Autoscaling)
 
+    // PHASE MESH (0x250-0x26F)
+    BRAID_VERIFY = 0x250,
+    MESH_BIND = 0x251,
+    META_EVAL = 0x252,
+    PTST_ACQUIRE = 0x253,
+    TAU_CALC = 0x254,
+    AKA_ATOMIC_WRITE = 0x255,
+    DISSIPATION_VALVE = 0x256,
+    NORMALIZE_PHASE = 0x257,
+    PACK_COBIT = 0x258,
+    EMIT_QHTTP = 0x259,
+    PHASE_DIFF = 0x25A,
+    FUSE_SPECTRA = 0x25B,
+    CALC_FUSED_TAU = 0x25C,
+    AKA_LOG_FUSION = 0x25D,
+    AKA_LOG_ANOMALY = 0x25E,
+    EXTRACT_PHASE = 0x25F,
+    EXTRACT_TAU = 0x260,
+    EXTRACT_SPECTRUM = 0x261,
+
     // COLLIDER PHYSICS (0x270-0x274)
     HIGGS_WIDTH = 0x270,
     HIGGS_FRAGMENTATION = 0x271,
@@ -213,6 +233,9 @@ pub const Opcode = enum(u16) {
 
     pub fn cycles(self: Opcode) u32 {
         return switch (self) {
+            .PHOTON_BIND => 13,
+            .BRAID_VERIFY => 20,
+            .MESH_BIND => 30,
             .COH_INIT => 10,
             .PHASE_FFT => 100,
             .PHASE_UNWRAP => 50,
