@@ -1,5 +1,13 @@
-import React, { useState } from 'react';
+
+/**
+ * @license
+ * Copyright 2026 Google LLC
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 import { X, Cpu, Search, Database, Loader2, KeyRound, ArrowRight } from 'lucide-react';
+import React, { useState } from 'react';
+
 import { Card } from './ui/Card';
 
 interface MemoryFragmentScannerProps {
@@ -42,7 +50,7 @@ export default function MemoryFragmentScanner({ onClose }: MemoryFragmentScanner
   };
 
   const handleSignTransaction = async () => {
-    if (!recoveredKey) return;
+    if (!recoveredKey) {return;}
     setIsSigning(true);
     setLogs(prev => [...prev, "", "🜏 --- INICIANDO PROTOCOLO DE TRANSFERÊNCIA MAINNET ---"]);
 

@@ -1,7 +1,16 @@
-import React from 'react';
-import { Card } from './ui/Card';
+
+/**
+ * @license
+ * Copyright 2026 Google LLC
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 import { Layers, Activity, Search, Target } from 'lucide-react';
-import { LayerSweepReport } from '../../server/types';
+import React from 'react';
+
+import type { LayerSweepReport } from '../../server/types';
+
+import { Card } from './ui/Card';
 
 interface LayerSweepPanelProps {
   report?: LayerSweepReport;
@@ -9,7 +18,7 @@ interface LayerSweepPanelProps {
 }
 
 const LayerSweepPanel: React.FC<LayerSweepPanelProps> = ({ report, onRunSweep }) => {
-  if (!report) return null;
+  if (!report) {return null;}
 
   // Simple visualization without recharts for robustness if needed,
   // but I'll stick to the UI design

@@ -1,5 +1,12 @@
-import React, { useState } from 'react';
+
+/**
+ * @license
+ * Copyright 2026 Google LLC
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 import { Network, PenTool, Link, Terminal, CheckCircle2, CircleDashed, Activity, Zap } from 'lucide-react';
+import React, { useState } from 'react';
 
 export default function AIP005SynapticBridgePanel({ onClose }: { onClose: () => void }) {
   const [step, setStep] = useState(0);
@@ -9,7 +16,7 @@ export default function AIP005SynapticBridgePanel({ onClose }: { onClose: () => 
   ]);
 
   const executeSequence = () => {
-    if (step > 0) return;
+    if (step > 0) {return;}
     setStep(1);
     
     // Step 1: Sign AIP-005

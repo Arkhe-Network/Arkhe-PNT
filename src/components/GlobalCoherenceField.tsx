@@ -1,6 +1,13 @@
-import React, { useEffect, useRef, useState } from 'react';
-import { motion } from 'motion/react';
+
+/**
+ * @license
+ * Copyright 2026 Google LLC
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 import { Terminal, Cpu, Network, Database, Activity } from 'lucide-react';
+import { motion } from 'motion/react';
+import React, { useEffect, useRef, useState } from 'react';
 
 interface Node {
   x: number;
@@ -22,9 +29,9 @@ export default function GlobalCoherenceField({ onClose }: GlobalCoherenceFieldPr
 
   useEffect(() => {
     const canvas = canvasRef.current;
-    if (!canvas) return;
+    if (!canvas) {return;}
     const ctx = canvas.getContext('2d');
-    if (!ctx) return;
+    if (!ctx) {return;}
 
     // Initialize 64 Bio-nós (Upgraded from 50)
     const N = 64;

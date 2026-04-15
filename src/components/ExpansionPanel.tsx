@@ -1,8 +1,18 @@
-import React, { useState } from 'react';
-import { Card } from './ui/Card';
-import { SimulationState } from '../../server/types';
+
+/**
+ * @license
+ * Copyright 2026 Google LLC
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 import { MapPin, Signal, Users, Plus } from 'lucide-react';
+import React, { useState } from 'react';
+
+import type { SimulationState } from '../../server/types';
 import { cn } from '../lib/utils';
+
+import { Card } from './ui/Card';
+
 
 interface ExpansionPanelProps {
   state: SimulationState;
@@ -12,10 +22,10 @@ const ExpansionPanel: React.FC<ExpansionPanelProps> = ({ state }) => {
   const [neighborhood, setNeighborhood] = useState('');
   const expansion = state.expansionStatus;
 
-  if (!expansion) return null;
+  if (!expansion) {return null;}
 
   const handleStartExpansion = async () => {
-    if (!neighborhood.trim()) return;
+    if (!neighborhood.trim()) {return;}
     try {
       await fetch('/api/expansion/start', {
         method: 'POST',

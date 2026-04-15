@@ -1,5 +1,12 @@
-import React, { useState } from 'react';
+
+/**
+ * @license
+ * Copyright 2026 Google LLC
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 import { Link, Shield, Key, Lock, CheckCircle2, Activity, Database } from 'lucide-react';
+import React, { useState } from 'react';
 
 interface GenesisBlockSignerProps {
   onClose: () => void;

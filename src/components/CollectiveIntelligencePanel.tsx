@@ -1,5 +1,12 @@
-import React, { useState, useEffect } from 'react';
+
+/**
+ * @license
+ * Copyright 2026 Google LLC
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 import { Network, Brain, Activity, Zap, CheckCircle2, Users } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
 
 interface CollectiveIntelligencePanelProps {
   onClose: () => void;

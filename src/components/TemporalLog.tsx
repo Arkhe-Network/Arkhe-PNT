@@ -1,6 +1,16 @@
-import { Card } from './ui/Card';
+
+/**
+ * @license
+ * Copyright 2026 Google LLC
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+
 import { Clock } from 'lucide-react';
+
 import type { OrbLog } from '../hooks/useArkheSimulation';
+
+import { Card } from './ui/Card';
 
 interface TemporalLogProps {
   logs: OrbLog[];

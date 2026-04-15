@@ -1,5 +1,12 @@
-import React, { useState, useEffect } from 'react';
+
+/**
+ * @license
+ * Copyright 2026 Google LLC
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 import { Cpu, Network, Activity, Shield, Zap, RefreshCw, CheckCircle2, AlertTriangle, Database } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
 
 interface DimOSPanelProps {
   onClose: () => void;
@@ -62,7 +69,7 @@ export default function DimOSDistributionPanel({ onClose }: DimOSPanelProps) {
       // Update node statuses randomly during deployment
       if (progress < 100) {
         setFleet(prev => prev.map(node => {
-          if (node.status === 'active') return node;
+          if (node.status === 'active') {return node;}
           if (Math.random() > 0.7) {
              const newStatus = Math.random() > 0.5 ? 'syncing' : 'active';
              if (newStatus === 'active' && node.status !== 'active') {

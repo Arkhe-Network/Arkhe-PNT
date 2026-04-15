@@ -1,3 +1,11 @@
+
+/**
+ * @license
+ * Copyright 2026 Google LLC
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+import { Activity, Shield, Zap, Cpu, Heart, Fingerprint } from 'lucide-react';
 import React, { useState } from 'react';
 import {
   LineChart,
@@ -10,8 +18,10 @@ import {
   AreaChart,
   Area
 } from 'recharts';
+
 import { useArkheSimulation } from '../hooks/useArkheSimulation';
-import { Activity, Shield, Zap, Cpu, Heart, Fingerprint } from 'lucide-react';
+
+
 import TemporalLensPanel from './TemporalLensPanel';
 
 const CorvoNoirDashboard: React.FC = () => {

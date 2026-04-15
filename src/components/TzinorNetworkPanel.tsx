@@ -1,5 +1,12 @@
-import React from 'react';
+
+/**
+ * @license
+ * Copyright 2026 Google LLC
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 import { Network, ArrowRightLeft, Zap, Clock, Database } from 'lucide-react';
+import React from 'react';
 
 export interface TzinorEnvelope {
   id: string;

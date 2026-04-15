@@ -1,7 +1,16 @@
-import React from 'react';
-import { Card } from './ui/Card';
+
+/**
+ * @license
+ * Copyright 2026 Google LLC
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 import { Zap, Activity, Play } from 'lucide-react';
-import { ThermodynamicTrainingReport } from '../../server/types';
+import React from 'react';
+
+import type { ThermodynamicTrainingReport } from '../../server/types';
+
+import { Card } from './ui/Card';
 
 interface ThermodynamicTrainingPanelProps {
   report?: ThermodynamicTrainingReport;
@@ -9,7 +18,7 @@ interface ThermodynamicTrainingPanelProps {
 }
 
 const ThermodynamicTrainingPanel: React.FC<ThermodynamicTrainingPanelProps> = ({ report, onRunTraining }) => {
-  if (!report) return null;
+  if (!report) {return null;}
 
   return (
     <Card

@@ -1,5 +1,12 @@
-import React, { useState, useEffect, useRef } from 'react';
+
+/**
+ * @license
+ * Copyright 2026 Google LLC
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 import { X, Activity, Shield, Key } from 'lucide-react';
+import React, { useState, useEffect, useRef } from 'react';
 
 interface ZkERCSimulatorProps {
   onClose: () => void;
@@ -22,7 +29,7 @@ export default function ZkERCSimulator({ onClose }: ZkERCSimulatorProps) {
   const changeAmount = currentUtxo.amount - amount;
 
   const executeTransaction = () => {
-    if (amount > currentUtxo.amount) return;
+    if (amount > currentUtxo.amount) {return;}
     setIsExecuting(true);
     setStep(1);
     

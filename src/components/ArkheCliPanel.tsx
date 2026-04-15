@@ -1,5 +1,12 @@
-import React, { useState, useEffect, useRef } from 'react';
+
+/**
+ * @license
+ * Copyright 2026 Google LLC
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 import { Terminal, Shield, Zap, CheckCircle2 } from 'lucide-react';
+import React, { useState, useEffect, useRef } from 'react';
 
 export default function ArkheCliPanel({ onClose }: { onClose: () => void }) {
   const [logs, setLogs] = useState<string[]>([]);
@@ -14,7 +21,7 @@ export default function ArkheCliPanel({ onClose }: { onClose: () => void }) {
   }, [logs]);
 
   const executeSequence = async () => {
-    if (isExecuting || step > 0) return;
+    if (isExecuting || step > 0) {return;}
     setIsExecuting(true);
     setStep(1);
 
