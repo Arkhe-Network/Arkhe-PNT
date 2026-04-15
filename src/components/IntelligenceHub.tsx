@@ -1,5 +1,13 @@
-import React from 'react';
+
+/**
+ * @license
+ * Copyright 2026 Google LLC
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 import { Activity, AlertTriangle, Brain, Map as MapIcon, Database, Zap, Satellite, Cpu, MessageSquare, Library } from 'lucide-react';
+import React from 'react';
+
 import { useArkheSimulation } from '../hooks/useArkheSimulation';
 
 interface ValidatorData {
@@ -9,7 +17,7 @@ interface ValidatorData {
 }
 
 interface AnomalyData {
-  orbs: { lat: number; lng: number; intensity: number }[];
+  orbs: Array<{ lat: number; lng: number; intensity: number }>;
 }
 
 interface PhaseData {
@@ -17,7 +25,7 @@ interface PhaseData {
   current: string;
 }
 
-const RadarChart = ({ data, focusKey }: { data: any[], focusKey: string }) => (
+const RadarChart = ({ data, focusKey }: { data: unknown[], focusKey: string }) => (
   <div className="h-48 bg-black/40 rounded-lg flex items-center justify-center border border-arkhe-cyan/30">
     <span className="text-arkhe-cyan/50 font-mono text-sm">[Radar Chart Visualization: {focusKey}]</span>
   </div>
@@ -30,7 +38,7 @@ const Alert = ({ type, children }: { type: string, children: React.ReactNode }) 
   </div>
 );
 
-const MapLayer = ({ source, markers }: { source: string, markers: any[] }) => (
+const MapLayer = ({ source, markers }: { source: string, markers: unknown[] }) => (
   <div className="h-48 bg-black/40 rounded-lg flex items-center justify-center border border-purple-500/30 relative overflow-hidden">
     <MapIcon className="absolute opacity-10 w-32 h-32 text-purple-500" />
     <div className="z-10 text-center">

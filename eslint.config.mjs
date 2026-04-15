@@ -32,7 +32,7 @@ export default defineConfig([
 
       parserOptions: {
         projectService: {
-          allowDefaultProject: [
+          allowDefaultProject: [ "src/*.tsx",
             '.prettierrc.cjs',
             'puppeteer.config.cjs',
             'eslint.config.mjs',

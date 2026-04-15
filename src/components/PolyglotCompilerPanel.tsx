@@ -1,6 +1,13 @@
-import React, { useState, useEffect } from 'react';
+
+/**
+ * @license
+ * Copyright 2026 Google LLC
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 import { X, Terminal, CheckCircle2, Cpu, Globe, Database, Code2, Play, AlertTriangle, Infinity } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
+import React, { useState, useEffect } from 'react';
 
 interface PolyglotCompilerPanelProps {
   onClose: () => void;

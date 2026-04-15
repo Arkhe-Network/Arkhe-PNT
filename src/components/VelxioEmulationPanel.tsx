@@ -1,6 +1,13 @@
-import React, { useState, useEffect } from 'react';
+
+/**
+ * @license
+ * Copyright 2026 Google LLC
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 import { motion, AnimatePresence } from 'framer-motion';
 import { Cpu, Terminal, Play, Square, Code, Zap, CheckCircle2, RefreshCw, Layers, Wifi, WifiOff } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
 
 interface VelxioEmulationPanelProps {
   onClose: () => void;

@@ -1,6 +1,13 @@
-import React, { useState, useEffect } from 'react';
-import { motion, AnimatePresence } from 'motion/react';
+
+/**
+ * @license
+ * Copyright 2026 Google LLC
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 import { Network, Brain, Shield, Zap, Clock, Cpu, Activity, Database, Eye, Layers } from 'lucide-react';
+import { motion, AnimatePresence } from 'motion/react';
+import React, { useState, useEffect } from 'react';
 
 interface AgentNode {
   id: string;

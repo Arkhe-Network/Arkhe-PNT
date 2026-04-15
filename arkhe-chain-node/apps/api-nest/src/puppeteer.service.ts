@@ -1,7 +1,11 @@
+/**
+ * @license
+ * Copyright 2026 Arkhe Network
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 import { Injectable } from '@nestjs/common';
 import puppeteer from 'puppeteer';
-import { logger } from '@arkhe/shared';
-import * as path from 'path';
 
 @Injectable()
 export class PuppeteerService {
@@ -23,11 +27,9 @@ export class PuppeteerService {
     `;
 
     await page.setContent(htmlContent);
-    const pdfPath = path.join(process.cwd(), 'coherence_report.pdf');
-    await page.pdf({ path: pdfPath, format: 'A4' });
-
+    const pdfBuffer = await page.pdf({ format: 'A4' });
     await browser.close();
-    logger.info(`Puppeteer report generated: ${pdfPath}`);
-    return pdfPath;
+
+    return pdfBuffer.toString('base64');
   }
 }

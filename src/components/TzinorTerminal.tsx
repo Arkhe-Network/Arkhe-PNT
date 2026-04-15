@@ -1,5 +1,13 @@
+
+/**
+ * @license
+ * Copyright 2026 Google LLC
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 import React, { useEffect, useState } from 'react';
-import { TzinorMemoryState } from '../types/tzinor';
+
+import type { TzinorMemoryState } from '../types/tzinor';
 
 interface TzinorTerminalProps {
   tzinor: TzinorMemoryState;
@@ -11,11 +19,11 @@ const GRID_ROWS = 12;
 const GRID_COLS = 48;
 
 export default function TzinorTerminal({ tzinor, threatLevel }: TzinorTerminalProps) {
-  const [grid, setGrid] = useState<{ char: string; color: string }[][]>([]);
+  const [grid, setGrid] = useState<Array<Array<{ char: string; color: string }>>>([]);
 
   useEffect(() => {
     // Generate the ASCII grid based on Tzinor state
-    const newGrid: { char: string; color: string }[][] = Array(GRID_ROWS).fill(null).map(() => 
+    const newGrid: Array<Array<{ char: string; color: string }>> = Array(GRID_ROWS).fill(null).map(() =>
       Array(GRID_COLS).fill({ char: ' ', color: 'text-arkhe-muted' })
     );
 
@@ -38,10 +46,10 @@ export default function TzinorTerminal({ tzinor, threatLevel }: TzinorTerminalPr
     const coreR = Math.floor(GRID_ROWS / 2);
     const coreC = Math.floor(GRID_COLS / 2);
     
-    tzinor.gMemory.forEach((engram, idx) => {
+    tzinor.gMemory.forEach((engram, _idx) => {
       // Spiral placement for engrams
-      const angle = idx * 2.4;
-      const radius = 2 + idx * 0.5;
+      const angle = _idx * 2.4;
+      const radius = 2 + _idx * 0.5;
       const r = Math.floor(coreR + Math.sin(angle) * radius);
       const c = Math.floor(coreC + Math.cos(angle) * radius * 2); // *2 for character aspect ratio
       
@@ -56,7 +64,7 @@ export default function TzinorTerminal({ tzinor, threatLevel }: TzinorTerminalPr
     });
 
     // Render fContext (Immediate Context - Active Orbs)
-    tzinor.fContext.forEach((node, idx) => {
+    tzinor.fContext.forEach((node, _idx) => {
       // Map embedding to grid position
       const embX = node.embedding[0] || 0;
       const embY = node.embedding[1] || 0;
@@ -70,8 +78,8 @@ export default function TzinorTerminal({ tzinor, threatLevel }: TzinorTerminalPr
         const safeCharIdx = Math.max(0, Math.min(charIdx, CHAR_PALETTE.length - 1));
         
         let color = 'text-arkhe-cyan';
-        if (threatLevel === 'critical') color = 'text-arkhe-red';
-        else if (threatLevel === 'warning') color = 'text-arkhe-orange';
+        if (threatLevel === 'critical') {color = 'text-arkhe-red';}
+        else if (threatLevel === 'warning') {color = 'text-arkhe-orange';}
 
         newGrid[r][c] = { 
           char: CHAR_PALETTE[safeCharIdx], 

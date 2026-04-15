@@ -1,5 +1,12 @@
-import React, { useState, useEffect } from 'react';
+
+/**
+ * @license
+ * Copyright 2026 Google LLC
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 import { Network, Activity, CheckCircle2, CircleDashed, Server, Zap } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
 
 const NODES = [
   { id: 'btc', name: 'Bitcoin', protocol: 'TCP/8333', color: 'text-orange-500', bg: 'bg-orange-500/10', border: 'border-orange-500/30' },
@@ -20,7 +27,7 @@ export default function P2PNetworkPanel({ onClose }: { onClose: () => void }) {
   ]);
 
   const connectNodes = async () => {
-    if (connectedNodes.length > 0 || connectingTo) return;
+    if (connectedNodes.length > 0 || connectingTo) {return;}
 
     for (const node of NODES) {
       setConnectingTo(node.id);
@@ -139,8 +146,8 @@ export default function P2PNetworkPanel({ onClose }: { onClose: () => void }) {
             <div className="flex-1 font-mono text-xs text-gray-300 space-y-2 overflow-y-auto whitespace-pre-wrap">
               {logs.map((log, i) => {
                 let colorClass = 'text-arkhe-cyan/80';
-                if (log.includes('[SUCCESS]')) colorClass = 'text-arkhe-green font-bold';
-                if (log.includes('DIALING')) colorClass = 'text-yellow-500/80';
+                if (log.includes('[SUCCESS]')) {colorClass = 'text-arkhe-green font-bold';}
+                if (log.includes('DIALING')) {colorClass = 'text-yellow-500/80';}
                 
                 return (
                   <div key={i} className={`animate-fade-in ${colorClass}`}>

@@ -1,6 +1,13 @@
-import React, { useEffect, useState } from 'react';
+
+/**
+ * @license
+ * Copyright 2026 Google LLC
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 import { Network, Server, Activity, Shield, Cpu, Play, CheckCircle, XCircle, Clock } from 'lucide-react';
 import { motion } from 'motion/react';
+import React, { useEffect, useState } from 'react';
 
 interface Agent {
   id: string;
@@ -50,7 +57,7 @@ export default function AgentManagementPanel() {
   }, []);
 
   const handleCreateTask = async () => {
-    if (!newTaskType) return;
+    if (!newTaskType) {return;}
     setLoading(true);
     try {
       await fetch('/api/tasks', {

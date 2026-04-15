@@ -1,6 +1,14 @@
-import React, { useState } from 'react';
+
+/**
+ * @license
+ * Copyright 2026 Google LLC
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 import { Wallet, ArrowRightLeft, ShieldCheck, Coins, ExternalLink, Loader2, Link as LinkIcon, CheckCircle2, HardDrive, Network } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
+import React, { useState } from 'react';
+
 import { logger } from '../../server/logger.ts';
 
 interface X402WalletPanelProps {
@@ -8,17 +16,17 @@ interface X402WalletPanelProps {
     address: string;
     network: string;
     balanceUSDC: number;
-    transactions: {
+    transactions: Array<{
       id: string;
       amount: number;
       resource: string;
       provider: string;
       timestamp: string;
-    }[];
+    }>;
     moltxLink?: {
       status: 'unlinked' | 'linked';
       signature?: string;
-      payload?: any;
+      payload?: unknown;
     };
     gstpSync?: {
       status: 'idle' | 'syncing' | 'synced';
@@ -59,8 +67,8 @@ export default function X402WalletPanel({ wallet }: X402WalletPanelProps) {
       } else {
         setPaymentStatus({ success: false, message: data.message || 'Payment failed' });
       }
-    } catch (error) {
-      setPaymentStatus({ success: false, message: 'Network error' });
+    } catch (_error) {
+      setPaymentStatus({ success: false, message: 'Network _error' });
     } finally {
       setIsPaying(false);
       setTimeout(() => setPaymentStatus(null), 3000);
@@ -71,8 +79,8 @@ export default function X402WalletPanel({ wallet }: X402WalletPanelProps) {
     setIsLinking(true);
     try {
       await fetch('/api/x402/moltx-handshake', { method: 'POST' });
-    } catch (error) {
-      logger.error('MoltX Handshake failed: ' + error);
+    } catch (_error) {
+      logger._error('MoltX Handshake failed: ' + _error);
     } finally {
       setIsLinking(false);
     }
@@ -82,8 +90,8 @@ export default function X402WalletPanel({ wallet }: X402WalletPanelProps) {
     setIsSyncing(true);
     try {
       await fetch('/api/x402/gstp-sync', { method: 'POST' });
-    } catch (error) {
-      logger.error('GSTP Sync failed: ' + error);
+    } catch (_error) {
+      logger._error('GSTP Sync failed: ' + _error);
     } finally {
       setIsSyncing(false);
     }
@@ -93,8 +101,8 @@ export default function X402WalletPanel({ wallet }: X402WalletPanelProps) {
     setIsPrometheusSyncing(true);
     try {
       await fetch('/api/x402/prometheus-sync', { method: 'POST' });
-    } catch (error) {
-      logger.error('Prometheus Sync failed: ' + error);
+    } catch (_error) {
+      logger._error('Prometheus Sync failed: ' + _error);
     } finally {
       setIsPrometheusSyncing(false);
     }

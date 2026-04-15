@@ -1,5 +1,12 @@
-import React, { useState, useEffect } from 'react';
+
+/**
+ * @license
+ * Copyright 2026 Google LLC
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 import { Link, Shield, Key, Lock, CheckCircle2, Activity, Database, Users, Network } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
 
 interface GhostProtocolPanelProps {
   onClose: () => void;
@@ -10,7 +17,7 @@ export default function GhostProtocolPanel({ onClose }: GhostProtocolPanelProps)
   const [progress, setProgress] = useState(0);
   const [isComplete, setIsComplete] = useState(false);
   const [logs, setLogs] = useState<string[]>([]);
-  const [derivedKeys, setDerivedKeys] = useState<{ id: string, key: string, status: string }[]>([]);
+  const [derivedKeys, setDerivedKeys] = useState<Array<{ id: string, key: string, status: string }>>([]);
 
   const addLog = (msg: string) => {
     setLogs(prev => [`[${new Date().toISOString().split('T')[1].slice(0, 8)}] ${msg}`, ...prev].slice(0, 15));

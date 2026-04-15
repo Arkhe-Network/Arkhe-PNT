@@ -1,6 +1,13 @@
-import React from 'react';
+
+/**
+ * @license
+ * Copyright 2026 Google LLC
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 import { X, Layers, GitBranch, Box, Cpu, Scale, Lightbulb } from 'lucide-react';
 import { motion } from 'motion/react';
+import React from 'react';
 
 interface MultiversalExpansionPanelProps {
   onClose: () => void;

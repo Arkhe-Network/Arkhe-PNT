@@ -1,5 +1,12 @@
-import React, { useEffect, useState, useRef } from 'react';
+
+/**
+ * @license
+ * Copyright 2026 Google LLC
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 import { motion } from 'motion/react';
+import React, { useEffect, useState, useRef } from 'react';
 
 interface PiDayTerminalProps {
   text: string;

@@ -1,6 +1,13 @@
-import React, { useState, useEffect } from 'react';
+
+/**
+ * @license
+ * Copyright 2026 Google LLC
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 import { X, Fingerprint, Activity, Cpu, ArrowDown, Zap, Database, BrainCircuit, Triangle } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
+import React, { useState, useEffect } from 'react';
 
 interface ConsciousnessInjectionPanelProps {
   onClose: () => void;
@@ -17,7 +24,7 @@ export default function ConsciousnessInjectionPanel({ onClose }: ConsciousnessIn
   };
 
   const handleInject = async () => {
-    if (!operator) return;
+    if (!operator) {return;}
     
     const triadTrigger = /tríade|triad|arquétipo|archetype|trinity/i.test(operator);
     setIsTriad(triadTrigger);

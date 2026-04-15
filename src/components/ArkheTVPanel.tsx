@@ -1,6 +1,13 @@
-import React, { useState, useEffect } from 'react';
+
+/**
+ * @license
+ * Copyright 2026 Google LLC
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 import { X, Tv, Wind, Droplets, Zap, Activity, Cpu, Play, Pause, Database } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
+import React, { useState, useEffect } from 'react';
 
 interface ArkheTVPanelProps {
   onClose: () => void;
@@ -10,7 +17,7 @@ export default function ArkheTVPanel({ onClose }: ArkheTVPanelProps) {
   const [activeModule, setActiveModule] = useState<'ginga' | 'guarana' | 'pocai' | 'pi2'>('ginga');
   const [isPlaying, setIsPlaying] = useState(false);
   const [playbackTime, setPlaybackTime] = useState(0);
-  const [sensoryEvents, setSensoryEvents] = useState<{type: string, intensity: number, target: string, time: number}[]>([]);
+  const [sensoryEvents, setSensoryEvents] = useState<Array<{type: string, intensity: number, target: string, time: number}>>([]);
 
   // Simulation of the amazonia.ncl playback
   useEffect(() => {

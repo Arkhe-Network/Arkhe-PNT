@@ -1,8 +1,16 @@
-import React from 'react';
+
+/**
+ * @license
+ * Copyright 2026 Google LLC
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 import { Shield, Cpu, Code, Activity, BarChart, Zap, Globe, Lock, Brain, Database, Network, Server, X } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
+import React from 'react';
+
+import type { EnterpriseSubagentState } from '../../server/types';
 import { useArkheSimulation } from '../hooks/useArkheSimulation';
-import { EnterpriseSubagentState } from '../../server/types';
 
 interface DomainSectionProps {
   title: string;
@@ -18,7 +26,7 @@ const DomainSection: React.FC<DomainSectionProps> = ({ title, icon, agents, colo
     setLoading(agentId);
     try {
       let action = 'process';
-      let body: any = {};
+      let body: unknown = {};
 
       if (agentId === 'G1') {
         action = 'validate-policy';
@@ -109,7 +117,7 @@ export const EnterprisePlusPanel: React.FC<EnterprisePlusPanelProps> = ({ onClos
   const state = useArkheSimulation();
   const enterprise = state.enterpriseSubagents;
 
-  if (!enterprise) return null;
+  if (!enterprise) {return null;}
 
   return (
     <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4 md:p-8">

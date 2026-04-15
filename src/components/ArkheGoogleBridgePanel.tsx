@@ -1,6 +1,13 @@
-import React, { useState, useEffect } from 'react';
+
+/**
+ * @license
+ * Copyright 2026 Google LLC
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 import { X, Cloud, Shield, MessageSquare, Ticket, Key, CheckCircle2, Clock, AlertCircle, Send } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
+import React, { useState, useEffect } from 'react';
 
 interface ArkheGoogleBridgePanelProps {
   onClose: () => void;
@@ -29,7 +36,7 @@ export default function ArkheGoogleBridgePanel({ onClose }: ArkheGoogleBridgePan
 
   const handleSendMessage = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!messageInput.trim() || connectionState !== 'connected') return;
+    if (!messageInput.trim() || connectionState !== 'connected') {return;}
     
     addLog(`[OUT] AgentMessage: ${messageInput}`);
     setMessageInput('');

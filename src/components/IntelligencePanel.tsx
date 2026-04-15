@@ -1,5 +1,12 @@
-import React, { useState, useEffect } from 'react';
+
+/**
+ * @license
+ * Copyright 2026 Google LLC
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 import { Activity, AlertTriangle, Brain, MessageSquare, Zap, X } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
 
 interface Alert {
   id: string;
@@ -19,7 +26,7 @@ export default function IntelligencePanel({ onClose }: IntelligencePanelProps) {
 
   // Simulação de um feed de inteligência ao vivo, inspirado no Crucix
   useEffect(() => {
-    if (!isLive) return;
+    if (!isLive) {return;}
 
     const mockAlerts: Alert[] = [
       {

@@ -1,6 +1,15 @@
-import React, { useState, useRef } from 'react';
+
+/**
+ * @license
+ * Copyright 2026 Google LLC
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 import { X, Video, Play, Loader2, Download, ShieldCheck, Cpu } from 'lucide-react';
+import React, { useState, useRef } from 'react';
+
 import { Card } from '../components/ui/Card';
+
 import AtelierLog from './AtelierLog';
 
 interface VideoGenerationPanelProps {
@@ -17,7 +26,7 @@ export default function VideoGenerationPanel({ onClose }: VideoGenerationPanelPr
   const videoRef = useRef<HTMLVideoElement>(null);
 
   const handleGenerate = async () => {
-    if (!prompt.trim()) return;
+    if (!prompt.trim()) {return;}
 
     setError(null);
     setVideoUrl(null);
@@ -54,7 +63,7 @@ export default function VideoGenerationPanel({ onClose }: VideoGenerationPanelPr
       const data = await response.json();
       setVideoUrl(data.videoUrl);
       setStage('IDLE');
-    } catch (err: any) {
+    } catch (err: unknown) {
       setError(err.message || 'An unexpected error occurred.');
       setStage('IDLE');
     }

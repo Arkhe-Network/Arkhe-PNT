@@ -1,3 +1,10 @@
+
+/**
+ * @license
+ * Copyright 2026 Google LLC
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 import React, { useState } from 'react';
 
 interface CommandCenterProps {
@@ -56,7 +63,7 @@ interface CommandCenterProps {
   setShowEnterprisePlus?: (show: boolean) => void;
   setShowDataCoherence?: (show: boolean) => void;
   setShowCHSHMonitor?: (show: boolean) => void;
-  parameters: any;
+  parameters: unknown;
 }
 
 export function CommandCenter({
@@ -279,7 +286,7 @@ export function CommandCenter({
               onClick={async () => {
                 const res = await fetch('/api/pi-day', { method: 'POST' });
                 const data = await res.json();
-                if (data.success) setPiDayText(data.injection);
+                if (data.success) {setPiDayText(data.injection);}
               }}
               className="w-full py-2 border border-yellow-500/50 text-yellow-500 hover:bg-yellow-500/10 rounded transition-colors uppercase tracking-widest font-bold animate-pulse shadow-[0_0_10px_rgba(234,179,8,0.2)]"
             >

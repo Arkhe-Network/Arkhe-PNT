@@ -1,5 +1,14 @@
-import { Card } from './ui/Card';
+
+/**
+ * @license
+ * Copyright 2026 Google LLC
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 import { Activity } from 'lucide-react';
+
+import { Card } from './ui/Card';
+
 
 interface ThermodynamicsPanelProps {
   thermo: {

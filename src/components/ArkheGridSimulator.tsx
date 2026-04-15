@@ -1,5 +1,12 @@
-import React, { useState, useEffect, useRef } from 'react';
+
+/**
+ * @license
+ * Copyright 2026 Google LLC
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 import { X, Activity, Zap, Network } from 'lucide-react';
+import React, { useState, useEffect, useRef } from 'react';
 
 interface ArkheGridSimulatorProps {
   onClose: () => void;
@@ -21,9 +28,9 @@ export default function ArkheGridSimulator({ onClose }: ArkheGridSimulatorProps)
   
   useEffect(() => {
     const canvas = canvasRef.current;
-    if (!canvas) return;
+    if (!canvas) {return;}
     const ctx = canvas.getContext('2d');
-    if (!ctx) return;
+    if (!ctx) {return;}
 
     let time = 0;
     const dt = 0.016; // ~60fps
@@ -118,8 +125,8 @@ export default function ArkheGridSimulator({ onClose }: ArkheGridSimulatorProps)
         ctx.beginPath();
         for (let px = -10; px <= 10; px++) {
           const py = Math.sin(px * 0.5 - newPhases[i]) * 8;
-          if (px === -10) ctx.moveTo(x + px, y + py);
-          else ctx.lineTo(x + px, y + py);
+          if (px === -10) {ctx.moveTo(x + px, y + py);}
+          else {ctx.lineTo(x + px, y + py);}
         }
         ctx.strokeStyle = R > 0.8 ? '#00ffff' : '#ff8800';
         ctx.lineWidth = 1.5;
@@ -176,7 +183,7 @@ export default function ArkheGridSimulator({ onClose }: ArkheGridSimulatorProps)
 
     requestRef.current = requestAnimationFrame(render);
     return () => {
-      if (requestRef.current) cancelAnimationFrame(requestRef.current);
+      if (requestRef.current) {cancelAnimationFrame(requestRef.current);}
     };
   }, [volatility, noise, coupling]);
 

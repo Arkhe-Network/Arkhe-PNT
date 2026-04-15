@@ -1,5 +1,13 @@
-import React, { useState } from 'react';
+
+/**
+ * @license
+ * Copyright 2026 Google LLC
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 import { Network, Terminal, CheckCircle2, CircleDashed, Activity, Zap, Code, ShieldCheck, Box } from 'lucide-react';
+import React, { useState } from 'react';
+
 import { ArkheSDK } from '../sdk/ArkheSDK';
 
 export default function SepoliaIntegrationPanel({ onClose }: { onClose: () => void }) {
@@ -10,7 +18,7 @@ export default function SepoliaIntegrationPanel({ onClose }: { onClose: () => vo
   ]);
 
   const executeSequence = async () => {
-    if (step > 0) return;
+    if (step > 0) {return;}
     setStep(1);
     
     // Step 1: Deploy Contracts to Sepolia

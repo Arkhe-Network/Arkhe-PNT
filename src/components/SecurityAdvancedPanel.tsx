@@ -1,5 +1,13 @@
-import React, { useState, useEffect } from 'react';
+
+/**
+ * @license
+ * Copyright 2026 Google LLC
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 import { Shield, Lock, Zap, Eye, Database, Activity, RefreshCw, AlertTriangle, CheckCircle2, Flame } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+
 import { useArkheSimulation } from '../hooks/useArkheSimulation';
 
 interface SecurityAdvancedPanelProps {
