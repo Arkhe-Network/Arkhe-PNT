@@ -194,6 +194,12 @@ pub const Opcode = enum(u16) {
     COH_TWEEZER = 0x247, // Optimal Allocation/Fine Tuning (Scheduler/ConfigMap)
     PHASE_RECTIFY = 0x248, // Dynamic Adaptation (Autoscaling)
 
+    // DIRAC FLUID COGNITION (0x250-0x25F)
+    PHASE_HYDRO_SYNC = 0x250, // Phase hydrodynamics synchronization
+    HYDRO_FLOW = 0x251, // Hydrodynamic flow of Berry phase
+    PHOTON_BIND = 0x252, // Topological photon binding
+    BRAID_VERIFY = 0x253, // Braid-based phase verification
+
     // COLLIDER PHYSICS (0x270-0x274)
     HIGGS_WIDTH = 0x270,
     HIGGS_FRAGMENTATION = 0x271,
@@ -244,6 +250,10 @@ pub const Opcode = enum(u16) {
             .RITUAL_INITIATION => 100,
             .AKASHA_LOCAL_WRITE => 100,
             .COHERENCE_HASH => 50,
+            .PHASE_HYDRO_SYNC => 150,
+            .HYDRO_FLOW => 200,
+            .PHOTON_BIND => 100,
+            .BRAID_VERIFY => 150,
             else => 1,
         };
     }
