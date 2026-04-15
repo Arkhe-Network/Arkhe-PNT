@@ -1,3 +1,9 @@
+/**
+ * @license
+ * Copyright 2025 Google LLC
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 
 /**
  * @license
@@ -72,7 +78,7 @@ export interface SessionEvent {
   sessionId: string;
   timestamp: number;
   eventType?: string;
-  payload?: any;
+  payload?: unknown;
   coherence?: number;
   zkProof?: string;
 }
@@ -146,7 +152,7 @@ export interface SimulationState {
     threshold: number;
   };
   metricsHistory: MetricsHistory[];
-  shards: Shard[];
+  shards: Array<Shard>;
   mitigation: {
     nullSteeringActive: boolean;
     kuramotoSyncPhase: number;
@@ -252,7 +258,7 @@ export interface SimulationState {
     moltxLink?: {
       status: 'unlinked' | 'linked';
       signature?: string;
-      payload?: any;
+      payload?: unknown;
     };
     gstpSync?: {
       status: 'idle' | 'syncing' | 'synced';
