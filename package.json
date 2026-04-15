@@ -83,11 +83,20 @@
     "node": "^20.19.0 || ^22.12.0 || >=23"
   },
   "dependencies": {
+    "@huggingface/transformers": "^4.1.0",
     "@opentelemetry/api": "^1.9.1",
     "@opentelemetry/exporter-logs-otlp-http": "^0.214.0",
     "@opentelemetry/resources": "^2.6.1",
     "@opentelemetry/sdk-logs": "^0.214.0",
+    "@streamdown/cjk": "^1.0.3",
+    "@streamdown/code": "^1.1.1",
+    "@streamdown/math": "^1.0.2",
+    "@streamdown/mermaid": "^1.0.2",
+    "@tailwindcss/vite": "^4.2.2",
     "@types/react": "^19.2.14",
+    "@types/react-router-dom": "^5.3.3",
+    "@types/three": "^0.183.1",
+    "@vitejs/plugin-react": "^6.0.1",
     "clsx": "^2.1.1",
     "express-rate-limit": "^8.3.2",
     "framer-motion": "^12.38.0",
@@ -95,7 +104,12 @@
     "lucide-react": "^1.8.0",
     "motion": "^12.38.0",
     "react": "^19.2.5",
+    "react-router-dom": "^7.14.1",
     "recharts": "^3.8.1",
-    "tailwind-merge": "^3.5.0"
+    "shaka-player": "^5.1.0",
+    "streamdown": "^2.5.0",
+    "tailwind-merge": "^3.5.0",
+    "three": "^0.183.2",
+    "vite": "^8.0.8"
   }
 }

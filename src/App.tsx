@@ -50,6 +50,7 @@ import PhaseSteganographyPanel from './components/PhaseSteganographyPanel';
 import { DysonSphereTelemetry } from './components/DysonSphereTelemetry';
 import DimOSDistributionPanel from './components/DimOSDistributionPanel';
 import GeoKeyDecoderPanel from './components/GeoKeyDecoderPanel';
+import BonsaiPrismPanel from './components/BonsaiPrismPanel';
 import GenesisBlockSignerPanel from './components/GenesisBlockSignerPanel';
 import GhostProtocolPanel from './components/GhostProtocolPanel';
 import ArkheSecTelemetryPanel from './components/ArkheSecTelemetryPanel';
@@ -129,6 +130,7 @@ export function Dashboard() {
   const [showEnterprisePlus, setShowEnterprisePlus] = useState(false);
   const [showDataCoherence, setShowDataCoherence] = useState(false);
   const [showCHSHMonitor, setShowCHSHMonitor] = useState(false);
+  const [showBonsaiPrism, setShowBonsaiPrism] = useState(false);
   const attackTypes = ['Jamming', 'Time Shift', 'Data Spoofing', 'BGP Jitter', 'Quantum Shor', 'SEU Radiation'];
   const [timeToGenesis, setTimeToGenesis] = useState('');
 
@@ -327,6 +329,7 @@ export function Dashboard() {
             setShowEnterprisePlus={setShowEnterprisePlus}
             setShowDataCoherence={setShowDataCoherence}
             setShowCHSHMonitor={setShowCHSHMonitor}
+            setShowBonsaiPrism={setShowBonsaiPrism}
             parameters={state.parameters}
           />
         </div>
@@ -381,6 +384,9 @@ export function Dashboard() {
             <AgentManagementPanel />
           </div>
         </div>
+      )}
+      {showBonsaiPrism && (
+        <BonsaiPrismPanel onClose={() => setShowBonsaiPrism(false)} />
       )}
       {showSecurityAdvanced && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4">

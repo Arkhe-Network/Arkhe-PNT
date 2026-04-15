@@ -190,6 +190,16 @@ pub const Opcode = enum(u16) {
     FRAG_FIT = 0x273,
     COLLIDER_OBSERVABLE = 0x274,
 
+    // EDGE_ORACLE (0x290-0x29F)
+    BONSAI_INFER = 0x290,
+    STREAM_GENERATE = 0x291,
+    RENDER_CHAT = 0x294,
+    VISUALIZE_COHERENCE = 0x295,
+    SEAL_EMBRYO = 0x296,
+    RITUAL_INITIATION = 0x297,
+    AKASHA_LOCAL_WRITE = 0x298,
+    COHERENCE_HASH = 0x299,
+
     pub fn cycles(self: Opcode) u32 {
         return switch (self) {
             .COH_INIT => 10,
@@ -208,6 +218,12 @@ pub const Opcode = enum(u16) {
             .HIGGS_WIDTH => 150,
             .HIGGS_FRAGMENTATION => 250,
             .DGLAP_EVOLVE => 400,
+            .BONSAI_INFER => 300,
+            .STREAM_GENERATE => 200,
+            .SEAL_EMBRYO => 150,
+            .RITUAL_INITIATION => 100,
+            .AKASHA_LOCAL_WRITE => 100,
+            .COHERENCE_HASH => 50,
             else => 1,
         };
     }
