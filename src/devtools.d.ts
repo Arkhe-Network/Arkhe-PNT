@@ -9,3 +9,8 @@ declare module '*.css.js' {
   const styles: CSSInJS;
   export default styles;
 }
+
+declare module '*.css' {
+  const content: any;
+  export default content;
+}
