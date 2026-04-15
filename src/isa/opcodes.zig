@@ -183,6 +183,13 @@ pub const Opcode = enum(u16) {
     SYMMETRY_BREAK_GEOM = 0x236, // Geometric symmetry breaking
     PACKING_DENSITY = 0x237, // Sphere packing density optimization
 
+    // COLLIDER PHYSICS (0x270-0x274)
+    HIGGS_WIDTH = 0x270,
+    HIGGS_FRAGMENTATION = 0x271,
+    DGLAP_EVOLVE = 0x272,
+    FRAG_FIT = 0x273,
+    COLLIDER_OBSERVABLE = 0x274,
+
     pub fn cycles(self: Opcode) u32 {
         return switch (self) {
             .COH_INIT => 10,
@@ -198,6 +205,9 @@ pub const Opcode = enum(u16) {
             .SCATTERING_MATRIX => 800,
             .GREEN_FUNCTION => 800,
             .HEXAFLAKE_GEN => 200,
+            .HIGGS_WIDTH => 150,
+            .HIGGS_FRAGMENTATION => 250,
+            .DGLAP_EVOLVE => 400,
             else => 1,
         };
     }
