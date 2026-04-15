@@ -1,9 +1,22 @@
-import Fastify from 'fastify';
-import { fastifyTRPCPlugin } from '@trpc/server/adapters/fastify';
-import { initTRPC } from '@trpc/server';
-import { z } from 'zod';
-import Redis from 'ioredis';
+/**
+ * @license
+ * Copyright 2025 Google LLC
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+
+/**
+ * @license
+ * Copyright 2026 Google LLC
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 import { logger } from '@arkhe/shared';
+import { initTRPC } from '@trpc/server';
+import { fastifyTRPCPlugin } from '@trpc/server/adapters/fastify';
+import Fastify from 'fastify';
+import Redis from 'ioredis';
+import { z } from 'zod';
 
 const t = initTRPC.create();
 

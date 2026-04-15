@@ -1,6 +1,14 @@
+
+/**
+ * @license
+ * Copyright 2026 Google LLC
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 import { WebSocket } from 'ws';
-import { state } from './state';
+
 import { logger } from './logger';
+import { state } from './state';
 
 /**
  * @module ARStreamServer

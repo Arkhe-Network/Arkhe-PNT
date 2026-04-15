@@ -1,6 +1,13 @@
-import { state } from './state';
+
+/**
+ * @license
+ * Copyright 2026 Google LLC
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 import { logger } from './logger';
-import { UserSession } from './types';
+import { state } from './state';
+import type { UserSession } from './types';
 
 export function runCivicInspection(session: UserSession) {
   const subagents = state.civicSubagents;

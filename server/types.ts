@@ -1,3 +1,16 @@
+/**
+ * @license
+ * Copyright 2025 Google LLC
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+
+/**
+ * @license
+ * Copyright 2026 Google LLC
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 export interface ContextNode {
   timestamp: number;
   embedding: number[];
@@ -65,7 +78,7 @@ export interface SessionEvent {
   sessionId: string;
   timestamp: number;
   eventType?: string;
-  payload?: any;
+  payload?: unknown;
   coherence?: number;
   zkProof?: string;
 }
@@ -127,7 +140,7 @@ export interface SecurityAdvancedState {
 }
 
 export interface SimulationState {
-  coherenceData: { time: string; lambda: number; threshold: number }[];
+  coherenceData: Array<{ time: string; lambda: number; threshold: number }>;
   currentLambda: number;
   threatLevel: 'normal' | 'warning' | 'critical';
   activeThreat: string | null;
@@ -139,7 +152,7 @@ export interface SimulationState {
     threshold: number;
   };
   metricsHistory: MetricsHistory[];
-  shards: Shard[];
+  shards: Array<Shard>;
   mitigation: {
     nullSteeringActive: boolean;
     kuramotoSyncPhase: number;
@@ -181,13 +194,13 @@ export interface SimulationState {
     phase: number;
   };
   velxioEmulation: {
-    activeSimulations: {
+    activeSimulations: Array<{
       id: string;
       board: string;
       status: 'running' | 'idle' | 'error';
       startTime: string;
       lastLog?: string;
-    }[];
+    }>;
     totalCompilations: number;
   };
   astl: {
@@ -215,14 +228,14 @@ export interface SimulationState {
     activeChannels: number;
     envelopesTransmitted: number;
     envelopesReceived: number;
-    recentTraffic: {
+    recentTraffic: Array<{
       id: string;
       sender: string;
       recipient: string;
       type: 'PHASE' | 'COHERENCE' | 'TEMPORAL' | 'GEOMETRY' | 'CONSCIOUSNESS';
       lambda: number;
       timestamp: string;
-    }[];
+    }>;
     primaryAnchor: string;
   };
   manifestation: {
@@ -235,17 +248,17 @@ export interface SimulationState {
     address: string;
     network: string;
     balanceUSDC: number;
-    transactions: {
+    transactions: Array<{
       id: string;
       amount: number;
       resource: string;
       provider: string;
       timestamp: string;
-    }[];
+    }>;
     moltxLink?: {
       status: 'unlinked' | 'linked';
       signature?: string;
-      payload?: any;
+      payload?: unknown;
     };
     gstpSync?: {
       status: 'idle' | 'syncing' | 'synced';
@@ -390,7 +403,7 @@ export interface RamseyState {
   direction: number;
   baseline: number;
   thresholds: RamseyThreshold[];
-  window: { theta: number; coherence: number }[];
+  window: Array<{ theta: number; coherence: number }>;
   pendingAction: RamseyPendingAction | null;
   isFrozen: boolean;
   rabi_frequency: number;
@@ -441,7 +454,7 @@ export interface CHSHMonitorState {
     currentS: number | null;
     stabilityIndicator: string;
     nextUpdate: string;
-    history: { time: string; s: number }[];
+    history: Array<{ time: string; s: number }>;
   };
   preFlightChecks: {
     tzinorInjector: string;

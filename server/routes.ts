@@ -1,22 +1,34 @@
-import express from "express";
-import { exec } from "child_process";
-import * as crypto from "crypto";
-import { state, tzinorStore, generateOrbId } from "./state";
-import { OrbPayload } from "./types";
-import { OrderBook, Order } from "./arkhedx";
+
+/**
+ * @license
+ * Copyright 2026 Google LLC
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+
+import { exec } from "node:child_process";
+import * as crypto from "node:crypto";
+
+
 import { GoogleGenAI } from "@google/genai";
-import * as ecc from 'tiny-secp256k1';
-import { ECPairFactory } from 'ecpair';
 import * as bitcoin from 'bitcoinjs-lib';
+import { ECPairFactory } from 'ecpair';
+import express from "express";
 import { createClient } from 'redis';
-import { calibrateChronoCoil, decodeGKPSyndrome } from "./chrono_coil";
+import * as ecc from 'tiny-secp256k1';
+
+import { agentsState, tasksState, createTask } from "./agent_grpc_server";
 import { arkheChain } from "./arkhe_chain";
 import { initiateDIPMapping, isolateSatoshiVoice } from "./arkhe_telemetry";
+import { OrderBook } from "./arkhedx";
+import type { Order } from "./arkhedx";
+import { broker } from "./broker";
+import { calibrateChronoCoil, decodeGKPSyndrome } from "./chrono_coil";
+import { logger } from "./logger";
 import { publishToNostr } from "./nostr_integration";
 import { broadcastFilteredAudio } from "./presence_field_server";
-import { logger } from "./logger";
-import { agentsState, tasksState, createTask } from "./agent_grpc_server";
-import { broker } from "./broker";
+import { state, tzinorStore, generateOrbId } from "./state";
+import type { OrbPayload } from "./types";
 
 const ECPair = ECPairFactory(ecc);
 
@@ -287,7 +299,7 @@ export function setupRoutes(app: express.Express, broadcastState: () => void, cl
 
   app.post("/api/ghost-node/sign-transaction", adminOnly, express.json(), (req, res) => {
     const { privateKey, destination, amount } = req.body;
-    if (!privateKey) return res.status(400).json({ error: "PrivateKey required" });
+    if (!privateKey) {return res.status(400).json({ error: "PrivateKey required" });}
     
     const destAddress = destination || "1NeXusXyZ9oB8b9c7d6e5f4g3h2i1j0kL";
     const btcAmount = amount ? parseFloat(amount) : 50.0;
@@ -601,7 +613,7 @@ export function setupRoutes(app: express.Express, broadcastState: () => void, cl
         
         for (const line of lines) {
           if (line.includes('=======================================================================')) {
-            if (isJson) break; // End of JSON
+            if (isJson) {break;} // End of JSON
             isJson = true; // Start of JSON
             continue;
           }
@@ -727,7 +739,7 @@ export function setupRoutes(app: express.Express, broadcastState: () => void, cl
 
   app.post("/api/mcp/connect-velxio", express.json(), (req, res) => {
     const { url } = req.body;
-    if (!url) return res.status(400).json({ error: "URL is required" });
+    if (!url) {return res.status(400).json({ error: "URL is required" });}
 
     if (!state.edge.velxioConnections.includes(url)) {
       state.edge.velxioConnections.push(url);
@@ -829,9 +841,9 @@ export function setupRoutes(app: express.Express, broadcastState: () => void, cl
 
   app.post("/api/parameters", (req, res) => {
     const { autoMitigate, couplingStrength, lambdaThreshold } = req.body;
-    if (autoMitigate !== undefined) state.parameters.autoMitigate = autoMitigate;
-    if (couplingStrength !== undefined) state.parameters.couplingStrength = couplingStrength;
-    if (lambdaThreshold !== undefined) state.parameters.lambdaThreshold = lambdaThreshold;
+    if (autoMitigate !== undefined) {state.parameters.autoMitigate = autoMitigate;}
+    if (couplingStrength !== undefined) {state.parameters.couplingStrength = couplingStrength;}
+    if (lambdaThreshold !== undefined) {state.parameters.lambdaThreshold = lambdaThreshold;}
     res.json({ success: true, parameters: state.parameters });
   });
 
@@ -1225,13 +1237,13 @@ export function setupRoutes(app: express.Express, broadcastState: () => void, cl
 
     // Determine qhttp method equivalent
     let qhttpMethod = 'SUPERPOSITION';
-    if (method === 'POST') qhttpMethod = 'COLLAPSE';
-    if (method === 'PUT') qhttpMethod = 'ENTANGLE';
+    if (method === 'POST') {qhttpMethod = 'COLLAPSE';}
+    if (method === 'PUT') {qhttpMethod = 'ENTANGLE';}
 
     logger.info(`🜏 [qhttp] ${qhttpMethod} ${action} for subagent ${subagent.name} (${id})`);
 
     let resultPayload: any = { status: "processed" };
-    let logs: string[] = [];
+    const logs: string[] = [];
 
     // POC Specific Logic for G1, D1, X1, G4
     if (id.toUpperCase() === 'G1' && action === 'validate-policy') {
@@ -1326,7 +1338,7 @@ export function setupRoutes(app: express.Express, broadcastState: () => void, cl
       let variance = 0.0;
       for (let i = 0; i < phaseSignature.length; i++) {
         let diff = (phaseSignature[i] - anchorPhases[i] + Math.PI) % (2 * Math.PI);
-        if (diff < 0) diff += 2 * Math.PI;
+        if (diff < 0) {diff += 2 * Math.PI;}
         diff -= Math.PI;
         variance += diff * diff;
       }
@@ -1340,7 +1352,7 @@ export function setupRoutes(app: express.Express, broadcastState: () => void, cl
       const referenceFingerprint = [128, 128, 128, 128, 128, 128, 128, 128, 128, 128, 128, 128, 128, 128, 128, 128];
       let matches = 0;
       for (let i = 0; i < 16; i++) {
-        if (Math.abs(fingerprint[i] - referenceFingerprint[i]) <= 1) matches++;
+        if (Math.abs(fingerprint[i] - referenceFingerprint[i]) <= 1) {matches++;}
       }
       isClone = (matches / 16) >= 0.92;
     }
@@ -1402,7 +1414,7 @@ export function setupRoutes(app: express.Express, broadcastState: () => void, cl
     };
 
     state.populationFeedback.unshift(entry);
-    if (state.populationFeedback.length > 50) state.populationFeedback.pop();
+    if (state.populationFeedback.length > 50) {state.populationFeedback.pop();}
 
     broadcastState();
     res.json({ success: true, entry });

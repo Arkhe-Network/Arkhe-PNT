@@ -1,3 +1,10 @@
+
+/**
+ * @license
+ * Copyright 2026 Google LLC
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 import { state, updateState, tzinorStore, generateOrbId } from "./state";
 
 let lastTriggeredThreshold: number | null = null;
@@ -10,17 +17,17 @@ export function runSimulationTick(broadcastState: () => void) {
   let newLambda = state.currentLambda;
   let newThreatLevel = state.threatLevel;
   let newActiveThreat = state.activeThreat;
-  let newMetrics = { ...state.metrics };
-  let newMitigation = { ...state.mitigation };
+  const newMetrics = { ...state.metrics };
+  const newMitigation = { ...state.mitigation };
   let newLogs = [...state.logs];
   let newShards = [...state.shards];
-  let newThermo = { ...state.thermodynamics };
-  let newTopology = { ...state.topology };
-  let newHardware = { ...state.hardware };
-  let newSecurity = { ...state.security };
-  let newSecurityAdvanced = { ...state.securityAdvanced };
-  let newRamsey = { ...state.ramsey };
-  let newCHSH = { ...state.chshMonitor };
+  const newThermo = { ...state.thermodynamics };
+  const newTopology = { ...state.topology };
+  const newHardware = { ...state.hardware };
+  const newSecurity = { ...state.security };
+  const newSecurityAdvanced = { ...state.securityAdvanced };
+  const newRamsey = { ...state.ramsey };
+  const newCHSH = { ...state.chshMonitor };
 
   // CHSH Live Telemetry Simulation
   if (newCHSH.status === 'ACTIVATED') {
@@ -265,15 +272,15 @@ export function runSimulationTick(broadcastState: () => void) {
       
       // Recover shards
       newShards = newShards.map(s => {
-        if (s.status === 'corrupted') return { ...s, status: 'recovering' };
-        if (s.status === 'recovering' && Math.random() > 0.5) return { ...s, status: 'active' };
+        if (s.status === 'corrupted') {return { ...s, status: 'recovering' };}
+        if (s.status === 'recovering' && Math.random() > 0.5) {return { ...s, status: 'active' };}
         return s;
       });
       newMitigation.tzinorShardsAvailable = newShards.filter(s => s.status === 'active').length;
 
       // Recover topology & security
-      if (Math.random() > 0.5) newTopology.yangBaxterValid = true;
-      if (Math.random() > 0.5) newSecurity.zkProofValid = true;
+      if (Math.random() > 0.5) {newTopology.yangBaxterValid = true;}
+      if (Math.random() > 0.5) {newSecurity.zkProofValid = true;}
       newTopology.handshakeSuccessRate = Math.min(94.7, newTopology.handshakeSuccessRate + 5.0);
 
       // Recover Advanced Security
@@ -384,7 +391,7 @@ export function runSimulationTick(broadcastState: () => void) {
   newThermo.d3 = 1.0 / Math.pow(k, 4);
 
   // Keep logs bounded
-  if (newLogs.length > 50) newLogs = newLogs.slice(0, 50);
+  if (newLogs.length > 50) {newLogs = newLogs.slice(0, 50);}
 
   const timeStr = new Date().toLocaleTimeString('en-US', { hour12: false, second: '2-digit', minute: '2-digit' });
   
@@ -411,7 +418,7 @@ export function runSimulationTick(broadcastState: () => void) {
 
   // Tor Simulation
   if (newNetworkInfra.tor.status === 'CIRCUIT_ESTABLISHING') {
-    if (Math.random() > 0.9) newNetworkInfra.tor.status = 'CONNECTED';
+    if (Math.random() > 0.9) {newNetworkInfra.tor.status = 'CONNECTED';}
   }
   newNetworkInfra.tor.latencyMs = 120 + Math.random() * 20;
 
@@ -549,10 +556,10 @@ export function runSimulationTick(broadcastState: () => void) {
       invariantsVerified: state.manifestation.invariantsVerified + (Math.random() > 0.9 ? 1 : 0),
       stage: (() => {
         const r = Math.random();
-        if (r > 0.99) return 'C_PHASE';
-        if (r > 0.98) return 'Z_STRUCTURE';
-        if (r > 0.95) return 'TZINOROT_EXEC';
-        if (r > 0.90) return 'R4_PROJECTION';
+        if (r > 0.99) {return 'C_PHASE';}
+        if (r > 0.98) {return 'Z_STRUCTURE';}
+        if (r > 0.95) {return 'TZINOROT_EXEC';}
+        if (r > 0.90) {return 'R4_PROJECTION';}
         return state.manifestation.stage;
       })(),
       activeTask: state.manifestation.stage === 'C_PHASE' ? 'Refinamento da Especificação (Fase ℂ)' :
