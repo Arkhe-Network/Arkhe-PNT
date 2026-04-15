@@ -1,7 +1,15 @@
-import fs from 'fs';
-import path from 'path';
-import { TzinorMemoryState, OrbPayload } from './types';
+
+/**
+ * @license
+ * Copyright 2026 Google LLC
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+import fs from 'node:fs';
+import path from 'node:path';
+
 import { logger } from './logger';
+import type { TzinorMemoryState, OrbPayload } from './types';
 
 const STATE_FILE = path.join(process.cwd(), 'tzinor-state.json');
 
@@ -86,8 +94,8 @@ export class EvolutionaryStateStore {
     });
 
     // Keep arrays bounded (VecDeque behavior)
-    if (this.state.fContext.length > 20) this.state.fContext = this.state.fContext.slice(0, 20);
-    if (this.state.gMemory.length > 100) this.state.gMemory = this.state.gMemory.slice(0, 100);
+    if (this.state.fContext.length > 20) {this.state.fContext = this.state.fContext.slice(0, 20);}
+    if (this.state.gMemory.length > 100) {this.state.gMemory = this.state.gMemory.slice(0, 100);}
 
     // 4. Recalculate State Coherence
     this.state.lambdaCoherence = observation.coherence;

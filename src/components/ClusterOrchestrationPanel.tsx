@@ -1,8 +1,16 @@
-import React, { useState } from 'react';
+
+/**
+ * @license
+ * Copyright 2026 Google LLC
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 import { X, Network, Server, Cpu, Activity, Database, Zap, ArrowRight, CheckCircle2 } from 'lucide-react';
 import { motion } from 'motion/react';
-import { SimulationState } from '../../server/types';
+import React, { useState } from 'react';
+
 import { logger } from '../../server/logger.ts';
+import type { SimulationState } from '../../server/types';
 
 interface ClusterOrchestrationPanelProps {
   onClose: () => void;

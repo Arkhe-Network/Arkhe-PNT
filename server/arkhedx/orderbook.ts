@@ -1,6 +1,14 @@
-import { Order, Side, Trade } from './types';
-import { getCoherenceMultiplier } from './oracle';
+
+/**
+ * @license
+ * Copyright 2026 Google LLC
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 import { calculateFee } from './janus';
+import { getCoherenceMultiplier } from './oracle';
+import type { Order, Trade } from './types';
+import { Side } from './types';
 
 export class OrderBook {
   symbol: string;
@@ -50,8 +58,8 @@ export class OrderBook {
       
       // Check price matching
       if (takerOrder.type === 'limit') {
-        if (takerOrder.side === 'buy' && takerOrder.price < makerOrder.price) break;
-        if (takerOrder.side === 'sell' && takerOrder.price > makerOrder.price) break;
+        if (takerOrder.side === 'buy' && takerOrder.price < makerOrder.price) {break;}
+        if (takerOrder.side === 'sell' && takerOrder.price > makerOrder.price) {break;}
       }
       
       const tradeSize = Math.min(takerOrder.size - takerOrder.filled, makerOrder.size - makerOrder.filled);

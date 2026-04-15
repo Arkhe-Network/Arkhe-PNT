@@ -1,13 +1,20 @@
-import React, { useState, useEffect } from 'react';
+
+/**
+ * @license
+ * Copyright 2026 Google LLC
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 import { X, Eye, Activity, Globe, Sparkles, HeartPulse, Radio, BrainCircuit } from 'lucide-react';
 import { motion } from 'motion/react';
+import React, { useState, useEffect } from 'react';
 
 interface OrbesPanelProps {
   onClose: () => void;
 }
 
 export default function OrbesPanel({ onClose }: OrbesPanelProps) {
-  const [events, setEvents] = useState<{ id: number; source: string; type: string; coherence: number }[]>([]);
+  const [events, setEvents] = useState<Array<{ id: number; source: string; type: string; coherence: number }>>([]);
 
   useEffect(() => {
     const interval = setInterval(() => {

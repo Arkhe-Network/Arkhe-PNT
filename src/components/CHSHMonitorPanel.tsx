@@ -1,8 +1,17 @@
-import React from 'react';
-import { Card } from './ui/Card';
+
+/**
+ * @license
+ * Copyright 2026 Google LLC
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 import { Activity, Gauge, ShieldCheck, Zap, Info, Binary } from 'lucide-react';
+import React from 'react';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, ReferenceLine } from 'recharts';
+
 import { useArkheSimulation } from '../hooks/useArkheSimulation';
+
+import { Card } from './ui/Card';
 
 interface CHSHMonitorPanelProps {
   onClose: () => void;
@@ -12,7 +21,7 @@ export default function CHSHMonitorPanel({ onClose }: CHSHMonitorPanelProps) {
   const state = useArkheSimulation();
   const chsh = state.chshMonitor;
 
-  if (!chsh) return null;
+  if (!chsh) {return null;}
 
   return (
     <div className="bg-black/90 border border-arkhe-cyan/30 rounded-xl overflow-hidden flex flex-col max-h-[90vh] w-full max-w-5xl shadow-[0_0_30px_rgba(0,255,170,0.1)] backdrop-blur-md">

@@ -1,6 +1,13 @@
-import React, { useState, useEffect } from 'react';
-import { motion } from 'motion/react';
+
+/**
+ * @license
+ * Copyright 2026 Google LLC
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 import { X, HeartPulse, Activity, Fingerprint, Waves, BrainCircuit } from 'lucide-react';
+import { motion } from 'motion/react';
+import React, { useState, useEffect } from 'react';
 
 interface NeuralMolecularBridgePanelProps {
   onClose: () => void;
@@ -23,7 +30,7 @@ export default function NeuralMolecularBridgePanel({ onClose }: NeuralMolecularB
 
   // Simulate incoming gRPC stream from the iOS/watchOS app
   useEffect(() => {
-    if (!isConnected) return;
+    if (!isConnected) {return;}
 
     const interval = setInterval(() => {
       // Generate stochastic biological data

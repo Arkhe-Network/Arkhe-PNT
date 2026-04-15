@@ -1,4 +1,12 @@
-import { SimulationState, TzinorMemoryState, OrbLog, Shard, MetricsHistory } from './types';
+
+/**
+ * @license
+ * Copyright 2026 Google LLC
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+import type { SimulationState} from './types';
+import { TzinorMemoryState, OrbLog, Shard, MetricsHistory } from './types';
 import { EvolutionaryStateStore } from './tzinor';
 
 // Global State

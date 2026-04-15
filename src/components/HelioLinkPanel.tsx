@@ -1,9 +1,20 @@
-import React from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { Progress } from '@/components/ui/progress';
+
+/**
+ * @license
+ * Copyright 2026 Google LLC
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 import { Sun, Radio, Activity, Globe } from 'lucide-react';
-import { HelioState } from '../../server/types';
+import React from 'react';
+
+import type { HelioState } from '../../server/types';
+
+import { Badge } from '@/components/ui/badge';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Progress } from '@/components/ui/progress';
+
+
 
 interface HelioLinkPanelProps {
   helio?: HelioState;
@@ -13,7 +24,7 @@ interface HelioLinkPanelProps {
 }
 
 const HelioLinkPanel: React.FC<HelioLinkPanelProps> = ({ helio, onListen, onSync, coherence }) => {
-  if (!helio) return null;
+  if (!helio) {return null;}
 
   const syncAvailable = coherence > 0.999;
 

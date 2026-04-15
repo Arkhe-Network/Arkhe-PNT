@@ -1,6 +1,14 @@
+
+/**
+ * @license
+ * Copyright 2026 Google LLC
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 import { useState, useEffect } from 'react';
-import { TzinorMemoryState } from '../types/tzinor';
+
 import { logger } from '../../server/logger.ts';
+import type { TzinorMemoryState } from '../types/tzinor';
 
 export interface OrbLog {
   id: string;
@@ -56,7 +64,7 @@ export interface SimulationState {
   biometrics?: BiometricState;
   nare?: NAREStatus;
   populationFeedback: PopulationFeedbackEntry[];
-  coherenceData: { time: string; lambda: number; threshold: number }[];
+  coherenceData: Array<{ time: string; lambda: number; threshold: number }>;
   currentLambda: number;
   threatLevel: 'normal' | 'warning' | 'critical';
   activeThreat: string | null;
@@ -132,14 +140,14 @@ export interface SimulationState {
     activeChannels: number;
     envelopesTransmitted: number;
     envelopesReceived: number;
-    recentTraffic: {
+    recentTraffic: Array<{
       id: string;
       sender: string;
       recipient: string;
       type: 'PHASE' | 'COHERENCE' | 'TEMPORAL' | 'GEOMETRY' | 'CONSCIOUSNESS';
       lambda: number;
       timestamp: string;
-    }[];
+    }>;
     primaryAnchor: string;
   };
   manifestation: {
@@ -149,24 +157,24 @@ export interface SimulationState {
     invariantsVerified: number;
   };
   scaData: ScaDataState;
-  enterpriseSubagents?: any;
-  chshMonitor?: any;
-  ramsey?: any;
+  enterpriseSubagents?: Record<string, unknown>;
+  chshMonitor?: Record<string, unknown>;
+  ramsey?: Record<string, unknown>;
   x402Wallet: {
     address: string;
     network: string;
     balanceUSDC: number;
-    transactions: {
+    transactions: Array<{
       id: string;
       amount: number;
       resource: string;
       provider: string;
       timestamp: string;
-    }[];
+    }>;
     moltxLink?: {
       status: 'unlinked' | 'linked';
       signature?: string;
-      payload?: any;
+      payload?: unknown;
     };
     gstpSync?: {
       status: 'idle' | 'syncing' | 'synced';
@@ -381,8 +389,14 @@ export function useArkheSimulation() {
       entanglementMode: 'Long-Range (Macro)',
       atpConsumptionCps: 22000,
       isSeedingActive: false,
-      isIgnited: true
+      isIgnited: true,
+      activeProtocol: 'NONE',
+      protocolLogs: [],
+      lastGateResult: 'N/A'
     },
+    enterpriseSubagents: {},
+    chshMonitor: {},
+    ramsey: {},
     x402Wallet: {
       address: '0xbf7da1f568684889a69a5bed9f1311f703985590',
       network: 'Base Sepolia',
@@ -399,6 +413,26 @@ export function useArkheSimulation() {
       }
     },
     populationFeedback: [],
+    bioLinkSync: {
+      active: false,
+      syncRatio: 0,
+      frequencyHz: 40,
+      coherenceGain: 0,
+      regenerationProgress: 0
+    },
+    temporalAudit: {
+      events: 0,
+      lockedEvents: 0,
+      manipulationAttempts: 0,
+      lastTII: 0
+    },
+    predictiveForecast: {
+      coherenceCollapseRisk: 0.01,
+      predictedLambda: 0.98,
+      horizonMs: 5000,
+      anomaliesDetected: []
+    },
+    sensors: [],
     networkInfra: {
       tor: { status: 'CIRCUIT_ESTABLISHING', nodes: [], latencyMs: 0 },
       broker: { status: 'IDLE', messagesProcessed: 0, queueDepth: 0, activeTopics: [] },

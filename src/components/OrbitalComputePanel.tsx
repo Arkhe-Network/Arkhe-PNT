@@ -1,5 +1,12 @@
-import React from 'react';
+
+/**
+ * @license
+ * Copyright 2026 Google LLC
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 import { Satellite, Globe, Cpu, Layers, Radio } from 'lucide-react';
+import React from 'react';
 
 export interface OrbitalState {
   nodeName: string;

@@ -1,6 +1,13 @@
-import React, { useState, useEffect } from 'react';
-import { motion } from 'motion/react';
+
+/**
+ * @license
+ * Copyright 2026 Google LLC
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 import { X, Shield, Cpu, Code, Terminal, Lock, GitBranch, Layers, Eye, Activity } from 'lucide-react';
+import { motion } from 'motion/react';
+import React, { useState, useEffect } from 'react';
 
 interface OuroborosEnginePanelProps {
   onClose: () => void;

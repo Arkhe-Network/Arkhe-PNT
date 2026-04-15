@@ -1,8 +1,16 @@
-import React, { useEffect, useRef, useState } from 'react';
+
+/**
+ * @license
+ * Copyright 2026 Google LLC
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 import { X, Video, Activity, Wifi, ShieldAlert, Play, Pause, Maximize, Volume2, VolumeX, Terminal, Eye, Layers } from 'lucide-react';
 import { motion } from 'motion/react';
+import React, { useEffect, useRef, useState } from 'react';
 // @ts-ignore
 import shaka from 'shaka-player';
+
 import { logger } from '../../server/logger';
 
 interface TemporalStreamViewerProps {
@@ -23,7 +31,7 @@ export default function TemporalStreamViewer({ onClose }: TemporalStreamViewerPr
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
   useEffect(() => {
-    if (!videoRef.current) return;
+    if (!videoRef.current) {return;}
 
     // Install built-in polyfills to patch browser incompatibilities.
     shaka.polyfill.installAll();
@@ -32,7 +40,7 @@ export default function TemporalStreamViewer({ onClose }: TemporalStreamViewerPr
       const newPlayer = new shaka.Player(videoRef.current);
       setPlayer(newPlayer);
 
-      newPlayer.addEventListener('error', (event: any) => {
+      newPlayer.addEventListener('error', (event: unknown) => {
         logger.error(`Error code ${event.detail.code} object ${JSON.stringify(event.detail)}`);
         setError(`SHAKA_ERR_${event.detail.code}`);
       });
@@ -40,7 +48,7 @@ export default function TemporalStreamViewer({ onClose }: TemporalStreamViewerPr
       // Adaptation events -> Coherence changes
       newPlayer.addEventListener('adaptation', () => {
         const tracks = newPlayer.getVariantTracks();
-        const activeTrack = tracks.find((t: any) => t.active);
+        const activeTrack = tracks.find((t: unknown) => t.active);
         if (activeTrack) {
           // Estimate coherence based on bandwidth
           const newCoherence = Math.min(1.0, activeTrack.bandwidth / 5000000);
@@ -49,7 +57,7 @@ export default function TemporalStreamViewer({ onClose }: TemporalStreamViewerPr
       });
 
       // Segment downloaded -> Perception frame ready (simulated)
-      newPlayer.addEventListener('segmentdownloaded', (event: any) => {
+      newPlayer.addEventListener('segmentdownloaded', (event: unknown) => {
         setCapturedFrames(prev => prev + 1);
       });
 
@@ -75,7 +83,7 @@ export default function TemporalStreamViewer({ onClose }: TemporalStreamViewerPr
           videoRef.current.muted = true;
           videoRef.current.play().then(() => setIsPlaying(true)).catch(e => logger.error("Auto-play prevented: " + e));
         }
-      }).catch((e: any) => {
+      }).catch((e: unknown) => {
         logger.error('Error loading video: ' + e);
         setError(`LOAD_ERR_${e.code}`);
       });
@@ -161,7 +169,7 @@ export default function TemporalStreamViewer({ onClose }: TemporalStreamViewerPr
   };
 
   const formatBitrate = (bits: number) => {
-    if (!bits) return '0 Mbps';
+    if (!bits) {return '0 Mbps';}
     return (bits / 1000000).toFixed(2) + ' Mbps';
   };
 

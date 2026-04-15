@@ -1,21 +1,33 @@
-import express from "express";
-import cors from "cors";
-import helmet from "helmet";
-import rateLimit from "express-rate-limit";
-import { createServer as createViteServer } from "vite";
-import path from "path";
-import { state } from "./state";
-import { runSimulationTick } from "./simulation";
-import { setupRoutes } from "./routes";
+
+/**
+ * @license
+ * Copyright 2026 Google LLC
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+import path from "node:path";
+
 import { ApolloServer, gql } from 'apollo-server-express';
-import { typeDefs, resolvers } from './graphql';
-import { setupPresenceServer } from "./presence_field_server";
-import { setupARStream } from "./ar_stream";
-import { setupProofGraphRoutes } from "./proof_graph";
-import { setupLucentCollector } from "./lucent_omega";
-import { logger } from "./logger";
+import cors from "cors";
+import express from "express";
+import rateLimit from "express-rate-limit";
+import helmet from "helmet";
+import { createServer as createViteServer } from "vite";
+
+
 import { startAgentGrpcServer } from "./agent_grpc_server";
+import { setupARStream } from "./ar_stream";
 import { setupConnectors } from "./connectors";
+import { typeDefs, resolvers } from './graphql';
+import { logger } from "./logger";
+import { setupLucentCollector } from "./lucent_omega";
+import { setupPresenceServer } from "./presence_field_server";
+import { setupRoutes } from "./routes";
+import { runSimulationTick } from "./simulation";
+import { state } from "./state";
+
+
+import { setupProofGraphRoutes } from "./proof_graph";
 
 // SSE Clients
 const clients: express.Response[] = [];
@@ -61,7 +73,7 @@ async function startServer() {
   app.use(cors({
     origin: (origin, callback) => {
       // Allow requests with no origin (like mobile apps or curl)
-      if (!origin) return callback(null, true);
+      if (!origin) {return callback(null, true);}
       if (process.env.NODE_ENV !== "production" || allowedOrigins.indexOf(origin) !== -1) {
         callback(null, true);
       } else {

@@ -1,5 +1,13 @@
-import React, { useEffect, useState } from 'react';
+
+/**
+ * @license
+ * Copyright 2026 Google LLC
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 import { Activity, AlertTriangle, CheckCircle, ShieldAlert } from 'lucide-react';
+import React, { useEffect, useState } from 'react';
+
 import { logger } from '../../server/logger.ts';
 
 interface ConsensusState {

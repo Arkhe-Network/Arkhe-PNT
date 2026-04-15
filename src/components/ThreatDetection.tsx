@@ -1,7 +1,17 @@
-import { Card } from './ui/Card';
+
+/**
+ * @license
+ * Copyright 2026 Google LLC
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+
 import { ShieldAlert } from 'lucide-react';
 import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, ReferenceLine } from 'recharts';
-import { MetricsHistory } from '../hooks/useArkheSimulation';
+
+import type { MetricsHistory } from '../hooks/useArkheSimulation';
+
+import { Card } from './ui/Card';
 
 interface ThreatDetectionProps {
   metrics: {

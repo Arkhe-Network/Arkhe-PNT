@@ -1,7 +1,16 @@
-import React from 'react';
-import { Card } from './ui/Card';
-import { SimulationState } from '../../server/types';
+
+/**
+ * @license
+ * Copyright 2026 Google LLC
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 import { FileText, Download, Fingerprint, Calendar } from 'lucide-react';
+import React from 'react';
+
+import type { SimulationState } from '../../server/types';
+
+import { Card } from './ui/Card';
 
 interface GovernanceManifestoPanelProps {
   state: SimulationState;
@@ -10,7 +19,7 @@ interface GovernanceManifestoPanelProps {
 const GovernanceManifestoPanel: React.FC<GovernanceManifestoPanelProps> = ({ state }) => {
   const manifesto = state.governanceManifesto;
 
-  if (!manifesto) return null;
+  if (!manifesto) {return null;}
 
   const handleExport = () => {
     const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(manifesto, null, 2));

@@ -1,4 +1,12 @@
-import * as crypto from 'crypto';
+
+/**
+ * @license
+ * Copyright 2026 Google LLC
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+import * as crypto from 'node:crypto';
+
 import { logger } from './logger';
 
 const PHI = 1.618033988749895;
@@ -19,8 +27,8 @@ export class Block {
     public timestamp: number,
     public transactions: Transaction[],
     public previousHash: string,
-    public nonce: number = 0,
-    public coherenceScore: number = 0
+    public nonce = 0,
+    public coherenceScore = 0
   ) {
     this.hash = this.calculateHash();
   }
@@ -104,12 +112,12 @@ export class ArkheChain {
 
   verifyPhaseSignature(tx: Transaction): boolean {
     // Transações de recompensa (Geração Espontânea) não precisam de assinatura
-    if (tx.sender === "0000000000000000000000000000000000000000") return true;
+    if (tx.sender === "0000000000000000000000000000000000000000") {return true;}
     
     // Transação Genesis do Sistema Arkhe
-    if (tx.sender === "ARKHE_SYSTEM" && tx.phaseSignature === "GENESIS_PHI_SIGNATURE") return true;
+    if (tx.sender === "ARKHE_SYSTEM" && tx.phaseSignature === "GENESIS_PHI_SIGNATURE") {return true;}
     
-    if (!tx.phaseSignature) return false;
+    if (!tx.phaseSignature) {return false;}
 
     // O payload esperado que o observador deve ter assinado
     const payload = tx.sender + tx.recipient + tx.amount + (tx.memoryFragment || "");

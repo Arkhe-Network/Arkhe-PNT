@@ -1,6 +1,16 @@
-import { Card } from './ui/Card';
+
+/**
+ * @license
+ * Copyright 2026 Google LLC
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+
 import { Network, Server, ShieldCheck, Zap, Repeat } from 'lucide-react';
-import { Shard } from '../hooks/useArkheSimulation';
+
+import type { Shard } from '../hooks/useArkheSimulation';
+
+import { Card } from './ui/Card';
 
 interface NetworkStatusProps {
   shards: Shard[];

@@ -31,14 +31,7 @@ export default defineConfig([
       },
 
       parserOptions: {
-        projectService: {
-          allowDefaultProject: [
-            '.prettierrc.cjs',
-            'puppeteer.config.cjs',
-            'eslint.config.mjs',
-            'rollup.config.mjs',
-            'skills/memory-leak-debugging/references/compare_snapshots.js',
-          ],
+        projectService: true
         },
       },
 

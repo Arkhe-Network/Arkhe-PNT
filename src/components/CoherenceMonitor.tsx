@@ -1,9 +1,18 @@
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, ReferenceLine } from 'recharts';
-import { Card } from './ui/Card';
+
+/**
+ * @license
+ * Copyright 2026 Google LLC
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 import { Activity } from 'lucide-react';
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, ReferenceLine } from 'recharts';
+
+import { Card } from './ui/Card';
+
 
 interface CoherenceMonitorProps {
-  data: { time: string; lambda: number; threshold: number }[];
+  data: Array<{ time: string; lambda: number; threshold: number }>;
   currentLambda: number;
 }
 
@@ -49,7 +58,7 @@ export default function CoherenceMonitor({ data, currentLambda }: CoherenceMonit
               fontSize={10} 
               tickLine={false} 
               axisLine={false}
-              tickFormatter={(val) => val.toFixed(1)}
+              tickFormatter={(val: number) => val.toFixed(1)}
             />
             <Tooltip 
               contentStyle={{ backgroundColor: '#111214', borderColor: '#1f2024', color: '#E0E0E0', fontSize: '12px', fontFamily: 'monospace' }}

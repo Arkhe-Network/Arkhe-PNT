@@ -1,4 +1,12 @@
-import { OnRpcRequestHandler, NodeType } from '@metamask/snaps-sdk';
+
+/**
+ * @license
+ * Copyright 2026 Google LLC
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+import type { OnRpcRequestHandler} from '@metamask/snaps-sdk';
+import { NodeType } from '@metamask/snaps-sdk';
 
 export const onRpcRequest: OnRpcRequestHandler = async ({ origin, request }) => {
   switch (request.method) {

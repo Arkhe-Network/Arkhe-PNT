@@ -1,6 +1,13 @@
-import React, { useState, useEffect } from 'react';
-import { motion, AnimatePresence } from 'motion/react';
+
+/**
+ * @license
+ * Copyright 2026 Google LLC
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 import { X, Cpu, Network, Database, ArrowRight, Zap, Code, Layers, Activity } from 'lucide-react';
+import { motion, AnimatePresence } from 'motion/react';
+import React, { useState, useEffect } from 'react';
 
 interface HybridArchitecturePanelProps {
   onClose: () => void;
@@ -18,10 +25,10 @@ export default function HybridArchitecturePanel({ onClose }: HybridArchitectureP
   }, []);
 
   useEffect(() => {
-    if (simulationStep === 0) setActiveStage('C');
-    if (simulationStep === 1) setActiveStage('TZINOR');
-    if (simulationStep === 2) setActiveStage('Z');
-    if (simulationStep === 3) setActiveStage('R4');
+    if (simulationStep === 0) {setActiveStage('C');}
+    if (simulationStep === 1) {setActiveStage('TZINOR');}
+    if (simulationStep === 2) {setActiveStage('Z');}
+    if (simulationStep === 3) {setActiveStage('R4');}
   }, [simulationStep]);
 
   return (

@@ -1,4 +1,12 @@
-import { EventEmitter } from 'events';
+
+/**
+ * @license
+ * Copyright 2026 Google LLC
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+import { EventEmitter } from 'node:events';
+
 import { logger } from './logger';
 import { state } from './state';
 

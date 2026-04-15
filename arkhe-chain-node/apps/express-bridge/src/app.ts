@@ -1,9 +1,22 @@
+/**
+ * @license
+ * Copyright 2025 Google LLC
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+
+/**
+ * @license
+ * Copyright 2026 Google LLC
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+import { logger } from '@arkhe/shared';
 import express from 'express';
+import jwt from 'jsonwebtoken';
 import passport from 'passport';
 import { Strategy as JwtStrategy, ExtractJwt } from 'passport-jwt';
-import jwt from 'jsonwebtoken';
 import { Sequelize, DataTypes } from 'sequelize';
-import { logger } from '@arkhe/shared';
 
 const app = express();
 app.use(express.json());
@@ -32,7 +45,7 @@ passport.use(
   new JwtStrategy(opts, async (jwt_payload, done) => {
     try {
       const user = await User.findByPk(jwt_payload.sub);
-      if (user) return done(null, user);
+      if (user) {return done(null, user);}
       return done(null, false);
     } catch (err) {
       return done(err, false);

@@ -1,6 +1,14 @@
-import React from 'react';
+
+/**
+ * @license
+ * Copyright 2026 Google LLC
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 import { X, Database, Activity, AlertCircle, RefreshCcw, Layout, Shield, Network, Server } from 'lucide-react';
 import { motion } from 'motion/react';
+import React from 'react';
+
 import { useArkheSimulation } from '../hooks/useArkheSimulation';
 
 interface DataCoherenceDashboardProps {
@@ -114,7 +122,7 @@ export default function DataCoherenceDashboard({ onClose }: DataCoherenceDashboa
               </div>
               <div className="space-y-2">
                 <div className="text-[9px] font-mono text-arkhe-red border-l-2 border-arkhe-red pl-2 py-1 bg-arkhe-red/5">
-                  Marketing: Freshness > 5min on campaign_metrics
+                  Marketing: Freshness {'>'} 5min on campaign_metrics
                 </div>
               </div>
             </div>

@@ -1,8 +1,17 @@
-import { WebSocketServer, WebSocket } from 'ws';
+
+/**
+ * @license
+ * Copyright 2026 Google LLC
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+import type { WebSocket } from 'ws';
+import { WebSocketServer } from 'ws';
+
+import { runCivicInspection } from './civic_subagents';
 import { logger } from './logger';
 import { state } from './state';
-import { SessionEvent, UserSession } from './types';
-import { runCivicInspection } from './civic_subagents';
+import type { SessionEvent, UserSession } from './types';
 
 const LUCENT_PORT = 61803;
 
