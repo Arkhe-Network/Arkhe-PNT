@@ -87,6 +87,7 @@
     "@opentelemetry/exporter-logs-otlp-http": "^0.214.0",
     "@opentelemetry/resources": "^2.6.1",
     "@opentelemetry/sdk-logs": "^0.214.0",
+    "@synsci/cli": "^1.1.113",
     "@types/react": "^19.2.14",
     "clsx": "^2.1.1",
     "express-rate-limit": "^8.3.2",
