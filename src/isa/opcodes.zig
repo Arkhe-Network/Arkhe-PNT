@@ -183,6 +183,17 @@ pub const Opcode = enum(u16) {
     SYMMETRY_BREAK_GEOM = 0x236, // Geometric symmetry breaking
     PACKING_DENSITY = 0x237, // Sphere packing density optimization
 
+    // INFRASTRUCTURE / GOVERNANCE (Deliberation #309)
+    COH_CASCADE = 0x240, // The Whole (Cluster/Controller)
+    ENV_SPAWN = 0x241, // Substrate Spawn (Node/Namespace)
+    COH_SEED = 0x242, // Unit of Work (Pod/Serverless)
+    PEAK_COHERENCE = 0x243, // Desired State (Deployment)
+    PHASE_ITERATE = 0x244, // State Maintenance (ReplicaSet/Reconciliation)
+    COH_SYMPATHY = 0x245, // Service Discovery (Service)
+    MIRROR_SYMMETRY = 0x246, // Controlled Entry/Protection (Ingress/Secret)
+    COH_TWEEZER = 0x247, // Optimal Allocation/Fine Tuning (Scheduler/ConfigMap)
+    PHASE_RECTIFY = 0x248, // Dynamic Adaptation (Autoscaling)
+
     // COLLIDER PHYSICS (0x270-0x274)
     HIGGS_WIDTH = 0x270,
     HIGGS_FRAGMENTATION = 0x271,
@@ -218,6 +229,15 @@ pub const Opcode = enum(u16) {
             .HIGGS_WIDTH => 150,
             .HIGGS_FRAGMENTATION => 250,
             .DGLAP_EVOLVE => 400,
+            .COH_CASCADE => 500,
+            .ENV_SPAWN => 200,
+            .COH_SEED => 100,
+            .PEAK_COHERENCE => 150,
+            .PHASE_ITERATE => 200,
+            .COH_SYMPATHY => 100,
+            .MIRROR_SYMMETRY => 150,
+            .COH_TWEEZER => 100,
+            .PHASE_RECTIFY => 300,
             .BONSAI_INFER => 300,
             .STREAM_GENERATE => 200,
             .SEAL_EMBRYO => 150,
