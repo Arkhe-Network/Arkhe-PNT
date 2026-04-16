@@ -6,9 +6,8 @@
 
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { CrystallizationRitual } from '../ritual/prism-ritual.js';
-import { EmbryoVault } from '../storage/embryovault.js';
 import { ChronicleVault } from '../storage/chroniclevault.js';
-import { X, Send, Square, Info } from 'lucide-react';
+import { X, Send, Square, Info, History } from 'lucide-react';
 import { Streamdown } from "streamdown";
 import { code } from "@streamdown/code";
 import { mermaid } from "@streamdown/mermaid";
@@ -45,13 +44,21 @@ export default function BonsaiPrismPanel({ onClose }) {
     );
 
     workerRef.current.onmessage = (e) => {
-      const { status, token, output, error, progress: prog, loaded } = e.data;
+      const { status, token, output, error, progress: prog, loaded, total } = e.data;
 
       switch (status) {
         case 'ritual_progress':
           setProgress(prog);
           if (ritualRef.current) {
-              ritualRef.current.updateProgress(loaded);
+              // Transformers.js progress can be based on percentage (0-100) or bytes
+              // If total is provided, we use it for the ritual visualization
+              if (total > 0) {
+                 ritualRef.current.updateProgress(loaded);
+              } else {
+                 // Fallback to percentage-based update if total is unknown
+                 const estimatedTotal = selectedModel.includes('1.7b') ? 290_000_000 : 1_200_000_000;
+                 ritualRef.current.updateProgress((prog / 100) * estimatedTotal);
+              }
           }
           break;
         case 'ready':
@@ -107,7 +114,7 @@ export default function BonsaiPrismPanel({ onClose }) {
   useEffect(() => {
       if (stage === 'ritual' && canvasRef.current && !ritualRef.current) {
           ritualRef.current = new CrystallizationRitual(canvasRef.current.id);
-          const estimatedSize = selectedModel.includes('1.7b') ? 290_000_000 : 700_000_000;
+          const estimatedSize = selectedModel.includes('1.7b') ? 290_000_000 : 1_200_000_000;
           ritualRef.current.initiate(estimatedSize);
           workerRef.current.postMessage({ type: 'load', data: selectedModel });
       }
