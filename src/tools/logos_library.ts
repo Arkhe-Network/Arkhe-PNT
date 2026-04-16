@@ -12,7 +12,7 @@ export const FAMILIES = [
   'NULL', 'PHOTON', 'BRAID', 'MESH', 'HYDRO', 'CHRONOS', 'ASI', 'SYS',
   'CLOUD', 'NEURAL', 'GAIA', 'COSMOS', 'MÖBIUS', 'V2G', 'PTST', 'OHF',
   'DYSON', 'NOMAD', 'CAGE', 'MINING', 'VITAE', 'AKASHA', 'QHTTP', 'RL',
-  'TRAFFIC', 'DRONE', 'BCI', 'EPR', 'LAGRANGE', 'SCHUMANN', 'PLANCK', 'OMEGA'
+  'DRONE', 'BCI', 'EPR', 'LAGRANGE', 'SCHUMANN', 'PLANCK', 'OMEGA', 'GNU'
 ] as const;
 
 export const ASPECTS = [
@@ -20,7 +20,7 @@ export const ASPECTS = [
   'TWIST', 'UNTWIST', 'MEASURE', 'COLLAPSE', 'ENTANGLE', 'DISENTANGLE',
   'CRYSTALLIZE', 'DECRYSTALLIZE', 'BOOST', 'DAMP', 'FILTER', 'AMPLIFY',
   'ATTENUATE', 'DELAY', 'ADVANCE', 'BRANCH', 'MERGE', 'MAP', 'REDUCE',
-  'EXPAND', 'PROJECT', 'LIFT', 'CONVOLVE', 'DECONVOLVE'
+  'EXPAND', 'PROJECT', 'LIFT', 'CONVOLVE', 'DECONVOLVE', 'COMPAT'
 ] as const;
 
 const familyDescriptions: Record<string, string> = {
@@ -55,7 +55,8 @@ const familyDescriptions: Record<string, string> = {
   LAGRANGE: 'Pontos de equilíbrio gravitacional e âncoras de fase.',
   SCHUMANN: 'Ressonância geomagnética da Terra.',
   PLANCK: 'Escala fundamental do espaço-tempo.',
-  OMEGA: 'Fim da entropia e o Projeto Ômega.'
+  OMEGA: 'Fim da entropia e o Projeto Ômega.',
+  GNU: 'Camada de compatibilidade com o legado GNU.'
 };
 
 const aspectFunctions: Record<string, string> = {
@@ -90,7 +91,8 @@ const aspectFunctions: Record<string, string> = {
   PROJECT: 'Reduz a dimensionalidade da fase.',
   LIFT: 'Aumenta a dimensionalidade da fase.',
   CONVOLVE: 'Aplica convolução de fase entre sinais.',
-  DECONVOLVE: 'Reverte o efeito da convolução.'
+  DECONVOLVE: 'Reverte o efeito da convolução.',
+  COMPAT: 'Ativa modo de compatibilidade com sistemas legados.'
 };
 
 /**

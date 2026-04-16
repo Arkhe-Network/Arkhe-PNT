@@ -217,6 +217,9 @@ pub const Opcode = enum(u16) {
     AKASHA_LOCAL_WRITE = 0x298,
     COHERENCE_HASH = 0x299,
 
+    // GNU COMPATIBILITY (Deliberation #393)
+    GNU_COMPAT = 0x4000,
+
     pub fn cycles(self: Opcode) u32 {
         return switch (self) {
             .PHOTON_BIND => 13,
@@ -257,6 +260,7 @@ pub const Opcode = enum(u16) {
             .HYDRO_FLOW => 200,
             .PHOTON_BIND => 100,
             .BRAID_VERIFY => 150,
+            .GNU_COMPAT => 100,
             else => 1,
         };
     }
