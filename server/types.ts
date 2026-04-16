@@ -325,6 +325,12 @@ export interface NetworkInfraState {
     cacheHits: number;
     memoryUsageMb: number;
   };
+  dns: {
+    totalQueries: number;
+    successfulResolutions: number;
+    failedResolutions: number;
+    lastResolvedConcept?: string;
+  };
 }
 
 export interface NAREStatus {

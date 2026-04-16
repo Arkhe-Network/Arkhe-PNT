@@ -27,6 +27,7 @@ import { calibrateChronoCoil, decodeGKPSyndrome } from "./chrono_coil";
 import { logger } from "./logger";
 import { publishToNostr } from "./nostr_integration";
 import { broadcastFilteredAudio } from "./presence_field_server";
+import { ARKHE_DNS_GLOSSARY, resolveConcept, reverseResolve } from "./arkhe_dns";
 import { state, tzinorStore, generateOrbId } from "./state";
 import type { OrbPayload } from "./types";
 
@@ -1507,5 +1508,46 @@ export function setupRoutes(app: express.Express, broadcastState: () => void, cl
 
     broadcastState();
     res.json({ success: true, logs });
+  });
+
+  // Arkhe-DNS Endpoints
+  app.post("/api/arkhe-dns/resolve", express.json(), (req, res) => {
+    const { concept } = req.body;
+    state.networkInfra.dns.totalQueries += 1;
+
+    if (!concept) {
+      state.networkInfra.dns.failedResolutions += 1;
+      return res.status(400).json({ error: "Concept is required" });
+    }
+
+    const address = resolveConcept(concept);
+    if (address) {
+      state.networkInfra.dns.successfulResolutions += 1;
+      state.networkInfra.dns.lastResolvedConcept = concept;
+      broadcastState();
+      res.json({ success: true, concept, address });
+    } else {
+      state.networkInfra.dns.failedResolutions += 1;
+      broadcastState();
+      res.status(404).json({ success: false, error: "Concept not found in glossary" });
+    }
+  });
+
+  app.get("/api/arkhe-dns/glossary", (req, res) => {
+    res.json({ success: true, glossary: ARKHE_DNS_GLOSSARY });
+  });
+
+  app.post("/api/arkhe-dns/reverse-resolve", express.json(), (req, res) => {
+    const { address } = req.body;
+    if (!address) {
+      return res.status(400).json({ error: "Address is required" });
+    }
+
+    const concept = reverseResolve(address);
+    if (concept) {
+      res.json({ success: true, address, concept });
+    } else {
+      res.status(404).json({ success: false, error: "Address not found in glossary" });
+    }
   });
 }

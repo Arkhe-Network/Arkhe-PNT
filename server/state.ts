@@ -382,6 +382,11 @@ export let state: SimulationState = {
       status: 'READY',
       cacheHits: 8541,
       memoryUsageMb: 42.8
+    },
+    dns: {
+      totalQueries: 0,
+      successfulResolutions: 0,
+      failedResolutions: 0
     }
   }
 };
