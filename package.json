@@ -46,7 +46,7 @@
   "homepage": "https://github.com/ChromeDevTools/chrome-devtools-mcp#readme",
   "mcpName": "io.github.ChromeDevTools/chrome-devtools-mcp",
   "devDependencies": {
-    "@eslint/js": "^9.35.0",
+    "@eslint/js": "^10.0.1",
     "@google/genai": "^1.37.0",
     "@modelcontextprotocol/sdk": "1.29.0",
     "@rollup/plugin-commonjs": "^29.0.0",
@@ -64,7 +64,7 @@
     "chrome-devtools-frontend": "1.0.1611825",
     "core-js": "3.49.0",
     "debug": "4.4.3",
-    "eslint": "^9.35.0",
+    "eslint": "^10.2.0",
     "eslint-import-resolver-typescript": "^4.4.4",
     "eslint-plugin-import": "^2.32.0",
     "globals": "^17.0.0",
