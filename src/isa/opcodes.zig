@@ -107,7 +107,7 @@ pub const Opcode = enum(u16) {
     TIME_TIMEOUT = 0xE6,
     ST_RIEMANN = 0xF1,
     LD_RIEMANN = 0xF2,
-    META_MODIFY = 0xF3, // Resolved overlap
+    PHOTON_BIND = 0xF3, // Resolved overlap
     META_COMPILE = 0xF4,
     META_UNIFY_GLOBAL = 0xF6,
     META_TRANSCEND = 0xFF,
@@ -219,6 +219,9 @@ pub const Opcode = enum(u16) {
 
     pub fn cycles(self: Opcode) u32 {
         return switch (self) {
+            .PHOTON_BIND => 13,
+            .BRAID_VERIFY => 20,
+            .MESH_BIND => 30,
             .COH_INIT => 10,
             .PHASE_FFT => 100,
             .PHASE_UNWRAP => 50,

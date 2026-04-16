@@ -18,31 +18,37 @@ class PhasePacket:
     phase_signature: str  # Hash da fase atual do serviço emissor
     ttl: int = 64  # Time-to-live em hops
     coherence_priority: float = 0.95  # lambda2 do emissor no momento do envio
+    target_phase: float = 0.0 # Target phase for routing (Block #320)
+    self_cross_id: str = "FORWARD" # Retrocausal status (Block #320)
 
     def to_bytes(self) -> bytes:
         """Serialização com compressão e integridade."""
         header = struct.pack(
-            '!d16sBff',  # Network byte order
+            '!d16sBff f8s',  # Network byte order
             self.timestamp,
             self.phase_signature.encode()[:16],
             self.ttl,
             self.coherence_priority,
-            len(self.payload)
+            len(self.payload),
+            self.target_phase,
+            self.self_cross_id.encode()[:8]
         )
         return header + self.payload
 
     @classmethod
     def from_bytes(cls, data: bytes) -> 'PhasePacket':
-        header_size = struct.calcsize('!d16sBff')
-        timestamp, phase_sig, ttl, coherence, payload_len = struct.unpack(
-            '!d16sBff', data[:header_size]
+        header_size = struct.calcsize('!d16sBff f8s')
+        timestamp, phase_sig, ttl, coherence, payload_len, target_phase, self_cross_id = struct.unpack(
+            '!d16sBff f8s', data[:header_size]
         )
         return cls(
             payload=data[header_size:header_size+int(payload_len)],
             timestamp=timestamp,
             phase_signature=phase_sig.decode().strip('\x00'),
             ttl=ttl,
-            coherence_priority=coherence
+            coherence_priority=coherence,
+            target_phase=target_phase,
+            self_cross_id=self_cross_id.decode().strip('\x00')
         )
 
 @dataclass
@@ -59,12 +65,19 @@ class PhaseAwareDNS:
     def __init__(self):
         self.coherence_cache: Dict[str, Any] = {}
 
-    async def resolve_with_coherence(self, hostname: str) -> ResolvedEndpoint:
+    async def resolve_with_coherence(self, hostname: str, target_phase: Optional[float] = None) -> ResolvedEndpoint:
         """
-        Resolve hostname priorizando endpoints com alta lambda2.
+        Resolve hostname priorizando endpoints com alta lambda2 ou fase próxima.
         """
         # Mocking DNS resolution for now
         selected_ip = "127.0.0.1"
+
+        # Phase-aware logic: if target_phase provided, would filter endpoints
+        # that have a phase gradient pointing toward the target.
+        if target_phase is not None:
+            # Simulation of phase-based filtering
+            pass
+
         return ResolvedEndpoint(
             ip=selected_ip,
             service_id=hashlib.sha256(f"{hostname}:{selected_ip}".encode()).hexdigest()[:16],
