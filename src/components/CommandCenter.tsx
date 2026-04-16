@@ -65,6 +65,7 @@ interface CommandCenterProps {
   setShowDataCoherence?: (show: boolean) => void;
   setShowCHSHMonitor?: (show: boolean) => void;
   setShowBonsaiPrism?: (show: boolean) => void;
+  setShowNeko?: (show: boolean) => void;
   parameters: any;
 }
 
@@ -126,9 +127,7 @@ export function CommandCenter({
   setShowDataCoherence,
   setShowCHSHMonitor,
   setShowBonsaiPrism,
-  setShowPhaseLawSynthesizer,
-  setShowBioSync,
-  setShowProofOfIntelligence,
+  setShowNeko,
   parameters,
 }: CommandCenterProps) {
   const [activeCommandTab, setActiveCommandTab] = useState('operations');
@@ -293,6 +292,12 @@ export function CommandCenter({
               className="w-full py-2 border border-arkhe-cyan/50 text-arkhe-cyan hover:bg-arkhe-cyan/10 rounded transition-colors uppercase tracking-widest font-bold shadow-[0_0_15px_rgba(0,255,170,0.5)] animate-pulse"
             >
               LAMBDA Prism (Bonsai 1-bit)
+            </button>
+            <button
+              onClick={() => setShowNeko && setShowNeko(true)}
+              className="w-full py-2 border border-blue-400/50 text-blue-400 hover:bg-blue-400/10 rounded transition-colors uppercase tracking-widest font-bold shadow-[0_0_15px_rgba(96,165,250,0.3)] animate-pulse"
+            >
+              Neko Virtual Browser (WebRTC)
             </button>
           </div>
         )}
