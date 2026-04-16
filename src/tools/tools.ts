@@ -16,6 +16,7 @@ import * as inputTools from './input.js';
 import * as lighthouseTools from './lighthouse.js';
 import * as memoryTools from './memory.js';
 import * as logosLibraryTools from './logos_library.js';
+import * as nekoTools from './neko.js';
 import * as networkTools from './network.js';
 import * as osCathedralTools from './os_cathedral.js';
 import * as pagesTools from './pages.js';
@@ -51,6 +52,7 @@ export const createTools = (args: ParsedArguments) => {
         ...Object.values(lambdaTools),
         ...Object.values(osCathedralTools),
         ...Object.values(logosLibraryTools),
+        ...Object.values(nekoTools),
       ];
 
   const tools = [];

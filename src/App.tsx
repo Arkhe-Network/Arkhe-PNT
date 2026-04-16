@@ -71,6 +71,8 @@ import { EnterprisePlusPanel } from './components/EnterprisePlusPanel';
 import DataCoherenceDashboard from './components/DataCoherenceDashboard';
 import CHSHMonitorPanel from './components/CHSHMonitorPanel';
 import CorvoNoirDashboard from './components/CorvoNoirDashboard';
+import NekoPanel from './components/NekoPanel';
+import OrbVMLiveMonitor from './components/OrbVMLiveMonitor';
 import { ConsensusMeter } from './components/ConsensusMeter';
 import RamseyConfirmationModal from './components/RamseyConfirmationModal';
 import { CommandCenter } from './components/CommandCenter';
@@ -134,6 +136,8 @@ export function Dashboard() {
   const [showDataCoherence, setShowDataCoherence] = useState(false);
   const [showCHSHMonitor, setShowCHSHMonitor] = useState(false);
   const [showBonsaiPrism, setShowBonsaiPrism] = useState(false);
+  const [showNeko, setShowNeko] = useState(false);
+  const [showOrbVMMonitor, setShowOrbVMMonitor] = useState(false);
   const attackTypes = ['Jamming', 'Time Shift', 'Data Spoofing', 'BGP Jitter', 'Quantum Shor', 'SEU Radiation'];
   const [timeToGenesis, setTimeToGenesis] = useState('');
 
@@ -334,6 +338,8 @@ export function Dashboard() {
             setShowDataCoherence={setShowDataCoherence}
             setShowCHSHMonitor={setShowCHSHMonitor}
             setShowBonsaiPrism={setShowBonsaiPrism}
+            setShowNeko={setShowNeko}
+            setShowOrbVMMonitor={setShowOrbVMMonitor}
             parameters={state.parameters}
           />
         </div>
@@ -404,6 +410,12 @@ export function Dashboard() {
       )}
       {showBonsaiPrism && (
         <BonsaiPrismPanel onClose={() => setShowBonsaiPrism(false)} />
+      )}
+      {showNeko && (
+        <NekoPanel onClose={() => setShowNeko(false)} />
+      )}
+      {showOrbVMMonitor && (
+        <OrbVMLiveMonitor onClose={() => setShowOrbVMMonitor(false)} />
       )}
       {showSecurityAdvanced && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4">
