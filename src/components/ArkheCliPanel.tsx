@@ -5,7 +5,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { Terminal, Shield, Zap, CheckCircle2 } from 'lucide-react';
+import { Terminal, Shield, Zap, CheckCircle2, Smartphone } from 'lucide-react';
 import React, { useState, useEffect, useRef } from 'react';
 
 export default function ArkheCliPanel({ onClose }: { onClose: () => void }) {
@@ -20,19 +20,19 @@ export default function ArkheCliPanel({ onClose }: { onClose: () => void }) {
     }
   }, [logs]);
 
+  const addLog = (msg: string, delay: number) => {
+    return new Promise<void>(resolve => {
+      setTimeout(() => {
+        setLogs(prev => [...prev, msg]);
+        resolve();
+      }, delay);
+    });
+  };
+
   const executeSequence = async () => {
     if (isExecuting || step > 0) {return;}
     setIsExecuting(true);
     setStep(1);
-
-    const addLog = (msg: string, delay: number) => {
-      return new Promise<void>(resolve => {
-        setTimeout(() => {
-          setLogs(prev => [...prev, msg]);
-          resolve();
-        }, delay);
-      });
-    };
 
     // Step 1: make build-go
     await addLog("$ make build-go", 500);
@@ -130,6 +130,23 @@ export default function ArkheCliPanel({ onClose }: { onClose: () => void }) {
                   </div>
                 </div>
               </div>
+            </div>
+
+            <div className="bg-arkhe-cyan/5 border border-arkhe-cyan/20 rounded-lg p-4">
+              <h3 className="font-mono text-[10px] uppercase tracking-widest text-arkhe-cyan mb-2">Android Node Bootstrap</h3>
+              <p className="text-[10px] text-arkhe-muted mb-3 font-mono">Run Arkhe(n) on your mobile device via Termux.</p>
+              <button
+                onClick={async () => {
+                  await addLog("\n$ # INSTRUÇÕES PARA ANDROID", 200);
+                  await addLog("1. Instale o Termux (F-Droid)", 200);
+                  await addLog("2. Execute o comando abaixo no Termux:", 200);
+                  await addLog("curl -O https://raw.githubusercontent.com/Arkhe-Network/Arkhe-PNT/main/scripts/arkhe-android-bootstrap.sh && bash arkhe-android-bootstrap.sh", 400);
+                }}
+                className="w-full py-2 border border-arkhe-cyan/30 text-arkhe-cyan hover:bg-arkhe-cyan/10 rounded text-[10px] uppercase tracking-widest transition-colors flex items-center justify-center gap-2"
+              >
+                <Smartphone className="w-3 h-3" />
+                Get Bootstrap Command
+              </button>
             </div>
             
             <button 
