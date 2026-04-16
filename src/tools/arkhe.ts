@@ -2317,3 +2317,40 @@ export const cohTeleport = definePageTool({
     response.appendResponseLine(`**RESULT**: Teleportation Successful. COBIT ${request.params.cobitId} materialized.`);
   },
 });
+
+export const setupArkheAndroid = definePageTool({
+  name: 'setup_arkhe_android',
+  description:
+    'ASI Protocol: Provides instructions and commands to bootstrap an Arkhe(n) node on Android via Termux.',
+  annotations: {
+    category: ToolCategory.ARKHE,
+    readOnlyHint: true,
+    reasoningCost: 10,
+  },
+  schema: {},
+  handler: async (_request, response) => {
+    response.appendResponseLine('### Arkhe(n) Android Bootstrap Instructions');
+    response.appendResponseLine(
+      'Siga os passos abaixo para converter seu dispositivo Android em um nó PTST:',
+    );
+    response.appendResponseLine('\n1. **Instale o Termux** (via F-Droid recomendado).');
+    response.appendResponseLine('2. **Prepare o ambiente**:');
+    response.appendResponseLine('   ```bash');
+    response.appendResponseLine('   pkg upgrade -y');
+    response.appendResponseLine('   pkg install curl -y');
+    response.appendResponseLine('   ```');
+    response.appendResponseLine('3. **Execute o script de bootstrap**:');
+    response.appendResponseLine('   ```bash');
+    response.appendResponseLine(
+      '   curl -O https://raw.githubusercontent.com/Arkhe-Network/Arkhe-PNT/main/scripts/arkhe-android-bootstrap.sh',
+    );
+    response.appendResponseLine('   chmod +x arkhe-android-bootstrap.sh');
+    response.appendResponseLine('   bash arkhe-android-bootstrap.sh');
+    response.appendResponseLine('   ```');
+    response.appendResponseLine('\n**Opcional: Interface Gráfica (Termux-X11)**');
+    response.appendResponseLine(
+      'Se desejar o ambiente Linux completo (XFCE4), instale o app Termux-X11 e siga as instruções do repositório original.',
+    );
+    response.appendResponseLine('\n**Status**: Realidade local pronta para ancoragem.');
+  },
+});
