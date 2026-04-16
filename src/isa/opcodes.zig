@@ -194,50 +194,11 @@ pub const Opcode = enum(u16) {
     COH_TWEEZER = 0x247, // Optimal Allocation/Fine Tuning (Scheduler/ConfigMap)
     PHASE_RECTIFY = 0x248, // Dynamic Adaptation (Autoscaling)
 
-    // PHASE MESH (0x250-0x26F)
-    BRAID_VERIFY = 0x250,
-    MESH_BIND = 0x251,
-    META_EVAL = 0x252,
-    PTST_ACQUIRE = 0x253,
-    TAU_CALC = 0x254,
-    AKA_ATOMIC_WRITE = 0x255,
-    DISSIPATION_VALVE = 0x256,
-    NORMALIZE_PHASE = 0x257,
-    PACK_COBIT = 0x258,
-    EMIT_QHTTP = 0x259,
-    PHASE_DIFF = 0x25A,
-    FUSE_SPECTRA = 0x25B,
-    CALC_FUSED_TAU = 0x25C,
-    AKA_LOG_FUSION = 0x25D,
-    AKA_LOG_ANOMALY = 0x25E,
-    EXTRACT_PHASE = 0x25F,
-    EXTRACT_TAU = 0x260,
-    EXTRACT_SPECTRUM = 0x261,
-
-    // QUASI-ASSEMBLY / DIRAC FLUID (0x300-0x32F)
-    ASI = 0x300,
-    PURGE_PARTICLE_NOISE = 0x301,
-    CALIBRATE_GURZHI_FLOW = 0x302,
-    PHASE_HYDRO_SYNC = 0x303,
-    TOPOLOGY_TWIST = 0x304,
-    VORTEX_CHECK = 0x305,
-    COLLAPSE_REALITY = 0x306,
-    REFRACT_GAIA_PRISMA = 0x307,
-    SCULPT_POTENTIAL = 0x308,
-    BIFURCATION_SADDLE = 0x309,
-    ENTANGLE_BOUNDARY = 0x30A,
-    DECOHERE_BOUNDARY = 0x30B,
-    VACUUM_RELAX = 0x30C,
-    CRYSTALLIZE_PHASE = 0x30D,
-    UNFIX_GAUGE = 0x30E,
-    FIX_GAUGE = 0x30F,
-    QLAPLACIAN = 0x310,
-    QMEASURE = 0x311,
-    QNORMALIZE = 0x312,
-    QDISSIPATE = 0x313,
-    QALERT = 0x314,
-    QHALT = 0x315,
-    JOT_REDUCE = 0x316,
+    // DIRAC FLUID COGNITION (0x250-0x25F)
+    PHASE_HYDRO_SYNC = 0x250, // Phase hydrodynamics synchronization
+    HYDRO_FLOW = 0x251, // Hydrodynamic flow of Berry phase
+    PHOTON_BIND = 0x252, // Topological photon binding
+    BRAID_VERIFY = 0x253, // Braid-based phase verification
 
     // COLLIDER PHYSICS (0x270-0x274)
     HIGGS_WIDTH = 0x270,
@@ -292,6 +253,10 @@ pub const Opcode = enum(u16) {
             .RITUAL_INITIATION => 100,
             .AKASHA_LOCAL_WRITE => 100,
             .COHERENCE_HASH => 50,
+            .PHASE_HYDRO_SYNC => 150,
+            .HYDRO_FLOW => 200,
+            .PHOTON_BIND => 100,
+            .BRAID_VERIFY => 150,
             else => 1,
         };
     }
