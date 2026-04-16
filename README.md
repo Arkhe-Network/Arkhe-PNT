@@ -836,3 +836,24 @@ Please consult [these instructions](./docs/debugging-android.md).
 ## Known limitations
 
 See [Troubleshooting](./docs/troubleshooting.md).
+
+---
+
+## Repository Overview
+
+This repository is a monorepo that integrates standard browser automation with the **Arkhe(n)** experimental framework.
+
+### Major Components
+
+- **`src/`**: Core TypeScript implementation of the MCP server, featuring standard DevTools tools and Arkhe-specific extensions.
+- **`arkhe-core/`**: Central networking and synchronization logic for the Arkhe PTST (Phase Topology Space-Time) nodes.
+- **`src/isa/`**: Definition of the Arkhé(n) Instruction Set Architecture (ISA) in Zig, governing low-level simulation opcodes.
+- **`arkhe-direnv/`**: A Go-based utility for managing coherent shell environments.
+- **Mobile Integration**: Native implementations for Android and iOS nodes located in `android/` and `ios/` directories.
+- **Verification Suite**: A collection of Python and TypeScript scripts in `scripts/` for validating system coherence and security.
+
+### Ethical Mandate (EQBE)
+
+Modules related to simulation and quantum-biological state modification are subject to the **Ethical Quantum-Biological Engineering (EQBE)** protocol defined in [`AGENTS.md`](./AGENTS.md). This includes mandatory safety audits and adherence to non-disruption "Red Lines."
+
+For more details, consult the [Quick Start Guide](./QUICK_START_GUIDE.md) and the [Implementation Summary](./IMPLEMENTATION_SUMMARY_v3_0_OMEGA.md).
