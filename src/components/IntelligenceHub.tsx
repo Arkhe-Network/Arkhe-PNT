@@ -337,3 +337,4 @@ export const IntelligenceHub: React.FC<IntelligenceHubProps> = ({ onClose }) => 
     </div>
   );
 };
+export default IntelligenceHub;

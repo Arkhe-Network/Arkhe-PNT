@@ -5,7 +5,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { Activity, AlertTriangle, CheckCircle, ShieldAlert } from 'lucide-react';
+import { AlertTriangle, CheckCircle, ShieldAlert } from 'lucide-react';
 import React, { useEffect, useState } from 'react';
 
 import { logger } from '../../server/logger.ts';
@@ -39,8 +39,8 @@ export const ConsensusMeter: React.FC = () => {
       }
     };
 
-    const interval = setInterval(fetchConsensus, 5000);
-    fetchConsensus(); // Initial fetch
+    const interval = setInterval(() => { void fetchConsensus(); }, 5000);
+    void fetchConsensus(); // Initial fetch
 
     return () => clearInterval(interval);
   }, []);
@@ -91,3 +91,4 @@ export const ConsensusMeter: React.FC = () => {
     </div>
   );
 };
+export default ConsensusMeter;

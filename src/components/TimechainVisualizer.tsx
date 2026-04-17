@@ -8,7 +8,7 @@
 
 import { Link } from 'lucide-react';
 
-import type { OrbLog } from '../hooks/useArkheSimulation';
+import type { OrbLog } from '../../server/types';
 
 import { Card } from './ui/Card';
 
@@ -52,7 +52,7 @@ export default function TimechainVisualizer({ logs }: TimechainVisualizerProps) 
                   λ₂: {block.coherence.toFixed(3)}
                 </div>
                 <div className="text-[8px] font-mono text-arkhe-muted truncate">
-                  {new Date(block.targetTime).toLocaleTimeString('en-US', { hour12: false, second: '2-digit', minute: '2-digit' })}
+                  {new Date(block.targetTime || 0).toLocaleTimeString('en-US', { hour12: false, second: '2-digit', minute: '2-digit' })}
                 </div>
                 {block.threatType && (
                   <div className="absolute -top-2 -right-2 bg-arkhe-red text-black text-[8px] font-bold px-1 rounded animate-pulse">

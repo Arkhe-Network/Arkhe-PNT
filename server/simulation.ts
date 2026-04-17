@@ -118,7 +118,7 @@ export function runSimulationTick(broadcastState: () => void) {
                 type: 'GLOBAL_ADJUST',
                 angle: newRamsey.theta,
                 coherence: newLambda,
-                timestamp: new Date(now).toISOString(),
+                time: new Date(now).toISOString(),
                 expiresAt: expiresAt
               };
 
@@ -592,7 +592,7 @@ export function runSimulationTick(broadcastState: () => void) {
         amount: cost,
         resource: resources[idx],
         provider: providers[idx],
-        timestamp: new Date().toISOString()
+        time: new Date().toISOString()
     });
     if (state.x402Wallet.transactions.length > 8) {
         state.x402Wallet.transactions.pop();
