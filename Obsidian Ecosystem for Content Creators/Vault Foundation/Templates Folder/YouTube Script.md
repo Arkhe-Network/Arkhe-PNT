@@ -9,10 +9,12 @@ tags: [content/youtube]
 # Title: {{title}}
 
 ## 🪝 The Hook (0:00 - 0:45)
+
 - [ ] Visual:
 - [ ] Audio:
 
 ## 📝 Script / Talking Points
+
 - **Intro:** Welcome back...
 - **The Problem:** Why are we here?
 - **The Solution:**
@@ -23,9 +25,11 @@ tags: [content/youtube]
 - **CTA:** Subscribe / Link in bio
 
 ## 🎬 Production Notes
+
 - B-Roll needed:
 - Screen recordings:
 - Thumbnails ideas: [[Thumbnail Ideas]]
 
 ## 🔗 Description & Links
+
 ...
