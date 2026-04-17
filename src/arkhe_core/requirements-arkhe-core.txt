@@ -14,3 +14,6 @@ graphql-core
 websockets
 jwt
 cryptography
+jax
+jaxlib
+scipy
