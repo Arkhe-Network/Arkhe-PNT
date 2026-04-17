@@ -45,6 +45,9 @@ Welcome to the compounding knowledge base of the Bio-Quantum Cathedral.
 - [[wiki/synapse-kappa/cirbp_longevity_genomic_coherence|CIRBP Longevity & Genomic Coherence]]: BioFDTD model for Bowhead whale-inspired DNA repair.
 - [[wiki/synapse-kappa/light_activated_nerve_repair|Light-Activated Nerve Repair]]: Light-induced phase engineering for suture-less nerve regeneration.
 
+## ✍️ Content Creation
+- [[Obsidian Ecosystem for Content Creators/Dashboard|Creator Dashboard]]: Central command center for the content ecosystem.
+
 ## 📂 Sources
 - [[wiki/sources/2026-04-13_cobit_canonical_technical_document|COBIT Technical Document]]: Canonical technical document for the Coherent Bit.
 - [[wiki/sources/2026-04-11_arkhe_block_38|Arkhe-Block #38 — Geometria do Anonimato]]: Synthesis of the 38th block.

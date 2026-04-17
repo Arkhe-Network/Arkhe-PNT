@@ -26,6 +26,7 @@ total_pages: 5 (plus stubs)
 ## Maps of Content (MOCs)
 - [[MOC: BIP-1 Hardware Stack]] – Overview of all components: APD, TIA, VGA, comparator, digital counter, ARM firmware.
 - [[MOC: Quantum Biology Evidence]] – Links to experimental papers, contradictions, and open questions.
+- [[Obsidian Ecosystem for Content Creators/Dashboard|MOC: Content Creator Ecosystem]] – Complete workflow for creators.
 
 ## Sources (Processed)
 - [[2026-04-04_anyons_in_microtubules]] – Berg et al., Nature Quantum Biology (2026).
