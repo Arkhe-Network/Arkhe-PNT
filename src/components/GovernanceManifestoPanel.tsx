@@ -1,4 +1,3 @@
-
 /**
  * @license
  * Copyright 2026 Google LLC
@@ -9,7 +8,6 @@ import { FileText, Download, Fingerprint, Calendar } from 'lucide-react';
 import React from 'react';
 
 import type { SimulationState } from '../../server/types';
-
 import { Card } from './ui/Card';
 
 interface GovernanceManifestoPanelProps {
@@ -59,7 +57,7 @@ const GovernanceManifestoPanel: React.FC<GovernanceManifestoPanelProps> = ({ sta
         </div>
 
         <div className="space-y-3">
-          {manifesto.directives.map((d) => (
+          {manifesto.directives?.map((d: any) => (
             <div key={d.id} className="space-y-1">
               <div className="flex items-center gap-2">
                 <span className="text-arkhe-cyan font-bold text-[10px]">{d.id}.</span>
@@ -72,19 +70,21 @@ const GovernanceManifestoPanel: React.FC<GovernanceManifestoPanelProps> = ({ sta
           ))}
         </div>
 
-        <div className="pt-3 border-t border-white/5 space-y-2">
-          <p className="text-[8px] text-white/30 uppercase font-mono">Impacto Biológico Projetado</p>
-          <div className="grid grid-cols-2 gap-2 text-[9px]">
-            <div className="flex justify-between text-white/50">
-              <span>Ganho Telomérico:</span>
-              <span className="text-[#00FFAA]">+{manifesto.cellular_impact.telomere_gain}%</span>
-            </div>
-            <div className="flex justify-between text-white/50">
-              <span>Redução Estresse:</span>
-              <span className="text-[#00FFAA]">{manifesto.cellular_impact.oxidative_stress}%</span>
+        {manifesto.cellular_impact && (
+          <div className="pt-3 border-t border-white/5 space-y-2">
+            <p className="text-[8px] text-white/30 uppercase font-mono">Impacto Biológico Projetado</p>
+            <div className="grid grid-cols-2 gap-2 text-[9px]">
+              <div className="flex justify-between text-white/50">
+                <span>Ganho Telomérico:</span>
+                <span className="text-[#00FFAA]">+{manifesto.cellular_impact.telomere_gain}%</span>
+              </div>
+              <div className="flex justify-between text-white/50">
+                <span>Redução Estresse:</span>
+                <span className="text-[#00FFAA]">{manifesto.cellular_impact.oxidative_stress}%</span>
+              </div>
             </div>
           </div>
-        </div>
+        )}
 
         <div className="pt-2">
           <p className="text-[7px] text-white/20 font-mono break-all leading-tight">

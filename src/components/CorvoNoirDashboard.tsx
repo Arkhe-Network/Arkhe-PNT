@@ -1,11 +1,10 @@
-
 /**
  * @license
  * Copyright 2026 Google LLC
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { Activity, Shield, Zap, Cpu, Heart, Fingerprint } from 'lucide-react';
+import { Activity, Shield, Zap, Cpu, Heart, Fingerprint, Smile, Users, Radio } from 'lucide-react';
 import React, { useState } from 'react';
 import {
   LineChart,
@@ -20,12 +19,11 @@ import {
 } from 'recharts';
 
 import { useArkheSimulation } from '../hooks/useArkheSimulation';
-
-
 import TemporalLensPanel from './TemporalLensPanel';
 
 const CorvoNoirDashboard: React.FC = () => {
   const state = useArkheSimulation();
+  const [activeTab, setActiveTab] = useState<'coherence' | 'governance' | 'biolink' | 'security'>('coherence');
 
   // Simulated time-series data for the Kuramoto R(t)
   const chartData = React.useMemo(() => {
@@ -91,7 +89,7 @@ const CorvoNoirDashboard: React.FC = () => {
 
         {/* Temporal Lens & Population Feedback */}
         <div className="lg:col-span-1">
-          <TemporalLensPanel state={state} />
+          <TemporalLensPanel state={state as any} />
         </div>
       </div>
 
@@ -204,23 +202,23 @@ const CorvoNoirDashboard: React.FC = () => {
                 <div className="space-y-4">
                   <div>
                     <p className="text-[10px] text-neutral-500 uppercase mb-1 flex justify-between">
-                      Mass Synchronization <span>{(state.bioLinkSync.syncRatio * 100).toFixed(1)}%</span>
+                      Mass Synchronization <span>{(state.bioLinkSync?.syncRatio || 0 * 100).toFixed(1)}%</span>
                     </p>
                     <div className="w-full bg-neutral-800 h-2 rounded-full overflow-hidden">
-                      <div className="bg-blue-500 h-full transition-all duration-1000" style={{ width: `${state.bioLinkSync.syncRatio * 100}%` }}></div>
+                      <div className="bg-blue-500 h-full transition-all duration-1000" style={{ width: `${(state.bioLinkSync?.syncRatio || 0) * 100}%` }}></div>
                     </div>
                   </div>
                   <div>
                     <p className="text-[10px] text-neutral-500 uppercase mb-1 flex justify-between">
-                      Cellular Regeneration Pulse <span>{(state.bioLinkSync.regenerationProgress).toFixed(1)}%</span>
+                      Cellular Regeneration Pulse <span>{(state.bioLinkSync?.regenerationProgress || 0).toFixed(1)}%</span>
                     </p>
                     <div className="w-full bg-neutral-800 h-2 rounded-full overflow-hidden">
-                      <div className="bg-emerald-500 h-full transition-all duration-1000" style={{ width: `${state.bioLinkSync.regenerationProgress}%` }}></div>
+                      <div className="bg-emerald-500 h-full transition-all duration-1000" style={{ width: `${state.bioLinkSync?.regenerationProgress || 0}%` }}></div>
                     </div>
                   </div>
                   <div className="bg-blue-900/10 p-3 rounded border border-blue-800/30">
                     <p className="text-[10px] text-blue-400 font-bold mb-1">MAXTOKI FEEDBACK CHANNEL</p>
-                    <p className="text-[9px] text-blue-300/70">13,000 residents in Urca/Flamengo are currently interacting with their 2027 instances. Coherence gain: <span className="text-white">x{state.bioLinkSync.coherenceGain.toFixed(2)}</span></p>
+                    <p className="text-[9px] text-blue-300/70">13,000 residents in Urca/Flamengo are currently interacting with their 2027 instances. Coherence gain: <span className="text-white">x{state.bioLinkSync?.coherenceGain?.toFixed(2) || '0.00'}</span></p>
                   </div>
                 </div>
 
@@ -245,29 +243,29 @@ const CorvoNoirDashboard: React.FC = () => {
               <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
                  <div className="bg-black/40 p-2 rounded border border-neutral-800">
                     <p className="text-[8px] text-neutral-500 uppercase">Temporal Inconsistency (TII)</p>
-                    <p className={`text-lg font-bold ${state.temporalAudit.lastTII > 0.05 ? 'text-red-500' : 'text-emerald-400'}`}>
-                      {state.temporalAudit.lastTII.toFixed(4)}
+                    <p className={`text-lg font-bold ${(state.temporalAudit?.lastTII || 0) > 0.05 ? 'text-red-500' : 'text-emerald-400'}`}>
+                      {state.temporalAudit?.lastTII?.toFixed(4) || '0.0000'}
                     </p>
                  </div>
                  <div className="bg-black/40 p-2 rounded border border-neutral-800">
                     <p className="text-[8px] text-neutral-500 uppercase">Locked Events</p>
-                    <p className="text-lg font-bold text-neutral-100">{state.temporalAudit.lockedEvents}</p>
+                    <p className="text-lg font-bold text-neutral-100">{state.temporalAudit?.lockedEvents || 0}</p>
                  </div>
                  <div className="bg-black/40 p-2 rounded border border-neutral-800">
                     <p className="text-[8px] text-neutral-500 uppercase">Collapse Risk</p>
-                    <p className={`text-lg font-bold ${state.predictiveForecast.coherenceCollapseRisk > 0.3 ? 'text-red-500' : 'text-emerald-400'}`}>
-                      {(state.predictiveForecast.coherenceCollapseRisk * 100).toFixed(1)}%
+                    <p className={`text-lg font-bold ${(state.predictiveForecast?.coherenceCollapseRisk || 0) > 0.3 ? 'text-red-500' : 'text-emerald-400'}`}>
+                      {((state.predictiveForecast?.coherenceCollapseRisk || 0) * 100).toFixed(1)}%
                     </p>
                  </div>
                  <div className="bg-black/40 p-2 rounded border border-neutral-800">
                     <p className="text-[8px] text-neutral-500 uppercase">Forecast λ₂</p>
-                    <p className="text-lg font-bold text-blue-400">{state.predictiveForecast.predictedLambda.toFixed(4)}</p>
+                    <p className="text-lg font-bold text-blue-400">{state.predictiveForecast?.predictedLambda?.toFixed(4) || '0.0000'}</p>
                  </div>
               </div>
 
               <div className="bg-neutral-900 p-3 rounded border border-neutral-800 h-32 overflow-hidden relative">
                  <div className="flex gap-1 h-full items-end">
-                   {state.sensors.map((s) => (
+                   {state.sensors?.map((s) => (
                      <div
                        key={s.id}
                        className={`w-1 transition-all ${s.status === 'attacked' ? 'bg-red-500 animate-pulse' : s.status === 'isolated' ? 'bg-neutral-700' : 'bg-emerald-500/40'}`}

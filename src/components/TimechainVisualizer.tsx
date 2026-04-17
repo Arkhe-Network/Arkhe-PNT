@@ -8,7 +8,7 @@
 
 import { Link } from 'lucide-react';
 
-import type { OrbLog } from '../hooks/useArkheSimulation';
+import type { OrbLog } from '../../server/types';
 
 import { Card } from './ui/Card';
 
