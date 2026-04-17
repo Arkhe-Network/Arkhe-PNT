@@ -1,4 +1,3 @@
-
 /**
  * @license
  * Copyright 2026 Google LLC
@@ -10,11 +9,29 @@ import React from 'react';
 
 import type { HelioState } from '../../server/types';
 
-import { Badge } from '@/components/ui/badge';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Progress } from '@/components/ui/progress';
+import { Card } from './ui/Card';
 
+interface BadgeProps {
+    children: React.ReactNode;
+    className?: string;
+}
 
+const Badge: React.FC<BadgeProps> = ({ children, className }) => (
+    <div className={`px-2 py-0.5 rounded-full border text-[10px] ${className}`}>
+        {children}
+    </div>
+);
+
+interface ProgressProps {
+    value: number;
+    className?: string;
+}
+
+const Progress: React.FC<ProgressProps> = ({ value, className }) => (
+    <div className={`w-full bg-white/10 rounded-full overflow-hidden ${className}`}>
+        <div className="h-full bg-current transition-all duration-300" style={{ width: `${value}%` }} />
+    </div>
+);
 
 interface HelioLinkPanelProps {
   helio?: HelioState;
@@ -29,17 +46,18 @@ const HelioLinkPanel: React.FC<HelioLinkPanelProps> = ({ helio, onListen, onSync
   const syncAvailable = coherence > 0.999;
 
   return (
-    <Card className="bg-black/80 border-arkhe-cyan/30 text-white font-mono">
-      <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-        <CardTitle className="text-sm font-medium flex items-center gap-2">
-          <Sun className="w-4 h-4 text-orange-500 animate-pulse" />
-          PHASE D: HELIO-LINK COUPLING
-        </CardTitle>
-        <Badge variant="outline" className="border-arkhe-cyan text-arkhe-cyan text-[10px]">
+    <Card
+      title="PHASE D: HELIO-LINK COUPLING"
+      icon={<Sun className="w-4 h-4 text-orange-500 animate-pulse" />}
+      className="bg-black/80 border-arkhe-cyan/30 text-white font-mono"
+    >
+      <div className="absolute top-4 right-4">
+        <Badge className="border-arkhe-cyan text-arkhe-cyan">
           {helio.ethicalMode.toUpperCase()}
         </Badge>
-      </CardHeader>
-      <CardContent className="space-y-4">
+      </div>
+
+      <div className="space-y-4">
         <div className="grid grid-cols-2 gap-2 text-[10px]">
           <div className="space-y-1">
             <p className="text-arkhe-muted">STATUS</p>
@@ -56,7 +74,7 @@ const HelioLinkPanel: React.FC<HelioLinkPanelProps> = ({ helio, onListen, onSync
             <span className="text-arkhe-muted">SOLAR COHERENCE (3mHz)</span>
             <span className="text-arkhe-cyan">{(helio.solarCoherence * 100).toFixed(2)}%</span>
           </div>
-          <Progress value={helio.solarCoherence * 100} className="h-1 bg-arkhe-cyan/10" />
+          <Progress value={helio.solarCoherence * 100} className="h-1 text-arkhe-cyan" />
         </div>
 
         <div className="grid grid-cols-2 gap-2">
@@ -92,7 +110,7 @@ const HelioLinkPanel: React.FC<HelioLinkPanelProps> = ({ helio, onListen, onSync
             ))}
           </div>
         </div>
-      </CardContent>
+      </div>
     </Card>
   );
 };

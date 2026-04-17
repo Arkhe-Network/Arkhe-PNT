@@ -1,4 +1,3 @@
-
 /**
  * @license
  * Copyright 2026 Google LLC
@@ -6,281 +5,8 @@
  */
 
 import { useState, useEffect } from 'react';
-
-import { logger } from '../../server/logger.ts';
-import type { TzinorMemoryState } from '../types/tzinor';
-
-export interface OrbLog {
-  id: string;
-  originTime: number;
-  targetTime: number;
-  coherence: number;
-  status: 'Valid' | 'Mitigated' | 'Rejected';
-  threatType?: string;
-}
-
-export interface Shard {
-  id: number;
-  status: 'active' | 'corrupted' | 'recovering';
-}
-
-export interface MetricsHistory {
-  time: string;
-  musd: number;
-  musda: number;
-  wmaBc: number;
-}
-
-export interface BiometricState {
-  livenessScore: number;
-  isAuthentic: boolean;
-  lastVerification: string;
-  heartbeatCoherence: number;
-  phaseSignature: number[];
-}
-
-export interface NAREStatus {
-  epState: boolean;
-  calibrationRounds: number;
-  packetsTransmitted: number;
-  preAcksSuccess: number;
-  avgEffectiveLatencyMs: number;
-  temporalParadoxesDetected: number;
-  currentLambda2: number;
-  predictionWindow: string;
-  status: string;
-}
-
-export interface PopulationFeedbackEntry {
-  id: string;
-  residentName: string;
-  year: number;
-  message: string;
-  coherence: number;
-  timestamp: string;
-}
-
-export interface SimulationState {
-  biometrics?: BiometricState;
-  nare?: NAREStatus;
-  populationFeedback: PopulationFeedbackEntry[];
-  coherenceData: Array<{ time: string; lambda: number; threshold: number }>;
-  currentLambda: number;
-  threatLevel: 'normal' | 'warning' | 'critical';
-  activeThreat: string | null;
-  logs: OrbLog[];
-  metrics: {
-    musd: number;
-    musda: number;
-    wmaBc: number;
-    threshold: number;
-  };
-  metricsHistory: MetricsHistory[];
-  shards: Shard[];
-  mitigation: {
-    nullSteeringActive: boolean;
-    kuramotoSyncPhase: number;
-    tzinorShardsAvailable: number;
-  };
-  parameters: {
-    autoMitigate: boolean;
-    couplingStrength: number;
-    lambdaThreshold: number;
-  };
-  thermodynamics: {
-    coherenceC: number;
-    dissipationF: number;
-    d2: number;
-    d3: number;
-  };
-  topology: {
-    yangBaxterValid: boolean;
-    berryPhase: number;
-    handshakeSuccessRate: number;
-  };
-  hardware: {
-    fpgaUtilization: number;
-    segPower: number;
-    tmrFaultsCorrected: number;
-    bramScrubbingActive: boolean;
-  };
-  security: {
-    zkProofValid: boolean;
-    nttLatency: number;
-  };
-  tzinor: TzinorMemoryState;
-  epoch: number;
-  edge: {
-    activePhysicalNodes: number;
-    mcpConnections: string[];
-    phase: number;
-  };
-  astl: {
-    activeMesh: string;
-    facets: number;
-    coherence: number;
-    phaseVolume: number;
-    temporalAnchors: string[];
-    manifestationProgress: number;
-  };
-  orbital: {
-    nodeName: string;
-    altitudeKm: number;
-    telemetryLatencyMs: number;
-    computeLoad: number;
-    radiationFlux: number;
-    osStack: {
-      execution: string;
-      control: string;
-      simulation: string;
-      compute: string;
-    };
-  };
-  tzinorNetwork: {
-    activeChannels: number;
-    envelopesTransmitted: number;
-    envelopesReceived: number;
-    recentTraffic: Array<{
-      id: string;
-      sender: string;
-      recipient: string;
-      type: 'PHASE' | 'COHERENCE' | 'TEMPORAL' | 'GEOMETRY' | 'CONSCIOUSNESS';
-      lambda: number;
-      timestamp: string;
-    }>;
-    primaryAnchor: string;
-  };
-  manifestation: {
-    stage: 'C_PHASE' | 'Z_STRUCTURE' | 'TZINOROT_EXEC' | 'R4_PROJECTION';
-    activeTask: string;
-    retrocausalIntegrity: number;
-    invariantsVerified: number;
-  };
-  scaData: ScaDataState;
-  enterpriseSubagents?: Record<string, unknown>;
-  chshMonitor?: Record<string, unknown>;
-  ramsey?: Record<string, unknown>;
-  x402Wallet: {
-    address: string;
-    network: string;
-    balanceUSDC: number;
-    transactions: Array<{
-      id: string;
-      amount: number;
-      resource: string;
-      provider: string;
-      timestamp: string;
-    }>;
-    moltxLink?: {
-      status: 'unlinked' | 'linked';
-      signature?: string;
-      payload?: unknown;
-    };
-    gstpSync?: {
-      status: 'idle' | 'syncing' | 'synced';
-      lastSync?: string;
-      deviceId?: string;
-    };
-    prometheusSync?: {
-      status: 'idle' | 'syncing' | 'synced';
-      lastSync?: string;
-      activeNodes?: number;
-    };
-  };
-  bioLinkSync: BioLinkSyncState;
-  temporalAudit: TemporalAuditState;
-  predictiveForecast: PredictiveForecastState;
-  sensors: SensorState[];
-  networkInfra: NetworkInfraState;
-}
-
-export interface NetworkInfraState {
-  tor: {
-    status: 'CONNECTED' | 'DISCONNECTED' | 'CIRCUIT_ESTABLISHING';
-    nodes: string[];
-    latencyMs: number;
-  };
-  broker: {
-    status: 'ACTIVE' | 'IDLE' | 'ERROR';
-    messagesProcessed: number;
-    queueDepth: number;
-    activeTopics: string[];
-  };
-  redis: {
-    status: 'READY' | 'FAILOVER' | 'OFFLINE';
-    cacheHits: number;
-    memoryUsageMb: number;
-  };
-}
-
-export interface GovernanceManifesto {
-  year: number;
-  eigenvalues: number[];
-  sectors: Record<string, string>;
-  status: 'draft' | 'published';
-  timestamp: string;
-}
-
-export interface GrossHappinessState {
-  globalIndex: number;
-  districts: DistrictHappiness[];
-}
-
-export interface DistrictHappiness {
-  name: string;
-  index: number;
-  lastPulse: string | null;
-}
-
-export interface ScaDomain {
-  name: string;
-  lambda2: number;
-  action: string;
-  health: 'STABLE' | 'CRITICAL';
-}
-
-export interface ScaDataState {
-  domains: ScaDomain[];
-  overallHealth: number;
-  topology: 'TRINITY' | 'KAGOME';
-  globalOrderR: number;
-  topologicalState: string;
-  entanglementMode: string;
-  atpConsumptionCps: number;
-  isSeedingActive: boolean;
-  isIgnited: boolean;
-  activeProtocol: 'NONE' | 'BRAID' | 'COMPUTE' | 'HEAL' | 'SEAL';
-  protocolLogs: string[];
-  lastGateResult: string;
-}
-
-export interface BioLinkSyncState {
-  active: boolean;
-  syncRatio: number;
-  frequencyHz: number;
-  coherenceGain: number;
-  regenerationProgress: number;
-}
-
-export interface TemporalAuditState {
-  events: number;
-  lockedEvents: number;
-  manipulationAttempts: number;
-  lastTII: number;
-}
-
-export interface PredictiveForecastState {
-  coherenceCollapseRisk: number;
-  predictedLambda: number;
-  horizonMs: number;
-  anomaliesDetected: string[];
-}
-
-export interface SensorState {
-  id: number;
-  value: number;
-  status: 'active' | 'isolated' | 'attacked';
-}
+import { logger } from '../../server/logger';
+import type { SimulationState } from '../../server/types';
 
 export function useArkheSimulation() {
   const [state, setState] = useState<SimulationState>({
@@ -328,6 +54,14 @@ export function useArkheSimulation() {
       zkProofValid: true,
       nttLatency: 10.24,
     },
+    securityAdvanced: {
+      l1: { teeStatus: 'secure', intrusionSensor: 'nominal', thermalDestructionArmed: false, hsmBackupSynced: true, lastRemoteAttestation: new Date().toISOString() },
+      l2: { eprHandshake: 'active', muSig2Heartbeat: 'verified', pneumaOutlierDetected: false, qrngJitterMs: 0.42 },
+      l3: { nullifierVerified: true, timestampQRNG: new Date().toISOString(), ttlValid: true, t2StarMicroseconds: 150 },
+      l4: { owlSignatureValid: true, logosConsistency: 0.99, zkOntologicalProof: true, merkleDagRoot: '0x...', geoLlmActive: true, geoQaiCoherence: 0.98 },
+      l5: { cspStatus: 'enforced', sriVerified: true, antiCsrfToken: '...', zkUiVerified: true, pwaCacheSigned: true },
+      qhttp: { pqTlsStatus: 'Kyber+ECDH', xKuramotoHeader: '...', bellViolationS: 2.82 }
+    },
     tzinor: {
       agentId: 'arkhe-node-01',
       currentEpoch: Date.now() / 1000,
@@ -340,7 +74,12 @@ export function useArkheSimulation() {
     edge: {
       activePhysicalNodes: 1048576,
       mcpConnections: ['mcp://arkhe-vision.sn44.bittensor', 'mcp://zombie-fleet.dimos'],
+      velxioConnections: [],
       phase: 26.0,
+    },
+    velxioEmulation: {
+        activeSimulations: [],
+        totalCompilations: 0
     },
     astl: {
       activeMesh: 'hyper_torus.arkhestl',
@@ -394,9 +133,28 @@ export function useArkheSimulation() {
       protocolLogs: [],
       lastGateResult: 'N/A'
     },
-    enterpriseSubagents: {},
-    chshMonitor: {},
-    ramsey: {},
+    enterpriseSubagents: {
+        governance: [],
+        devops: [],
+        security: [],
+        ia: [],
+        operations: [],
+        interoperability: []
+    },
+    chshMonitor: {
+        status: 'IDLE',
+        timestamp: new Date().toISOString(),
+        arkheChainBlock: 0,
+        measurementSetup: { instrument: '', targetSystem: '', referenceLattice: '', angleBases: [], coincidenceWindowNs: 0, integrationTimeSec: 0 },
+        expectedOutcomes: { classicalLimit: 2, quantumLimit: 2.82, thresholdEntangled: 2.5, targetEntanglement: '' },
+        liveTelemetry: { status: 'OFFLINE', dataPoints: 0, currentS: null, stabilityIndicator: '', nextUpdate: '', history: [] },
+        preFlightChecks: { tzinorInjector: '', fibonacciPhaseAnchor: '', treeLacamGeodesic: '', pdsmIgnitionSequence: '' },
+        archimedesComment: '',
+        nextMilestone: { time: '', action: '' }
+    },
+    ramsey: {
+        enabled: false, auto_adjust: false, manual_approval_required: true, theta: 0, direction: 1, baseline: 0.9, thresholds: [], window: [], pendingAction: null, isFrozen: false, rabi_frequency: 100, generator_configs: {}, fibonacci_sequence: { name: '', generators: [] }
+    },
     x402Wallet: {
       address: '0xbf7da1f568684889a69a5bed9f1311f703985590',
       network: 'Base Sepolia',
@@ -434,9 +192,24 @@ export function useArkheSimulation() {
     },
     sensors: [],
     networkInfra: {
-      tor: { status: 'CIRCUIT_ESTABLISHING', nodes: [], latencyMs: 0 },
+      tor: { status: 'CONNECTED', nodes: [], latencyMs: 0 },
       broker: { status: 'IDLE', messagesProcessed: 0, queueDepth: 0, activeTopics: [] },
-      redis: { status: 'READY', cacheHits: 0, memoryUsageMb: 0 }
+      redis: { status: 'READY', cacheHits: 0, memoryUsageMb: 0 },
+      dns: { totalQueries: 0, successfulResolutions: 0, failedResolutions: 0 }
+    },
+    cluster: {
+        status: 'idle',
+        progress: 0,
+        logs: [],
+        nccl: { rho1_local: 0, rho1_global: 0 },
+        qhttp: { global_phase: 0, coherence: 0 }
+    },
+    lucentSessions: [],
+    civicSubagents: [],
+    hydro: {
+        neighborhoods: [],
+        globalMassBalance: 0,
+        zkAlertsCount: 0
     }
   });
 
@@ -467,4 +240,3 @@ export function useArkheSimulation() {
 
   return state;
 }
-
