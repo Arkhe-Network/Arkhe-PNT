@@ -8,6 +8,7 @@ from arkhe_core.api.phase_coherent_protocols import PhaseCoherentREST
 from arkhe_core.security.phase_identity import PhaseIdentityProvider
 from arkhe_core.messaging.phase_synchronization import PhaseSynchronizedWebSocket
 from arkhe_core.storage.phase_persistent import PhaseCoherentPostgres
+from arkhe_core.storage.cache_vault import ArkheCacheVault
 from arkhe_core.infrastructure.phase_orchestration import PhaseKubernetesOperator
 from arkhe_core.observability.phase_telemetry import PhaseStructuredLogger
 
@@ -42,6 +43,7 @@ class ArkheSystem:
         self.security = PhaseIdentityProvider(None, self.oscillator)
         self.messaging = PhaseSynchronizedWebSocket(self.oscillator)
         self.storage = PhaseCoherentPostgres(None, self.oscillator)
+        self.cache = ArkheCacheVault(self.oscillator)
         self.orchestration = PhaseKubernetesOperator()
 
     async def bootstrap(self):
