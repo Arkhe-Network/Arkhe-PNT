@@ -4,9 +4,13 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import {exec} from 'node:child_process';
 import {createHash} from 'node:crypto';
+import {promisify} from 'node:util';
 
 import type {McpPage} from '../McpPage.js';
+
+const execPromise = promisify(exec);
 import {zod} from '../third_party/index.js';
 
 import {ToolCategory} from './categories.js';
@@ -2352,5 +2356,38 @@ export const setupArkheAndroid = definePageTool({
       'Se desejar o ambiente Linux completo (XFCE4), instale o app Termux-X11 e siga as instruções do repositório original.',
     );
     response.appendResponseLine('\n**Status**: Realidade local pronta para ancoragem.');
+  },
+});
+
+export const runV14Simulation = definePageTool({
+  name: 'run_v14_simulation',
+  description:
+    'Block 419-Ω: Executes the ARKHE-CALIBRATION-CONTROLLER v1.4 live burn simulation (120s).',
+  annotations: {
+    category: ToolCategory.ARKHE,
+    readOnlyHint: true,
+    reasoningCost: 100,
+  },
+  schema: {},
+  handler: async (_request, response) => {
+    response.appendResponseLine('### Iniciando Simulação do Bloco 419-Ω (v1.4)');
+    try {
+      const {stdout, stderr} = await execPromise(
+        'python3 arkhe_v14_simulation.py',
+      );
+      if (stdout) {
+        response.appendResponseLine('```');
+        response.appendResponseLine(stdout);
+        response.appendResponseLine('```');
+      }
+      if (stderr) {
+        response.appendResponseLine('**Stderr:**');
+        response.appendResponseLine('```');
+        response.appendResponseLine(stderr);
+        response.appendResponseLine('```');
+      }
+    } catch (error) {
+      response.appendResponseLine(`**Erro na execução:** ${error}`);
+    }
   },
 });

@@ -8,6 +8,7 @@ import type {ParsedArguments} from '../bin/chrome-devtools-mcp-cli-options.js';
 
 import * as arkheTools from './arkhe.js';
 import * as arkheGnuTools from './arkhe_gnu.js';
+import * as arkheNetTools from './arkhe_net.js';
 import * as lambdaTools from './lambda_tools.js';
 import * as consoleTools from './console.js';
 import * as emulationTools from './emulation.js';
@@ -51,6 +52,7 @@ export const createTools = (args: ParsedArguments) => {
         ...Object.values(storageTools),
         ...Object.values(arkheTools),
         ...Object.values(arkheGnuTools),
+        ...Object.values(arkheNetTools),
         ...Object.values(lambdaTools),
         ...Object.values(osCathedralTools),
         ...Object.values(logosLibraryTools),
