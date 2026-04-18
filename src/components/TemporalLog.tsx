@@ -8,7 +8,7 @@
 
 import { Clock } from 'lucide-react';
 
-import type { OrbLog } from '../hooks/useArkheSimulation';
+import type { OrbLog } from '../../server/types';
 
 import { Card } from './ui/Card';
 
@@ -50,10 +50,10 @@ export default function TemporalLog({ logs }: TemporalLogProps) {
                     {log.id.substring(0, 8)}
                   </td>
                   <td className={`py-2 px-2 ${isRejected ? 'text-arkhe-red' : 'text-arkhe-text'}`}>
-                    {formatTime(log.originTime)}
+                    {formatTime(log.originTime || 0)}
                   </td>
                   <td className="py-2 px-2 text-arkhe-text">
-                    {formatTime(log.targetTime)}
+                    {formatTime(log.targetTime || 0)}
                   </td>
                   <td className={`py-2 px-2 ${log.coherence < 0.618 ? 'text-arkhe-red' : 'text-arkhe-cyan'}`}>
                     {log.coherence.toFixed(3)}

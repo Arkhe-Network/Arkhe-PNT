@@ -68,7 +68,7 @@ export default function X402WalletPanel({ wallet }: X402WalletPanelProps) {
         setPaymentStatus({ success: false, message: data.message || 'Payment failed' });
       }
     } catch (_error) {
-      setPaymentStatus({ success: false, message: 'Network _error' });
+      setPaymentStatus({ success: false, message: 'Network error' });
     } finally {
       setIsPaying(false);
       setTimeout(() => setPaymentStatus(null), 3000);

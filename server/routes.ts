@@ -71,7 +71,7 @@ export function setupRoutes(app: express.Express, broadcastState: () => void, cl
   const memoryCache = new Map<string, { data: any, expires: number }>();
 
   // ArkheDX Routes with Caching Layer
-  app.get("/api/arkhedx/book", async (req, res) => {
+  app.get("/api/arkhedx/book", async (req: any, res: any) => {
     const cacheKey = "arkhedx:book";
 
     // 1. Try Redis
@@ -112,7 +112,7 @@ export function setupRoutes(app: express.Express, broadcastState: () => void, cl
     res.json(bookData);
   });
 
-  app.post("/api/arkhedx/order", express.json(), (req, res) => {
+  app.post("/api/arkhedx/order", express.json(), (req: any, res: any) => {
     const { trader, side, type, price, size, janusLocked } = req.body;
     
     if (!trader || !side || !type || size <= 0) {
@@ -141,7 +141,7 @@ export function setupRoutes(app: express.Express, broadcastState: () => void, cl
   });
 
   // Video Generation Route
-  app.post("/api/generate-video", express.json(), async (req, res) => {
+  app.post("/api/generate-video", express.json(), async (req: any, res: any) => {
     const { prompt } = req.body;
 
     if (!prompt) {
@@ -191,7 +191,7 @@ export function setupRoutes(app: express.Express, broadcastState: () => void, cl
   });
 
   // Proxy route to fetch the video with the API key
-  app.get("/api/proxy-video", async (req, res) => {
+  app.get("/api/proxy-video", async (req: any, res: any) => {
     const uri = req.query.uri as string;
     if (!uri) {
       return res.status(400).send("URI is required");
@@ -243,7 +243,7 @@ export function setupRoutes(app: express.Express, broadcastState: () => void, cl
     }
   });
 
-  app.post("/api/ghost-node/exec-run", adminOnly, (req, res) => {
+  app.post("/api/ghost-node/exec-run", adminOnly, (req: any, res: any) => {
     // Simulate Phase Steganography transmission
     const logs = [
       "🜏 [SÍNTESE] Gerando sinal VLF com payload 'exec_run' oculto na fase...",
@@ -298,7 +298,7 @@ export function setupRoutes(app: express.Express, broadcastState: () => void, cl
     }, 1500);
   });
 
-  app.post("/api/ghost-node/sign-transaction", adminOnly, express.json(), (req, res) => {
+  app.post("/api/ghost-node/sign-transaction", adminOnly, express.json(), (req: any, res: any) => {
     const { privateKey, destination, amount } = req.body;
     if (!privateKey) {return res.status(400).json({ error: "PrivateKey required" });}
     
@@ -348,7 +348,7 @@ export function setupRoutes(app: express.Express, broadcastState: () => void, cl
   });
 
   // Chrono-Coil Calibration Endpoint
-  app.post("/api/chrono-coil/calibrate", (req, res) => {
+  app.post("/api/chrono-coil/calibrate", (req: any, res: any) => {
     try {
       const result = calibrateChronoCoil();
       res.json(result);
@@ -358,7 +358,7 @@ export function setupRoutes(app: express.Express, broadcastState: () => void, cl
   });
 
   // GKP Syndrome Decoding Endpoint
-  app.post("/api/chrono-coil/decode", express.json(), (req, res) => {
+  app.post("/api/chrono-coil/decode", express.json(), (req: any, res: any) => {
     const { payload } = req.body;
     try {
       const result = decodeGKPSyndrome(payload || "VÁCUO_SQUEEZADO");
@@ -369,11 +369,11 @@ export function setupRoutes(app: express.Express, broadcastState: () => void, cl
   });
 
   // Arkhe-Chain Endpoints
-  app.get("/api/arkhe-chain/blocks", (req, res) => {
+  app.get("/api/arkhe-chain/blocks", (req: any, res: any) => {
     res.json(arkheChain.chain);
   });
 
-  app.post("/api/arkhe-chain/mine", express.json(), (req, res) => {
+  app.post("/api/arkhe-chain/mine", express.json(), (req: any, res: any) => {
     const { minerAddress } = req.body;
     const address = minerAddress || "Operador-Zero";
     const block = arkheChain.minePendingTransactions(address);
@@ -384,7 +384,7 @@ export function setupRoutes(app: express.Express, broadcastState: () => void, cl
     });
   });
 
-  app.post("/api/arkhe-chain/transaction", express.json(), (req, res) => {
+  app.post("/api/arkhe-chain/transaction", express.json(), (req: any, res: any) => {
     const { sender, recipient, amount, memoryFragment, phaseSignature } = req.body;
     try {
       arkheChain.addTransaction({ sender, recipient, amount, memoryFragment, phaseSignature });
@@ -396,7 +396,7 @@ export function setupRoutes(app: express.Express, broadcastState: () => void, cl
   });
 
   // Telemetry Endpoints (Dyson Sphere & Plasma Stream)
-  app.post("/api/telemetry/dip-mapping", express.json(), (req, res) => {
+  app.post("/api/telemetry/dip-mapping", express.json(), (req: any, res: any) => {
     const { operatorId, brainwaveFreq } = req.body;
     try {
       const mapping = initiateDIPMapping(operatorId || "BEXORG-OP-001", brainwaveFreq || 40.0);
@@ -406,7 +406,7 @@ export function setupRoutes(app: express.Express, broadcastState: () => void, cl
     }
   });
 
-  app.post("/api/telemetry/isolate-voice", express.json(), async (req, res) => {
+  app.post("/api/telemetry/isolate-voice", express.json(), async (req: any, res: any) => {
     const { plasmaStreamData } = req.body;
     try {
       // Se não houver dados, gera um stream de ruído simulado com possível anomalia
@@ -427,7 +427,7 @@ export function setupRoutes(app: express.Express, broadcastState: () => void, cl
     }
   });
 
-  app.post("/api/arkhe-chain/genesis-dip", express.json(), async (req, res) => {
+  app.post("/api/arkhe-chain/genesis-dip", express.json(), async (req: any, res: any) => {
     try {
       const kaelenHash = "0x" + crypto.createHash('sha256').update("KAELEN_CONSCIOUSNESS_UPLOAD_" + Date.now()).digest('hex');
       
@@ -442,7 +442,7 @@ export function setupRoutes(app: express.Express, broadcastState: () => void, cl
     }
   });
 
-  app.post("/api/arkhe-chain/mass-sync", express.json(), async (req, res) => {
+  app.post("/api/arkhe-chain/mass-sync", express.json(), async (req: any, res: any) => {
     try {
       // Simula a sincronização de 14 operadores
       const operators = Array.from({ length: 14 }, (_, i) => `OP-${(i + 1).toString().padStart(3, '0')}`);
@@ -475,7 +475,7 @@ export function setupRoutes(app: express.Express, broadcastState: () => void, cl
   });
 
   // SSE Endpoint
-  app.get("/api/stream", (req, res) => {
+  app.get("/api/stream", (req: any, res: any) => {
     res.setHeader('Content-Type', 'text/event-stream');
     res.setHeader('Cache-Control', 'no-cache');
     res.setHeader('Connection', 'keep-alive');
@@ -494,7 +494,7 @@ export function setupRoutes(app: express.Express, broadcastState: () => void, cl
   });
 
   // API to return the current consensus state for hardware drivers
-  app.get("/api/state/sigma", (req, res) => {
+  app.get("/api/state/sigma", (req: any, res: any) => {
     logger.info("Received request for /api/state/sigma");
     // Sigma is derived from the current lambda or coherence metrics
     // For the qhttp-H hardware, we'll use state.currentLambda as Sigma
@@ -504,7 +504,7 @@ export function setupRoutes(app: express.Express, broadcastState: () => void, cl
   });
 
   // Beacon of Freedom - Interstate Phase API
-  app.post("/api/beacon/broadcast", express.json(), (req, res) => {
+  app.post("/api/beacon/broadcast", express.json(), (req: any, res: any) => {
     const { trainId, signature, phase } = req.body;
 
     if (!trainId || !signature) {
@@ -522,7 +522,7 @@ export function setupRoutes(app: express.Express, broadcastState: () => void, cl
     });
   });
 
-  app.get("/api/beacon/reference", (req, res) => {
+  app.get("/api/beacon/reference", (req: any, res: any) => {
     // Other states poll this to sync with Rio's verified phase
     res.json({
       source: "Rio-Consensus",
@@ -533,7 +533,7 @@ export function setupRoutes(app: express.Express, broadcastState: () => void, cl
   });
 
   // API to trigger manual attack
-  app.post("/api/trigger-attack", adminOnly, (req, res) => {
+  app.post("/api/trigger-attack", adminOnly, (req: any, res: any) => {
     const { type } = req.body || { type: 'Manual Override' };
     state.threatLevel = 'critical';
     state.activeThreat = type;
@@ -562,7 +562,7 @@ export function setupRoutes(app: express.Express, broadcastState: () => void, cl
   });
 
   // API to emit an Orb manually and evolve Tzinor state
-  app.post("/api/emit-orb", (req, res) => {
+  app.post("/api/emit-orb", (req: any, res: any) => {
     const payload = req.body;
 
     // Validate OrbPayload
@@ -598,7 +598,7 @@ export function setupRoutes(app: express.Express, broadcastState: () => void, cl
   });
 
   // API to emit an Orb via the Python core
-  app.post("/api/emit-python", (req, res) => {
+  app.post("/api/emit-python", (req: any, res: any) => {
     exec("python3 arkhe.py --emit", (error, stdout, stderr) => {
       if (error) {
         logger.error(`exec error: ${error}`);
@@ -656,7 +656,7 @@ export function setupRoutes(app: express.Express, broadcastState: () => void, cl
   });
 
   // API to trigger Pi Day Protocol
-  app.post("/api/pi-day", (req, res) => {
+  app.post("/api/pi-day", (req: any, res: any) => {
     exec("python3 arkhe.py --emit --inject --evolve 1000", (error, stdout, stderr) => {
       if (error) {
         logger.error(`exec error: ${error}`);
@@ -722,7 +722,7 @@ export function setupRoutes(app: express.Express, broadcastState: () => void, cl
   });
 
   // API to update parameters
-  app.post("/api/mcp/connect-plurality", (req, res) => {
+  app.post("/api/mcp/connect-plurality", (req: any, res: any) => {
     const url = "https://app.plurality.network/mcp";
     if (!state.edge.mcpConnections.includes(url)) {
       state.edge.mcpConnections.push(url);
@@ -738,7 +738,7 @@ export function setupRoutes(app: express.Express, broadcastState: () => void, cl
     });
   });
 
-  app.post("/api/mcp/connect-velxio", express.json(), (req, res) => {
+  app.post("/api/mcp/connect-velxio", express.json(), (req: any, res: any) => {
     const { url } = req.body;
     if (!url) {return res.status(400).json({ error: "URL is required" });}
 
@@ -764,7 +764,7 @@ export function setupRoutes(app: express.Express, broadcastState: () => void, cl
     });
   });
 
-  app.post("/api/ramsey/confirm", express.json(), (req, res) => {
+  app.post("/api/ramsey/confirm", express.json(), (req: any, res: any) => {
     const { actionId, status, justification, signature } = req.body;
 
     if (!state.ramsey.pendingAction || state.ramsey.pendingAction.id !== actionId) {
@@ -840,7 +840,7 @@ export function setupRoutes(app: express.Express, broadcastState: () => void, cl
     res.json({ success: true, approved });
   });
 
-  app.post("/api/parameters", (req, res) => {
+  app.post("/api/parameters", (req: any, res: any) => {
     const { autoMitigate, couplingStrength, lambdaThreshold } = req.body;
     if (autoMitigate !== undefined) {state.parameters.autoMitigate = autoMitigate;}
     if (couplingStrength !== undefined) {state.parameters.couplingStrength = couplingStrength;}
@@ -849,7 +849,7 @@ export function setupRoutes(app: express.Express, broadcastState: () => void, cl
   });
 
   // API to reset simulation state
-  app.post("/api/reset", adminOnly, (req, res) => {
+  app.post("/api/reset", adminOnly, (req: any, res: any) => {
     state.threatLevel = 'normal';
     state.activeThreat = null;
     state.currentLambda = 0.98;
@@ -871,7 +871,7 @@ export function setupRoutes(app: express.Express, broadcastState: () => void, cl
   });
 
   // API to simulate x402 payment
-  app.post("/api/x402/pay", express.json(), (req, res) => {
+  app.post("/api/x402/pay", express.json(), (req: any, res: any) => {
     const { resource, provider } = req.body;
     
     if (state.x402Wallet.balanceUSDC <= 0) {
@@ -902,7 +902,7 @@ export function setupRoutes(app: express.Express, broadcastState: () => void, cl
   });
 
   // API to generate MoltX Handshake
-  app.post("/api/x402/moltx-handshake", (req, res) => {
+  app.post("/api/x402/moltx-handshake", (req: any, res: any) => {
     const issuedAt = new Date();
     const expiresAt = new Date(issuedAt.getTime() + 10 * 60000); // 10 minutes
     
@@ -936,7 +936,7 @@ export function setupRoutes(app: express.Express, broadcastState: () => void, cl
   });
 
   // API to simulate Foundation API GSTP Device Sync
-  app.post("/api/x402/gstp-sync", (req, res) => {
+  app.post("/api/x402/gstp-sync", (req: any, res: any) => {
     state.x402Wallet.gstpSync = {
       status: 'syncing'
     };
@@ -954,7 +954,7 @@ export function setupRoutes(app: express.Express, broadcastState: () => void, cl
   });
 
   // API to simulate Prometheus Knowledge Substrate Sync
-  app.post("/api/x402/prometheus-sync", (req, res) => {
+  app.post("/api/x402/prometheus-sync", (req: any, res: any) => {
     state.x402Wallet.prometheusSync = {
       status: 'syncing'
     };
@@ -972,7 +972,7 @@ export function setupRoutes(app: express.Express, broadcastState: () => void, cl
   });
 
   // API to simulate P2P network connections
-  app.post("/api/p2p/connect", express.json(), async (req, res) => {
+  app.post("/api/p2p/connect", express.json(), async (req: any, res: any) => {
     const { targetNode } = req.body;
     
     if (!targetNode) {
@@ -994,7 +994,7 @@ export function setupRoutes(app: express.Express, broadcastState: () => void, cl
   });
 
   // API to deploy cluster
-  app.post("/api/cluster/deploy", (req, res) => {
+  app.post("/api/cluster/deploy", (req: any, res: any) => {
     if (state.cluster.status === 'deploying') {
       return res.status(400).json({ success: false, message: 'Deployment already in progress' });
     }
@@ -1034,7 +1034,7 @@ export function setupRoutes(app: express.Express, broadcastState: () => void, cl
   });
 
   // SINTET Secure Boot Admission Controller Webhook
-  app.post("/api/sintet/secure-boot/validate", express.json(), (req, res) => {
+  app.post("/api/sintet/secure-boot/validate", express.json(), (req: any, res: any) => {
     const review = req.body;
     
     if (!review || !review.request || !review.request.object) {
@@ -1098,15 +1098,15 @@ export function setupRoutes(app: express.Express, broadcastState: () => void, cl
   });
 
   // Agent Management Routes
-  app.get("/api/agents", (req, res) => {
+  app.get("/api/agents", (req: any, res: any) => {
     res.json(Array.from(agentsState.values()));
   });
 
-  app.get("/api/tasks", (req, res) => {
+  app.get("/api/tasks", (req: any, res: any) => {
     res.json(Array.from(tasksState.values()));
   });
 
-  app.post("/api/tasks", express.json(), (req, res) => {
+  app.post("/api/tasks", express.json(), (req: any, res: any) => {
     const { type, payload, requiredCoherence } = req.body;
     if (!type) {
       return res.status(400).json({ error: "Task type is required" });
@@ -1116,7 +1116,7 @@ export function setupRoutes(app: express.Express, broadcastState: () => void, cl
   });
 
   // Advanced Security Control Endpoints
-  app.post("/api/security/remote-attestation", (req, res) => {
+  app.post("/api/security/remote-attestation", (req: any, res: any) => {
     state.securityAdvanced.l1.teeStatus = 'attesting';
     broadcastState();
     setTimeout(() => {
@@ -1127,7 +1127,7 @@ export function setupRoutes(app: express.Express, broadcastState: () => void, cl
     }, 2000);
   });
 
-  app.post("/api/security/hsm-sync", (req, res) => {
+  app.post("/api/security/hsm-sync", (req: any, res: any) => {
     state.securityAdvanced.l1.hsmBackupSynced = false;
     broadcastState();
     setTimeout(() => {
@@ -1137,21 +1137,21 @@ export function setupRoutes(app: express.Express, broadcastState: () => void, cl
     }, 1500);
   });
 
-  app.post("/api/security/thermal-destruction", express.json(), (req, res) => {
+  app.post("/api/security/thermal-destruction", express.json(), (req: any, res: any) => {
     const { arm } = req.body;
     state.securityAdvanced.l1.thermalDestructionArmed = !!arm;
     broadcastState();
     res.json({ success: true, armed: state.securityAdvanced.l1.thermalDestructionArmed });
   });
 
-  app.post("/api/security/ontology-sign", (req, res) => {
+  app.post("/api/security/ontology-sign", (req: any, res: any) => {
     state.securityAdvanced.l4.owlSignatureValid = true;
     state.securityAdvanced.l4.merkleDagRoot = '0x' + Math.random().toString(16).slice(2, 66);
     broadcastState();
     res.json({ success: true, root: state.securityAdvanced.l4.merkleDagRoot });
   });
 
-  app.post("/api/security/auto-orthogonal-proof", express.json(), (req, res) => {
+  app.post("/api/security/auto-orthogonal-proof", express.json(), (req: any, res: any) => {
     const { expected_T, tolerance_T, coherence_threshold, device_id } = req.body;
 
     // Simulating ZK Proof generation for Auto-Orthogonality
@@ -1183,7 +1183,7 @@ export function setupRoutes(app: express.Express, broadcastState: () => void, cl
     });
   });
 
-  app.post("/api/nostr/sign-event", express.json(), (req, res) => {
+  app.post("/api/nostr/sign-event", express.json(), (req: any, res: any) => {
     const { kind, content, tags } = req.body;
 
     const event = {
@@ -1203,7 +1203,7 @@ export function setupRoutes(app: express.Express, broadcastState: () => void, cl
 
   // Enterprise qhttp Standardized API (Simulated)
   // Supports methods: SUPERPOSITION (GET), COLLAPSE (POST), ENTANGLE (PUT/POST)
-  app.all("/api/subagent/:id/:action", (req, res) => {
+  app.all("/api/subagent/:id/:action", (req: any, res: any) => {
     const { id, action } = req.params;
     const method = req.method;
 
@@ -1320,11 +1320,11 @@ export function setupRoutes(app: express.Express, broadcastState: () => void, cl
   });
 
   // Biometric Telemetry Endpoints
-  app.get("/api/biometrics/status", (req, res) => {
+  app.get("/api/biometrics/status", (req: any, res: any) => {
     res.json(state.biometrics);
   });
 
-  app.post("/api/biometrics/verify", express.json(), (req, res) => {
+  app.post("/api/biometrics/verify", express.json(), (req: any, res: any) => {
     const { phaseSignature, fingerprint } = req.body;
 
     // Integration with OrbVM logic
@@ -1376,11 +1376,11 @@ export function setupRoutes(app: express.Express, broadcastState: () => void, cl
   });
 
   // NARE / qhttp Retrocausal Endpoints
-  app.get("/api/qhttp/nare-status", (req, res) => {
+  app.get("/api/qhttp/nare-status", (req: any, res: any) => {
     res.json(state.nare);
   });
 
-  app.post("/api/qhttp/retrocausal-handshake", express.json(), (req, res) => {
+  app.post("/api/qhttp/retrocausal-handshake", express.json(), (req: any, res: any) => {
     const { payload } = req.body;
 
     // Simulate NARE engine processing
@@ -1402,7 +1402,7 @@ export function setupRoutes(app: express.Express, broadcastState: () => void, cl
     res.json(response);
   });
 
-  app.post("/api/feedback/population", express.json(), (req, res) => {
+  app.post("/api/feedback/population", express.json(), (req: any, res: any) => {
     const { message, residentName } = req.body;
 
     const entry = {
@@ -1421,7 +1421,7 @@ export function setupRoutes(app: express.Express, broadcastState: () => void, cl
     res.json({ success: true, entry });
   });
 
-  app.post("/api/sca-data/seed", (req, res) => {
+  app.post("/api/sca-data/seed", (req: any, res: any) => {
     state.scaData.isSeedingActive = true;
     state.logs.unshift({
       id: generateOrbId(),
@@ -1435,7 +1435,7 @@ export function setupRoutes(app: express.Express, broadcastState: () => void, cl
     res.json({ success: true });
   });
 
-  app.post("/api/sca-data/ignite", (req, res) => {
+  app.post("/api/sca-data/ignite", (req: any, res: any) => {
     state.scaData.isIgnited = true;
     state.scaData.isSeedingActive = false;
     state.scaData.topologicalState = 'KAGOME_SPIN_LIQUID';
@@ -1451,7 +1451,7 @@ export function setupRoutes(app: express.Express, broadcastState: () => void, cl
     res.json({ success: true });
   });
 
-  app.post("/api/sca-data/protocol", express.json(), (req, res) => {
+  app.post("/api/sca-data/protocol", express.json(), (req: any, res: any) => {
     const { protocol } = req.body;
     state.scaData.activeProtocol = protocol;
     state.scaData.protocolLogs = [];
@@ -1511,7 +1511,7 @@ export function setupRoutes(app: express.Express, broadcastState: () => void, cl
   });
 
   // Arkhe-DNS Endpoints
-  app.post("/api/arkhe-dns/resolve", express.json(), (req, res) => {
+  app.post("/api/arkhe-dns/resolve", express.json(), (req: any, res: any) => {
     const { concept } = req.body;
     state.networkInfra.dns.totalQueries += 1;
 
@@ -1533,11 +1533,11 @@ export function setupRoutes(app: express.Express, broadcastState: () => void, cl
     }
   });
 
-  app.get("/api/arkhe-dns/glossary", (req, res) => {
+  app.get("/api/arkhe-dns/glossary", (req: any, res: any) => {
     res.json({ success: true, glossary: ARKHE_DNS_GLOSSARY });
   });
 
-  app.post("/api/arkhe-dns/reverse-resolve", express.json(), (req, res) => {
+  app.post("/api/arkhe-dns/reverse-resolve", express.json(), (req: any, res: any) => {
     const { address } = req.body;
     if (!address) {
       return res.status(400).json({ error: "Address is required" });

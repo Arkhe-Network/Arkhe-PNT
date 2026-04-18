@@ -57,7 +57,7 @@ export default function TemporalStreamViewer({ onClose }: TemporalStreamViewerPr
       });
 
       // Segment downloaded -> Perception frame ready (simulated)
-      newPlayer.addEventListener('segmentdownloaded', (event: any) => {
+      newPlayer.addEventListener('segmentdownloaded', (_event: unknown) => {
         setCapturedFrames(prev => prev + 1);
       });
 
@@ -81,11 +81,13 @@ export default function TemporalStreamViewer({ onClose }: TemporalStreamViewerPr
         logger.info('The video has now been loaded!');
         if (videoRef.current) {
           videoRef.current.muted = true;
-          videoRef.current.play().then(() => setIsPlaying(true)).catch(e => logger.error("Auto-play prevented: " + e));
+          void videoRef.current.play().then(() => setIsPlaying(true)).catch(e => logger.error("Auto-play prevented: " + e));
         }
+        return null;
       }).catch((e: any) => {
         logger.error('Error loading video: ' + e);
         setError(`LOAD_ERR_${e.code}`);
+        return null;
       });
 
       const statTimer = setInterval(() => {
@@ -99,7 +101,8 @@ export default function TemporalStreamViewer({ onClose }: TemporalStreamViewerPr
     } else {
       setError('BROWSER_UNSUPPORTED');
     }
-  }, []);
+    return () => {};
+  }, [coherence]);
 
   const toggleVrMode = () => {
     if (player) {

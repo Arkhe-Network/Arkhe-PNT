@@ -208,3 +208,4 @@ export const EnterprisePlusPanel: React.FC<EnterprisePlusPanelProps> = ({ onClos
     </div>
   );
 };
+export default EnterprisePlusPanel;

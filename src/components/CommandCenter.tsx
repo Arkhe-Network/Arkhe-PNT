@@ -628,3 +628,4 @@ export function CommandCenter({
     </div>
   );
 }
+export default CommandCenter;
