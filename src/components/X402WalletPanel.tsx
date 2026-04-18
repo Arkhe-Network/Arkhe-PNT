@@ -68,7 +68,7 @@ export default function X402WalletPanel({ wallet }: X402WalletPanelProps) {
         setPaymentStatus({ success: false, message: data.message || 'Payment failed' });
       }
     } catch (_error) {
-      setPaymentStatus({ success: false, message: 'Network _error' });
+      setPaymentStatus({ success: false, message: 'Network error' });
     } finally {
       setIsPaying(false);
       setTimeout(() => setPaymentStatus(null), 3000);
@@ -80,7 +80,7 @@ export default function X402WalletPanel({ wallet }: X402WalletPanelProps) {
     try {
       await fetch('/api/x402/moltx-handshake', { method: 'POST' });
     } catch (_error) {
-      logger._error('MoltX Handshake failed: ' + _error);
+      logger.error('MoltX Handshake failed: ' + _error);
     } finally {
       setIsLinking(false);
     }
@@ -91,7 +91,7 @@ export default function X402WalletPanel({ wallet }: X402WalletPanelProps) {
     try {
       await fetch('/api/x402/gstp-sync', { method: 'POST' });
     } catch (_error) {
-      logger._error('GSTP Sync failed: ' + _error);
+      logger.error('GSTP Sync failed: ' + _error);
     } finally {
       setIsSyncing(false);
     }
@@ -102,7 +102,7 @@ export default function X402WalletPanel({ wallet }: X402WalletPanelProps) {
     try {
       await fetch('/api/x402/prometheus-sync', { method: 'POST' });
     } catch (_error) {
-      logger._error('Prometheus Sync failed: ' + _error);
+      logger.error('Prometheus Sync failed: ' + _error);
     } finally {
       setIsPrometheusSyncing(false);
     }

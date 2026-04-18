@@ -69,10 +69,10 @@ export default function DimOSDistributionPanel({ onClose }: DimOSPanelProps) {
       // Update node statuses randomly during deployment
       if (progress < 100) {
         setFleet(prev => prev.map(node => {
-          if (node.status === 'active') {return node;}
+          if ((node.status as string) === 'active') {return node;}
           if (Math.random() > 0.7) {
              const newStatus = Math.random() > 0.5 ? 'syncing' : 'active';
-             if (newStatus === 'active' && node.status !== 'active') {
+             if (newStatus === 'active' && (node.status as string) !== 'active') {
                  addLog(`NODE ${node.id} GENOME TRANSPLANT SUCCESSFUL.`);
              }
              return {
@@ -136,7 +136,7 @@ export default function DimOSDistributionPanel({ onClose }: DimOSPanelProps) {
                   className={`w-full py-3 mt-4 rounded font-mono text-sm uppercase tracking-widest transition-all ${
                     isDeploying 
                       ? 'bg-arkhe-cyan/20 text-arkhe-cyan border border-arkhe-cyan/50 cursor-not-allowed'
-                      : deploymentProgress === 100
+                      : Math.round(deploymentProgress) === 100
                         ? 'bg-arkhe-green/20 text-arkhe-green border border-arkhe-green/50 cursor-not-allowed'
                         : 'bg-arkhe-cyan/10 text-arkhe-cyan border border-arkhe-cyan hover:bg-arkhe-cyan/20 hover:shadow-[0_0_15px_rgba(0,255,170,0.3)]'
                   }`}
@@ -189,7 +189,7 @@ export default function DimOSDistributionPanel({ onClose }: DimOSPanelProps) {
               <div className="grid grid-cols-2 gap-3">
                 {fleet.map(node => (
                   <div key={node.id} className={`p-3 rounded border text-xs font-mono flex flex-col gap-2 transition-colors ${
-                    node.status === 'active' ? 'bg-arkhe-green/5 border-arkhe-green/30' :
+                    (node.status as string) === 'active' ? 'bg-arkhe-green/5 border-arkhe-green/30' :
                     node.status === 'syncing' ? 'bg-arkhe-cyan/5 border-arkhe-cyan/30' :
                     'bg-arkhe-card border-arkhe-border'
                   }`}>

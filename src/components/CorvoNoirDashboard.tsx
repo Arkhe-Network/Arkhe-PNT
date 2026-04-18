@@ -5,7 +5,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { Activity, Shield, Zap, Cpu, Heart, Fingerprint } from 'lucide-react';
+import { Activity, Shield, Zap, Cpu, Heart, Fingerprint, Smile, Users, Radio } from 'lucide-react';
 import React, { useState } from 'react';
 import {
   LineChart,
@@ -26,6 +26,7 @@ import TemporalLensPanel from './TemporalLensPanel';
 
 const CorvoNoirDashboard: React.FC = () => {
   const state = useArkheSimulation();
+  const [activeTab, setActiveTab] = useState<'coherence' | 'governance' | 'biolink' | 'security'>('coherence');
 
   // Simulated time-series data for the Kuramoto R(t)
   const chartData = React.useMemo(() => {
@@ -178,7 +179,7 @@ const CorvoNoirDashboard: React.FC = () => {
                 <div className="bg-amber-950/20 border border-amber-500/30 p-4 rounded">
                   <p className="text-xs font-bold text-amber-500 mb-2">MANIFESTO DE GOVERNANÇA 2027 (ACTIVE)</p>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
-                    {Object.entries(state.governanceManifesto.sectors).map(([sector, desc]) => (
+                    {Object.entries(state.governanceManifesto.sectors as Record<string, string>).map(([sector, desc]) => (
                       <div key={sector} className="text-[10px]">
                         <span className="text-amber-500/60 uppercase">{sector}:</span> <span className="text-amber-200/80">{desc}</span>
                       </div>
@@ -267,7 +268,7 @@ const CorvoNoirDashboard: React.FC = () => {
 
               <div className="bg-neutral-900 p-3 rounded border border-neutral-800 h-32 overflow-hidden relative">
                  <div className="flex gap-1 h-full items-end">
-                   {state.sensors.map((s) => (
+                   {state.sensors.map((s: any) => (
                      <div
                        key={s.id}
                        className={`w-1 transition-all ${s.status === 'attacked' ? 'bg-red-500 animate-pulse' : s.status === 'isolated' ? 'bg-neutral-700' : 'bg-emerald-500/40'}`}
@@ -367,7 +368,7 @@ const CorvoNoirDashboard: React.FC = () => {
                   <div>
                     <p className="text-[8px] text-neutral-500 uppercase mb-1">Phase Signature</p>
                     <div className="flex gap-0.5 h-4 items-end">
-                      {state.biometrics.phaseSignature.map((val, idx) => (
+                      {(state.biometrics.phaseSignature as number[]).map((val: number, idx: number) => (
                         <div
                           key={idx}
                           className="bg-emerald-500/50 flex-1 hover:bg-emerald-500 transition-colors"
@@ -379,7 +380,7 @@ const CorvoNoirDashboard: React.FC = () => {
                 )}
 
                 <p className="text-[7px] text-neutral-600 uppercase text-center italic">
-                  Last verified: {state.biometrics.lastVerification ? new Date(state.biometrics.lastVerification).toLocaleTimeString() : 'N/A'}
+                  Last verified: {state.biometrics.lastVerification ? new Date(state.biometrics.lastVerification as number).toLocaleTimeString() : 'N/A'}
                 </p>
               </div>
             ) : (
@@ -393,7 +394,7 @@ const CorvoNoirDashboard: React.FC = () => {
         <p className="text-[10px] text-neutral-500 mb-2 font-bold tracking-widest uppercase">System Log (CORVO_OS_KERNEL)</p>
         {state.logs.slice(0, 10).map((log) => (
           <div key={log.id} className="flex gap-2 mb-1">
-            <span className="text-neutral-600 text-[10px] shrink-0">[{new Date(log.originTime).toLocaleTimeString()}]</span>
+            <span className="text-neutral-600 text-[10px] shrink-0">[{new Date(log.originTime || 0).toLocaleTimeString()}]</span>
             <span className={`text-[10px] ${log.status === 'Valid' ? 'text-neutral-400' : 'text-red-400'}`}>
               {log.threatType || (log.status === 'Valid' ? 'NOMINAL OPERATION' : 'ANOMALY')}
             </span>
