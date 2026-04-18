@@ -5,14 +5,16 @@
  */
 
 import { useState, useEffect, useRef, useCallback } from 'react';
-import { CrystallizationRitual } from '../ritual/prism-ritual.js';
-import { ChronicleVault } from '../storage/chroniclevault.js';
 import { X, Send, Square, Info, History } from 'lucide-react';
 import { Streamdown } from "streamdown";
 import { code } from "@streamdown/code";
 import { mermaid } from "@streamdown/mermaid";
 import { createMathPlugin } from "@streamdown/math";
 import { cjk } from "@streamdown/cjk";
+// @ts-expect-error JS module
+import { CrystallizationRitual } from '../ritual/prism-ritual.js';
+// @ts-expect-error JS module
+import { ChronicleVault } from '../storage/chroniclevault.js';
 
 const math = createMathPlugin({ singleDollarTextMath: true });
 const STREAMDOWN_PLUGINS = { code, mermaid, math, cjk };
@@ -20,20 +22,24 @@ const STREAMDOWN_PLUGINS = { code, mermaid, math, cjk };
 const PRISM_GLYPH_CLASS =
   "h-9 w-9 overflow-hidden opacity-90 [clip-path:polygon(50%_4%,100%_100%,0%_100%)] bg-[radial-gradient(circle_at_50%_18%,rgba(255,255,255,0.3),transparent_28%),linear-gradient(180deg,rgba(255,122,92,1)_0%,rgba(255,184,77,1)_42%,rgba(182,123,232,1)_100%)] drop-shadow-[0_0_18px_rgba(255,184,77,0.18)]";
 
-export default function BonsaiPrismPanel({ onClose }) {
+interface BonsaiPrismPanelProps {
+  onClose: () => void;
+}
+
+export default function BonsaiPrismPanel({ onClose }: BonsaiPrismPanelProps) {
   // Estados do Ciclo de Vida
   const [stage, setStage] = useState('selection'); // selection | ritual | ready | error
   const [selectedModel, setSelectedModel] = useState('bonsai-1.7b');
   const [progress, setProgress] = useState(0);
-  const [messages, setMessages] = useState([]);
+  const [messages, setMessages] = useState<any[]>([]);
   const [input, setInput] = useState('');
   const [isGenerating, setIsGenerating] = useState(false);
-  const [tps, setTps] = useState(0);
+  const [tps, setTps] = useState<any>(0);
 
   // Refs
-  const workerRef = useRef(null);
-  const ritualRef = useRef(null);
-  const canvasRef = useRef(null);
+  const workerRef = useRef<Worker | null>(null);
+  const ritualRef = useRef<any>(null);
+  const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const chronicle = useRef(new ChronicleVault()).current;
 
   // Inicialização do Worker e Chronique
@@ -43,8 +49,8 @@ export default function BonsaiPrismPanel({ onClose }) {
       { type: 'module' }
     );
 
-    workerRef.current.onmessage = (e) => {
-      const { status, token, output, error, progress: prog, loaded, total } = e.data;
+    workerRef.current.onmessage = (e: MessageEvent) => {
+      const { status, token, error, progress: prog, loaded, total } = e.data;
 
       switch (status) {
         case 'ritual_progress':
@@ -53,18 +59,18 @@ export default function BonsaiPrismPanel({ onClose }) {
               // Transformers.js progress can be based on percentage (0-100) or bytes
               // If total is provided, we use it for the ritual visualization
               if (total > 0) {
-                 ritualRef.current.updateProgress(loaded);
+                 (ritualRef.current as any).updateProgress(loaded);
               } else {
                  // Fallback to percentage-based update if total is unknown
                  const estimatedTotal = selectedModel.includes('1.7b') ? 290_000_000 : 1_200_000_000;
-                 ritualRef.current.updateProgress((prog / 100) * estimatedTotal);
+                 (ritualRef.current as any).updateProgress((prog / 100) * estimatedTotal);
               }
           }
           break;
         case 'ready':
           setStage('ready');
           if (ritualRef.current) {
-              ritualRef.current.complete();
+              (ritualRef.current as any).complete();
           }
           break;
         case 'error':
@@ -93,16 +99,16 @@ export default function BonsaiPrismPanel({ onClose }) {
           break;
         case 'complete':
           setIsGenerating(false);
-          chronicle.saveChronicle(messages, selectedModel);
+          (chronicle as any).saveChronicle(messages, selectedModel);
           break;
       }
     };
 
-    chronicle.init();
+    (chronicle as any).init();
 
     return () => {
       workerRef.current?.terminate();
-      ritualRef.current?.destroy();
+      (ritualRef.current as any)?.destroy();
     };
   }, [chronicle, messages, selectedModel]);
 
@@ -116,7 +122,7 @@ export default function BonsaiPrismPanel({ onClose }) {
           ritualRef.current = new CrystallizationRitual(canvasRef.current.id);
           const estimatedSize = selectedModel.includes('1.7b') ? 290_000_000 : 1_200_000_000;
           ritualRef.current.initiate(estimatedSize);
-          workerRef.current.postMessage({ type: 'load', data: selectedModel });
+          workerRef.current?.postMessage({ type: 'load', data: selectedModel });
       }
   }, [stage, selectedModel]);
 
@@ -129,7 +135,7 @@ export default function BonsaiPrismPanel({ onClose }) {
     setInput('');
     setIsGenerating(true);
 
-    workerRef.current.postMessage({
+    workerRef.current?.postMessage({
       type: 'generate',
       data: {
         prompt: input,
@@ -140,7 +146,7 @@ export default function BonsaiPrismPanel({ onClose }) {
   };
 
   const interruptGeneration = () => {
-    workerRef.current.postMessage({ type: 'interrupt' });
+    workerRef.current?.postMessage({ type: 'interrupt' });
     setIsGenerating(false);
   };
 

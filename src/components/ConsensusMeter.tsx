@@ -8,7 +8,7 @@
 import { Activity, AlertTriangle, CheckCircle, ShieldAlert } from 'lucide-react';
 import React, { useEffect, useState } from 'react';
 
-import { logger } from '../../server/logger.ts';
+import { logger } from '../../server/logger';
 
 interface ConsensusState {
   sigma: number;

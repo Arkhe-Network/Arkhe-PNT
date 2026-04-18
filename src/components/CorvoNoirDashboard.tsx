@@ -5,7 +5,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { Activity, Shield, Zap, Cpu, Heart, Fingerprint } from 'lucide-react';
+import { Activity, Shield, Zap, Cpu, Heart, Fingerprint, Smile, Users, Radio } from "lucide-react";
 import React, { useState } from 'react';
 import {
   LineChart,
@@ -25,6 +25,7 @@ import { useArkheSimulation } from '../hooks/useArkheSimulation';
 import TemporalLensPanel from './TemporalLensPanel';
 
 const CorvoNoirDashboard: React.FC = () => {
+  const [activeTab, setActiveTab] = useState<"coherence" | "governance" | "biolink" | "security">("coherence");
   const state = useArkheSimulation();
 
   // Simulated time-series data for the Kuramoto R(t)

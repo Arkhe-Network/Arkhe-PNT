@@ -41,7 +41,7 @@ export class LucentCollector {
     this.eprContext = { getNonce: () => Math.random().toString() }; // new EPRHandshake();
 
     // Conexão qhttp (quantum WebSocket)
-    this.ws = new (global as any).WebSocket(`quantum://${apiUrl}/lucent/session`);
+    this.ws = new (globalThis as any).WebSocket(`quantum://${apiUrl}/lucent/session`);
     this.setupWebSocket();
 
     // Flush periódico
@@ -64,7 +64,7 @@ export class LucentCollector {
         eprNonce: this.eprContext.getNonce(),
         hydroNodeId: this.hydroContext.nodeId,
         timestamp: Date.now(),
-        userAgent: (global as any).navigator?.userAgent || "mock",
+        userAgent: (globalThis as any).navigator?.userAgent || "mock",
         viewport: { width: 1024, height: 768 }
       };
       this.ws.send(JSON.stringify(frame));
@@ -73,7 +73,7 @@ export class LucentCollector {
 
   private subscribeHydroContext(nodeId: string) {
     // Conecta ao nó HYDRO-Ω para receber métricas em tempo real
-    const hydroWs = new (global as any).WebSocket(`quantum://hydro.arkhe/node/${nodeId}`);
+    const hydroWs = new (globalThis as any).WebSocket(`quantum://hydro.arkhe/node/${nodeId}`);
     hydroWs.onmessage = (event: any) => {
       const data = JSON.parse(event.data);
       this.hydroContext = {

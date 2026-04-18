@@ -7,7 +7,7 @@
 
 import { useState, useEffect } from 'react';
 
-import { logger } from '../../server/logger.ts';
+import { logger } from '../../server/logger';
 import type { TzinorMemoryState } from '../types/tzinor';
 
 export interface OrbLog {
@@ -58,6 +58,127 @@ export interface PopulationFeedbackEntry {
   message: string;
   coherence: number;
   timestamp: string;
+}
+
+export interface SecurityAdvancedState {
+  l1: {
+    teeStatus: 'secure' | 'compromised' | 'attesting';
+    intrusionSensor: 'nominal' | 'alert';
+    thermalDestructionArmed: boolean;
+    hsmBackupSynced: boolean;
+    lastRemoteAttestation: string;
+  };
+  l2: {
+    eprHandshake: 'active' | 'failed';
+    muSig2Heartbeat: 'verified' | 'unverified';
+    pneumaOutlierDetected: boolean;
+    qrngJitterMs: number;
+  };
+  l3: {
+    nullifierVerified: boolean;
+    timestampQRNG: string;
+    ttlValid: boolean;
+    t2StarMicroseconds: number;
+  };
+  l4: {
+    owlSignatureValid: boolean;
+    logosConsistency: number;
+    zkOntologicalProof: boolean;
+    merkleDagRoot: string;
+    geoLlmActive: boolean;
+    geoQaiCoherence: number;
+  };
+  l5: {
+    cspStatus: 'enforced' | 'violation';
+    sriVerified: boolean;
+    antiCsrfToken: string;
+    zkUiVerified: boolean;
+    pwaCacheSigned: boolean;
+  };
+  qhttp: {
+    pqTlsStatus: 'Kyber+ECDH' | 'Classic' | 'None';
+    xKuramotoHeader: string;
+    bellViolationS: number;
+  };
+}
+
+export interface CHSHMonitorState {
+  status: string;
+  timestamp: string;
+  arkheChainBlock: number;
+  measurementSetup: {
+    instrument: string;
+    targetSystem: string;
+    referenceLattice: string;
+    angleBases: number[];
+    coincidenceWindowNs: number;
+    integrationTimeSec: number;
+  };
+  expectedOutcomes: {
+    classicalLimit: number;
+    quantumLimit: number;
+    thresholdEntangled: number;
+    targetEntanglement: string;
+  };
+  liveTelemetry: {
+    status: string;
+    dataPoints: number;
+    currentS: number | null;
+    stabilityIndicator: string;
+    nextUpdate: string;
+    history: Array<{ time: string; s: number }>;
+  };
+  preFlightChecks: {
+    tzinorInjector: string;
+    fibonacciPhaseAnchor: string;
+    treeLacamGeodesic: string;
+    pdsmIgnitionSequence: string;
+  };
+  archimedesComment: string;
+  nextMilestone: {
+    time: string;
+    action: string;
+  };
+}
+
+export interface RamseyState {
+  enabled: boolean;
+  auto_adjust: boolean;
+  manual_approval_required: boolean;
+  theta: number;
+  direction: number;
+  baseline: number;
+  thresholds: any[];
+  window: Array<{ theta: number; coherence: number }>;
+  pendingAction: any | null;
+  isFrozen: boolean;
+  rabi_frequency: number;
+  generator_configs: Record<string, any>;
+  fibonacci_sequence: any;
+}
+
+export interface GovernanceManifesto {
+  year: number;
+  eigenvalues: number[];
+  sectors: Record<string, string>;
+  status: "draft" | "published";
+  timestamp: string;
+  version: string;
+  directives: Array<{
+    id: string;
+    title: string;
+    description: string;
+  }>;
+  cellular_impact: {
+    telomere_gain: number;
+    oxidative_stress: number;
+  };
+  signature: string;
+}
+
+export interface GrossHappinessState {
+  globalIndex: number;
+  districts: any[];
 }
 
 export interface SimulationState {
@@ -113,6 +234,7 @@ export interface SimulationState {
   edge: {
     activePhysicalNodes: number;
     mcpConnections: string[];
+    velxioConnections: string[];
     phase: number;
   };
   astl: {
@@ -157,9 +279,16 @@ export interface SimulationState {
     invariantsVerified: number;
   };
   scaData: ScaDataState;
-  enterpriseSubagents?: Record<string, unknown>;
-  chshMonitor?: Record<string, unknown>;
-  ramsey?: Record<string, unknown>;
+  enterpriseSubagents: {
+    governance: any[];
+    devops: any[];
+    security: any[];
+    ia: any[];
+    operations: any[];
+    interoperability: any[];
+  };
+  chshMonitor: CHSHMonitorState;
+  ramsey: RamseyState;
   x402Wallet: {
     address: string;
     network: string;
@@ -192,6 +321,50 @@ export interface SimulationState {
   predictiveForecast: PredictiveForecastState;
   sensors: SensorState[];
   networkInfra: NetworkInfraState;
+  cluster: {
+    status: 'idle' | 'deploying' | 'resonant';
+    progress: number;
+    logs: string[];
+    nccl: {
+      rho1_local: number;
+      rho1_global: number;
+    };
+    qhttp: {
+      global_phase: number;
+      coherence: number;
+    };
+  };
+  securityAdvanced: SecurityAdvancedState;
+  lucentSessions: any[];
+  governanceManifesto: GovernanceManifesto;
+  grossHappiness: GrossHappinessState;
+  cellularHealth: {
+    telomere_length: number;
+    oxidative_stress: number;
+    mitochondrial_efficiency: number;
+    inflammation_marker: number;
+    overall_score: number;
+    regeneration_rate: number;
+  };
+  expansionStatus: {
+    totalCoverage: number;
+    nodes: Array<{
+      id: string;
+      name: string;
+      status: string;
+      signalStrength: number;
+      coherence: number;
+    }>;
+  };
+  forecaster: {
+    probability: number;
+    predictedLambda: number;
+    alertsIssued: number;
+    horizonMs: number;
+  };
+  velxioEmulation: any;
+  hydro: any;
+  civicSubagents: any;
 }
 
 export interface NetworkInfraState {
@@ -211,36 +384,15 @@ export interface NetworkInfraState {
     cacheHits: number;
     memoryUsageMb: number;
   };
-}
-
-export interface GovernanceManifesto {
-  year: number;
-  eigenvalues: number[];
-  sectors: Record<string, string>;
-  status: 'draft' | 'published';
-  timestamp: string;
-}
-
-export interface GrossHappinessState {
-  globalIndex: number;
-  districts: DistrictHappiness[];
-}
-
-export interface DistrictHappiness {
-  name: string;
-  index: number;
-  lastPulse: string | null;
-}
-
-export interface ScaDomain {
-  name: string;
-  lambda2: number;
-  action: string;
-  health: 'STABLE' | 'CRITICAL';
+  dns: {
+    totalQueries: number;
+    successfulResolutions: number;
+    failedResolutions: number;
+  };
 }
 
 export interface ScaDataState {
-  domains: ScaDomain[];
+  domains: any[];
   overallHealth: number;
   topology: 'TRINITY' | 'KAGOME';
   globalOrderR: number;
@@ -340,6 +492,7 @@ export function useArkheSimulation() {
     edge: {
       activePhysicalNodes: 1048576,
       mcpConnections: ['mcp://arkhe-vision.sn44.bittensor', 'mcp://zombie-fleet.dimos'],
+      velxioConnections: [],
       phase: 26.0,
     },
     astl: {
@@ -394,9 +547,40 @@ export function useArkheSimulation() {
       protocolLogs: [],
       lastGateResult: 'N/A'
     },
-    enterpriseSubagents: {},
-    chshMonitor: {},
-    ramsey: {},
+    enterpriseSubagents: {
+      governance: [],
+      devops: [],
+      security: [],
+      ia: [],
+      operations: [],
+      interoperability: []
+    },
+    chshMonitor: {
+      status: 'IDLE',
+      timestamp: '',
+      arkheChainBlock: 0,
+      measurementSetup: { instrument: '', targetSystem: '', referenceLattice: '', angleBases: [], coincidenceWindowNs: 0, integrationTimeSec: 0 },
+      expectedOutcomes: { classicalLimit: 2.0, quantumLimit: 2.82, thresholdEntangled: 2.5, targetEntanglement: '' },
+      liveTelemetry: { status: 'IDLE', dataPoints: 0, currentS: 0, stabilityIndicator: '', nextUpdate: '', history: [] },
+      preFlightChecks: { tzinorInjector: '', fibonacciPhaseAnchor: '', treeLacamGeodesic: '', pdsmIgnitionSequence: '' },
+      archimedesComment: '',
+      nextMilestone: { time: '', action: '' }
+    },
+    ramsey: {
+      enabled: true,
+      auto_adjust: true,
+      manual_approval_required: false,
+      theta: 0,
+      direction: 1,
+      baseline: 0.5,
+      thresholds: [],
+      window: [],
+      pendingAction: null,
+      isFrozen: false,
+      rabi_frequency: 1.0,
+      generator_configs: {},
+      fibonacci_sequence: { name: '', generators: [] }
+    },
     x402Wallet: {
       address: '0xbf7da1f568684889a69a5bed9f1311f703985590',
       network: 'Base Sepolia',
@@ -436,8 +620,39 @@ export function useArkheSimulation() {
     networkInfra: {
       tor: { status: 'CIRCUIT_ESTABLISHING', nodes: [], latencyMs: 0 },
       broker: { status: 'IDLE', messagesProcessed: 0, queueDepth: 0, activeTopics: [] },
-      redis: { status: 'READY', cacheHits: 0, memoryUsageMb: 0 }
-    }
+      redis: { status: 'READY', cacheHits: 0, memoryUsageMb: 0 },
+      dns: { totalQueries: 0, successfulResolutions: 0, failedResolutions: 0 }
+    },
+    cluster: {
+      status: 'idle',
+      progress: 0,
+      logs: [],
+      nccl: { rho1_local: 0, rho1_global: 0 },
+      qhttp: { global_phase: 0, coherence: 0 }
+    },
+    securityAdvanced: {
+      l1: { teeStatus: 'secure', intrusionSensor: 'nominal', thermalDestructionArmed: false, hsmBackupSynced: true, lastRemoteAttestation: '' },
+      l2: { eprHandshake: 'active', muSig2Heartbeat: 'verified', pneumaOutlierDetected: false, qrngJitterMs: 0 },
+      l3: { nullifierVerified: true, timestampQRNG: '', ttlValid: true, t2StarMicroseconds: 0 },
+      l4: { owlSignatureValid: true, logosConsistency: 1, zkOntologicalProof: true, merkleDagRoot: '', geoLlmActive: false, geoQaiCoherence: 1 },
+      l5: { cspStatus: 'enforced', sriVerified: true, antiCsrfToken: '', zkUiVerified: true, pwaCacheSigned: true },
+      qhttp: { pqTlsStatus: 'Kyber+ECDH', xKuramotoHeader: '', bellViolationS: 2.82 }
+    },
+    lucentSessions: [],
+    governanceManifesto: {
+      year: 2026, eigenvalues: [], sectors: {}, status: "draft", timestamp: "",
+      version: "v1.0.0",
+      directives: [],
+      cellular_impact: { telomere_gain: 0, oxidative_stress: 0 },
+      signature: "0x0"
+    },
+    grossHappiness: { globalIndex: 0, districts: [] },
+    cellularHealth: { telomere_length: 0.9, oxidative_stress: 0.1, mitochondrial_efficiency: 0.95, inflammation_marker: 0.05, overall_score: 0.98, regeneration_rate: 0.001 },
+    expansionStatus: { totalCoverage: 1048576, nodes: [] },
+    forecaster: { probability: 0, predictedLambda: 0.98, alertsIssued: 0, horizonMs: 5000 },
+    velxioEmulation: {},
+    hydro: {},
+    civicSubagents: []
   });
 
   useEffect(() => {
@@ -467,4 +682,3 @@ export function useArkheSimulation() {
 
   return state;
 }
-

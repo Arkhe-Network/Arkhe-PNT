@@ -8,16 +8,16 @@
 import { Sun, Radio, Activity, Globe } from 'lucide-react';
 import React from 'react';
 
-import type { HelioState } from '../../server/types';
+import { Card } from './ui/Card';
 
-import { Badge } from '@/components/ui/badge';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Progress } from '@/components/ui/progress';
-
-
+const Badge = (props: any) => <div {...props} />;
+const CardContent = (props: any) => <div {...props} />;
+const CardHeader = (props: any) => <div {...props} />;
+const CardTitle = (props: any) => <div {...props} />;
+const Progress = (props: any) => <div {...props} />;
 
 interface HelioLinkPanelProps {
-  helio?: HelioState;
+  helio?: any;
   onListen: () => void;
   onSync: () => void;
   coherence: number;
@@ -36,7 +36,7 @@ const HelioLinkPanel: React.FC<HelioLinkPanelProps> = ({ helio, onListen, onSync
           PHASE D: HELIO-LINK COUPLING
         </CardTitle>
         <Badge variant="outline" className="border-arkhe-cyan text-arkhe-cyan text-[10px]">
-          {helio.ethicalMode.toUpperCase()}
+          {helio.ethicalMode?.toUpperCase()}
         </Badge>
       </CardHeader>
       <CardContent className="space-y-4">
@@ -87,7 +87,7 @@ const HelioLinkPanel: React.FC<HelioLinkPanelProps> = ({ helio, onListen, onSync
             SCHUMANN MODES (IONOSFERA)
           </p>
           <div className="flex justify-between text-[9px] text-arkhe-cyan/70">
-            {helio.schumannModes.map((mode, i) => (
+            {helio.schumannModes?.map((mode: any, i: number) => (
               <span key={i}>{mode.toFixed(2)}Hz</span>
             ))}
           </div>

@@ -8,7 +8,7 @@
 import { Activity, Radio, BrainCircuit, Mic, Globe, Zap } from 'lucide-react';
 import React, { useState } from 'react';
 
-import { logger } from '../../server/logger.ts';
+import { logger } from '../../server/logger';
 
 import { Card } from './ui/Card';
 

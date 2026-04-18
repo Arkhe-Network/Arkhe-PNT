@@ -8,7 +8,8 @@
 import { Zap, Activity, Play } from 'lucide-react';
 import React from 'react';
 
-import type { ThermodynamicTrainingReport } from '../../server/types';
+// Type mocked
+type HelioState = any; type LatentCoherenceResults = any; type SolarEntropyReport = any; type ThermodynamicTrainingReport = any;
 
 import { Card } from './ui/Card';
 
