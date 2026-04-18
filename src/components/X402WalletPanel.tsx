@@ -9,7 +9,7 @@ import { Wallet, ArrowRightLeft, ShieldCheck, Coins, ExternalLink, Loader2, Link
 import { motion, AnimatePresence } from 'motion/react';
 import React, { useState } from 'react';
 
-import { logger } from '../../server/logger.ts';
+import { logger } from '../../server/logger';
 
 interface X402WalletPanelProps {
   wallet: {

@@ -25,6 +25,7 @@ import { useArkheSimulation } from '../hooks/useArkheSimulation';
 import TemporalLensPanel from './TemporalLensPanel';
 
 const CorvoNoirDashboard: React.FC = () => {
+  const [activeTab, setActiveTab] = useState<"coherence" | "governance" | "biolink" | "security">("coherence");
   const state = useArkheSimulation();
   const [activeTab, setActiveTab] = useState<'coherence' | 'governance' | 'biolink' | 'security'>('coherence');
 

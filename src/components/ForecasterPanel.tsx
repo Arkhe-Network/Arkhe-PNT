@@ -8,7 +8,7 @@
 import { AlertTriangle, TrendingDown, Bell, ShieldAlert } from 'lucide-react';
 import React from 'react';
 
-import type { SimulationState } from '../../server/types';
+import type { SimulationState } from '../hooks/useArkheSimulation';
 import { cn } from '../lib/utils';
 
 import { Card } from './ui/Card';

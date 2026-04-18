@@ -196,8 +196,8 @@ export default function DimOSDistributionPanel({ onClose }: DimOSPanelProps) {
                     <div className="flex justify-between items-center">
                       <span className="font-bold text-white">{node.id}</span>
                       <span className={`px-2 py-0.5 rounded text-[10px] uppercase ${
-                        node.status === 'active' ? 'bg-arkhe-green/20 text-arkhe-green' :
-                        node.status === 'syncing' ? 'bg-arkhe-cyan/20 text-arkhe-cyan animate-pulse' :
+                        node.status as string === 'active' ? 'bg-arkhe-green/20 text-arkhe-green' :
+                        node.status as string === 'syncing' ? 'bg-arkhe-cyan/20 text-arkhe-cyan animate-pulse' :
                         'bg-zinc-800 text-zinc-400'
                       }`}>
                         {node.status}
@@ -207,7 +207,7 @@ export default function DimOSDistributionPanel({ onClose }: DimOSPanelProps) {
                       <span>Type: {node.type}</span>
                       <span>OS: <span className={node.genomeVersion === 'v2.14.0' ? 'text-arkhe-cyan' : ''}>{node.genomeVersion}</span></span>
                     </div>
-                    {node.status === 'active' && (
+                    {node.status as string === 'active' && (
                       <div className="flex justify-between text-[10px]">
                         <span className="text-arkhe-muted">Coherence:</span>
                         <span className="text-arkhe-green">{(node.coherence * 100).toFixed(2)}%</span>

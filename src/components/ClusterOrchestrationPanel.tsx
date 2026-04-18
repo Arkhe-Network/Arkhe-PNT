@@ -9,8 +9,8 @@ import { X, Network, Server, Cpu, Activity, Database, Zap, ArrowRight, CheckCirc
 import { motion } from 'motion/react';
 import React, { useState } from 'react';
 
-import { logger } from '../../server/logger.ts';
-import type { SimulationState } from '../../server/types';
+import { logger } from '../../server/logger';
+import type { SimulationState } from '../hooks/useArkheSimulation';
 
 interface ClusterOrchestrationPanelProps {
   onClose: () => void;
