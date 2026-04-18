@@ -21,6 +21,7 @@ import * as logosLibraryTools from './logos_library.js';
 import * as nekoTools from './neko.js';
 import * as networkTools from './network.js';
 import * as osCathedralTools from './os_cathedral.js';
+import * as tauTools from './tau.js';
 import * as pagesTools from './pages.js';
 import * as performanceTools from './performance.js';
 import * as screencastTools from './screencast.js';
@@ -55,6 +56,7 @@ export const createTools = (args: ParsedArguments) => {
         ...Object.values(arkheNetTools),
         ...Object.values(lambdaTools),
         ...Object.values(osCathedralTools),
+        ...Object.values(tauTools),
         ...Object.values(logosLibraryTools),
         ...Object.values(nekoTools),
       ];
