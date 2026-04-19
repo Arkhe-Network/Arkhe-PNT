@@ -290,6 +290,18 @@ export function useArkheSimulation() {
       broker: { status: 'IDLE', messagesProcessed: 0, queueDepth: 0, activeTopics: [] },
       redis: { status: 'READY', cacheHits: 0, memoryUsageMb: 0 },
       dns: { totalQueries: 0, successfulResolutions: 0, failedResolutions: 0 }
+    },
+    spectra: {
+      vaults: [
+        { id: 'sDAI', name: 'sDAI MetaVault', chain: 'Ethereum', asset: 'DAI', tvl: 5420000, apy: 4.5, epoch: 42 },
+        { id: 'stETH', name: 'stETH MetaVault', chain: 'Ethereum', asset: 'stETH', tvl: 8150000, apy: 3.8, epoch: 42 },
+        { id: 'aUSDC', name: 'aUSDC Market', chain: 'Arbitrum', asset: 'USDC', tvl: 2100000, apy: 5.2, epoch: 15 }
+      ],
+      oracles: [
+        { marketId: 'stETH-JUN-2026', tokenType: 'PT', price: 0.9452, confidence: 0.9998, lastUpdate: new Date().toISOString() },
+        { marketId: 'stETH-JUN-2026', tokenType: 'YT', price: 0.0548, confidence: 0.9997, lastUpdate: new Date().toISOString() }
+      ],
+      totalTvl: 15670000
     }
   });
 
