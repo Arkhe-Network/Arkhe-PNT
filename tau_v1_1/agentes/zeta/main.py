@@ -1,4 +1,3 @@
-from typing import Any, Optional
 from .base import TAUAgent
 
 class GateAgent(TAUAgent):
@@ -10,7 +9,7 @@ class GateAgent(TAUAgent):
         super().__init__("ZETA", "Θ", "Threshold Manager / O_Core_Top")
         self.credits = 1000
 
-    async def run_cycle(self, vacuum: Optional[Any] = None) -> bytes:
+    def run_cycle(self) -> bytes:
         self.logger.info(f"Managing thresholds (v1.1). Credits: {self.credits}")
         status = "OPEN" if self.credits > 100 else "CONSERVATION_MODE"
         return self.qhttp_msg({"gate_status": status, "credits": self.credits}, confidence=1.0)

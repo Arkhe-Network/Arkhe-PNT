@@ -9,7 +9,7 @@ class GuardianAgent(TAUAgent):
     """
     def __init__(self):
         super().__init__("ALFA", "Ω", "Mesh Controller / TP53")
-        self.threshold = 0.65 # v1.1 Threshold
+        self.threshold = 0.65 # ARKHE-N Certified v1.1
 
     async def run_cycle(self, vacuum: Optional[Any] = None) -> bytes:
         if vacuum:
