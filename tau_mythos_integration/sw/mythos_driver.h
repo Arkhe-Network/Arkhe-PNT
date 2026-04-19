@@ -3,6 +3,7 @@
 
 #include <stdint.h>
 #include <stdbool.h>
+#include <stddef.h>
 
 // Register Map (Aligned with RTL)
 #define MYTHOS_REG_CTRL     0x00
