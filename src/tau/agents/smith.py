@@ -1,3 +1,4 @@
+from typing import Any, Optional
 from .base import TAUAgent
 
 class SmithAgent(TAUAgent):
@@ -9,7 +10,7 @@ class SmithAgent(TAUAgent):
         super().__init__("KAPPA", "Π", "Forge Digital / Aider + Verilator")
         self.patch_queue = []
 
-    def run_cycle(self) -> bytes:
+    async def run_cycle(self, vacuum: Optional[Any] = None) -> bytes:
         if self.patch_queue:
             task = self.patch_queue.pop(0)
             self.logger.info(f"Processing patch request (off-peak logic): {task}")
