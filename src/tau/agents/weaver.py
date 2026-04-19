@@ -1,3 +1,4 @@
+from typing import Any, Optional
 from .base import TAUAgent
 
 class WeaverAgent(TAUAgent):
