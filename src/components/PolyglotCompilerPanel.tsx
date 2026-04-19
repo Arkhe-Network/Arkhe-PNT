@@ -72,6 +72,7 @@ export default function PolyglotCompilerPanel({ onClose }: PolyglotCompilerPanel
           addLog('ALL SUBSTRATES VERIFIED. MATHEMATICAL CONSISTENCY CONFIRMED.');
           setCompilationState('verified');
         }, 1000);
+        return () => clearTimeout(timer);
       }
     }
     return () => {

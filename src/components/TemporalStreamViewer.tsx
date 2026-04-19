@@ -1,4 +1,3 @@
-
 /**
  * @license
  * Copyright 2026 Google LLC
@@ -31,7 +30,9 @@ export default function TemporalStreamViewer({ onClose }: TemporalStreamViewerPr
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
   useEffect(() => {
-    if (!videoRef.current) {return;}
+    if (!videoRef.current) {
+      return;
+    }
 
     // Install built-in polyfills to patch browser incompatibilities.
     shaka.polyfill.installAll();
