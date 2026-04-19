@@ -19,15 +19,15 @@ import {
   Area
 } from 'recharts';
 
-import { useArkheSimulation } from '../hooks/useArkheSimulation';
+import { useArkheSimulation } from '../hooks/useArkheSimulation'
+import type { SimulationState } from '../../server/types';
 
 
 import TemporalLensPanel from './TemporalLensPanel';
 
 const CorvoNoirDashboard: React.FC = () => {
-  const [activeTab, setActiveTab] = useState<"coherence" | "governance" | "biolink" | "security">("coherence");
-  const state = useArkheSimulation();
   const [activeTab, setActiveTab] = useState<'coherence' | 'governance' | 'biolink' | 'security'>('coherence');
+  const state: SimulationState = useArkheSimulation();
 
   // Simulated time-series data for the Kuramoto R(t)
   const chartData = React.useMemo(() => {

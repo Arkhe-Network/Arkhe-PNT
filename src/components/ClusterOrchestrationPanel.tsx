@@ -10,7 +10,7 @@ import { motion } from 'motion/react';
 import React, { useState } from 'react';
 
 import { logger } from '../../server/logger';
-import type { SimulationState } from '../hooks/useArkheSimulation';
+import type { SimulationState } from '../../server/types';
 
 interface ClusterOrchestrationPanelProps {
   onClose: () => void;

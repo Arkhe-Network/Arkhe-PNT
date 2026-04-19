@@ -83,7 +83,7 @@ const HelioLinkPanel: React.FC<HelioLinkPanelProps> = ({ helio, onListen, onSync
             SCHUMANN MODES (IONOSFERA)
           </p>
           <div className="flex justify-between text-[9px] text-arkhe-cyan/70">
-            {(helio.schumannModes || []).map((mode, i) => (
+            {(helio.schumannModes || []).map((mode: number | string, i: number) => (
               <span key={i}>{typeof mode === 'number' ? mode.toFixed(2) : mode}Hz</span>
             ))}
           </div>

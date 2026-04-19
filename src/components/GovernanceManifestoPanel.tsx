@@ -8,7 +8,7 @@
 import { FileText, Download, Fingerprint, Calendar } from 'lucide-react';
 import React from 'react';
 
-import type { SimulationState } from '../hooks/useArkheSimulation';
+import type { SimulationState } from '../../server/types';
 
 import { Card } from './ui/Card';
 
