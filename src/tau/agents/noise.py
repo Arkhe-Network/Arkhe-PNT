@@ -1,3 +1,4 @@
+from typing import Any, Optional
 import random
 from .base import TAUAgent
 
@@ -9,7 +10,7 @@ class NoiseAgent(TAUAgent):
     def __init__(self):
         super().__init__("EPSILON", "∇", "NV-BFM / Explorador Caótico")
 
-    def run_cycle(self) -> bytes:
+    async def run_cycle(self, vacuum: Optional[Any] = None) -> bytes:
         if random.random() < 0.1:
             exploration_task = "Search for new free tier LLM APIs (OAM Exploration)."
             self.logger.info(f"Injecting noise: {exploration_task}")

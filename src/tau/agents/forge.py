@@ -1,3 +1,4 @@
+from typing import Any, Optional
 from .base import TAUAgent
 
 class ForgeAgent(TAUAgent):
@@ -8,7 +9,7 @@ class ForgeAgent(TAUAgent):
     def __init__(self):
         super().__init__("GAMMA", "Φ", "Spawner / PAU Combinacional")
 
-    def run_cycle(self) -> bytes:
+    async def run_cycle(self, vacuum: Optional[Any] = None) -> bytes:
         self.logger.info("Monitoring standby hosts availability...")
         return self.qhttp_msg({"standby_hosts": ["standby_1", "standby_2"], "status": "READY"}, confidence=1.0)
 
