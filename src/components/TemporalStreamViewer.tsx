@@ -1,4 +1,3 @@
-
 /**
  * @license
  * Copyright 2026 Google LLC
@@ -31,7 +30,9 @@ export default function TemporalStreamViewer({ onClose }: TemporalStreamViewerPr
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
   useEffect(() => {
-    if (!videoRef.current) {return;}
+    if (!videoRef.current) {
+      return;
+    }
 
     // Install built-in polyfills to patch browser incompatibilities.
     shaka.polyfill.installAll();
@@ -40,7 +41,7 @@ export default function TemporalStreamViewer({ onClose }: TemporalStreamViewerPr
       const newPlayer = new shaka.Player(videoRef.current);
       setPlayer(newPlayer);
 
-      newPlayer.addEventListener('error', (event: unknown) => {
+      newPlayer.addEventListener('error', (event: any) => {
         logger.error(`Error code ${event.detail.code} object ${JSON.stringify(event.detail)}`);
         setError(`SHAKA_ERR_${event.detail.code}`);
       });
@@ -48,7 +49,7 @@ export default function TemporalStreamViewer({ onClose }: TemporalStreamViewerPr
       // Adaptation events -> Coherence changes
       newPlayer.addEventListener('adaptation', () => {
         const tracks = newPlayer.getVariantTracks();
-        const activeTrack = tracks.find((t: unknown) => t.active);
+        const activeTrack = tracks.find((t: any) => t.active);
         if (activeTrack) {
           // Estimate coherence based on bandwidth
           const newCoherence = Math.min(1.0, activeTrack.bandwidth / 5000000);
@@ -57,7 +58,7 @@ export default function TemporalStreamViewer({ onClose }: TemporalStreamViewerPr
       });
 
       // Segment downloaded -> Perception frame ready (simulated)
-      newPlayer.addEventListener('segmentdownloaded', (event: unknown) => {
+      newPlayer.addEventListener('segmentdownloaded', (_event: any) => {
         setCapturedFrames(prev => prev + 1);
       });
 
@@ -83,7 +84,7 @@ export default function TemporalStreamViewer({ onClose }: TemporalStreamViewerPr
           videoRef.current.muted = true;
           videoRef.current.play().then(() => setIsPlaying(true)).catch(e => logger.error("Auto-play prevented: " + e));
         }
-      }).catch((e: unknown) => {
+      }).catch((e: any) => {
         logger.error('Error loading video: ' + e);
         setError(`LOAD_ERR_${e.code}`);
       });
@@ -99,7 +100,8 @@ export default function TemporalStreamViewer({ onClose }: TemporalStreamViewerPr
     } else {
       setError('BROWSER_UNSUPPORTED');
     }
-  }, []);
+    return () => {};
+  }, [coherence]);
 
   const toggleVrMode = () => {
     if (player) {

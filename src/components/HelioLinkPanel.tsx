@@ -10,9 +10,9 @@ import React from 'react';
 
 import type { HelioState } from '../../server/types';
 
-import { Badge } from '@/components/ui/badge';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Progress } from '@/components/ui/progress';
+import { Badge } from './ui/Badge';
+import { Card, CardContent, CardHeader, CardTitle } from './ui/Card';
+import { Progress } from './ui/Progress';
 
 
 

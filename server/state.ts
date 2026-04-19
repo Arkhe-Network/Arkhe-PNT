@@ -388,6 +388,62 @@ export let state: SimulationState = {
       successfulResolutions: 0,
       failedResolutions: 0
     }
+  },
+  bioLinkSync: {
+    active: true,
+    syncRatio: 0.98,
+    frequencyHz: 40,
+    coherenceGain: 1.05,
+    regenerationProgress: 0.42
+  },
+  temporalAudit: {
+    events: 8472,
+    lockedEvents: 128,
+    manipulationAttempts: 3,
+    lastTII: 0.0012
+  },
+  predictiveForecast: {
+    coherenceCollapseRisk: 0.004,
+    predictedLambda: 0.981,
+    horizonMs: 5000,
+    anomaliesDetected: []
+  },
+  sensors: Array.from({ length: 168 }).map((_, i) => ({
+    id: i,
+    value: 4.5 + Math.random() * 0.5,
+    status: 'active'
+  })),
+  cellularHealth: {
+    telomere_length: 0.82,
+    oxidative_stress: 0.12,
+    mitochondrial_efficiency: 0.94,
+    inflammation_marker: 0.08,
+    overall_score: 0.89,
+    regeneration_rate: 0.14
+  },
+  expansionStatus: {
+    activePhysicalNodes: 1048576,
+    projectedNodes: 2097152,
+    growthRate: 0.05,
+    phaseVelocity: 0.92,
+    energyConsumptionKw: 1240,
+    isExpanding: true,
+    activeProject: 'CARIOCA_CATALYST',
+    totalCoverage: 2850000,
+    nodes: [
+      { id: 'n1', name: 'Copacabana', status: 'active', signalStrength: 0.98, coherence: 0.992 },
+      { id: 'n2', name: 'Ipanema', status: 'active', signalStrength: 0.97, coherence: 0.991 },
+      { id: 'n3', name: 'Leblon', status: 'active', signalStrength: 0.99, coherence: 0.994 }
+    ]
+  },
+  forecaster: {
+    horizonDays: 30,
+    accuracy: 0.985,
+    lastForecast: new Date().toISOString(),
+    trend: 'stable',
+    probability: 0.991,
+    predictedLambda: 0.981,
+    alertsIssued: 3
   }
 };
 

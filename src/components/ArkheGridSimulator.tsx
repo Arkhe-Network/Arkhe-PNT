@@ -1,4 +1,3 @@
-
 /**
  * @license
  * Copyright 2026 Google LLC
@@ -19,7 +18,7 @@ export default function ArkheGridSimulator({ onClose }: ArkheGridSimulatorProps)
   const [coherence, setCoherence] = useState(0);
   
   const canvasRef = useRef<HTMLCanvasElement>(null);
-  const requestRef = useRef<number>();
+  const requestRef = useRef<number>(undefined);
   
   // Physics state
   const N = 8;

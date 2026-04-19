@@ -68,12 +68,14 @@ export default function PolyglotCompilerPanel({ onClose }: PolyglotCompilerPanel
         }, 600);
         return () => clearTimeout(timer);
       } else {
-        setTimeout(() => {
+        const timer = setTimeout(() => {
           addLog('ALL SUBSTRATES VERIFIED. MATHEMATICAL CONSISTENCY CONFIRMED.');
           setCompilationState('verified');
         }, 1000);
+        return () => clearTimeout(timer);
       }
     }
+    return () => {};
   }, [compilationState, activeLangIndex]);
 
   const executeRun = () => {

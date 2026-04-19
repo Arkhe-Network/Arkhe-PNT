@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 /**
  * @license
  * Copyright 2026 Google LLC
@@ -20,20 +21,20 @@ const STREAMDOWN_PLUGINS = { code, mermaid, math, cjk };
 const PRISM_GLYPH_CLASS =
   "h-9 w-9 overflow-hidden opacity-90 [clip-path:polygon(50%_4%,100%_100%,0%_100%)] bg-[radial-gradient(circle_at_50%_18%,rgba(255,255,255,0.3),transparent_28%),linear-gradient(180deg,rgba(255,122,92,1)_0%,rgba(255,184,77,1)_42%,rgba(182,123,232,1)_100%)] drop-shadow-[0_0_18px_rgba(255,184,77,0.18)]";
 
-export default function BonsaiPrismPanel({ onClose }) {
+export default function BonsaiPrismPanel({ onClose }: { onClose: () => void }) {
   // Estados do Ciclo de Vida
   const [stage, setStage] = useState('selection'); // selection | ritual | ready | error
   const [selectedModel, setSelectedModel] = useState('bonsai-1.7b');
   const [progress, setProgress] = useState(0);
-  const [messages, setMessages] = useState([]);
+  const [messages, setMessages] = useState<any[]>([]);
   const [input, setInput] = useState('');
   const [isGenerating, setIsGenerating] = useState(false);
   const [tps, setTps] = useState(0);
 
   // Refs
-  const workerRef = useRef(null);
-  const ritualRef = useRef(null);
-  const canvasRef = useRef(null);
+  const workerRef = useRef<any>(null);
+  const ritualRef = useRef<any>(null);
+  const canvasRef = useRef<any>(null);
   const chronicle = useRef(new ChronicleVault()).current;
 
   // Inicialização do Worker e Chronique
@@ -43,8 +44,8 @@ export default function BonsaiPrismPanel({ onClose }) {
       { type: 'module' }
     );
 
-    workerRef.current.onmessage = (e) => {
-      const { status, token, output, error, progress: prog, loaded, total } = e.data;
+    workerRef.current.onmessage = (e: any) => {
+      const { status, token, error, progress: prog, loaded, total } = e.data;
 
       switch (status) {
         case 'ritual_progress':

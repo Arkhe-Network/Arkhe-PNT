@@ -69,7 +69,7 @@ export default function DimOSDistributionPanel({ onClose }: DimOSPanelProps) {
       // Update node statuses randomly during deployment
       if (progress < 100) {
         setFleet(prev => prev.map(node => {
-          if (node.status === 'active') {return node;}
+          if ((node.status as any) === 'active') {return node;}
           if (Math.random() > 0.7) {
              const newStatus = Math.random() > 0.5 ? 'syncing' : 'active';
              if (newStatus === 'active' && node.status !== 'active') {
@@ -189,14 +189,14 @@ export default function DimOSDistributionPanel({ onClose }: DimOSPanelProps) {
               <div className="grid grid-cols-2 gap-3">
                 {fleet.map(node => (
                   <div key={node.id} className={`p-3 rounded border text-xs font-mono flex flex-col gap-2 transition-colors ${
-                    node.status === 'active' ? 'bg-arkhe-green/5 border-arkhe-green/30' :
+                    (node.status as any) === 'active' ? 'bg-arkhe-green/5 border-arkhe-green/30' :
                     node.status === 'syncing' ? 'bg-arkhe-cyan/5 border-arkhe-cyan/30' :
                     'bg-arkhe-card border-arkhe-border'
                   }`}>
                     <div className="flex justify-between items-center">
                       <span className="font-bold text-white">{node.id}</span>
                       <span className={`px-2 py-0.5 rounded text-[10px] uppercase ${
-                        node.status === 'active' ? 'bg-arkhe-green/20 text-arkhe-green' :
+                        (node.status as string) === 'active' ? 'bg-arkhe-green/20 text-arkhe-green' :
                         node.status === 'syncing' ? 'bg-arkhe-cyan/20 text-arkhe-cyan animate-pulse' :
                         'bg-zinc-800 text-zinc-400'
                       }`}>
@@ -207,7 +207,7 @@ export default function DimOSDistributionPanel({ onClose }: DimOSPanelProps) {
                       <span>Type: {node.type}</span>
                       <span>OS: <span className={node.genomeVersion === 'v2.14.0' ? 'text-arkhe-cyan' : ''}>{node.genomeVersion}</span></span>
                     </div>
-                    {node.status === 'active' && (
+                    {(node.status as any) === 'active' && (
                       <div className="flex justify-between text-[10px]">
                         <span className="text-arkhe-muted">Coherence:</span>
                         <span className="text-arkhe-green">{(node.coherence * 100).toFixed(2)}%</span>

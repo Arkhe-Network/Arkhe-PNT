@@ -306,6 +306,15 @@ export interface SimulationState {
   nare?: NAREStatus;
   populationFeedback: PopulationFeedbackEntry[];
   networkInfra: NetworkInfraState;
+  bioLinkSync: BioLinkSyncState;
+  temporalAudit: TemporalAuditState;
+  predictiveForecast: PredictiveForecastState;
+  sensors: SensorState[];
+  governanceManifesto?: GovernanceManifesto;
+  grossHappiness?: GrossHappinessState;
+  cellularHealth?: CellularHealthState;
+  expansionStatus?: ExpansionStatus;
+  forecaster?: ForecasterState;
 }
 
 export interface NetworkInfraState {
@@ -495,4 +504,136 @@ export interface ScaDataState {
   activeProtocol: 'NONE' | 'BRAID' | 'COMPUTE' | 'HEAL' | 'SEAL';
   protocolLogs: string[];
   lastGateResult: string;
+}
+
+export interface BioLinkSyncState {
+  active: boolean;
+  syncRatio: number;
+  frequencyHz: number;
+  coherenceGain: number;
+  regenerationProgress: number;
+}
+
+export interface TemporalAuditState {
+  events: number;
+  lockedEvents: number;
+  manipulationAttempts: number;
+  lastTII: number;
+}
+
+export interface PredictiveForecastState {
+  coherenceCollapseRisk: number;
+  predictedLambda: number;
+  horizonMs: number;
+  anomaliesDetected: string[];
+}
+
+export interface SensorState {
+  id: number;
+  value: number;
+  status: 'active' | 'isolated' | 'attacked';
+}
+
+export interface GovernanceManifesto {
+  year: number;
+  eigenvalues: number[];
+  sectors: Record<string, string>;
+  status: 'draft' | 'published';
+  timestamp: string;
+  version: string;
+  directives: Array<{
+    id: string;
+    title: string;
+    description: string;
+  }>;
+  cellular_impact: {
+    telomere_gain: number;
+    oxidative_stress: number;
+  };
+  governance_score: number;
+  signature: string;
+}
+
+export interface GrossHappinessState {
+  globalIndex: number;
+  districts: DistrictHappiness[];
+}
+
+export interface CellularHealthState {
+  telomere_length: number;
+  oxidative_stress: number;
+  mitochondrial_efficiency: number;
+  inflammation_marker: number;
+  overall_score: number;
+  regeneration_rate: number;
+}
+
+export interface ExpansionStatus {
+  activePhysicalNodes: number;
+  projectedNodes: number;
+  growthRate: number;
+  phaseVelocity: number;
+  energyConsumptionKw: number;
+  isExpanding: boolean;
+  activeProject: string;
+  totalCoverage: number;
+  nodes: Array<{
+    id: string;
+    name: string;
+    status: 'active' | 'syncing';
+    signalStrength: number;
+    coherence: number;
+  }>;
+}
+
+export interface ForecasterState {
+  horizonDays: number;
+  accuracy: number;
+  lastForecast: string;
+  trend: 'stable' | 'diverging' | 'converging';
+  probability: number;
+  predictedLambda: number;
+  alertsIssued: number;
+}
+
+export interface DistrictHappiness {
+  name: string;
+  index: number;
+  lastPulse: string | null;
+}
+
+export interface HelioState {
+  ethicalMode: string;
+  status: string;
+  cognitiveDilation: string;
+  solarCoherence: number;
+  schumannModes: number[];
+}
+
+export interface LatentCoherenceResults {
+  summary: {
+    avg_lambda_cot: number;
+    avg_lambda_coct: number;
+  };
+}
+
+export interface LayerSweepReport {
+  best_layer: number;
+  max_lambda2: number;
+  summary: string;
+  coct_sweep: Array<{ layer: number; lambda2: number }>;
+}
+
+export interface SolarEntropyReport {
+  slope: number;
+  confirmed: boolean;
+}
+
+export interface ThermodynamicTrainingReport {
+  method: string;
+  status: string;
+  parameters: {
+    n_oscillators: number;
+    final_loss: number;
+  };
 }
