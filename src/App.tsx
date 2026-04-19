@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { Shield, Settings, Menu, Bell, Search, Info, Terminal, Video, Smartphone, Hammer } from 'lucide-react';
+import { Shield, Settings, Menu, Bell, Search, Info, Terminal, Video, Smartphone, Hammer, TrendingUp } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import React, { useState } from 'react';
 
@@ -35,6 +35,7 @@ import QubitPipelinePanel from './components/QubitPipelinePanel';
 import RamseyConfirmationModal from './components/RamseyConfirmationModal';
 import ResearchAgentsPanel from './components/ResearchAgentsPanel';
 import SessionReplayViewer from './components/SessionReplayViewer';
+import SpectraYieldPanel from './components/SpectraYieldPanel';
 import TemporalLensPanel from './components/TemporalLensPanel';
 import TemporalLog from './components/TemporalLog';
 import TemporalStreamViewer from './components/TemporalStreamViewer';
@@ -52,7 +53,7 @@ import { useArkheSimulation } from './hooks/useArkheSimulation';
 
 export default function App() {
   const state = useArkheSimulation();
-  const [activePanel, setActivePanel] = useState<'simulation' | 'command' | 'intelligence' | 'network' | 'governance' | 'corvo' | 'enterprise' | 'bonsai' | 'neko' | 'dashboard' | 'forge'>('simulation');
+  const [activePanel, setActivePanel] = useState<'simulation' | 'command' | 'intelligence' | 'network' | 'governance' | 'corvo' | 'enterprise' | 'bonsai' | 'neko' | 'dashboard' | 'forge' | 'spectra'>('simulation');
   const [showTzinor, setShowTzinor] = useState(false);
   const [showTelevision, setShowTelevision] = useState(false);
   const [showVideoGen, setShowVideoGen] = useState(false);
@@ -69,6 +70,7 @@ export default function App() {
     { id: 'bonsai', label: 'Bonsai Prism', icon: Shield },
     { id: 'neko', label: 'Neko Browser', icon: Shield },
     { id: 'forge', label: 'A-Forge Studio', icon: Hammer },
+    { id: 'spectra', label: 'Spectra Yield', icon: TrendingUp },
   ];
 
   return (
@@ -243,6 +245,7 @@ export default function App() {
                 setShowSecurityAdvanced={() => {}}
                 setShowPluralityMCP={() => {}}
                 setShowVelxioEmulation={() => {}}
+                setShowSpectra={() => setActivePanel('spectra')}
                 parameters={state.parameters}
               />
             </motion.div>
@@ -299,6 +302,12 @@ export default function App() {
           { activePanel === 'forge' && (
             <motion.div key="forge" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
               <ForgeStudioPanel onClose={() => setActivePanel("simulation")} />
+            </motion.div>
+          )}
+
+          { activePanel === 'spectra' && (
+            <motion.div key="spectra" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
+              <SpectraYieldPanel spectra={state.spectra!} onClose={() => setActivePanel("simulation")} />
             </motion.div>
           )}
         </AnimatePresence>

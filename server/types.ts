@@ -317,6 +317,31 @@ export interface SimulationState {
   layerSweep?: LayerSweepReport;
   solarEntropy?: SolarEntropyReport;
   thermodynamicTraining?: ThermodynamicTrainingReport;
+  spectra?: SpectraState;
+}
+
+export interface SpectraVault {
+  id: string;
+  name: string;
+  chain: string;
+  asset: string;
+  tvl: number;
+  apy: number;
+  epoch: number;
+}
+
+export interface SpectraOracle {
+  marketId: string;
+  tokenType: 'PT' | 'YT';
+  price: number;
+  confidence: number;
+  lastUpdate: string;
+}
+
+export interface SpectraState {
+  vaults: SpectraVault[];
+  oracles: SpectraOracle[];
+  totalTvl: number;
 }
 
 export interface ExpansionStatus {

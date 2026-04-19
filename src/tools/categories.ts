@@ -16,6 +16,7 @@ export enum ToolCategory {
   STORAGE = 'storage',
   ARKHE = 'arkhe',
   DECENTRALIZED = 'decentralized',
+  FINANCE = 'finance',
 }
 
 export const labels = {
@@ -30,4 +31,5 @@ export const labels = {
   [ToolCategory.STORAGE]: 'Storage',
   [ToolCategory.ARKHE]: 'Arkhe(n) Protocols',
   [ToolCategory.DECENTRALIZED]: 'Decentralized Protocols',
+  [ToolCategory.FINANCE]: 'Finance Protocols',
 };
