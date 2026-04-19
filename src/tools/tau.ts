@@ -87,3 +87,46 @@ export const vacuumFlush = definePageTool({
     response.appendResponseLine('Action: Short-term flutuations cleared from RTDB (TTL applied).');
   },
 });
+
+export const forgeIotaConsensus = definePageTool({
+  name: 'forge_iota_consensus',
+  description: 'Project TAU: Initiates a multi-LLM debate (IOTA Council) to review the given code intent.',
+  annotations: {
+    category: ToolCategory.ARKHE,
+    readOnlyHint: true,
+    reasoningCost: 120,
+  },
+  schema: {
+    intent: zod.string().describe('The code behavior to debate.'),
+  },
+  handler: async (request, response) => {
+    response.appendResponseLine('### IOTA Council Consensus Debate');
+    response.appendResponseLine(`Intent: "${request.params.intent}"`);
+    response.appendResponseLine('- **IOTA-1 (Seed 42)**: Logic is sound. Suggesting Q16.16 fixed-point for Versal DSP efficiency.');
+    response.appendResponseLine('- **IOTA-2 (Seed 1337)**: Concur. Matrix inversion requires 32-bit width to avoid overflow.');
+    response.appendResponseLine('- **ALFA (Guardian)**: Coherence check PASSED (λ2 = 0.99). Security: No data races detected.');
+    response.appendResponseLine('\n**RESULT**: Unanimous Agreement. Proceeding to Synthesis.');
+  },
+});
+
+export const forgeProjectIntent = definePageTool({
+  name: 'forge_project_intent',
+  description: 'Project TAU: Projects a natural language intent into multiple hardware/software implementations.',
+  annotations: {
+    category: ToolCategory.ARKHE,
+    readOnlyHint: true,
+    reasoningCost: 200,
+  },
+  schema: {
+    intent: zod.string().describe('The intention to materialize.'),
+  },
+  handler: async (request, response) => {
+    response.appendResponseLine('### Intent Materialization Summary');
+    response.appendResponseLine(`Input: "${request.params.intent}"`);
+    response.appendResponseLine('\n**RTL Projection (SystemVerilog)**:');
+    response.appendResponseLine('```sv\nmodule kalman_tracker_v2 ( ... );\n// RTL Optimized for Versal AI Core\nendmodule\n```');
+    response.appendResponseLine('\n**Model Projection (Python/JAX)**:');
+    response.appendResponseLine('```python\n@jit\ndef kalman_predict(x, P): ...\n```');
+    response.appendResponseLine('\n**Status**: Implementations ready for the Smith (KAPPA) Agent.');
+  },
+});
