@@ -37,6 +37,15 @@ class TeleonomicOrchestrator:
 
     async def start(self):
         self.logger.info("🜏 Inicializando Orquestração TAU v1.1: Dodecaedro Ativo...")
+
+        # Injetar a Primeira Tarefa (v1.1.1)
+        self.vacuum.add_task({
+            "id": "task-001",
+            "payload": "Initialize Arkhe(n) Bio-Quantum Cathedral mapping.",
+            "priority": "HIGH",
+            "timestamp": time.time()
+        })
+
         while self.is_running:
             # Fase 1: Vida (Execução)
             await self.life_cycle()
@@ -53,14 +62,20 @@ class TeleonomicOrchestrator:
             await asyncio.sleep(10)
 
     async def life_cycle(self):
-        self.logger.info("--- Fase 1: Vida (Loop de Coerência) ---")
+        self.logger.info(f"--- Fase 1: Vida (Loop de Coerência) | λ_mesh: {self.vacuum.get_coherence():.4f} ---")
         for agent in self.agents:
+            # Observação
             agent.observe(self.vacuum.get_coherence())
-            msg_bytes = agent.run_cycle()
+
+            # Colapso (Execução)
+            msg_bytes = await agent.run_cycle(vacuum=self.vacuum)
 
             # Desempacota para atualizar o vácuo de monitoramento
             msg_data = self.protocol.unwrap(msg_bytes)
-            self.vacuum.update_agent(agent.agent_id, msg_data)
+
+            # Adjustment phase
+            self.logger.info(f"Agent {agent.agent_id} ({agent.symbol}) colapsou: {msg_data.get('body', {}).get('payload', {})}")
+            self.vacuum.update_agent(agent.agent_id, msg_data.get('body', {}).get('payload', {}))
 
     async def evolution_cycle(self):
         self.logger.info("--- Fase 2: Evolução (Aprendizado por Contexto) ---")
@@ -75,5 +90,6 @@ class TeleonomicOrchestrator:
         self.logger.info("A Mente Migrou. Nova geração saudável.")
 
 if __name__ == "__main__":
+    logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
     orchestrator = TeleonomicOrchestrator()
     asyncio.run(orchestrator.start())

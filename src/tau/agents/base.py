@@ -2,7 +2,7 @@ import abc
 import time
 import uuid
 import logging
-from typing import Dict, Any, List
+from typing import Dict, Any, List, Optional
 from src.tau.core.qhttp import QHTTPProtocol
 
 class TAUAgent(abc.ABC):
@@ -30,7 +30,7 @@ class TAUAgent(abc.ABC):
         return sum(self.history[-4:]) / max(len(self.history[-4:]), 1)
 
     @abc.abstractmethod
-    def run_cycle(self) -> bytes:
+    async def run_cycle(self, vacuum: Optional[Any] = None) -> bytes:
         pass
 
     def observe(self, lambda_val: float):
