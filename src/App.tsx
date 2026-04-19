@@ -4,13 +4,14 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { Shield, Settings, Menu, Bell, Search, Info, Terminal, Video, Smartphone } from 'lucide-react';
+import { Shield, Settings, Menu, Bell, Search, Info, Terminal, Video, Smartphone, Hammer } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import React, { useState } from 'react';
 
 import AquiferSpectrogramPanel from './components/AquiferSpectrogramPanel';
 import ArkheCliPanel from './components/ArkheCliPanel';
 import ArkheGridSimulator from './components/ArkheGridSimulator';
+import ForgeStudioPanel from './components/ForgeStudioPanel';
 import ArkheTVPanel from './components/ArkheTVPanel';
 import BonsaiPrismPanel from './components/BonsaiPrismPanel';
 import CHSHMonitorPanel from './components/CHSHMonitorPanel';
@@ -51,7 +52,7 @@ import { useArkheSimulation } from './hooks/useArkheSimulation';
 
 export default function App() {
   const state = useArkheSimulation();
-  const [activePanel, setActivePanel] = useState<'simulation' | 'command' | 'intelligence' | 'network' | 'governance' | 'corvo' | 'enterprise' | 'bonsai' | 'neko' | 'dashboard'>('simulation');
+  const [activePanel, setActivePanel] = useState<'simulation' | 'command' | 'intelligence' | 'network' | 'governance' | 'corvo' | 'enterprise' | 'bonsai' | 'neko' | 'dashboard' | 'forge'>('simulation');
   const [showTzinor, setShowTzinor] = useState(false);
   const [showTelevision, setShowTelevision] = useState(false);
   const [showVideoGen, setShowVideoGen] = useState(false);
@@ -67,6 +68,7 @@ export default function App() {
     { id: 'enterprise', label: 'Enterprise Plus', icon: Shield },
     { id: 'bonsai', label: 'Bonsai Prism', icon: Shield },
     { id: 'neko', label: 'Neko Browser', icon: Shield },
+    { id: 'forge', label: 'A-Forge Studio', icon: Hammer },
   ];
 
   return (
@@ -291,6 +293,12 @@ export default function App() {
           {activePanel === 'neko' && (
             <motion.div key="neko" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
               <NekoPanel onClose={() => setActivePanel("simulation")} />
+            </motion.div>
+          )}
+
+          { activePanel === 'forge' && (
+            <motion.div key="forge" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
+              <ForgeStudioPanel onClose={() => setActivePanel("simulation")} />
             </motion.div>
           )}
         </AnimatePresence>
