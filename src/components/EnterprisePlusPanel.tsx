@@ -10,7 +10,8 @@ import { motion, AnimatePresence } from 'motion/react';
 import React from 'react';
 
 import type { EnterpriseSubagentState } from '../../server/types';
-import { useArkheSimulation } from '../hooks/useArkheSimulation';
+import { useArkheSimulation } from '../hooks/useArkheSimulation'
+import type { SimulationState } from '../../server/types';
 
 interface DomainSectionProps {
   title: string;
@@ -114,7 +115,7 @@ interface EnterprisePlusPanelProps {
 }
 
 export const EnterprisePlusPanel: React.FC<EnterprisePlusPanelProps> = ({ onClose }) => {
-  const state = useArkheSimulation();
+  const state: SimulationState = useArkheSimulation();
   const enterprise = state.enterpriseSubagents;
 
   if (!enterprise) {return null;}
@@ -208,3 +209,4 @@ export const EnterprisePlusPanel: React.FC<EnterprisePlusPanelProps> = ({ onClos
     </div>
   );
 };
+export default EnterprisePlusPanel;

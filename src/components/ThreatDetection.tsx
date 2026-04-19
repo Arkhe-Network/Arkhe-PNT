@@ -9,7 +9,7 @@
 import { ShieldAlert } from 'lucide-react';
 import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, ReferenceLine } from 'recharts';
 
-import type { MetricsHistory } from '../hooks/useArkheSimulation';
+import type { MetricsHistory } from '../../server/types';
 
 import { Card } from './ui/Card';
 

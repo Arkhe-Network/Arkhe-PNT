@@ -6,7 +6,7 @@
  */
 
 import { motion } from 'framer-motion';
-import { Waves, Activity, Droplets, ShieldAlert, Radio, Box, Users, Link as LinkIcon, AlertTriangle } from 'lucide-react';
+import { Activity, Droplets, ShieldAlert, Radio, Users, Link as LinkIcon, AlertTriangle } from 'lucide-react';
 import React, { useEffect, useState, useRef, useMemo } from 'react';
 import * as THREE from 'three';
 
@@ -129,8 +129,8 @@ export default function AquiferSpectrogramPanel({ onClose }: { onClose?: () => v
   // Real-time Data Sync
   useEffect(() => {
     const eventSource = new EventSource('/api/stream');
-    eventSource.onmessage = (event) => {
-      const newState = JSON.parse(event.data);
+    eventSource.onmessage = (event: MessageEvent) => {
+      const newState = JSON.parse(event.data as string);
       setState(newState);
     };
     return () => eventSource.close();
@@ -189,7 +189,7 @@ export default function AquiferSpectrogramPanel({ onClose }: { onClose?: () => v
   // Audio and FFT Analysis
   const toggleAudio = () => {
     if (isPlaying) {
-      if (audioCtxRef.current) {audioCtxRef.current.suspend();}
+      if (audioCtxRef.current) {void audioCtxRef.current.suspend();}
       setIsPlaying(false);
     } else {
       if (!audioCtxRef.current) {
@@ -197,7 +197,7 @@ export default function AquiferSpectrogramPanel({ onClose }: { onClose?: () => v
         analyserRef.current = audioCtxRef.current.createAnalyser();
         analyserRef.current.fftSize = 128;
       }
-      audioCtxRef.current.resume();
+      void audioCtxRef.current.resume();
       setIsPlaying(true);
       updateFFT();
     }

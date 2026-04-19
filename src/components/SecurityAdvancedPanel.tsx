@@ -8,14 +8,15 @@
 import { Shield, Lock, Zap, Eye, Database, Activity, RefreshCw, AlertTriangle, CheckCircle2, Flame } from 'lucide-react';
 import React, { useState, useEffect } from 'react';
 
-import { useArkheSimulation } from '../hooks/useArkheSimulation';
+import { useArkheSimulation } from '../hooks/useArkheSimulation'
+import type { SimulationState } from '../../server/types';
 
 interface SecurityAdvancedPanelProps {
   onClose: () => void;
 }
 
 export default function SecurityAdvancedPanel({ onClose }: SecurityAdvancedPanelProps) {
-  const state = useArkheSimulation();
+  const state: SimulationState = useArkheSimulation();
   const [activeTab, setActiveTab] = useState<'l1' | 'l2' | 'l3' | 'l4' | 'l5' | 'qhttp'>('l1');
   const [attesting, setAttesting] = useState(false);
   const [syncing, setSyncing] = useState(false);

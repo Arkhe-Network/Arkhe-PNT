@@ -8,7 +8,7 @@
 
 import { Network, Server, ShieldCheck, Zap, Repeat } from 'lucide-react';
 
-import type { Shard } from '../hooks/useArkheSimulation';
+import type { Shard } from '../../server/types';
 
 import { Card } from './ui/Card';
 

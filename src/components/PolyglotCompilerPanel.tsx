@@ -48,10 +48,11 @@ export default function PolyglotCompilerPanel({ onClose }: PolyglotCompilerPanel
   };
 
   useEffect(() => {
+    let timer: NodeJS.Timeout;
     if (compilationState === 'compiling') {
       if (activeLangIndex < LANGUAGES.length) {
         const lang = LANGUAGES[activeLangIndex];
-        const timer = setTimeout(() => {
+        timer = setTimeout(() => {
           addLog(`[${lang.name}] Compiling ${lang.role}... OK`);
           
           if (lang.id === 'lean4') {
@@ -66,16 +67,17 @@ export default function PolyglotCompilerPanel({ onClose }: PolyglotCompilerPanel
           setProgress(((activeLangIndex + 1) / LANGUAGES.length) * 100);
           setActiveLangIndex(prev => prev + 1);
         }, 600);
-        return () => clearTimeout(timer);
       } else {
-        const timer = setTimeout(() => {
+        timer = setTimeout(() => {
           addLog('ALL SUBSTRATES VERIFIED. MATHEMATICAL CONSISTENCY CONFIRMED.');
           setCompilationState('verified');
         }, 1000);
         return () => clearTimeout(timer);
       }
     }
-    return () => {};
+    return () => {
+      if (timer) {clearTimeout(timer);}
+    };
   }, [compilationState, activeLangIndex]);
 
   const executeRun = () => {

@@ -48,12 +48,12 @@ const ExpansionPanel: React.FC<ExpansionPanelProps> = ({ state }) => {
         <div className="flex justify-between items-center bg-black/40 p-2 rounded border border-white/5">
           <div className="text-[10px] text-white/50 uppercase">Cobertura Populacional</div>
           <div className="text-sm font-bold text-arkhe-cyan font-mono">
-            {expansion.totalCoverage.toLocaleString()} RESIDENTES
+            {expansion.totalCoverage?.toLocaleString() || '0'} RESIDENTES
           </div>
         </div>
 
         <div className="space-y-2">
-          {expansion.nodes.map((node) => (
+          {expansion.nodes.map((node: any) => (
             <div key={node.id} className="flex items-center justify-between p-2 bg-black/20 rounded border border-white/5">
               <div className="flex items-center gap-2">
                 <div className={cn(
@@ -65,10 +65,10 @@ const ExpansionPanel: React.FC<ExpansionPanelProps> = ({ state }) => {
               <div className="flex items-center gap-3">
                 <div className="flex items-center gap-1">
                   <Signal className="w-3 h-3 text-white/30" />
-                  <span className="text-[9px] text-white/50">{(node.signalStrength * 100).toFixed(0)}%</span>
+                    <span className="text-[9px] text-white/50">{((node.signalStrength || 0) * 100).toFixed(0)}%</span>
                 </div>
                 <div className="text-[9px] font-mono text-arkhe-cyan">
-                  λ₂: {node.coherence.toFixed(4)}
+                    λ₂: {(node.coherence || 0).toFixed(4)}
                 </div>
               </div>
             </div>

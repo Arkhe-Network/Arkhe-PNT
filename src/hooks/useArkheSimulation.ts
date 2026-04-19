@@ -7,10 +7,8 @@
 
 import { useState, useEffect } from 'react';
 
-import { logger } from '../../server/logger';
-import type { SimulationState, OrbLog, Shard, MetricsHistory } from '../../server/types';
-
-export type { SimulationState, OrbLog, Shard, MetricsHistory };
+import { logger } from '../../server/logger.ts';
+import type { SimulationState } from '../../server/types';
 
 export function useArkheSimulation() {
   const [state, setState] = useState<SimulationState>({
@@ -59,12 +57,45 @@ export function useArkheSimulation() {
       nttLatency: 10.24,
     },
     securityAdvanced: {
-      l1: { teeStatus: 'secure', intrusionSensor: 'nominal', thermalDestructionArmed: false, hsmBackupSynced: true, lastRemoteAttestation: '' },
-      l2: { eprHandshake: 'active', muSig2Heartbeat: 'verified', pneumaOutlierDetected: false, qrngJitterMs: 0.1 },
-      l3: { nullifierVerified: true, timestampQRNG: '', ttlValid: true, t2StarMicroseconds: 100 },
-      l4: { owlSignatureValid: true, logosConsistency: 1.0, zkOntologicalProof: true, merkleDagRoot: '', geoLlmActive: true, geoQaiCoherence: 1.0 },
-      l5: { cspStatus: 'enforced', sriVerified: true, antiCsrfToken: '', zkUiVerified: true, pwaCacheSigned: true },
-      qhttp: { pqTlsStatus: 'Kyber+ECDH', xKuramotoHeader: '', bellViolationS: 2.82 }
+      l1: {
+        teeStatus: 'secure',
+        intrusionSensor: 'nominal',
+        thermalDestructionArmed: false,
+        hsmBackupSynced: true,
+        lastRemoteAttestation: new Date().toISOString()
+      },
+      l2: {
+        eprHandshake: 'active',
+        muSig2Heartbeat: 'verified',
+        pneumaOutlierDetected: false,
+        qrngJitterMs: 0.5
+      },
+      l3: {
+        nullifierVerified: true,
+        timestampQRNG: new Date().toISOString(),
+        ttlValid: true,
+        t2StarMicroseconds: 50.0
+      },
+      l4: {
+        owlSignatureValid: true,
+        logosConsistency: 0.99,
+        zkOntologicalProof: true,
+        merkleDagRoot: '0x0',
+        geoLlmActive: true,
+        geoQaiCoherence: 0.95
+      },
+      l5: {
+        cspStatus: 'enforced',
+        sriVerified: true,
+        antiCsrfToken: '0x0',
+        zkUiVerified: true,
+        pwaCacheSigned: true
+      },
+      qhttp: {
+        pqTlsStatus: 'Kyber+ECDH',
+        xKuramotoHeader: '0x0',
+        bellViolationS: 2.82
+      }
     },
     tzinor: {
       agentId: 'arkhe-node-01',
@@ -137,23 +168,86 @@ export function useArkheSimulation() {
       protocolLogs: [],
       lastGateResult: 'N/A'
     },
-    enterpriseSubagents: {
-      governance: [], devops: [], security: [], ia: [], operations: [], interoperability: []
+    cluster: {
+      status: 'idle',
+      progress: 0,
+      logs: [],
+      nccl: {
+        rho1_local: 0,
+        rho1_global: 0
+      },
+      qhttp: {
+        global_phase: 0,
+        coherence: 0
+      }
     },
-    civicSubagents: [],
-    chshMonitor: {
-      status: 'nominal',
-      timestamp: new Date().toISOString(),
-      arkheChainBlock: 12345,
-      measurementSetup: { instrument: '', targetSystem: '', referenceLattice: '', angleBases: [], coincidenceWindowNs: 0, integrationTimeSec: 0 },
-      expectedOutcomes: { classicalLimit: 2, quantumLimit: 2.82, thresholdEntangled: 2.1, targetEntanglement: 'high' },
-      liveTelemetry: { status: 'streaming', dataPoints: 0, currentS: null, stabilityIndicator: 'high', nextUpdate: '', history: [] },
-      preFlightChecks: { tzinorInjector: 'ok', fibonacciPhaseAnchor: 'ok', treeLacamGeodesic: 'ok', pdsmIgnitionSequence: 'ok' },
-      archimedesComment: '',
-      nextMilestone: { time: '', action: '' }
+    lucentSessions: [],
+    hydro: {
+      neighborhoods: [],
+      globalMassBalance: 0,
+      zkAlertsCount: 0
     },
     ramsey: {
-      enabled: false, auto_adjust: false, manual_approval_required: true, theta: 0, direction: 1, baseline: 1.0, thresholds: [], window: [], pendingAction: null, isFrozen: false, rabi_frequency: 0, generator_configs: {}, fibonacci_sequence: { name: '', generators: [] }
+      enabled: false,
+      auto_adjust: true,
+      manual_approval_required: false,
+      theta: 0,
+      direction: 1,
+      baseline: 0.5,
+      thresholds: [],
+      window: [],
+      pendingAction: null,
+      isFrozen: false,
+      rabi_frequency: 10.0,
+      generator_configs: {},
+      fibonacci_sequence: { name: 'Default', generators: [] }
+    },
+    civicSubagents: [],
+    enterpriseSubagents: {
+      governance: [],
+      devops: [],
+      security: [],
+      ia: [],
+      operations: [],
+      interoperability: []
+    },
+    chshMonitor: {
+      status: 'IDLE',
+      timestamp: new Date().toISOString(),
+      arkheChainBlock: 0,
+      measurementSetup: {
+        instrument: 'Default',
+        targetSystem: 'Default',
+        referenceLattice: 'Default',
+        angleBases: [],
+        coincidenceWindowNs: 0,
+        integrationTimeSec: 0
+      },
+      expectedOutcomes: {
+        classicalLimit: 2.0,
+        quantumLimit: 2.82,
+        thresholdEntangled: 2.4,
+        targetEntanglement: 'HIGH'
+      },
+      liveTelemetry: {
+        status: 'OFFLINE',
+        dataPoints: 0,
+        currentS: null,
+        stabilityIndicator: 'UNKNOWN',
+        nextUpdate: '',
+        history: []
+      },
+      preFlightChecks: {
+        tzinorInjector: 'PASS',
+        fibonacciPhaseAnchor: 'PASS',
+        treeLacamGeodesic: 'PASS',
+        pdsmIgnitionSequence: 'PASS'
+      },
+      archimedesComment: '',
+      nextMilestone: {
+        time: '',
+        action: ''
+      }
     },
     x402Wallet: {
       address: '0xbf7da1f568684889a69a5bed9f1311f703985590',
@@ -197,9 +291,18 @@ export function useArkheSimulation() {
       redis: { status: 'READY', cacheHits: 0, memoryUsageMb: 0 },
       dns: { totalQueries: 0, successfulResolutions: 0, failedResolutions: 0 }
     },
-    cluster: { status: 'idle', progress: 0, logs: [], nccl: { rho1_local: 0, rho1_global: 0 }, qhttp: { global_phase: 0, coherence: 0 } },
-    lucentSessions: [],
-    hydro: { neighborhoods: [], globalMassBalance: 1.0, zkAlertsCount: 0 }
+    spectra: {
+      vaults: [
+        { id: 'sDAI', name: 'sDAI MetaVault', chain: 'Ethereum', asset: 'DAI', tvl: 5420000, apy: 4.5, epoch: 42 },
+        { id: 'stETH', name: 'stETH MetaVault', chain: 'Ethereum', asset: 'stETH', tvl: 8150000, apy: 3.8, epoch: 42 },
+        { id: 'aUSDC', name: 'aUSDC Market', chain: 'Arbitrum', asset: 'USDC', tvl: 2100000, apy: 5.2, epoch: 15 }
+      ],
+      oracles: [
+        { marketId: 'stETH-JUN-2026', tokenType: 'PT', price: 0.9452, confidence: 0.9998, lastUpdate: new Date().toISOString() },
+        { marketId: 'stETH-JUN-2026', tokenType: 'YT', price: 0.0548, confidence: 0.9997, lastUpdate: new Date().toISOString() }
+      ],
+      totalTvl: 15670000
+    }
   });
 
   useEffect(() => {
@@ -229,4 +332,3 @@ export function useArkheSimulation() {
 
   return state;
 }
-

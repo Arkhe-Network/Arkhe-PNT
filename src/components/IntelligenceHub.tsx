@@ -8,7 +8,8 @@
 import { Activity, AlertTriangle, Brain, Map as MapIcon, Database, Zap, Satellite, Cpu, MessageSquare, Library } from 'lucide-react';
 import React from 'react';
 
-import { useArkheSimulation } from '../hooks/useArkheSimulation';
+import { useArkheSimulation } from '../hooks/useArkheSimulation'
+import type { SimulationState } from '../../server/types';
 
 interface ValidatorData {
   id: string;
@@ -72,7 +73,7 @@ interface IntelligenceHubProps {
 }
 
 export const IntelligenceHub: React.FC<IntelligenceHubProps> = ({ onClose }) => {
-  const state = useArkheSimulation();
+  const state: SimulationState = useArkheSimulation();
   
   // Map real simulation state to the hub's expected format
   const phase = { drift: 1.0 - state.currentLambda, current: 'Voyager' };
@@ -337,3 +338,4 @@ export const IntelligenceHub: React.FC<IntelligenceHubProps> = ({ onClose }) => 
     </div>
   );
 };
+export default IntelligenceHub;

@@ -9,7 +9,8 @@ import { Activity, Gauge, ShieldCheck, Zap, Info, Binary } from 'lucide-react';
 import React from 'react';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, ReferenceLine } from 'recharts';
 
-import { useArkheSimulation } from '../hooks/useArkheSimulation';
+import { useArkheSimulation } from '../hooks/useArkheSimulation'
+import type { SimulationState } from '../../server/types';
 
 import { Card } from './ui/Card';
 
@@ -18,7 +19,7 @@ interface CHSHMonitorPanelProps {
 }
 
 export default function CHSHMonitorPanel({ onClose }: CHSHMonitorPanelProps) {
-  const state = useArkheSimulation();
+  const state: SimulationState = useArkheSimulation();
   const chsh = state.chshMonitor;
 
   if (!chsh) {return null;}
@@ -186,7 +187,9 @@ export default function CHSHMonitorPanel({ onClose }: CHSHMonitorPanelProps) {
             </div>
             <div className="text-right">
               <div className="text-[10px] font-mono text-arkhe-muted uppercase tracking-tighter">ETA (T-FIELD)</div>
-              <div className="text-xs font-bold font-mono text-arkhe-cyan">{chsh.nextMilestone.time.split('T')[1].replace('Z', '')}</div>
+              <div className="text-xs font-bold font-mono text-arkhe-cyan">
+                {chsh.nextMilestone.time ? chsh.nextMilestone.time.split('T')[1].replace('Z', '') : '--:--:--'}
+              </div>
             </div>
           </div>
         </div>

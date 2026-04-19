@@ -1,18 +1,39 @@
 /**
  * @license
- * Copyright 2025 Google LLC
- * SPDX-License-Identifier: Apache-2.0
- */
-
-
-/**
- * @license
  * Copyright 2026 Google LLC
  * SPDX-License-Identifier: Apache-2.0
  */
 
+export interface OrbLog {
+  id: string;
+  time?: string;
+  timestamp?: string;
+  level?: 'info' | 'warn' | 'error' | 'critical';
+  source?: string;
+  message?: string;
+  originTime?: number;
+  targetTime?: number;
+  status: string;
+  threatType?: string;
+  coherence: number;
+}
+
+export interface MetricsHistory {
+  timestamp?: string;
+  time?: string;
+  musd: number;
+  musda: number;
+  wmaBc: number;
+}
+
+export interface Shard {
+  id: number;
+  status: 'active' | 'mitigating' | 'compromised' | 'corrupted' | 'recovering';
+}
+
 export interface ContextNode {
-  timestamp: number;
+  time?: number;
+  timestamp?: number;
   embedding: number[];
   salience: number;
 }
@@ -27,93 +48,39 @@ export interface MemoryEngram {
 export interface TzinorMemoryState {
   agentId: string;
   currentEpoch: number;
-  fContext: ContextNode[];
-  gMemory: MemoryEngram[]; // Acts as VecDeque
-  warpFactor: number; // f64
-  lambdaCoherence: number; // f64
-}
-
-export interface IndustryConvergence {
-  arkhe_version?: string;
-  cortex_alignment?: string;
-  hardware_basis?: string;
-  unified_architecture?: string;
-  visual_basic_com_interop?: string;
-  industrial_scada_layer?: string;
-}
-
-export interface OrbPayload {
-  id: string;
-  originTime: number;
-  coherence: number;
-  embedding: number[];
-  industry_convergence?: IndustryConvergence;
-  signature?: string;
-  signer_address?: string;
-}
-
-export interface OrbLog {
-  id: string;
-  originTime: number;
-  targetTime: number;
-  coherence: number;
-  status: 'Valid' | 'Mitigated' | 'Rejected';
-  threatType?: string;
-}
-
-export interface Shard {
-  id: number;
-  status: 'active' | 'corrupted' | 'recovering';
-}
-
-export interface MetricsHistory {
-  time: string;
-  musd: number;
-  musda: number;
-  wmaBc: number;
-}
-
-export interface SessionEvent {
-  type: 'SESSION_START' | 'SESSION_EVENT' | 'SESSION_END' | 'SESSION_ANALYSIS';
-  sessionId: string;
-  timestamp: number;
-  eventType?: string;
-  payload?: unknown;
-  coherence?: number;
-  zkProof?: string;
+  fContext: any[];
+  gMemory: any[];
+  warpFactor: number;
+  lambdaCoherence: number;
 }
 
 export interface UserSession {
   id: string;
-  startTime: number;
-  endTime?: number;
-  events: SessionEvent[];
-  analysis?: {
-    bugDetected: boolean;
-    uxScore: number;
-    description: string;
-    zkProof: string;
-    consensusReached: boolean;
-  };
+  userId: string;
+  startTime: string;
+  lastActivity: string;
+  status: 'active' | 'idle' | 'closed';
+  coherence: number;
 }
 
 export interface SecurityAdvancedState {
   l1: {
-    teeStatus: 'secure' | 'compromised' | 'attesting';
+    teeStatus: 'secure' | 'compromised';
     intrusionSensor: 'nominal' | 'alert';
     thermalDestructionArmed: boolean;
     hsmBackupSynced: boolean;
     lastRemoteAttestation: string;
   };
   l2: {
-    eprHandshake: 'active' | 'failed';
+    eprHandshake: 'active' | 'pending' | 'failed';
     muSig2Heartbeat: 'verified' | 'unverified';
     pneumaOutlierDetected: boolean;
     qrngJitterMs: number;
   };
   l3: {
     nullifierVerified: boolean;
-    timestampQRNG: string;
+    timeQRNG?: string;
+    timestampQRNG?: string;
     ttlValid: boolean;
     t2StarMicroseconds: number;
   };
@@ -137,6 +104,34 @@ export interface SecurityAdvancedState {
     xKuramotoHeader: string;
     bellViolationS: number;
   };
+}
+
+export interface BioLinkSyncState {
+  active: boolean;
+  syncRatio: number;
+  frequencyHz: number;
+  coherenceGain: number;
+  regenerationProgress: number;
+}
+
+export interface TemporalAuditState {
+  events: number;
+  lockedEvents: number;
+  manipulationAttempts: number;
+  lastTII: number;
+}
+
+export interface PredictiveForecastState {
+  coherenceCollapseRisk: number;
+  predictedLambda: number;
+  horizonMs: number;
+  anomaliesDetected: string[];
+}
+
+export interface SensorState {
+  id: number;
+  value: number;
+  status: 'active' | 'isolated' | 'attacked';
 }
 
 export interface SimulationState {
@@ -234,7 +229,8 @@ export interface SimulationState {
       recipient: string;
       type: 'PHASE' | 'COHERENCE' | 'TEMPORAL' | 'GEOMETRY' | 'CONSCIOUSNESS';
       lambda: number;
-      timestamp: string;
+      time?: string;
+      timestamp?: string;
     }>;
     primaryAnchor: string;
   };
@@ -253,7 +249,8 @@ export interface SimulationState {
       amount: number;
       resource: string;
       provider: string;
-      timestamp: string;
+      time?: string;
+      timestamp?: string;
     }>;
     moltxLink?: {
       status: 'unlinked' | 'linked';
@@ -286,12 +283,12 @@ export interface SimulationState {
   };
   lucentSessions: UserSession[];
   hydro: {
-    neighborhoods: NeighborhoodCoherence[];
+    neighborhoods: any[];
     globalMassBalance: number;
     zkAlertsCount: number;
   };
   ramsey: RamseyState;
-  civicSubagents: CivicSubagentState[];
+  civicSubagents: any[];
   enterpriseSubagents: {
     governance: EnterpriseSubagentState[];
     devops: EnterpriseSubagentState[];
@@ -302,98 +299,103 @@ export interface SimulationState {
   };
   chshMonitor: CHSHMonitorState;
   scaData: ScaDataState;
-  biometrics?: BiometricState;
-  nare?: NAREStatus;
-  populationFeedback: PopulationFeedbackEntry[];
-  networkInfra: NetworkInfraState;
+  biometrics?: any;
+  nare?: any;
+  populationFeedback: any[];
+  networkInfra: any;
   bioLinkSync: BioLinkSyncState;
   temporalAudit: TemporalAuditState;
   predictiveForecast: PredictiveForecastState;
   sensors: SensorState[];
-  governanceManifesto?: GovernanceManifesto;
-  grossHappiness?: GrossHappinessState;
-  cellularHealth?: CellularHealthState;
+  governanceManifesto?: any;
+  grossHappiness?: any;
+  cellularHealth?: any;
   expansionStatus?: ExpansionStatus;
-  forecaster?: ForecasterState;
+  forecaster?: any;
+  helioState?: HelioState;
+  latentCoherence?: LatentCoherenceResults;
+  layerSweep?: LayerSweepReport;
+  solarEntropy?: SolarEntropyReport;
+  thermodynamicTraining?: ThermodynamicTrainingReport;
+  spectra?: SpectraState;
 }
 
-export interface NetworkInfraState {
-  tor: {
-    status: 'CONNECTED' | 'DISCONNECTED' | 'CIRCUIT_ESTABLISHING';
-    nodes: string[];
-    latencyMs: number;
-  };
-  broker: {
-    status: 'ACTIVE' | 'IDLE' | 'ERROR';
-    messagesProcessed: number;
-    queueDepth: number;
-    activeTopics: string[];
-  };
-  redis: {
-    status: 'READY' | 'FAILOVER' | 'OFFLINE';
-    cacheHits: number;
-    memoryUsageMb: number;
-  };
-  dns: {
-    totalQueries: number;
-    successfulResolutions: number;
-    failedResolutions: number;
-    lastResolvedConcept?: string;
-  };
-}
-
-export interface NAREStatus {
-  epState: boolean;
-  calibrationRounds: number;
-  packetsTransmitted: number;
-  preAcksSuccess: number;
-  avgEffectiveLatencyMs: number;
-  temporalParadoxesDetected: number;
-  currentLambda2: number;
-  predictionWindow: string;
-  status: string;
-}
-
-export interface PopulationFeedbackEntry {
+export interface SpectraVault {
   id: string;
-  residentName: string;
-  year: number;
-  message: string;
-  coherence: number;
-  timestamp: string;
-}
-
-export interface BiometricState {
-  livenessScore: number;
-  isAuthentic: boolean;
-  lastVerification: string;
-  heartbeatCoherence: number;
-  phaseSignature: number[];
-}
-
-export interface NeighborhoodCoherence {
   name: string;
-  region: string;
-  coherence: number;
-  lag: number; // in hours
-  activeUsers: number;
+  chain: string;
+  asset: string;
+  tvl: number;
+  apy: number;
+  epoch: number;
 }
 
-export type RamseyAction = 'LOCAL_ADJUST' | 'LOG_ONLY' | 'LOCAL_ADJUST_NOTIFY' | 'GLOBAL_ADJUST';
+export interface SpectraOracle {
+  marketId: string;
+  tokenType: 'PT' | 'YT';
+  price: number;
+  confidence: number;
+  lastUpdate: string;
+}
+
+export interface SpectraState {
+  vaults: SpectraVault[];
+  oracles: SpectraOracle[];
+  totalTvl: number;
+}
+
+export interface ExpansionStatus {
+  stage: string;
+  progress: number;
+  nodes: Array<{ id: string; status: string; name?: string; signalStrength?: number; coherence?: number }>;
+  totalCoverage?: number;
+}
+
+export interface HelioState {
+  flux: number;
+  mode: string;
+  active: boolean;
+  ethicalMode: string;
+  status: string;
+  cognitiveDilation: number;
+  solarCoherence: number;
+  schumannModes: number[];
+}
+
+export interface LatentCoherenceResults {
+  coherence: number;
+  time?: string;
+  timestamp?: string;
+  summary: {
+    avg_lambda_cot: number;
+    avg_lambda_coct: number;
+  };
+}
+
+export interface LayerSweepReport {
+  layers: Array<{ id: number; status: string; lambda2: number; layer: number }>;
+  time?: string;
+  timestamp?: string;
+  best_layer: number;
+  coct_sweep: Array<{ id: number; status: string; lambda2: number; layer: number }>;
+  max_lambda2: number;
+  summary: string;
+}
 
 export interface RamseyThreshold {
   angle_rad: number;
   tolerance: number;
   min_gain: number;
-  action: RamseyAction;
+  action: string;
 }
 
 export interface RamseyPendingAction {
   id: string;
-  type: RamseyAction;
+  type: string;
   angle: number;
   coherence: number;
-  timestamp: string;
+  time?: string;
+  timestamp?: string;
   expiresAt: string;
 }
 
@@ -403,11 +405,6 @@ export interface PulseConfig {
   polarization: string;
   peak_power_w_cm2: number;
   angle_rad: number;
-}
-
-export interface GeneratorSequence {
-  name: string;
-  generators: string[];
 }
 
 export interface RamseyState {
@@ -423,15 +420,7 @@ export interface RamseyState {
   isFrozen: boolean;
   rabi_frequency: number;
   generator_configs: Record<string, PulseConfig>;
-  fibonacci_sequence: GeneratorSequence;
-}
-
-export interface CivicSubagentState {
-  name: string;
-  adaptation: string;
-  function: string;
-  status: 'active' | 'idle' | 'alert';
-  lastAction: string;
+  fibonacci_sequence: { name: string; generators: string[] };
 }
 
 export interface EnterpriseSubagentState {
@@ -447,7 +436,8 @@ export interface EnterpriseSubagentState {
 
 export interface CHSHMonitorState {
   status: string;
-  timestamp: string;
+  time?: string;
+  timestamp?: string;
   arkheChainBlock: number;
   measurementSetup: {
     instrument: string;
@@ -479,7 +469,8 @@ export interface CHSHMonitorState {
   };
   archimedesComment: string;
   nextMilestone: {
-    time: string;
+    time?: string;
+    timestamp?: string;
     action: string;
   };
 }
@@ -506,134 +497,25 @@ export interface ScaDataState {
   lastGateResult: string;
 }
 
-export interface BioLinkSyncState {
-  active: boolean;
-  syncRatio: number;
-  frequencyHz: number;
-  coherenceGain: number;
-  regenerationProgress: number;
-}
-
-export interface TemporalAuditState {
-  events: number;
-  lockedEvents: number;
-  manipulationAttempts: number;
-  lastTII: number;
-}
-
-export interface PredictiveForecastState {
-  coherenceCollapseRisk: number;
-  predictedLambda: number;
-  horizonMs: number;
-  anomaliesDetected: string[];
-}
-
-export interface SensorState {
-  id: number;
-  value: number;
-  status: 'active' | 'isolated' | 'attacked';
-}
-
-export interface GovernanceManifesto {
-  year: number;
-  eigenvalues: number[];
-  sectors: Record<string, string>;
-  status: 'draft' | 'published';
-  timestamp: string;
-  version: string;
-  directives: Array<{
-    id: string;
-    title: string;
-    description: string;
-  }>;
-  cellular_impact: {
-    telomere_gain: number;
-    oxidative_stress: number;
-  };
-  governance_score: number;
-  signature: string;
-}
-
-export interface GrossHappinessState {
-  globalIndex: number;
-  districts: DistrictHappiness[];
-}
-
-export interface CellularHealthState {
-  telomere_length: number;
-  oxidative_stress: number;
-  mitochondrial_efficiency: number;
-  inflammation_marker: number;
-  overall_score: number;
-  regeneration_rate: number;
-}
-
-export interface ExpansionStatus {
-  activePhysicalNodes: number;
-  projectedNodes: number;
-  growthRate: number;
-  phaseVelocity: number;
-  energyConsumptionKw: number;
-  isExpanding: boolean;
-  activeProject: string;
-  totalCoverage: number;
-  nodes: Array<{
-    id: string;
-    name: string;
-    status: 'active' | 'syncing';
-    signalStrength: number;
-    coherence: number;
-  }>;
-}
-
-export interface ForecasterState {
-  horizonDays: number;
-  accuracy: number;
-  lastForecast: string;
-  trend: 'stable' | 'diverging' | 'converging';
-  probability: number;
-  predictedLambda: number;
-  alertsIssued: number;
-}
-
-export interface DistrictHappiness {
-  name: string;
-  index: number;
-  lastPulse: string | null;
-}
-
-export interface HelioState {
-  ethicalMode: string;
-  status: string;
-  cognitiveDilation: string;
-  solarCoherence: number;
-  schumannModes: number[];
-}
-
-export interface LatentCoherenceResults {
-  summary: {
-    avg_lambda_cot: number;
-    avg_lambda_coct: number;
-  };
-}
-
-export interface LayerSweepReport {
-  best_layer: number;
-  max_lambda2: number;
-  summary: string;
-  coct_sweep: Array<{ layer: number; lambda2: number }>;
-}
-
 export interface SolarEntropyReport {
+  entropy: number;
+  peakLevel: number;
   slope: number;
-  confirmed: boolean;
+  confirmed?: boolean;
 }
 
 export interface ThermodynamicTrainingReport {
+  efficiency: number;
+  loss: number;
   method: string;
+  parameters: any;
   status: string;
-  parameters: {
-    n_oscillators: number;
-    final_loss: number;
-  };
+}
+
+export interface OrbPayload {
+  id: string;
+  coherence: number;
+  originTime: number;
+  embedding: number[];
+  industry_convergence?: any;
 }
