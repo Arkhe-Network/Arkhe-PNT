@@ -8,7 +8,7 @@
 import { MapPin, Signal, Users, Plus } from 'lucide-react';
 import React, { useState } from 'react';
 
-import type { SimulationState } from '../hooks/useArkheSimulation';
+import type { SimulationState } from '../../server/types';
 import { cn } from '../lib/utils';
 
 import { Card } from './ui/Card';

@@ -8,7 +8,8 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { Search, Database, Zap, Shield, Microscope } from 'lucide-react';
-import { useArkheSimulation } from '../hooks/useArkheSimulation';
+import { useArkheSimulation } from '../hooks/useArkheSimulation'
+import type { SimulationState } from '../../server/types';
 
 interface ResearchModuleProps {
   id: string;
@@ -47,7 +48,7 @@ const ResearchModule = ({ name, description, status, icon: Icon }: ResearchModul
 };
 
 export default function ResearchAgentsPanel() {
-  const state = useArkheSimulation();
+  const state: SimulationState = useArkheSimulation();
   const [isSearching, setIsSearching] = useState(false);
   const [searchLog, setSearchLog] = useState<string[]>([]);
 

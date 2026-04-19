@@ -255,6 +255,31 @@ export const cliOptions = {
     describe:
       'Exposes a "slim" set of 3 tools covering navigation, script execution and screenshots only. Useful for basic browser tasks.',
   },
+  beeApi: {
+    type: 'string',
+    description: 'Endpoint for Swarm Bee node (e.g., http://127.0.0.1:1633).',
+    default: 'http://127.0.0.1:1633',
+  },
+  ipfsGateway: {
+    type: 'string',
+    description: 'Endpoint for IPFS Gateway (e.g., http://127.0.0.1:8080).',
+    default: 'http://127.0.0.1:8080',
+  },
+  ipfsApi: {
+    type: 'string',
+    description: 'Endpoint for IPFS API (e.g., http://127.0.0.1:5001).',
+    default: 'http://127.0.0.1:5001',
+  },
+  radicleHttpd: {
+    type: 'string',
+    description: 'Endpoint for Radicle httpd (e.g., http://127.0.0.1:8780).',
+    default: 'http://127.0.0.1:8780',
+  },
+  ethRpc: {
+    type: 'string',
+    description: 'Endpoint for Ethereum JSON-RPC (e.g., http://127.0.0.1:8545).',
+    default: 'http://127.0.0.1:8545',
+  },
   viaCli: {
     type: 'boolean',
     describe:
