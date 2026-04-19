@@ -25,9 +25,11 @@ UIO_DEVICE = "/dev/uio0"
 KINETIC_MOMENTUM_THRESHOLD = 2.0  # mm/s
 
 # --- Estruturas de Dados NumPy (Scaffold Σ) ---
+# Alinhado ao VRP v1.1 corrigido (Little-Endian):
+# bytes 0-1: x, 2-3: y, 4-5: z, 6: intensity, 7: flags
 roi_dtype = np.dtype([
-    ('x', np.int16), ('y', np.int16), ('z', np.int16),
-    ('flags', np.uint8), ('intensity', np.uint8)
+    ('x', '<i2'), ('y', '<i2'), ('z', '<i2'),
+    ('intensity', 'u1'), ('flags', 'u1')
 ])
 
 class RhoAgentCoherence:
@@ -66,18 +68,26 @@ class RhoAgentCoherence:
         return False
 
     def process_batch(self):
-        # Simulação simplificada de stream
-        tokens = np.array([(100, 200, 300, 0x01, 255)], dtype=roi_dtype)
+        # Simulação simplificada de stream ou leitura real se mmap estiver pronto
+        if self.mmap_obj:
+            data = self.mmap_obj[self.read_ptr:self.read_ptr + ROI_PACKET_SIZE]
+            tokens = np.frombuffer(data, dtype=roi_dtype)
+            self.read_ptr = (self.read_ptr + ROI_PACKET_SIZE) % ROI_BUFFER_SIZE
+        else:
+            tokens = np.array([(100, 200, 300, 255, 0x01)], dtype=roi_dtype)
+
         now = time.time()
 
         for token in tokens:
             momentum = 0.0
             if self.last_pos is not None:
-                dist = math.sqrt((token['x'] - self.last_pos[0])**2 + (token['y'] - self.last_pos[1])**2 + (token['z'] - self.last_pos[2])**2)
+                dist = math.sqrt((float(token['x']) - self.last_pos[0])**2 +
+                                 (float(token['y']) - self.last_pos[1])**2 +
+                                 (float(token['z']) - self.last_pos[2])**2)
                 dt = now - self.last_ts
                 if dt > 0: momentum = dist / dt
 
-            self.last_pos = (token['x'], token['y'], token['z'])
+            self.last_pos = (float(token['x']), float(token['y']), float(token['z']))
             self.last_ts = now
 
             payload = {
@@ -89,6 +99,7 @@ class RhoAgentCoherence:
 
             auth_param = f"?auth={self.db_secret}" if self.db_secret else ""
 
+            # flags: bit 3 é high_intensity
             if momentum > KINETIC_MOMENTUM_THRESHOLD or (token['flags'] & 0x08):
                 requests.post(f"{self.firebase_url}/vacuum/roi.json{auth_param}", json=payload, timeout=0.5)
             else:
