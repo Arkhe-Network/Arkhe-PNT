@@ -1,6 +1,5 @@
-# Makefile for Mythos RHO Agent (ARM64)
-CROSS_COMPILE = aarch64-linux-gnu-
-CC = $(CROSS_COMPILE)gcc
+# Makefile for Mythos RHO Agent (Native/ARM64)
+CC = gcc
 CFLAGS = -O3 -Wall -D_GNU_SOURCE
 LDFLAGS = -lm -lpthread
 
