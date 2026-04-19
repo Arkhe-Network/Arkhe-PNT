@@ -63,12 +63,17 @@ export const createTools = (args: ParsedArguments) => {
         ...Object.values(nekoTools),
       ];
 
-  const tools = [];
+  const tools: ToolDefinition[] = [];
   for (const tool of rawTools) {
+    let toolDef: ToolDefinition | undefined;
     if (typeof tool === 'function') {
-      tools.push(tool(args) as unknown as ToolDefinition);
-    } else {
-      tools.push(tool as ToolDefinition);
+      toolDef = tool(args) as unknown as ToolDefinition;
+    } else if (tool && typeof tool === 'object' && 'name' in tool) {
+      toolDef = tool as ToolDefinition;
+    }
+
+    if (toolDef && toolDef.name) {
+      tools.push(toolDef);
     }
   }
 
