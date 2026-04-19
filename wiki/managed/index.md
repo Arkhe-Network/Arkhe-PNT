@@ -1,7 +1,7 @@
 ---
 title: LM Wiki Index
-updated: 2026-04-04
-total_pages: 5 (plus stubs)
+updated: 2026-04-06
+total_pages: 13 (plus stubs)
 ---
 
 # 🧠 LM Wiki: BIP‑1 & Fibonacci Anyon Domain
@@ -17,6 +17,9 @@ total_pages: 5 (plus stubs)
 - [[Microtubule Quantum Coherence]] – Proposed mechanism for quantum effects in cytoskeleton.
 - [[The Quantum Oasis Effect]] – Hypothesis that microtubules protect quantum states from decoherence.
 - [[Gold Standard for BIP-1]] – The specific statistical signature (p_vac = 0.381966) that validates the hardware.
+- [[Prompt Injection]] – Manipulation of LLM input to override instructions.
+- [[Agentic Pentesting]] – Autonomous execution of security tasks by AI agents.
+- [[Sensitive Information Disclosure]] – Unintentional leakage of confidential data.
 
 ## Hardware & Engineering
 - [[BIP-1 Hardware Specifications]] – Mechanical, electrical, and optical parameters of the bio‑implant.
@@ -29,3 +32,5 @@ total_pages: 5 (plus stubs)
 
 ## Sources (Processed)
 - [[2026-04-04_anyons_in_microtubules]] – Berg et al., Nature Quantum Biology (2026).
+- [[2026-04-06_ai_pentest_toolkit]] – Mr-Infect AI Penetration Testing Toolkit.
+- [[2026-04-06_pentest_copilot]] – BugBase Pentest Copilot Autonomous Agent.
