@@ -40,6 +40,7 @@ Welcome to the compounding knowledge base of the Bio-Quantum Cathedral.
 - [[protocols/SKILL|Skill]]: Protocol & Teknet Engineering rules.
 - [[protocols/STANZA_DQD_TUNING|Stanza DQD Tuning]]: Automated discovery of Double Quantum Dots.
 - [[protocols/WINDOWS_DRIVER_SIGNING|Windows Driver Signing]]: Legacy system integration requirements.
+- [[ANEXO_AA_BALSAMO_DE_QUARTZO|ANEXO AA: O Bálsamo de Quartzo]]: Kit de Primeiros Socorros para Desenvolvedores (Ferreiro FAQ).
 
 ## 📦 Entities
 
