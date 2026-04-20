@@ -10,10 +10,11 @@ import {promisify} from 'node:util';
 
 import type {McpPage} from '../McpPage.js';
 
-const execPromise = promisify(exec);
 import {zod} from '../third_party/index.js';
 
 import {ToolCategory} from './categories.js';
+
+const execPromise = promisify(exec);
 import {definePageTool} from './ToolDefinition.js';
 
 export const getMembraneStats = definePageTool({

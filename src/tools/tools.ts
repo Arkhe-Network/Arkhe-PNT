@@ -68,8 +68,11 @@ export const createTools = (args: ParsedArguments) => {
   const tools = [];
   for (const tool of rawTools) {
     if (typeof tool === 'function') {
-      tools.push(tool(args) as unknown as ToolDefinition);
-    } else {
+      const toolDef = tool(args) as unknown as ToolDefinition;
+      if (toolDef && toolDef.name) {
+        tools.push(toolDef);
+      }
+    } else if (tool && (tool as ToolDefinition).name) {
       tools.push(tool as ToolDefinition);
     }
   }
