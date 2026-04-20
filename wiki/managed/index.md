@@ -1,7 +1,7 @@
 ---
 title: LM Wiki Index
-updated: 2026-04-06
-total_pages: 13 (plus stubs)
+updated: 2026-04-20
+total_pages: 15 (plus stubs)
 ---
 
 # 🧠 LM Wiki: BIP‑1 & Fibonacci Anyon Domain
@@ -22,6 +22,8 @@ total_pages: 13 (plus stubs)
 - [[Prompt Injection]] – Manipulation of LLM input to override instructions.
 - [[Agentic Pentesting]] – Autonomous execution of security tasks by AI agents.
 - [[Sensitive Information Disclosure]] – Unintentional leakage of confidential data.
+- [[Network Reconnaissance]] – Host and service discovery techniques.
+- [[WAF Bypass Techniques]] – Circumventing web application firewalls.
 
 ## Hardware & Engineering
 
@@ -40,3 +42,4 @@ total_pages: 13 (plus stubs)
 - [[2026-04-04_anyons_in_microtubules]] – Berg et al., Nature Quantum Biology (2026).
 - [[2026-04-06_ai_pentest_toolkit]] – Mr-Infect AI Penetration Testing Toolkit.
 - [[2026-04-06_pentest_copilot]] – BugBase Pentest Copilot Autonomous Agent.
+- [[2026-04-20_the_book_of_secret_knowledge]] – Comprehensive security resource repository.

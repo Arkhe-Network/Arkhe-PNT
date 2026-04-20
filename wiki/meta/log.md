@@ -17,3 +17,4 @@ Chronological append-only log of Arkhe(n) knowledge base actions.
 - Ingested source summary for [[Pentest Copilot]].
 - Created concepts: [[Prompt Injection]], [[Agentic Pentesting]], [[Sensitive Information Disclosure]].
 - Updated [[LM Wiki Index]].
+## [2026-04-20] ingest | [[The Book of Secret Knowledge]] | Updated: [[Agentic Pentesting]]; Created: [[Network Reconnaissance]], [[WAF Bypass Techniques]]
