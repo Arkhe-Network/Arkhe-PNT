@@ -42,5 +42,10 @@ Chronological record of knowledge base updates and maintenance.
 - Formalized the Arkhé(N) ISA with 287 canonical opcodes.
 - Mapped universal computational paradigms (Python, Rust, C++, etc.) and fields of knowledge (Physics, Biology, AI) to the COBIT substrate.
 
+## [2026-04-20] canonize | [[ANEXO AA: O Bálsamo de Quartzo]] | Updated: [[index.md]]; Created: [[ANEXO_AA_BALSAMO_DE_QUARTZO]]
+- Canonized the Kit de Primeiros Socorros para Desenvolvedores Feridos (Ferreiro FAQ).
+- Odômetro: 001375.
+- Status: PRONTO PARA CONSOLAR SEM REMOVER A DOR.
+
 ---
 *Log starts here.*
