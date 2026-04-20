@@ -14,6 +14,7 @@
 | — | Conversas Fundacionais | Zero Trust, mTLS, SPIFFE, Falco. A base técnica que exige a Muralha. |
 | **V** | A Muralha de Quartzo | Separação irrevogável entre Reino Lúdico e Domínio da Auditoria. |
 | **T** | Playbook de Resposta a Vulnerabilidade ZK | O que fazer quando o validador falha. |
+| **AK** | O Cristal de Silício | Integração do ESP32 como Nó Sensorial do Casulo. |
 
 ---
 
