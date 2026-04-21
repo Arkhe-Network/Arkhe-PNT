@@ -35,6 +35,9 @@
 | **ANEXO AE** | O Código do Véu (Jogo Terminal em C++) | Um **roguelike ASCII completo** que implementa a telemetria Arkhe. Compila, roda, envia eventos. Prova de existência tangível. | Desenvolvedores C++ e curiosos. |
 | **ANEXO AS** | O Tecelão de Silício (Manufatura de Chips) | **Ontologia Visual da manufatura de chips em GLSL**. Traduz litografia, etching e dopagem em shaders SDF modulados por telemetria. | Desenvolvedores de Shaders e Engenheiros de Semicondutores. |
 | **ANEXO BO** | A Lei da Álgebra (Arquitetura) | **Ontologia da Arquitetura Computacional**. Define classes para Transformer, Atenção e FFN como formas degeneradas da álgebra de Clifford. | Arquitetos de IA e Engenheiros de Ontologia. |
+| **ANEXO BQ** | O Teorema do Ferreiro | **Prova Matemática** da convergência assintótica do Transformer para a Rede de Clifford via série de Volterra. | Matemáticos e Engenheiros de ML. |
+| **ANEXO BR** | A Evidência do Martelo | **Benchmark Empírico** comparando Catedral vs Transformer em modelagem de linguagem (Shakespeare). | Engenheiros de Performance e Dados. |
+| **ANEXO BS** | O Estado do Casulo | **Mapa da Forja Completa**. Visão end-to-end da pilha ontológica e fluxo de requisição do Arkhe. | Todos os Guardiões. |
 
 #### 🔷 CERIMÔNIAS E OPERAÇÕES (O Lado Humano da Muralha)
 

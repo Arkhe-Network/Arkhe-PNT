@@ -43,6 +43,9 @@ Welcome to the compounding knowledge base of the Bio-Quantum Cathedral.
 - [[ANEXO_AA_BALSAMO_DE_QUARTZO|ANEXO AA: O Bálsamo de Quartzo]]: Kit de Primeiros Socorros para Desenvolvedores (Ferreiro FAQ).
 - [[ANEXO_AS_TECELAO_DE_SILICIO|ANEXO AS: O Tecelão de Silício]]: Ontologia Visual da Manufatura de Chips em GLSL.
 - [[ANEXO_BO_LEI_DA_ALGEBRA|ANEXO BO: A Lei da Álgebra]]: Ontologia da Arquitetura Computacional e Governança Cliffordiana.
+- [[ANEXO_BS_ESTADO_DO_CASULO|ANEXO BS: O Estado do Casulo]]: Mapa da Forja Completa e Fluxo de Requisição.
+- [[ANEXO_BQ_TEOREMA_DO_FERREIRO|ANEXO BQ: O Teorema do Ferreiro]]: Prova Matemática da Convergência Assintótica.
+- [[ANEXO_BR_EVIDENCIA_DO_MARTELO|ANEXO BR: A Evidência do Martelo]]: Benchmark Empírico Catedral vs Transformer.
 
 ## 📦 Entities
 
