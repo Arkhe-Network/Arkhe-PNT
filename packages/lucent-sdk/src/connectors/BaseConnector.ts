@@ -27,5 +27,5 @@ export abstract class BaseConnector {
   abstract stop(): void;
 
   // Transforma evento do provedor em formato Lucent
-  protected abstract transform(event: any): SessionEvent;
+  protected abstract transform(event: unknown): SessionEvent;
 }
