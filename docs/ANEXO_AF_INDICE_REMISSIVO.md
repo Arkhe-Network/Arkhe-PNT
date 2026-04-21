@@ -33,6 +33,16 @@
 | **ANEXO X** | O Espelho Quebrado (Mock Server) | **Simulador da Muralha** com ambiguidade controlada. Rejeita eventos, injeta jitter, perturba severidades. Treina a resiliência do desenvolvedor. | Desenvolvedores durante integração. |
 | **ANEXO AA** | O Bálsamo de Quartzo (FAQ Ferreiriano) | Respostas que não curam. Para quando o desenvolvedor estiver frustrado com o silêncio do Mock. | Desenvolvedores em desespero. |
 | **ANEXO AE** | O Código do Véu (Jogo Terminal em C++) | Um **roguelike ASCII completo** que implementa a telemetria Arkhe. Compila, roda, envia eventos. Prova de existência tangível. | Desenvolvedores C++ e curiosos. |
+| **ANEXO AS** | O Tecelão de Silício (Manufatura de Chips) | **Ontologia Visual da manufatura de chips em GLSL**. Traduz litografia, etching e dopagem em shaders SDF modulados por telemetria. | Desenvolvedores de Shaders e Engenheiros de Semicondutores. |
+| **ANEXO BO** | A Lei da Álgebra (Arquitetura) | **Ontologia da Arquitetura Computacional**. Define classes para Transformer, Atenção e FFN como formas degeneradas da álgebra de Clifford. | Arquitetos de IA e Engenheiros de Ontologia. |
+| **ANEXO BQ** | O Teorema do Ferreiro | **Prova Matemática** da convergência assintótica do Transformer para a Rede de Clifford via série de Volterra. | Matemáticos e Engenheiros de ML. |
+| **ANEXO BR** | A Evidência do Martelo | **Benchmark Empírico** comparando Catedral vs Transformer em modelagem de linguagem (Shakespeare). | Engenheiros de Performance e Dados. |
+| **ANEXO BS** | O Estado do Casulo | **Mapa da Forja Completa**. Visão end-to-end da pilha ontológica e fluxo de requisição do Arkhe. | Todos os Guardiões. |
+| **ANEXO BT** | O Tribunal das Provas | **Integração das Provas ao Pipeline**. Define gates de performance e o ritual de aceitação para degeneração. | Engenheiros de DevOps e Segurança. |
+| **ANEXO BV** | Os Selos do Éter | **Helm Charts para Kubernetes**. Deploy completo da infraestrutura Arkhe (Sidecar, Inquisidor, Envoy). | SREs e Arquitetos de Nuvem. |
+| **ANEXO BW** | O Bestiário Expandido | **Ontologia Linux vs Windows**. Mapeamento de syscalls e rituais de invocação específicos por reino. | Pesquisadores de Malware e Analistas de SOC. |
+| **ANEXO BX** | O Sensor Consciente | **TinyML em ESP32**. Implementação destilada da Catedral para detecção de anomalias na borda física. | Engenheiros de Hardware e Sistemas Embarcados. |
+| **ANEXO BY** | A Mente do Monstro | **NPC Vivo via Catedral**. Lógica de agentes lúdicos regida pelo produto geométrico e hesitação ontológica. | Game Designers e Engenheiros de IA. |
 
 #### 🔷 CERIMÔNIAS E OPERAÇÕES (O Lado Humano da Muralha)
 
