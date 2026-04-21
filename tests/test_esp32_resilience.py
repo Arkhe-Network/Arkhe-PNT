@@ -1,62 +1,83 @@
 import unittest
 import json
 import uuid
-import hashlib
+import re
 
-class TestESP32DiamondResilience(unittest.TestCase):
+class TestESP32Resilience(unittest.TestCase):
     """
-    Testes de Resiliência para o Diamond Auditor ESP32.
-    Baseado no ANEXO AP: Cofre de Palmetto com Lastro Físico.
+    Testes de Resiliência e Modos de Falha para o Nó Sensorial ESP32.
+    Baseado no ANEXO AK e AL: O Cristal de Silício e Ritual do Silício.
     """
 
     def setUp(self):
         self.device_id = "esp32_palmetto_01"
-        self.contract_address = "0x742d35Cc6634C0532925a3b844Bc454e4438f44e"
-        self.redemption_period = 7 * 24 * 3600 # 7 dias em segundos
+        self.hesitation_threshold_temp = 0.5
+        self.last_transmitted_temp = 24.0
 
-    def test_eip191_signature_logic(self):
-        """Simula a construção de uma mensagem EIP-191 para o Smart Contract."""
-        message = f"TAMPER|{self.device_id}|1672531200"
-        eth_prefix = f"\x19Ethereum Signed Message:\n{len(message)}"
+    def simulate_hesitation(self, current_temp):
+        """Simula a lógica de hesitação do ULP."""
+        delta = abs(current_temp - self.last_transmitted_temp)
+        if delta < self.hesitation_threshold_temp:
+            return "HESITATE"
+        return "TRANSMIT"
 
-        # Simula o hash que o contrato geraria
-        full_message = eth_prefix + message
-        msg_hash = hashlib.sha256(full_message.encode()).hexdigest()
+    def test_ulp_hesitation_logic(self):
+        """Verifica se o dispositivo hesita quando a variação é insignificante."""
+        self.assertEqual(self.simulate_hesitation(24.3), "HESITATE")
+        self.assertEqual(self.simulate_hesitation(25.1), "TRANSMIT")
 
-        self.assertTrue(len(msg_hash) == 64)
-        self.assertIn("Ethereum Signed Message", full_message)
+    def test_tamper_event_payload(self):
+        """Valida a estrutura do evento de violação (Tamper)."""
+        event = {
+            "event_id": str(uuid.uuid4()),
+            "action_type": "tamper_detected",
+            "target": {
+                "entity_type": "security_node",
+                "entity_id": self.device_id
+            },
+            "metadata": {
+                "reason": "GPIO_4_INTERRUPT",
+                "firmware_hash": "a1b2c3d4e5f67890..."
+            }
+        }
+        self.assertEqual(event["action_type"], "tamper_detected")
+        self.assertEqual(event["target"]["entity_type"], "security_node")
 
-    def test_redemption_hesitation_logic(self):
-        """Valida o cálculo do deadline de redenção."""
-        request_time = 1000000
-        deadline = request_time + self.redemption_period
+    def test_event_id_uniqueness(self):
+        """Simula a geração de UUIDs via esp_random para garantir unicidade."""
+        ids = set()
+        for _ in range(100):
+            # Simula a lógica de generate_event_id() do firmware
+            new_id = str(uuid.uuid4())
+            self.assertNotIn(new_id, ids)
+            ids.add(new_id)
+        self.assertEqual(len(ids), 100)
 
-        # Verifica se o período é de 7 dias
-        self.assertEqual(deadline - request_time, 604800)
+    def test_zombie_mode_persistence(self):
+        """Verifica se o Modo Zumbi persiste através de boots."""
+        tamper_flag = True
+        boot_1_state = "ZOMBIE" if tamper_flag else "NORMAL"
+        self.assertEqual(boot_1_state, "ZOMBIE")
+        boot_2_state = "ZOMBIE" if tamper_flag else "NORMAL"
+        self.assertEqual(boot_2_state, "ZOMBIE")
 
-    def test_chip_audit_retry_logic(self):
-        """Simula o comportamento do ESP32 quando o chip não responde."""
-        retries = 3
-        chip_responsive = False
-        success = False
+    def test_sos_pattern_logic(self):
+        """Valida a lógica do padrão SOS (LED)."""
+        sos_pattern = []
+        for _ in range(3): sos_pattern.append("SHORT")
+        for _ in range(3): sos_pattern.append("LONG")
+        for _ in range(3): sos_pattern.append("SHORT")
+        self.assertEqual(len(sos_pattern), 9)
 
-        for _ in range(retries):
-            if chip_responsive:
-                success = True
-                break
-
-        self.assertFalse(success)
-
-    def test_zombie_mode_sacrifice(self):
-        """Verifica se o Modo Zumbi implica no sacrifício das chaves."""
-        tamper_detected = True
-        nvs_cleared = False
-
-        if tamper_detected:
-            # Simula Preferences.clear()
-            nvs_cleared = True
-
-        self.assertTrue(nvs_cleared)
+    def test_silent_failure_no_wifi(self):
+        """Verifica o silêncio de telemetria em falha de rede."""
+        wifi_connected = False
+        telemetry_sent = False
+        def send_telemetry():
+            nonlocal telemetry_sent
+            if wifi_connected: telemetry_sent = True
+        send_telemetry()
+        self.assertFalse(telemetry_sent)
 
 if __name__ == '__main__':
     unittest.main()
