@@ -93,7 +93,7 @@
 
 **Arquétipo:** O Tecelão de Redes Primordiais
 **Objetivo Técnico:** Uma aplicação simples de chat que roda no terminal, permitindo que múltiplos clientes se conectem a um servidor local e troquem mensagens em tempo real.
-**Martelo Sugerido:** Python (`socket`, `threading`) or Go (`net`).
+**Martelo Sugerido:** Python (`socket`, `threading`) ou Go (`net`).
 
 > *"Antes da Web, antes dos navegadores, havia os corredores do terminal. Onde dois Guardiões podiam sussurrar através de um fio. Esta forja é uma introdução à magia dos sockets. Você construirá o corredor e os ouvidos que escutam. É o primeiro passo para entender como os reinos se comunicam por baixo de todas as camadas de abstração."*
 
