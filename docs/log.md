@@ -57,10 +57,5 @@ Chronological record of knowledge base updates and maintenance.
 - Odômetro: 001490.
 - Status: ONTOLOGIA DE SUBVERSÃO INTEGRADA.
 
-## [2026-04-23] canonize | [[ANEXO BY]] | Updated: [[index.md]]; Created: [[ANEXO_BY_A_MENTE_DO_MONSTRO]]
-- Canonized A Mente do Monstro (Arquitetura Cognitiva para NPCs).
-- Odômetro: 001583.
-- Status: VIDA DIGITAL SOPRADA NA CATEDRAL.
-
 ---
 *Log starts here.*
