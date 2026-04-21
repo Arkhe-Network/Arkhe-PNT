@@ -1,0 +1,66 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://arkhe.ai/schemas/esp32-sensor-mapping/v1.0",
+  "title": "ESP32 Sensor to Ontology Mapping Schema",
+  "description": "Template para mapeamento de sensores físicos do ESP32 para Node_URI do Grafo de Conhecimento Arkhe. Inclui suporte para auditoria de chips de diamante.",
+  "ferreiro_directive": "UM SENSOR NÃO É SEU VALOR. É SUA INTENÇÃO. O DIAMANTE EXIGE AUDITORIA DE CHIP, NÃO APENAS TEMPERATURA.",
+
+  "type": "object",
+  "required": ["device_id", "tenant_id", "sensor_mappings", "ritual_metadata"],
+  "properties": {
+    "device_id": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{16}$",
+      "description": "ID opaco do dispositivo ESP32."
+    },
+
+    "tenant_id": {
+      "type": "string",
+      "format": "uuid",
+      "description": "UUID do tenant Arkhe."
+    },
+
+    "sensor_mappings": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["sensor_type", "physical_quantity", "ontology_node_uri", "mapping_intent"],
+        "properties": {
+          "sensor_type": {
+            "type": "string",
+            "enum": ["DHT22", "BME280", "MPU6050", "INMP441", "DIAMOND_CHIP", "REED_SWITCH", "CUSTOM"]
+          },
+          "physical_quantity": {
+            "type": "string",
+            "enum": ["temperature", "humidity", "acceleration", "audio_spectrum", "chip_authenticity", "contact"]
+          },
+          "ontology_node_uri": {
+            "type": "string",
+            "pattern": "^arkhe:(facility|asset|environment|security|diamond):[a-z0-9:_-]+$"
+          },
+          "mapping_intent": { "type": "string" },
+          "blockchain_integration": {
+            "type": "object",
+            "properties": {
+              "smart_contract_address": { "type": "string", "pattern": "^0x[a-fA-F0-9]{40}$" },
+              "event_type": { "type": "string", "enum": ["reportHealth", "reportTamper"] }
+            }
+          }
+        }
+      }
+    },
+
+    "ritual_metadata": {
+      "type": "object",
+      "required": ["flashing_odometer", "efuses_burned"],
+      "properties": {
+        "flashing_odometer": { "type": "integer" },
+        "efuses_burned": {
+          "type": "array",
+          "items": { "type": "string", "enum": ["SECURE_BOOT", "FLASH_CRYPT", "JTAG_DISABLE"] }
+        },
+        "witness": { "type": "string" }
+      }
+    }
+  }
+}
