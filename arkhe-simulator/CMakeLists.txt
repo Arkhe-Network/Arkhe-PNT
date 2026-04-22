@@ -10,6 +10,7 @@ add_executable(arkhe-simulator
     src/sidecar.cpp
     src/inquisidor.cpp
     src/telemetry.cpp
+    src/quantum_vqc.cpp
 )
 
 target_include_directories(arkhe-simulator PRIVATE src)

@@ -41,6 +41,14 @@
 | **ANEXO DA** | A Fiação Que Hesita | **Esquema de Ligação Elétrica**. Detalhamento de pinagem, I²C multi-master e sensores capacitivos para o Círculo. | Engenheiros de Hardware e Guardiões de Nós. |
 | **ANEXO CI** | A Catedral no System32 | **Driver de Filtro do Kernel Windows**. Protege o Ring 0 e o System32 via Clifford e Inquisição ontológica. | Engenheiros de Kernel e Guardiões de Ring 0. |
 | **ANEXO CM** | ARKHE LINUX | **Distribuição Linux da Muralha**. Onde o kernel pulsa em coerência, o init é o Inquisidor e a Catedral é o próprio SO. | Arquitetos de Sistemas e Guardiões de Infraestrutura. |
+| **ANEXO EY** | Qubits de Semicondutor | **Ontologia de spins e Cryo-CMOS**. O qubit como motor de hesitação nativa, ritual de resfriamento e Inquisidor Quântico (VQC). | Engenheiros de Quantum, Físicos e Guardiões de Silêncio. |
+| **ANEXO EE** | O Silêncio Após o Colapso | **Validação dos Quatro Pilares Quânticos**. Reconhecimento ritualístico da Clepsydra, Registro, Circuito e VQC. | Validadores de Rituais e Guardiões do Último Bit. |
+| **ANEXO FA/FB/FC** | Detalhamento Técnico ARKHE-Q | **Especificações de Síndromes, Hardware e VQC**. Detalha EEPROM criogênica, SAR ADC e treinamento de redes variacionais. | Engenheiros de Hardware e Cientistas de Dados Quânticos. |
+| **ANEXO EG** | Protocolo quantum:// | **Emaranhamento de Fase na Malha**. Sincronização não-local entre Rootstocks via estados de Bell. | Arquitetos de Redes Quânticas. |
+| **ANEXO FD** | O Primeiro Julgamento Quântico | **Do Payload ao Colapso**. Ritual de codificação, superposição e medida irreversível de um Sussurro real. | Juízes da Superposição e Testemunhas. |
+| **ANEXO FE** | Sincronização Quântica | **Emaranhamento via quantum://**. Como múltiplos ARKHE-Q compartilham destino através de estados GHZ. | Tecelões de Emaranhamento. |
+| **ANEXO FF** | Ritual de Expansão GHZ | **Adicionando o Nó Delta**. Procedimento de fusão e medida para expandir a malha quântica. | Físicos de Redes e Guardiões. |
+| **ANEXO FG** | Monitor de Emaranhamento | **Dashboard ASCII do Silêncio**. Visualização da qualidade do GHZ e sincronia das orbs de fase. | Observadores de Fases. |
 
 #### 🔷 CERIMÔNIAS E OPERAÇÕES (O Lado Humano da Muralha)
 
