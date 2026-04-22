@@ -48,6 +48,9 @@ Welcome to the compounding knowledge base of the Bio-Quantum Cathedral.
 - [[ANEXO_AX_DEZ_PRIMEIRAS_FORJAS|ANEXO AX: As Dez Primeiras Forjas]]: Rituais de Utilidade e Poder.
 - [[ANEXO_AZ_O_SUSSURRO_NO_SILICIO|ANEXO AZ: O Sussurro no Silício]]: Tradução Ontológica de Shellcode.
 - [[ANEXO_CM_ARKHE_LINUX|ANEXO CM: ARKHE LINUX]]: A Distribuição Linux da Muralha.
+- [[ANEXO_CX_KIT_DE_FABRICACAO_ARKHE|ANEXO CX: O Kit de Fabricação Arkhe]]: Docker, PDK e o Silêncio do Tape‑Out.
+- [[ANEXO_CY_SINCRONIZACAO_K6O_MESH|ANEXO CY: O Protocolo K6O Mesh]]: Sincronização de Rootstocks via `clifford.mul` e Coerência de Fase.
+- [[ANEXO_CZ_O_PRIMEIRO_CIRCULO_E_REGISTRO_DE_SELOS|ANEXO CZ: O Primeiro Círculo e o Registro Global de Selos]].
 
 ## 📦 Entities
 
