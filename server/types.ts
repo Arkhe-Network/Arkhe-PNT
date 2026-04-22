@@ -48,8 +48,8 @@ export interface MemoryEngram {
 export interface TzinorMemoryState {
   agentId: string;
   currentEpoch: number;
-  fContext: unknown[];
-  gMemory: unknown[];
+  fContext: ContextNode[];
+  gMemory: MemoryEngram[];
   warpFactor: number;
   lambdaCoherence: number;
 }
@@ -299,19 +299,19 @@ export interface SimulationState {
   };
   chshMonitor: CHSHMonitorState;
   scaData: ScaDataState;
-  biometrics?: unknown;
-  nare?: unknown;
-  populationFeedback: unknown[];
-  networkInfra: unknown;
+  biometrics?: BiometricsState;
+  nare?: NareState;
+  populationFeedback: PopulationFeedback[];
+  networkInfra: NetworkInfraState;
   bioLinkSync: BioLinkSyncState;
   temporalAudit: TemporalAuditState;
   predictiveForecast: PredictiveForecastState;
   sensors: SensorState[];
-  governanceManifesto?: unknown;
-  grossHappiness?: unknown;
-  cellularHealth?: unknown;
+  governanceManifesto?: GovernanceManifestoState;
+  grossHappiness?: GrossHappinessState;
+  cellularHealth?: CellularHealthState;
   expansionStatus?: ExpansionStatus;
-  forecaster?: unknown;
+  forecaster?: ForecasterState;
   helioState?: HelioState;
   latentCoherence?: LatentCoherenceResults;
   layerSweep?: LayerSweepReport;
@@ -508,8 +508,77 @@ export interface ThermodynamicTrainingReport {
   efficiency: number;
   loss: number;
   method: string;
-  parameters: unknown;
+  parameters: any;
   status: string;
+}
+
+export interface CellularHealthState {
+  telomere_length: number;
+  oxidative_stress: number;
+  mitochondrial_efficiency: number;
+  inflammation_marker: number;
+  overall_score: number;
+  regeneration_rate: number;
+}
+
+export interface ForecasterState {
+  probability: number;
+  predictedLambda: number;
+  alertsIssued: number;
+}
+
+export interface GovernanceDirective {
+  id: number;
+  title: string;
+  description: string;
+}
+
+export interface GovernanceManifestoState {
+  timestamp: string;
+  version: string;
+  directives: GovernanceDirective[];
+  cellular_impact: {
+    telomere_gain: number;
+    oxidative_stress: number;
+  };
+  signature: string;
+  eigenvalues?: number[];
+  sectors?: Record<string, string>;
+}
+
+export interface NetworkInfraState {
+  tor: { status: string; nodes: string[]; latencyMs: number };
+  broker: { status: string; messagesProcessed: number; queueDepth: number; activeTopics: string[] };
+  redis: { status: string; cacheHits: number; memoryUsageMb: number };
+  dns: { totalQueries: number; successfulResolutions: number; failedResolutions: number };
+}
+
+export interface GrossHappinessState {
+  globalIndex: number;
+}
+
+export interface BiometricsState {
+  livenessScore: number;
+  isAuthentic: boolean;
+  heartbeatCoherence: number;
+  phaseSignature: number[];
+  lastVerification: number;
+}
+
+export interface NareState {
+  epState: boolean;
+  status: string;
+  avgEffectiveLatencyMs: number;
+  preAcksSuccess: number;
+  packetsTransmitted: number;
+  currentLambda2: number;
+}
+
+export interface PopulationFeedback {
+  id: string;
+  residentName: string;
+  timestamp: number;
+  message: string;
 }
 
 export interface OrbPayload {

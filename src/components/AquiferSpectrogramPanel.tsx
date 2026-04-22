@@ -130,7 +130,7 @@ export default function AquiferSpectrogramPanel({ onClose }: { onClose?: () => v
   useEffect(() => {
     const eventSource = new EventSource('/api/stream');
     eventSource.onmessage = (event: MessageEvent) => {
-      const newState = JSON.parse(event.data as string);
+      const newState = JSON.parse(event.data as unknown as string);
       setState(newState);
     };
     return () => eventSource.close();
