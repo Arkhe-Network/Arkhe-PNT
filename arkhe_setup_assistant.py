@@ -102,7 +102,6 @@ def setup_go_sentinel():
     print("\n>>> Building Go Sentinel...")
     if os.path.exists("arkhe-sentinel/go.mod"):
         os.makedirs("build/bin", exist_ok=True)
-        # Using absolute path for output to be safe
         out_path = os.path.abspath("build/bin/arkhe-sentinel")
         return run_command(["go", "build", "-o", out_path, "bot.go"], cwd="arkhe-sentinel")
     return True
