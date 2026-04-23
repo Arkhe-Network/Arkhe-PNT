@@ -35,21 +35,6 @@ class AffineSubstrate:
         self.coherence_score = 1.0
         self.active_logical_qubits = 0
         self.last_noise_event = "None"
-        self.operational_modes = {
-            "Calculo Primordial": False,
-            "Sincronia Total": False,
-            "Vigilia Profunda": False
-        }
-
-    def set_mode(self, mode: str, state: bool = True):
-        """Ativa ou desativa um modo operacional de alta fidelidade."""
-        if mode in self.operational_modes:
-            self.operational_modes[mode] = state
-            # Modos de alta fidelidade exigem/promovem estabilidade
-            if state:
-                self.coherence_score = min(1.0, self.coherence_score + 0.05)
-            return True
-        return False
 
     def process_logic(self, operation: str, **kwargs) -> Dict[str, Any]:
         """Executa uma operação lógica no substrato."""
@@ -95,7 +80,6 @@ class AffineSubstrate:
             "material": "Affine Code (F2^9)",
             "coherence": float(self.coherence_score),
             "last_event": self.last_noise_event,
-            "modes": self.operational_modes,
             "geometry": self.programmable_code.get_current_code_geometry(),
             "params": self.params
         }

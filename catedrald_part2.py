@@ -34,7 +34,6 @@ from catedrald_diamante import NVCenter, inject_diamond_into_core
 from catedrald_bio import BioScaffold, inject_bio_into_core
 from graphene_resonator import GrapheneSubstrate, inject_graphene_into_core
 from catedrald_affine import AffineSubstrate, inject_affine_into_core
-from catedrald_energy import EnergyOracle, inject_energy_into_core
 
 # ═══════════════════════════════════════════════════════════════════════════════
 # DETECÇÃO DE DEPENDÊNCIAS
@@ -413,7 +412,6 @@ class CatedralCore:
         self.bio = inject_bio_into_core(self)
         self.graphene = inject_graphene_into_core(self)
         self.affine = inject_affine_into_core(self)
-        self.energy = inject_energy_into_core(self)
         self._running = False
         self._heartbeat_thread: Optional[threading.Thread] = None
 
@@ -447,8 +445,7 @@ class CatedralCore:
                 "bio": self.bio.to_dict(),
                 "graphene": self.graphene.to_dict(),
                 "affine": self.affine.to_dict(),
-                "energy": self.energy.to_dict(),
-                "timestamp": datetime.now(timezone.utc).isoformat().replace("+00:00", "Z"),
+                "timestamp": datetime.utcnow().isoformat() + "Z",
             }
 
     def start(self):
@@ -692,11 +689,6 @@ class CatedralCLI:
                 table.add_row("Substrato 33 (Affine)", f"{affine.get('material', '?')}")
                 table.add_row("Affine Coherence", f"{affine.get('coherence', 0):.4f}")
                 table.add_row("Last Noise Event", f"{affine.get('last_event', '?')}")
-
-            energy = state.get('energy', {})
-            if energy:
-                table.add_row("Substrato 31 (Energy)", f"{energy.get('material', '?')}")
-                table.add_row("Solar Coherence", f"{energy.get('solar_coherence', 0):.4f}")
 
             table.add_row("Timestamp", state.get('timestamp', '?'))
             self.console.print(table)
