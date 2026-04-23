@@ -9,6 +9,10 @@ import { Activity, Shield, Zap, Cpu, Heart, Fingerprint, Smile, Users, Radio, Ap
 import { motion, AnimatePresence } from 'motion/react';
 import React, { useState } from 'react';
 import {
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
   ResponsiveContainer,
   AreaChart,
   Area,
@@ -238,9 +242,57 @@ const CorvoNoirDashboard: React.FC = () => {
                     </div>
                   </Card>
                 </div>
-              )}
-            </motion.div>
-          </AnimatePresence>
+              </div>
+            </div>
+          )}
+
+          {activeTab === 'security' && (
+            <div className="space-y-4">
+               <div className="flex justify-between items-center">
+                <p className="text-[10px] text-neutral-400 uppercase tracking-widest flex items-center gap-1">
+                  <Shield className="w-3 h-3 text-red-500" /> Chronos-Guard (Temporal Shield v2.1-Σ)
+                </p>
+                <button onClick={handleStressTest} className="text-[8px] bg-red-500/10 hover:bg-red-500/20 text-red-400 border border-red-500/50 px-2 py-1 uppercase">Stress Test</button>
+              </div>
+
+              <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+                 <div className="bg-black/40 p-2 rounded border border-neutral-800">
+                    <p className="text-[8px] text-neutral-500 uppercase">Temporal Inconsistency (TII)</p>
+                    <p className={`text-lg font-bold ${state.temporalAudit.lastTII > 0.05 ? 'text-red-500' : 'text-emerald-400'}`}>
+                      {state.temporalAudit.lastTII.toFixed(4)}
+                    </p>
+                 </div>
+                 <div className="bg-black/40 p-2 rounded border border-neutral-800">
+                    <p className="text-[8px] text-neutral-500 uppercase">Locked Events</p>
+                    <p className="text-lg font-bold text-neutral-100">{state.temporalAudit.lockedEvents}</p>
+                 </div>
+                 <div className="bg-black/40 p-2 rounded border border-neutral-800">
+                    <p className="text-[8px] text-neutral-500 uppercase">Collapse Risk</p>
+                    <p className={`text-lg font-bold ${state.predictiveForecast.coherenceCollapseRisk > 0.3 ? 'text-red-500' : 'text-emerald-400'}`}>
+                      {(state.predictiveForecast.coherenceCollapseRisk * 100).toFixed(1)}%
+                    </p>
+                 </div>
+                 <div className="bg-black/40 p-2 rounded border border-neutral-800">
+                    <p className="text-[8px] text-neutral-500 uppercase">Forecast λ₂</p>
+                    <p className="text-lg font-bold text-blue-400">{state.predictiveForecast.predictedLambda.toFixed(4)}</p>
+                 </div>
+              </div>
+
+              <div className="bg-neutral-900 p-3 rounded border border-neutral-800 h-32 overflow-hidden relative">
+                 <div className="flex gap-1 h-full items-end">
+                   {state.sensors.map((s) => (
+                     <div
+                       key={s.id}
+                       className={`w-1 transition-all ${s.status === 'attacked' ? 'bg-red-500 animate-pulse' : s.status === 'isolated' ? 'bg-neutral-700' : 'bg-emerald-500/40'}`}
+                       style={{ height: `${(s.value / 5.0) * 100}%`, minHeight: '2px' }}
+                     />
+                   ))}
+                 </div>
+                 <div className="absolute inset-0 bg-gradient-to-t from-neutral-900 to-transparent pointer-events-none" />
+                 <p className="absolute top-2 left-2 text-[8px] text-neutral-500 uppercase font-bold">168 NV SENSOR GRID (C-DOMAIN)</p>
+              </div>
+            </div>
+          )}
         </div>
 
         {/* Sidebar Stats */}
