@@ -193,7 +193,7 @@ export default function AquiferSpectrogramPanel({ onClose }: { onClose?: () => v
       setIsPlaying(false);
     } else {
       if (!audioCtxRef.current) {
-        const AudioContextClass = window.AudioContext || (window as unknown as { webkitAudioContext: any }).webkitAudioContext;
+        const AudioContextClass = window.AudioContext || (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext;
         audioCtxRef.current = new AudioContextClass();
         analyserRef.current = audioCtxRef.current.createAnalyser();
         analyserRef.current.fftSize = 128;

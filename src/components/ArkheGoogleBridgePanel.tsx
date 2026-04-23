@@ -7,7 +7,7 @@
 
 import { X, Cloud, Shield, MessageSquare, Ticket, Key, CheckCircle2,  AlertCircle, Send } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 
 interface ArkheGoogleBridgePanelProps {
   onClose: () => void;

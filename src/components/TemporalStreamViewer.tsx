@@ -17,8 +17,8 @@ interface TemporalStreamViewerProps {
 
 export default function TemporalStreamViewer({ onClose }: TemporalStreamViewerProps) {
   const videoRef = useRef<HTMLVideoElement>(null);
-  const [player, setPlayer] = useState<any>(null);
-  const [stats, setStats] = useState<any>({});
+  const [player, setPlayer] = useState<shaka.Player | null>(null);
+  const [stats, setStats] = useState<shaka.extern.Stats | Record<string, unknown>>({});
   const [isPlaying, setIsPlaying] = useState(false);
   const [isMuted, setIsMuted] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -40,15 +40,16 @@ export default function TemporalStreamViewer({ onClose }: TemporalStreamViewerPr
       const newPlayer = new shaka.Player(videoRef.current);
       setPlayer(newPlayer);
 
-      newPlayer.addEventListener('error', (event: any) => {
-        logger.error(`Error code ${event.detail.code} object ${JSON.stringify(event.detail)}`);
-        setError(`SHAKA_ERR_${event.detail.code}`);
+      newPlayer.addEventListener('error', (event: unknown) => {
+        const detail = (event as { detail: { code: number } }).detail;
+        logger.error(`Error code ${detail.code} object ${JSON.stringify(detail)}`);
+        setError(`SHAKA_ERR_${detail.code}`);
       });
 
       // Adaptation events -> Coherence changes
       newPlayer.addEventListener('adaptation', () => {
         const tracks = newPlayer.getVariantTracks();
-        const activeTrack = tracks.find((t: any) => t.active);
+        const activeTrack = tracks.find((t) => t.active);
         if (activeTrack) {
           // Estimate coherence based on bandwidth
           const newCoherence = Math.min(1.0, activeTrack.bandwidth / 5000000);
@@ -81,12 +82,12 @@ export default function TemporalStreamViewer({ onClose }: TemporalStreamViewerPr
         logger.info('The video has now been loaded!');
         if (videoRef.current) {
           videoRef.current.muted = true;
-          void void videoRef.current.play().then(() => setIsPlaying(true)).catch((e: any) => logger.error("Auto-play prevented: " + e));
+          void videoRef.current.play().then(() => setIsPlaying(true)).catch((e: unknown) => logger.error("Auto-play prevented: " + e));
         }
         return null;
-      }).catch((e: any) => {
+      }).catch((e: unknown) => {
         logger.error('Error loading video: ' + e);
-        setError(`LOAD_ERR_${(e as any)?.code || 'UNKNOWN'}`);
+        setError(`LOAD_ERR_${(e as { code?: string })?.code || 'UNKNOWN'}`);
         return null;
       });
 
@@ -171,7 +172,7 @@ export default function TemporalStreamViewer({ onClose }: TemporalStreamViewerPr
     }
   };
 
-  const formatBitrate = (bits: number) => {
+  const formatBitrate = (bits: number | undefined) => {
     if (!bits) {return '0 Mbps';}
     return (bits / 1000000).toFixed(2) + ' Mbps';
   };

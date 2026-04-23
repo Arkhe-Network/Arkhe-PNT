@@ -215,10 +215,12 @@ export default function ArkheOntologyVision({ onClose }: { onClose: () => void }
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(telemetry)
                 });
-            } catch (err) {}
+            } catch (_err) {}
         };
 
-        const interval = setInterval(sendTelemetry, 1000);
+        const interval = setInterval(() => {
+          void sendTelemetry();
+        }, 1000);
         return () => clearInterval(interval);
     }, [sessionId]);
 
@@ -232,7 +234,7 @@ export default function ArkheOntologyVision({ onClose }: { onClose: () => void }
             // In a real system, we'd hash the URI using the same logic as backend
             const nodeHash = selectedNode.uri.split(':').pop() || "unknown";
             const challengeRes = await fetch(`/api/game/zk-challenge/${nodeHash}`);
-            const challenge = await challengeRes.json();
+            const _challenge = await challengeRes.json();
 
             // 2. Simulate Local Proof Generation (WASM)
             await new Promise(resolve => setTimeout(resolve, 2000));
@@ -262,7 +264,7 @@ export default function ArkheOntologyVision({ onClose }: { onClose: () => void }
                     message: `FALHA NA PROVA ZK. O recurso está em conformidade formal.`
                 });
             }
-        } catch (err) {
+        } catch (_err) {
             setNotification({type: 'error', message: 'Erro no protocolo de privacidade ZK.'});
         } finally {
             setIsProving(false);
