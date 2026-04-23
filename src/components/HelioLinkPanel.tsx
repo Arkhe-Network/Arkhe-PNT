@@ -12,7 +12,7 @@ import type { HelioState } from '../../server/types';
 import { Card } from './ui/Card';
 
 interface HelioLinkPanelProps {
-  helio?: unknown;
+  helio?: any;
   onListen: () => void;
   onSync: () => void;
   coherence: number;

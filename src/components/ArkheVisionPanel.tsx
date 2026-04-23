@@ -5,7 +5,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { Eye, Network, ShieldAlert } from 'lucide-react';
+import { Eye, Network, ShieldAlert, Server } from 'lucide-react';
 import React, { useState } from 'react';
 
 interface ArkheVisionPanelProps {
