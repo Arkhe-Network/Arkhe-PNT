@@ -30,6 +30,8 @@ from datetime import datetime
 from typing import Any, Dict, List, Optional
 
 from catedrald_safira import SapphireScaffold, inject_sapphire_into_core
+from catedrald_diamante import NVCenter, inject_diamond_into_core
+from catedrald_bio import BioScaffold, inject_bio_into_core
 
 # ═══════════════════════════════════════════════════════════════════════════════
 # DETECÇÃO DE DEPENDÊNCIAS
@@ -404,6 +406,8 @@ class CatedralCore:
         self.immune = CatedralImmuneSystem(self)
         self.bug_bounty = BugBountyEngine(self)
         self.sapphire = inject_sapphire_into_core(self)
+        self.diamond = inject_diamond_into_core(self)
+        self.bio = inject_bio_into_core(self)
         self._running = False
         self._heartbeat_thread: Optional[threading.Thread] = None
 
@@ -433,6 +437,8 @@ class CatedralCore:
                 "quarantine_size": self.immune.get_quarantine_size(),
                 "bounty_total_qz": self.bug_bounty.get_total_quartz(),
                 "sapphire": self.sapphire.to_dict(),
+                "diamond": self.diamond.to_dict(),
+                "bio": self.bio.to_dict(),
                 "timestamp": datetime.utcnow().isoformat() + "Z",
             }
 
@@ -656,6 +662,16 @@ class CatedralCLI:
                 table.add_row("Substrato 25 (Safira)", f"{sapphire.get('material', '?')}")
                 table.add_row("Safira Coerência", f"{sapphire.get('contribuicao_coerencia', 0):.4f}")
 
+            diamond = state.get('diamond', {})
+            if diamond:
+                table.add_row("Substrato 27 (Diamante)", f"{diamond.get('material', '?')}")
+                table.add_row("NV Fidelity", f"{diamond.get('fidelity', 0):.4f}")
+
+            bio = state.get('bio', {})
+            if bio:
+                table.add_row("Substrato 28 (Bio)", f"{bio.get('material', '?')}")
+                table.add_row("Bio Homeostase", f"{bio.get('homeostase', 0):.4f}")
+
             table.add_row("Timestamp", state.get('timestamp', '?'))
             self.console.print(table)
         else:
@@ -834,6 +850,14 @@ class CatedralCLI:
                     sapphire = state.get('sapphire', {})
                     if sapphire:
                         left_table.add_row("Safira (Sub 25)", f"{sapphire.get('contribuicao_coerencia', 0):.3f}")
+
+                    diamond = state.get('diamond', {})
+                    if diamond:
+                        left_table.add_row("Diamante (Sub 27)", f"{diamond.get('fidelity', 0):.3f}")
+
+                    bio = state.get('bio', {})
+                    if bio:
+                        left_table.add_row("Bio (Sub 28)", f"{bio.get('homeostase', 0):.3f}")
 
                     left_table.add_row("QZ Total", f"{state.get('bounty_total_qz', 0):.2f}")
 
