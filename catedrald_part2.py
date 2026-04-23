@@ -26,7 +26,7 @@ import threading
 import time
 import uuid
 from dataclasses import dataclass, field, asdict
-from datetime import datetime
+from datetime import datetime, timezone, timezone
 from typing import Any, Dict, List, Optional
 
 from catedrald_safira import SapphireScaffold, inject_sapphire_into_core
@@ -224,7 +224,7 @@ class CatedralImmuneSystem:
         """
         seq = self._next_seq()
         payload_hash = self._hash_payload(payload_json)
-        timestamp = datetime.utcnow().isoformat() + "Z"
+        timestamp = datetime.now(timezone.utc).isoformat().replace("+00:00", "Z")
 
         entry = AuditEntry(
             timestamp=timestamp,
@@ -356,7 +356,7 @@ class BugBountyEngine:
             reporter=payload.get("reporter", "anonymous"),
             severity=severity,
             vector=payload.get("vector", "unknown"),
-            timestamp=datetime.utcnow().isoformat() + "Z",
+            timestamp=datetime.now(timezone.utc).isoformat().replace("+00:00", "Z"),
             reward_quartz=self.REWARD_TABLE[severity],
             status="open"
         )
