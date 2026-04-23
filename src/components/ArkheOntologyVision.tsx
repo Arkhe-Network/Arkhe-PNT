@@ -188,8 +188,8 @@ export default function ArkheOntologyVision({ onClose }: { onClose: () => void }
                 console.error("Failed to fetch visualization state:", error);
             }
         };
-        fetchData();
-        const interval = setInterval(fetchData, 5000);
+        void fetchData();
+        const interval = setInterval(() => { void fetchData(); }, 5000);
         return () => clearInterval(interval);
     }, []);
 

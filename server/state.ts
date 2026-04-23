@@ -6,7 +6,7 @@
 
 import { v4 as uuidv4 } from 'uuid';
 
-import type { SimulationState, OrbPayload } from './types';
+import type { SimulationState, OrbPayload, ContextNode, MemoryEngram } from './types';
 
 export let state: SimulationState = {
   coherenceData: [],

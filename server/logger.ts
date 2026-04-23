@@ -6,6 +6,7 @@
  */
 
 import { logs, SeverityNumber } from '@opentelemetry/api-logs';
+import type { AnyValueMap } from '@opentelemetry/api-logs';
 import { OTLPLogExporter } from '@opentelemetry/exporter-logs-otlp-http';
 import { resourceFromAttributes } from '@opentelemetry/resources';
 import { LoggerProvider, BatchLogRecordProcessor } from '@opentelemetry/sdk-logs';

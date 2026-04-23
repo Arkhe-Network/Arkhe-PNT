@@ -37,20 +37,20 @@ export default function VelxioEmulationPanel({ onClose }: VelxioEmulationPanelPr
         });
         const data = await res.json();
 
-        if (data.success) {
+        if ((data as { success: boolean }).success) {
           setBridgeStatus('connected');
           addLog('Handshake successful. Velxio Bridge registered in Teknet.');
         } else {
           setBridgeStatus('disconnected');
           addLog('ERR_BRIDGE: Connection rejected by Arkhe Sentinel.');
         }
-      } catch (e) {
+      } catch {
         setBridgeStatus('disconnected');
         addLog('ERR_BRIDGE: Failed to reach bridge endpoint.');
       }
     };
 
-    connectBridge();
+    void connectBridge();
   }, []);
 
   const handleStartSimulation = async () => {
