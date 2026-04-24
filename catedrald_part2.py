@@ -44,6 +44,8 @@ from crypto_shredder import CryptoShredder, MockHSMClient
 from cross_jurisdiction_audit import CrossJurisdictionAuditor, AuditQuery
 from dynamic_consent_protocol import ConsentManager, PrivacyProfile, DataCategory
 from portability_protocol import PortabilityProtocol
+from topological_photonics_protocol import TopologicalSovereigntyProtocol
+from audit_logger import AuditLogger
 
 # ═══════════════════════════════════════════════════════════════════════════════
 # DETECÇÃO DE DEPENDÊNCIAS
@@ -452,8 +454,12 @@ class CatedralCore:
         self.muscle = inject_muscle_into_core(self)
 
         # Substrato 56: Governança e Soberania de Dados
+        self.audit_logger = AuditLogger()
         self.consent = ConsentManager()
         self.shredder = CryptoShredder(MockHSMClient(), self.immune)
+
+        # Substrato 89: Fotônica Topológica Integrada
+        self.topological = TopologicalSovereigntyProtocol(self.audit_logger, self.consent)
 
         # Gerar chave RSA para o Auditor (em produção, viria de um cofre)
         private_key = rsa.generate_private_key(public_exponent=65537, key_size=2048)
@@ -499,6 +505,7 @@ class CatedralCore:
                 "graphene": self.graphene.to_dict(),
                 "affine": self.affine.to_dict(),
                 "muscle": self.muscle.to_dict(),
+                "topological": self.topological.get_ledger_status(),
                 "timestamp": datetime.utcnow().isoformat() + "Z",
             }
 
