@@ -11,6 +11,7 @@ import * as arkheGnuTools from './arkhe_gnu.js';
 import * as arkheNetTools from './arkhe_net.js';
 import * as consoleTools from './console.js';
 import * as decentralizedTools from './decentralized.js';
+import * as ebpfTools from './ebpf.js';
 import * as emulationTools from './emulation.js';
 import * as evoskillTools from './evoskill.js';
 import * as extensionTools from './extensions.js';
@@ -66,6 +67,7 @@ export const createTools = (args: ParsedArguments) => {
         ...Object.values(decentralizedTools),
         ...Object.values(arkheGnuTools),
         ...Object.values(arkheNetTools),
+        ...Object.values(ebpfTools),
         ...Object.values(lambdaTools),
         ...Object.values(osCathedralTools),
         ...Object.values(spectraTools),

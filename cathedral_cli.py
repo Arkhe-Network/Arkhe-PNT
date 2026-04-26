@@ -18,6 +18,7 @@ from utils.cathedral_secops.forensics import ImmutableInvestigator
 from utils.cathedral_secops.headi import SovereignHeadi
 from utils.cathedral_secops.gno_auditor import SovereignGnoAuditor
 from utils.cathedral_secops.dork_forge import SovereignDorkForge
+from utils.cathedral_secops.ebpf_sensor import SovereignEbpfSensor
 
 def print_banner():
     banner = """
@@ -93,6 +94,35 @@ async def handle_gno(args):
 async def handle_dork(args):
     forge = SovereignDorkForge(args.consent_id)
     result = await forge.process_dork(args.domain, args.type)
+    print(json.dumps(result, indent=2))
+
+async def handle_ebpf(args):
+    sensor = SovereignEbpfSensor(args.consent_id)
+    if args.op == "monitor":
+        result = await sensor.monitor_traffic(args.interface, args.duration)
+    elif args.op == "load":
+        if not args.elf_path:
+            result = {"success": False, "error": "ELF path is required for load operation."}
+        else:
+            # EQBE Compliance: Mandatory Ethics Review by Telos (G4) subagent
+            print("🜏 [EQBE] Consulting Telos (G4) for ethical impact review...")
+            # Simulation of Telos response
+            if "sensitive" in args.elf_path:
+                 result = {"status": "VETO", "reason": "Potential biological substrate disruption detected."}
+            else:
+                 print("🜏 [EQBE] Ethical clearance granted.")
+                 result = await sensor.load_ebpf_program(args.elf_path)
+    elif args.op == "readiness":
+        result = await sensor.check_readiness()
+    elif args.op == "benchmark":
+        result = await sensor.run_benchmark(args.benchmark_name)
+    elif args.op == "verify":
+        if not args.batch_id:
+            result = {"success": False, "error": "Batch ID is required for verify operation."}
+        else:
+            result = await sensor.verify_integrity(args.batch_id)
+    else:
+        result = {"success": False, "error": f"Unsupported eBPF operation: {args.op}"}
     print(json.dumps(result, indent=2))
 
 def main():
@@ -184,6 +214,15 @@ def main():
     dork_p.add_argument("--domain", required=True, help="Target Domain")
     dork_p.add_argument("--type", choices=["files", "open_dirs", "login_pages", "exposed_config"], required=True)
 
+    # 14. eBPF Sensor
+    ebpf_p = subparsers.add_parser("ebpf", parents=[common_parser])
+    ebpf_p.add_argument("op", choices=["monitor", "load", "verify", "readiness", "benchmark"])
+    ebpf_p.add_argument("--interface", help="Network interface for monitoring")
+    ebpf_p.add_argument("--duration", type=int, default=60, help="Duration in seconds")
+    ebpf_p.add_argument("--elf-path", help="Path to eBPF ELF program")
+    ebpf_p.add_argument("--batch-id", help="Batch ID for integrity verification")
+    ebpf_p.add_argument("--benchmark-name", default="distributed_consensus", help="Grounding benchmark name")
+
     args = parser.parse_args()
     print_banner()
 
@@ -213,6 +252,8 @@ def main():
         asyncio.run(handle_gno(args))
     elif args.command == "dork":
         asyncio.run(handle_dork(args))
+    elif args.command == "ebpf":
+        asyncio.run(handle_ebpf(args))
 
 if __name__ == "__main__":
     main()
