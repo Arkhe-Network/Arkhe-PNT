@@ -39,8 +39,9 @@ import ArkheOntologyVision from './components/ArkheOntologyVision';
 import ChipFabricationVision from './components/ChipFabricationVision';
 import ThreatDetection from './components/ThreatDetection';
 import TimechainVisualizer from './components/TimechainVisualizer';
-import TzinorNetworkPanel from './components/TzinorNetworkPanel';
+import TzinorNetworkPanel, { type TzinorNetworkState } from './components/TzinorNetworkPanel';
 import TzinorTerminal from './components/TzinorTerminal';
+import { type TzinorMemoryState } from './types/tzinor';
 import UnifiedOntologyPanel from './components/UnifiedOntologyPanel';
 import VideoGenerationPanel from './components/VideoGenerationPanel';
 import X402WalletPanel from './components/X402WalletPanel';
@@ -76,6 +77,7 @@ import { RealityExpressionPanel } from './components/RealityExpressionPanel';
 import { InvariantChipPanel } from './components/InvariantChipPanel';
 import { SelfRegulationPanel } from './components/SelfRegulationPanel';
 import { ConsciousClockPanel } from './components/ConsciousClockPanel';
+
 import { useArkheSimulation } from './hooks/useArkheSimulation';
 
 type PanelType = 'simulation' | 'command' | 'intelligence' | 'network' | 'governance' | 'corvo' | 'enterprise' | 'bonsai' | 'neko' | 'dashboard' | 'forge' | 'spectra' | 'game';
@@ -189,7 +191,7 @@ export default function App() {
             >
               <Terminal className="w-5 h-5 text-cyan-500" />
             </button>
-            <button 
+            <button
               onClick={() => setShowVideoGen(true)}
               className="px-3 py-1.5 bg-arkhe-cyan/10 border border-arkhe-cyan/50 text-arkhe-cyan rounded font-mono text-[10px] uppercase hover:bg-arkhe-cyan/20 transition-all flex items-center gap-2"
             >
@@ -233,11 +235,11 @@ export default function App() {
               <div className="lg:col-span-2 xl:col-span-2 space-y-6 flex flex-col">
                 <CoherenceMonitor data={state.coherenceData} currentLambda={state.currentLambda} />
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <TzinorNetworkPanel network={state.tzinorNetwork as any} />
+                  <TzinorNetworkPanel network={state.tzinorNetwork as TzinorNetworkState} />
                   <ManifestationCycle manifestation={state.manifestation} />
                 </div>
                 <div className="h-[280px]">
-                  <TzinorTerminal tzinor={state.tzinor as any} threatLevel={state.threatLevel} />
+                  <TzinorTerminal tzinor={state.tzinor as unknown as TzinorMemoryState} threatLevel={state.threatLevel} />
                 </div>
                 <TimechainVisualizer logs={state.logs} />
                 <div className="flex-1 min-h-[300px]">
