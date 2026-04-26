@@ -131,7 +131,7 @@ export const oasisAudit = definePageTool({
         if (stdout) {
           response.appendResponseLine(stdout);
         }
-      } catch (_error) {
+      } catch (error) {
         response.appendResponseLine(`- **Error**: Failed to execute audit sequence.`);
       }
     }
