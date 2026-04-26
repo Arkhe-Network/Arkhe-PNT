@@ -12,12 +12,14 @@ import * as arkheNetTools from './arkhe_net.js';
 import * as consoleTools from './console.js';
 import * as decentralizedTools from './decentralized.js';
 import * as emulationTools from './emulation.js';
+import * as epistemologyTools from './epistemology.js';
 import * as evoskillTools from './evoskill.js';
 import * as extensionTools from './extensions.js';
 import * as inPageTools from './inPage.js';
 import * as inputTools from './input.js';
 import * as lambdaTools from './lambda_tools.js';
 import * as gnoTools from './gno.js';
+import * as gitnexusTools from './gitnexus.js';
 import * as lighthouseTools from './lighthouse.js';
 import * as logosLibraryTools from './logos_library.js';
 import * as memoryTools from './memory.js';
@@ -61,6 +63,7 @@ export const createTools = (args: ParsedArguments) => {
         ...Object.values(scriptTools),
         ...Object.values(snapshotTools),
         ...Object.values(storageTools),
+        ...Object.values(epistemologyTools),
         ...Object.values(evoskillTools),
         ...Object.values(arkheTools),
         ...Object.values(decentralizedTools),
@@ -77,6 +80,7 @@ export const createTools = (args: ParsedArguments) => {
         ...Object.values(oasisTools),
         ...Object.values(meshtasticTools),
         ...Object.values(gnoTools),
+        ...Object.values(gitnexusTools),
       ];
 
   const tools = [];

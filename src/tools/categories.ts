@@ -22,6 +22,8 @@ export enum ToolCategory {
   EVOSKILL = 'evoskill',
   MESHTASTIC = 'meshtastic',
   GNO = 'gno',
+  GITNEXUS = 'gitnexus',
+  EPISTEMOLOGY = 'epistemology',
 }
 
 export const labels = {
@@ -42,4 +44,6 @@ export const labels = {
   [ToolCategory.EVOSKILL]: 'EvoSkill (Evolutionary Skill Induction)',
   [ToolCategory.MESHTASTIC]: 'Meshtastic Mesh Protocols',
   [ToolCategory.GNO]: 'Gno.land Execution Layer',
+  [ToolCategory.GITNEXUS]: 'GitNexus Code Intelligence',
+  [ToolCategory.EPISTEMOLOGY]: 'Epistemic Defense System (PSA/PEFM)',
 };
