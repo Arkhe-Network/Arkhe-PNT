@@ -1,6 +1,12 @@
+/**
+ * @license
+ * Copyright 2025 Google LLC
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 // arkhe-dashboard/scripts/verify-v19.ts
-import { ethicalFederatedLearner } from '../src/lib/federated/ethicalFederatedLearning';
 import { QuantumAROverlay } from '../src/lib/ar/quantumAROverlay';
+import { ethicalFederatedLearner } from '../src/lib/federated/ethicalFederatedLearning';
 
 async function verifyV19() {
   console.log('🚀 Iniciando Verificação do Arkhe OS v19...');
@@ -42,4 +48,4 @@ async function verifyV19() {
   console.log('\n--- Verificação Concluída ---');
 }
 
-verifyV19();
+void verifyV19();

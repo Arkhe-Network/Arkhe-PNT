@@ -1,8 +1,8 @@
 // arkhe-dashboard/src/app/api/telemetry/route.ts
 import { NextRequest, NextResponse } from 'next/server';
-import { EthicalMetrics } from '@/types/ethics';
+import {EthicalMetrics as _EthicalMetrics} from '@/types/ethics';
 
-export async function GET(request: NextRequest) {
+export async function GET(_request: NextRequest) {
   try {
     // Buscar métricas do núcleo C++ via proxy (simulado)
     return NextResponse.json({
