@@ -11,7 +11,7 @@ class OracleBridge:
         self.pkg_path = "gno.land/r/cathedral/coherence_oracle"
 
     async def push_metric(self, omega: float, status: str):
-        """Usa a ferramenta gno_call do MCP para persistir dados on-chain."""
+        """Usa a ferramenta gno_call do MCP para persistir dados onchain."""
         args = [str(omega), status]
         # Chamada via MCP (simulado na estrutura da classe)
         return await self.gno.call_contract(self.pkg_path, "RecordCoherence", args)

@@ -109,7 +109,7 @@ x:LucentEngine a x:Tzinor ;
 
 x:Mo1Relayer a x:Structure ;
     rdfs:label "Complexo Mo1 (Enclave)" ;
-    rdfs:comment "O receptor físico que permite a emissão NIR (transações on-chain)." .
+    rdfs:comment "O receptor físico que permite a emissão NIR (transações onchain)." .
 
 ### --- ENTERPRISE PLUS EXTENSIONS (BFO/DOLCE Inspired) ---
 
@@ -201,4 +201,4 @@ x:hasFidelity a owl:DatatypeProperty ;
 x:anchoredIn a owl:ObjectProperty ;
     rdfs:domain x:EthicalSynthesis ;
     rdfs:range x:SmartContract ;
-    rdfs:comment "Associates a synthesis with its on-chain anchor (e.g., KnowledgeAsset)." .
+    rdfs:comment "Associates a synthesis with its onchain anchor (e.g., KnowledgeAsset)." .

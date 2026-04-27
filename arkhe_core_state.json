@@ -1,5 +1,7 @@
 {
-  "kernel_omega": 0.9485,
-  "kernel_load": 0.484,
-  "timestamp": 1777250697
+  "kernel_omega": 0.985,
+  "kernel_load": 0.52,
+  "timestamp": 1716207000,
+  "odometro": "002198",
+  "phase": "v70.0_neural_integration"
 }

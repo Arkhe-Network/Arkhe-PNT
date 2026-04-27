@@ -55,7 +55,7 @@ class QuantumHandoverEngine:
         print("  > Verificando assinatura MuSig2 do Conselho (6/9)...")
         time.sleep(0.5)
 
-        # Simulação de transferência de ativos on-chain
+        # Simulação de transferência de ativos onchain
         self.node_s.stake += self.node_r.stake
         self.node_s.reputation = self.node_r.reputation
         self.node_r.stake = 0

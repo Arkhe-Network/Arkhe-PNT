@@ -18,7 +18,7 @@ pragma solidity ^0.8.24;
  * Integration with qhttp://:
  * - qhttp frames are validated by the LatticeValidator module
  * - PQ-Integrity Proofs are generated per-node, per-block
- * - Merkle roots are committed on-chain for network-wide integrity
+ * - Merkle roots are committed onchain for network-wide integrity
  */
 
 contract ArkheChainPQIntegrity {

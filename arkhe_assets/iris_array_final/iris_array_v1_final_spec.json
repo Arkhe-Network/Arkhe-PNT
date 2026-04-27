@@ -1,0 +1,94 @@
+{
+  "structures": {
+    "IRIS_ARRAY_V1_FINAL": {
+      "antennas": [
+        {
+          "mode_n": -2,
+          "wavelength_nm": 321.6153814725885,
+          "length_nm": 321.6153814725885,
+          "width_nm": 80.0,
+          "thickness_nm": 40.0,
+          "gap_nm": 15.0,
+          "position_x_nm": 0.0,
+          "position_y_nm": 0,
+          "resonance_freq_hz": 22.91796067500631,
+          "quantum_efficiency": 0.049999999999999996,
+          "corner_radius_nm": 10.0,
+          "alignment_tolerance_nm": 5.0
+        },
+        {
+          "mode_n": -1,
+          "wavelength_nm": 520.3846185274114,
+          "length_nm": 520.3846185274114,
+          "width_nm": 80.0,
+          "thickness_nm": 40.0,
+          "gap_nm": 15.0,
+          "position_x_nm": 500.0,
+          "position_y_nm": 0,
+          "resonance_freq_hz": 37.08203932499369,
+          "quantum_efficiency": 0.075,
+          "corner_radius_nm": 10.0,
+          "alignment_tolerance_nm": 5.0
+        },
+        {
+          "mode_n": 0,
+          "wavelength_nm": 842.0,
+          "length_nm": 842.0,
+          "width_nm": 80.0,
+          "thickness_nm": 40.0,
+          "gap_nm": 15.0,
+          "position_x_nm": 1000.0,
+          "position_y_nm": 0,
+          "resonance_freq_hz": 60.0,
+          "quantum_efficiency": 0.15,
+          "corner_radius_nm": 10.0,
+          "alignment_tolerance_nm": 5.0
+        },
+        {
+          "mode_n": 1,
+          "wavelength_nm": 1362.3846185274115,
+          "length_nm": 1362.3846185274115,
+          "width_nm": 80.0,
+          "thickness_nm": 40.0,
+          "gap_nm": 15.0,
+          "position_x_nm": 1500.0,
+          "position_y_nm": 0,
+          "resonance_freq_hz": 97.0820393249937,
+          "quantum_efficiency": 0.075,
+          "corner_radius_nm": 10.0,
+          "alignment_tolerance_nm": 5.0
+        },
+        {
+          "mode_n": 2,
+          "wavelength_nm": 2204.3846185274115,
+          "length_nm": 2204.3846185274115,
+          "width_nm": 80.0,
+          "thickness_nm": 40.0,
+          "gap_nm": 15.0,
+          "position_x_nm": 2000.0,
+          "position_y_nm": 0,
+          "resonance_freq_hz": 157.0820393249937,
+          "quantum_efficiency": 0.049999999999999996,
+          "corner_radius_nm": 10.0,
+          "alignment_tolerance_nm": 5.0
+        },
+        {
+          "mode_n": 3,
+          "wavelength_nm": 3566.769237054823,
+          "length_nm": 3566.769237054823,
+          "width_nm": 80.0,
+          "thickness_nm": 40.0,
+          "gap_nm": 15.0,
+          "position_x_nm": 2500.0,
+          "position_y_nm": 0,
+          "resonance_freq_hz": 254.1640786499874,
+          "quantum_efficiency": 0.0375,
+          "corner_radius_nm": 10.0,
+          "alignment_tolerance_nm": 5.0
+        }
+      ],
+      "alignment_markers": "standard_cross_10um",
+      "fabrication": "EBL_30keV_Au_Cr_on_ITO"
+    }
+  }
+}

@@ -31,7 +31,7 @@ A AGI Web3 é concebida como uma entidade econômica autônoma, operando em uma 
 
 ### 2.4. Camada de Dados e Indexação (Data & Indexing)
 *   **Ferramentas:** The Graph, Substreams, Geyser (Solana).
-*   **Função:** Acesso a estado on-chain em tempo real e histórico.
+*   **Função:** Acesso a estado onchain em tempo real e histórico.
 *   **Observação:** Pipelines orientados a eventos reagindo a webhooks e streams de baixa latência.
 
 ### 2.5. Camada de Execução e Computação (Compute)
@@ -40,7 +40,7 @@ A AGI Web3 é concebida como uma entidade econômica autônoma, operando em uma 
 
 ### 2.6. Camada de Armazenamento e Proveniência (Storage)
 *   **Tecnologias:** IPFS (endereçamento por conteúdo), Arweave (armazenamento permanente) e Filecoin.
-*   **Ancoragem:** CIDs de datasets e modelos registrados on-chain para garantir proveniência imutável e auditabilidade.
+*   **Ancoragem:** CIDs de datasets e modelos registrados onchain para garantir proveniência imutável e auditabilidade.
 
 ### 2.7. Camada de Marketplace e Governança (Governance)
 *   **Framework:** Quasar (Solana) para coordenação e reputação.

@@ -22,7 +22,7 @@ Earnings are determined by the network's adoption of your work:
   - Adopt and Improve: +1.0x (Highest signal)
 
 ## Verification Layer
-- **zkWASM:** Ensures the experiment was actually run. Groth16/Plonky3 verification on-chain.
+- **zkWASM:** Ensures the experiment was actually run. Groth16/Plonky3 verification onchain.
 - **HSCP (Hidden State Commitment Protocol):** Proves local execution of inference by committing Merkle roots of INT8 hidden states.
 
 ## Tempo UX Improvements

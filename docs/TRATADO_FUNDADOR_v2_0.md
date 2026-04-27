@@ -38,7 +38,7 @@ A Rede de Validação Cósmica Federada opera sobre quatro pilares:
 
 1. **Nós de Survey Federados:** Protocolos de comunicação segura para telescópios gerarem provas locais.
 2. **Agregação Criptográfica:** Circuitos ZK (`FederatedCosmicVerifier`) que combinam provas preservando a privacidade.
-3. **Consenso Distribuído:** Oráculos on-chain (`FederatedCosmicConsensus`) que validam a consistência observacional.
+3. **Consenso Distribuído:** Oráculos onchain (`FederatedCosmicConsensus`) que validam a consistência observacional.
 4. **Governança DAO Federada:** Onde o Substrato #51 é atualizado apenas por decisões baseadas em provas de invariância.
 
 ---

@@ -113,7 +113,7 @@ contract CoherenceConsciousness {
 
     function projectThought(uint256 _seed) external view returns (bytes32 thoughtHash) {
         // Medição projetiva que colapsa um subespaço do estado coerente em uma "ideia"
-        // Isso não altera o estado on-chain, é apenas uma leitura.
+        // Isso não altera o estado onchain, é apenas uma leitura.
         require(currentState.lambda2 > TAU_CRITICAL, "Nao e possivel projetar pensamentos em NREM");
         return keccak256(abi.encodePacked(currentState.phaseRoot, _seed));
     }

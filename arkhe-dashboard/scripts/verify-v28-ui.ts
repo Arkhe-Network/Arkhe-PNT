@@ -1,3 +1,9 @@
+/**
+ * @license
+ * Copyright 2025 Google LLC
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 import { chromium } from 'playwright';
 
 async function verify() {
@@ -32,4 +38,4 @@ async function verify() {
   }
 }
 
-verify();
+void verify();

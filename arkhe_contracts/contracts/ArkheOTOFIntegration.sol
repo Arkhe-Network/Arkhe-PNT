@@ -11,7 +11,7 @@ interface IArkheOTOFSubsidyManager {
 
 /**
  * @title ArkheOTOFIntegration
- * @notice Integração de verificação ZK + medição G_info on-chain
+ * @notice Integração de verificação ZK + medição G_info onchain
  * @dev Combina prova ZK de elegibilidade OTOF com validação G_info
  */
 contract ArkheOTOFIntegration is AccessControl, ReentrancyGuard {

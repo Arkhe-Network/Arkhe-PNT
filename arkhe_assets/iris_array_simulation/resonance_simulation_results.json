@@ -1,0 +1,38 @@
+{
+  "phi^-2": {
+    "peak_wavelength_nm": 323.2234583799514,
+    "target_wavelength_nm": 321.6153814725885,
+    "detuning_nm": 1.6080769073628858,
+    "status": "PASS"
+  },
+  "phi^-1": {
+    "peak_wavelength_nm": 522.9865416200483,
+    "target_wavelength_nm": 520.3846185274114,
+    "detuning_nm": 2.60192309263698,
+    "status": "PASS"
+  },
+  "phi^0": {
+    "peak_wavelength_nm": 846.2099999999999,
+    "target_wavelength_nm": 842.0,
+    "detuning_nm": 4.209999999999923,
+    "status": "PASS"
+  },
+  "phi^1": {
+    "peak_wavelength_nm": 1369.1965416200485,
+    "target_wavelength_nm": 1362.3846185274115,
+    "detuning_nm": 6.8119230926370165,
+    "status": "PASS"
+  },
+  "phi^2": {
+    "peak_wavelength_nm": 2208.7933877644664,
+    "target_wavelength_nm": 2204.3846185274115,
+    "detuning_nm": 4.408769237054912,
+    "status": "PASS"
+  },
+  "phi^3": {
+    "peak_wavelength_nm": 3573.9027755289326,
+    "target_wavelength_nm": 3566.769237054823,
+    "detuning_nm": 7.133538474109628,
+    "status": "PASS"
+  }
+}
