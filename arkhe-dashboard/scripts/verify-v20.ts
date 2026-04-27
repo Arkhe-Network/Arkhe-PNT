@@ -1,3 +1,9 @@
+/**
+ * @license
+ * Copyright 2025 Google LLC
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 // arkhe-dashboard/scripts/verify-v20.ts
 import { federatedCosmicMemory } from '../src/lib/memory/federatedCosmicMemory';
 import { federatedHomomorphicQuantum } from '../src/lib/quantum/federatedHomomorphicQuantum';
@@ -20,7 +26,7 @@ async function verifyV20() {
 
   // 2. Verificar Homomorphic Computing
   console.log('\n--- Testando Homomorphic Quantum Computing ---');
-  const sampleMetrics: any = { omega: 0.94, kEth: 0.93 };
+  const sampleMetrics = { omega: 0.94, kEth: 0.93 };
   const encrypted = await federatedHomomorphicQuantum.encryptEthicalData(sampleMetrics);
   console.log(`✅ Criptografia homomórfica (PQ-CKKS) bem-sucedida.`);
   console.log(`✅ Ciphertext size: ${encrypted.ciphertext.length} bytes`);
@@ -31,4 +37,4 @@ async function verifyV20() {
   console.log('\n--- Verificação v20 Concluída ---');
 }
 
-verifyV20();
+void verifyV20();
