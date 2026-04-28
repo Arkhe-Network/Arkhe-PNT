@@ -2,7 +2,7 @@
     "protocol": "ARKHE-04",
     "predictions": {
         "P1_AnestheticShift": {
-            "measured_pm": 0.59100374807433,
+            "measured_pm": 0.44243556421374175,
             "precision_pm": 0.5,
             "success": true
         },
