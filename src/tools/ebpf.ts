@@ -72,7 +72,7 @@ export const ebpfMonitorTraffic = definePageTool({
       ]);
       response.appendResponseLine(output);
     } catch (error: unknown) {
-      response.appendResponseLine(`Error: ${error.message}`);
+      response.appendResponseLine(`Error: ${(error as Error).message}`);
     }
   },
 });
@@ -99,7 +99,7 @@ export const ebpfCheckReadiness = definePageTool({
       ]);
       response.appendResponseLine(output);
     } catch (error: unknown) {
-      response.appendResponseLine(`Error: ${error.message}`);
+      response.appendResponseLine(`Error: ${(error as Error).message}`);
     }
   },
 });
@@ -132,7 +132,7 @@ export const ebpfRunBenchmark = definePageTool({
       ]);
       response.appendResponseLine(output);
     } catch (error: unknown) {
-      response.appendResponseLine(`Error: ${error.message}`);
+      response.appendResponseLine(`Error: ${(error as Error).message}`);
     }
   },
 });
@@ -162,7 +162,7 @@ export const ebpfLoadProgram = definePageTool({
       ]);
       response.appendResponseLine(output);
     } catch (error: unknown) {
-      response.appendResponseLine(`Error: ${error.message}`);
+      response.appendResponseLine(`Error: ${(error as Error).message}`);
     }
   },
 });
@@ -192,7 +192,7 @@ export const ebpfVerifyIntegrity = definePageTool({
       ]);
       response.appendResponseLine(output);
     } catch (error: unknown) {
-      response.appendResponseLine(`Error: ${error.message}`);
+      response.appendResponseLine(`Error: ${(error as Error).message}`);
     }
   },
 });

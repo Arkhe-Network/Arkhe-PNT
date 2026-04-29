@@ -40,8 +40,8 @@ export default function TemporalStreamViewer({ onClose }: TemporalStreamViewerPr
       const newPlayer = new shaka.Player(videoRef.current);
       setPlayer(newPlayer);
 
-      newPlayer.addEventListener('error', (event: any) => {
-        const detail = event.detail;
+      newPlayer.addEventListener('error', (event: unknown) => {
+        const detail = (event as { detail: { code: number } }).detail;
         logger.error(`Error code ${detail.code} object ${JSON.stringify(detail)}`);
         setError(`SHAKA_ERR_${detail.code}`);
       });
@@ -87,10 +87,10 @@ export default function TemporalStreamViewer({ onClose }: TemporalStreamViewerPr
             .catch((_e: unknown) => logger.error("Auto-play prevented"));
         }
         return null;
-      }).catch((e: any) => {
+      }).catch((e: unknown) => {
+        const err = e as { code?: number | string };
         logger.error('Error loading video: ' + e);
-// @ts-expect-error
-        setError(`LOAD_ERR_${e?.code || 'UNKNOWN'}`);
+        setError(`LOAD_ERR_${err.code || 'UNKNOWN'}`);
         return null;
       });
 
