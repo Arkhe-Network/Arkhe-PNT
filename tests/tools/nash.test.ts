@@ -7,6 +7,8 @@
 import assert from 'node:assert';
 import {describe, it} from 'node:test';
 
+import {McpResponse} from '../../src/McpResponse.js';
+import type {zod} from '../../src/third_party/index.js';
 import {
   nashGetDeviceStatus,
   nashEnrollCognitiveProfile,
@@ -14,20 +16,22 @@ import {
   nashAttest,
   nashCoercionScan,
 } from '../../src/tools/nash.js';
-import {McpResponse} from '../../src/McpResponse.js';
+import type {
+  Context,
+  ContextPage,
+  Request,
+} from '../../src/tools/ToolDefinition.js';
 
 describe('nash', () => {
   it('verifies Nash Identity Safe tools', async () => {
-    const response = new McpResponse({} as any);
-    const mockContext = {} as any;
-    const mockRequest = {params: {}} as any;
+    const response = new McpResponse({} as never);
+    const mockContext = {} as Context;
+    const mockRequest = {params: {}} as unknown as Request<zod.ZodRawShape> & {
+      page: ContextPage;
+    };
 
     // nash_get_device_status
-    await nashGetDeviceStatus.handler(
-      mockRequest,
-      response,
-      mockContext,
-    );
+    await nashGetDeviceStatus.handler(mockRequest, response, mockContext);
     assert.ok(
       response.responseLines.some(line =>
         line.includes('Nash Identity Safe: Device Status'),
@@ -58,7 +62,9 @@ describe('nash', () => {
     // nash_authenticate
     response.resetResponseLineForTesting();
     await nashAuthenticate.handler(
-      {params: {pin: '1234'}} as any,
+      {params: {pin: '1234'}} as Request<{pin: zod.ZodString}> & {
+        page: ContextPage;
+      },
       response,
       mockContext,
     );
@@ -69,16 +75,16 @@ describe('nash', () => {
       'nash_authenticate: Missing authorization message',
     );
     assert.ok(
-      response.responseLines.some(line =>
-        line.includes('verified locally'),
-      ),
+      response.responseLines.some(line => line.includes('verified locally')),
       'nash_authenticate: Missing verification message',
     );
 
     // nash_attest
     response.resetResponseLineForTesting();
     await nashAttest.handler(
-      {params: {payload: 'test_tx_hash'}} as any,
+      {params: {payload: 'test_tx_hash'}} as Request<{payload: zod.ZodString}> & {
+        page: ContextPage;
+      },
       response,
       mockContext,
     );
@@ -91,14 +97,10 @@ describe('nash', () => {
 
     // nash_coercion_scan
     response.resetResponseLineForTesting();
-    await nashCoercionScan.handler(
-      mockRequest,
-      response,
-      mockContext,
-    );
+    await nashCoercionScan.handler(mockRequest, response, mockContext);
     assert.ok(
-      response.responseLines.some(line =>
-        line.includes('SAFETY STATE') && line.includes('VOLUNTARY'),
+      response.responseLines.some(
+        line => line.includes('SAFETY STATE') && line.includes('VOLUNTARY'),
       ),
       'nash_coercion_scan: Missing safety state message',
     );
