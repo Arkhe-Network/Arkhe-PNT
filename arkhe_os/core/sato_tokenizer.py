@@ -1,4 +1,4 @@
-# sato_tokenizer.py — O Genoma da Forma (SATO)
+# sato_tokenizer.py — O Genoma da Forma (SATO) v1.0
 # Um strip é uma sequência de vértices onde cada três consecutivos formam um triângulo.
 # O SATO tokeniza isso como uma linguagem, preservando o fluxo do artista.
 
