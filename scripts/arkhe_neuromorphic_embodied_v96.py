@@ -357,6 +357,9 @@ class NeuromorphicEmbodiedPolicy(nn.Module):
             decay_rate=config.film_decay
         )
 
+        self.proprio_to_context = nn.Linear(config.proprio_dim, config.context_dim)
+
+
         # Medula: SNN com surrogate gradient
         self.spinal_snn = SurrogateLIFNeuron(
             input_dim=config.semantic_dim // 4,
@@ -402,7 +405,10 @@ class NeuromorphicEmbodiedPolicy(nn.Module):
         # 2. Cerebelo: modulação FiLM event-driven
         # Calcular erro proprioceptivo (simplificado: diferença entre previsto e observado)
         proprio_error = torch.randn(proprio_input.shape[0]) * 0.1  # Placeholder
-        z_mod = self.cerebellum(z_sem, proprio_input, proprio_error, t)
+                # Adapt proprio_input to context_dim
+        h_context = self.proprio_to_context(proprio_input)
+
+        z_mod = self.cerebellum(z_sem, h_context, proprio_error, t)
 
         # 3. Medula: decodificar ação via SNN
         action_spikes = self.spinal_snn(z_mod)  # [batch, action_dim]
