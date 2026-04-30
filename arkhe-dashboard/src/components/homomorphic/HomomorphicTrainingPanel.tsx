@@ -1,3 +1,10 @@
+
+/**
+ * @license
+ * Copyright 2026 Google LLC
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 // arkhe-dashboard/src/components/homomorphic/HomomorphicTrainingPanel.tsx
 'use client';
 
@@ -5,10 +12,10 @@ import { useState, useEffect } from 'react';
 
 export default function HomomorphicTrainingPanel() {
   const [isTraining, setIsTraining] = useState(false);
-  const [stats, setStats] = useState<any>(null);
+  const [stats, setStats] = useState<unknown>(null);
 
   useEffect(() => {
-    fetch('/api/quantum/train').then(r => r.json()).then(d => d.success && setStats(d.data));
+    void fetch('/api/quantum/train').then(r => r.json()).then(d => d.success && setStats(d.data));
   }, []);
 
   const handleTrain = async () => {

@@ -1,3 +1,10 @@
+
+/**
+ * @license
+ * Copyright 2026 Google LLC
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 // arkhe-dashboard/src/components/meditation/CoherentMeditationPanel.tsx
 'use client';
 
@@ -15,14 +22,14 @@ export default function CoherentMeditationPanel() {
   useEffect(() => {
     const initAudio = async () => {
       if (typeof window !== 'undefined' && 'AudioContext' in window) {
-        audioContextRef.current = new (window as any).AudioContext();
+        audioContextRef.current = new (window as unknown as Window & typeof globalThis & { AudioContext: typeof AudioContext }).AudioContext();
       }
     };
-    initAudio();
+    void initAudio();
 
     return () => {
       if (audioContextRef.current) {
-        audioContextRef.current.close();
+        void audioContextRef.current.close();
       }
     };
   }, []);
@@ -37,7 +44,7 @@ export default function CoherentMeditationPanel() {
   };
 
   useEffect(() => {
-    if (!isMeditating) return;
+    if (!isMeditating) {return;}
 
     const interval = setInterval(() => {
       setCollectiveCoherence(prev => Math.min(1.0, prev + 0.05 * Math.random()));
