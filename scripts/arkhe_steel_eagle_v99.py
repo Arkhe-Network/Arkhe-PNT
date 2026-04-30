@@ -46,33 +46,50 @@ class DroneState:
     last_reflex: Optional[str] = None
     ghz_collapse: int = 0  # local GHZ state for swarm consensus
 
+class VehicleDriverGRPCServer:
+    """Mock gRPC server representing the SteelEagle middleware (wrapper over existing SDK)."""
+    def __init__(self, endpoint: str):
+        self.endpoint = endpoint
+    def Actuate(self, command: Dict):
+        # Translates SteelEagle specification into vehicle-specific SDK commands
+        return {"status": "SUCCESS", "actuation": command.get("action")}
+
+
 class SteelEagleOS:
     """The onboard entity — logically the 'spine + cerebellum' of the drone."""
 
-    def __init__(self, drone_id: str, backend_endpoint: str):
+    def __init__(self, drone_id: str, backend_endpoint: str, grpc_endpoint: str = "localhost:50051"):
         self.drone_id = drone_id
         self.state = DroneState(drone_id=drone_id)
         self.mission_logic = MissionLogic()
-        self.drone_driver = DroneDriver()
+        self.drone_driver = DroneDriver(grpc_endpoint)
         self.remote_compute = GabrielProtocolClient(backend_endpoint)
 
     def step(self, telemetry: Dict) -> DroneState:
-        """A single control cycle: receive telemetry → decide → actuate."""
+        """A single control cycle (OODA Loop): receive telemetry → decide → actuate."""
+        # --- Observe ---
         # 1. Proprioceptive input (cerebellar)
         proprio_error = self._compute_proprio_error(telemetry)
-        # 2. Send frame to cognitive engine (cortical)
+        # Gather visual frame token
         token = GabrielToken(source_id=self.drone_id, token_type=TokenType.VISUAL_FRAME,
                              payload=telemetry.get('frame', b''), coherence=self.state.coherence)
         token.sign()
+
+        # --- Orient ---
+        # 2. Send frame to cognitive engine (cortical) via GabrielProtocolClient
         # 3. Wait for cognitive result (may be async)
         result = self.remote_compute.send(token)
+
+        # --- Decide ---
         # 4. Mission logic decides next state (cerebellar modulation)
         command = self.mission_logic.evaluate(self.state, result, proprio_error)
         # 5. Reflex check: if collision risk, bypass mission logic
         if self._detect_collision_risk(telemetry):
             command = self._emit_reflex(telemetry)
             self.state.last_reflex = f"reflex_{token.sequence_number}"
-        # 6. Drone driver translates into actuation (spinal)
+
+        # --- Act ---
+        # 6. Drone driver translates into actuation (spinal) via gRPC
         self.drone_driver.execute(command)
         self.state.mission_state = command.get('state', 'IDLE')
         return self.state
@@ -97,9 +114,16 @@ class MissionLogic:
         return {'action': cognitive_result.get('action', 'HOVER'), 'state': 'ACTIVE', 'gain': gain}
 
 class DroneDriver:
-    """Spinal module: translate abstract command to drone‑specific actuation."""
+    """Spinal module: act as gRPC client connecting to the vehicle-specific middleware."""
+    def __init__(self, grpc_endpoint: str):
+        self.grpc_endpoint = grpc_endpoint
+        # Mock connection to gRPC server
+        self._grpc_server_mock = VehicleDriverGRPCServer(grpc_endpoint)
+
     def execute(self, command: Dict) -> None:
-        pass  # In real SteelEagle, calls Tello/ArduPilot/etc. SDK
+        # Calls the gRPC middleware layer
+        response = self._grpc_server_mock.Actuate(command)
+        # pass  # In real SteelEagle, this translates over gRPC which then calls Tello/ArduPilot/etc. SDK
 
 class GabrielProtocolClient:
     """Remote compute driver — the ARKHE 'cortical projection' over Gabriel."""
@@ -147,6 +171,16 @@ class CognitiveEngine:
         """Process a frame and return structured result."""
         return {'engine': self.name, 'result': 'analysis complete', 'source': token.source_id}
 
+class OpenScoutObjectDetection(CognitiveEngine):
+    """OpenScout object detection via Tensorflow."""
+    def consume(self, token: GabrielToken) -> Dict:
+        return {'engine': self.name, 'detections': [{'class': 'obstacle', 'confidence': 0.95}], 'source': token.source_id}
+
+class OpenFaceRecognition(CognitiveEngine):
+    """OpenFace face recognition with deep neural networks."""
+    def consume(self, token: GabrielToken) -> Dict:
+        return {'engine': self.name, 'faces': [{'id': 'user_1', 'confidence': 0.88}], 'source': token.source_id}
+
 class SwarmController:
     """
     The 'Control Plane Module' — high‑level fleet orchestration.
@@ -176,14 +210,16 @@ def run_steel_eagle_convergence():
 
     # Initialize backend (Cloudlet)
     gabriel_server = GabrielServer()
-    object_engine = CognitiveEngine("object_detection")
-    gabriel_server.register_engine("object_detection", object_engine)
+    object_engine = OpenScoutObjectDetection("openscout_object_detection")
+    face_engine = OpenFaceRecognition("openface_recognition")
+    gabriel_server.register_engine("openscout_object_detection", object_engine)
+    gabriel_server.register_engine("openface_recognition", face_engine)
     swarm_ctrl = SwarmController()
 
     # Initialize drones
     drones = {}
     for i in range(3):
-        drone_os = SteelEagleOS(f"drone_{i}", "localhost:9090")
+        drone_os = SteelEagleOS(f"drone_{i}", "localhost:9090", "localhost:50051")
         swarm_ctrl.register_drone(drone_os.state)
         drones[f"drone_{i}"] = drone_os
 
