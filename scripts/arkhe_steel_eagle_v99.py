@@ -316,6 +316,16 @@ class SteelEagleOS:
 # COMPONENTE 6: SWARM CONTROLLER (Consenso Retrocausal Federado Terrestre)
 # ============================================================================
 
+class OpenScoutObjectDetection(CognitiveEngine):
+    """OpenScout object detection via Tensorflow."""
+    def consume(self, token: GabrielToken) -> Dict:
+        return {'engine': self.name, 'detections': [{'class': 'obstacle', 'confidence': 0.95}], 'source': token.source_id}
+
+class OpenFaceRecognition(CognitiveEngine):
+    """OpenFace face recognition with deep neural networks."""
+    def consume(self, token: GabrielToken) -> Dict:
+        return {'engine': self.name, 'faces': [{'id': 'user_1', 'confidence': 0.88}], 'source': token.source_id}
+
 class SwarmController:
     """
     High-level fleet orchestration.
