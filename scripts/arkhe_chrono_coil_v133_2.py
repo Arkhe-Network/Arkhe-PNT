@@ -117,12 +117,8 @@ class ChronoCoilFIR:
 
     def process_sample(self, x: float) -> Tuple[float, float]:
         self._delay_line.append(x)
-        while len(self._delay_line) < self.config.fir_taps:
-            self._delay_line.appendleft(0.0)
         correlation = sum(t * x_d for t, x_d in zip(self.template, self._delay_line))
         self._energy_buffer.append(x ** 2)
-        while len(self._energy_buffer) < self.config.fir_taps:
-            self._energy_buffer.append(0.0)
         signal_norm = np.sqrt(sum(self._energy_buffer) + 1e-12)
         return correlation / signal_norm, correlation
 
