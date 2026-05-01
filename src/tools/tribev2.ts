@@ -115,7 +115,7 @@ export const tribev2Predict = defineTool({
         response.appendResponseLine(`- Shape: \`(${result.shape.join(', ')})\``);
         response.appendResponseLine(`- Timesteps: ${result.n_timesteps}`);
         response.appendResponseLine(`- Vertices: ${result.n_vertices}`);
-      } catch (e) {
+      } catch (_e) {
          response.appendResponseLine('\n' + stdout);
       }
     }
