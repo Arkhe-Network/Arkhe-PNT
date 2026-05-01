@@ -17,8 +17,13 @@ from typing import Dict, List, Optional, Tuple, Callable, Set, Any, Union
 from enum import Enum, auto
 from abc import ABC, abstractmethod
 import logging
-from scipy import signal, fft
-from scipy.spatial.distance import cosine
+
+
+def cosine(u, v):
+    import numpy as np
+    return 1.0 - np.dot(u, v) / (np.linalg.norm(u) * np.linalg.norm(v))
+
+
 
 # =============================================================================
 # CONSTANTES FUNDAMENTAIS
