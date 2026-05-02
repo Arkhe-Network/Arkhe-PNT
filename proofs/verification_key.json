@@ -1,0 +1,19 @@
+{
+  "root_hash": "bdad1b49758bdf7976fc808c33d0ba824a857285acee40f08667aa7c82d304e4",
+  "schema": {
+    "track1": [
+      "a_fit",
+      "bayes_factor",
+      "p_value"
+    ],
+    "track2": [
+      "mi_nats",
+      "p_fdr",
+      "snr_db"
+    ],
+    "track3": [
+      "associator_norm",
+      "moufang_p"
+    ]
+  }
+}
