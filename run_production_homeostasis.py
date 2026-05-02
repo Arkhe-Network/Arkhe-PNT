@@ -1,7 +1,43 @@
 #!/usr/bin/env python3
 """
+
+Autor: Rafael Oliveira (ORCID: 0009-0005-2697-4668)
+Timestamp: 2026-05-03
+
+All 6 validated components integrated into main homeostatic pipeline:
+  1. Adaptive SPSA (a=0.4, c=0.2 shock fallback, decay k^-0.602)
+  2. Louvain Multi-Resolution (sweep 0.5 -> 1.0 -> 1.5 -> 2.0)
+  3. Non-Deterministic Proof Seeds (uuid4 + timestamp_ns + counter)
+  4. Causal Efficacy Metric (Wasserstein + Frobenius + sync + MI) [NORMALIZED]
+  5. Dynamic Root Hash (SHA256 content|parent|block_id|timestamp_ns)
+  6. Proof Type Tagging (MONITORING / CERTIFICATION / TRANSITION / STEERING)
+
+Crystal Brain v_inf.15: 768 oscillators, Kuramoto on T^2, Cauchy natural freq.
+
+Usage:
+  python run_production_homeostasis.py \
+      --data-path data/crystal_brain_v15 \
+      --expected-hash <sha256_hash> \
+      --security-bits 80
+"""
+
+import numpy as np
+import json
+import hashlib
+import time
+import sys
+import os
+import uuid
+import secrets
+import argparse
+from pathlib import Path
+from datetime import datetime, timezone
+from collections import Counter
+
+# === Core scientific libraries ===
+import scipy
+import sklearn
 ARKHE OS v_inf.327.7 — PRODUCTION INTEGRATION PIPELINE
-=====================================================
 Autor: Rafael Oliveira (ORCID: 0009-0005-2697-4668)
 Integrates all 6 validated components into unified production pipeline.
 """
