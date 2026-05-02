@@ -1,0 +1,63 @@
+{
+  "root_hash": "bdad1b49758bdf7976fc808c33d0ba824a857285acee40f08667aa7c82d304e4",
+  "leaf_count": 3,
+  "proof_paths": {
+    "0": [
+      {
+        "position": "right",
+        "hash": "b0d3fac528b2bfee80f200477b5209423ee75b07051eee63c6d3699010823aa2"
+      },
+      {
+        "position": "right",
+        "hash": "c717787c5073662e6896b5fcb79fb38f581fbbd17191fa9a6151cf73186df6d8"
+      }
+    ],
+    "1": [
+      {
+        "position": "left",
+        "hash": "f5b5d6cd7dc3578f4763c2145f7761d12c63b2088171fff75bdacc257c83dfd6"
+      },
+      {
+        "position": "left",
+        "hash": "fcd2a2caefcbab50cbea3fbdc293923848bbab17a0d39ab6da8f6d516061e2ed"
+      }
+    ],
+    "2": [
+      {
+        "position": "right",
+        "hash": "4e0f250060d7895d8ec3a8cf0fa2a093fcff80ddba5b0ce70d2bcdbc4bdbd20a"
+      },
+      {
+        "position": "right",
+        "hash": "4e0f250060d7895d8ec3a8cf0fa2a093fcff80ddba5b0ce70d2bcdbc4bdbd20a"
+      }
+    ]
+  },
+  "track_commitments": {
+    "track1": {
+      "grid_sizes": [
+        16,
+        24,
+        32
+      ],
+      "model_type": "orch_or",
+      "n_trials": 3
+    },
+    "track2": {
+      "n_trials": 100,
+      "sensor_params": {
+        "saturation_scale": 1.0,
+        "noise_std": 0.05
+      },
+      "intention_range": [
+        -2.6197451040897444,
+        1.8522781845089378
+      ]
+    },
+    "track3": {
+      "grid_size": 48,
+      "n_points": 2304,
+      "fano_table_commitment": "sha256:fano_v1.0"
+    }
+  }
+}
