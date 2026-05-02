@@ -1,0 +1,76 @@
+{
+  "block_0": {
+    "timestamp": "genesis",
+    "event": "CRYSTAL_HOMEOSTASIS_INIT",
+    "parameters": {
+      "kappa": null,
+      "lambda_l1": null,
+      "binarization_threshold": null,
+      "embedding_dim": null,
+      "capture_threshold": 0.8
+    },
+    "proof_hash": "genesis",
+    "parent_hash": "0000000000000000000000000000000000000000000000000000000000000000"
+  },
+  "block_1": {
+    "entropy_metadata": {
+      "seed": "7588fb6507b251ce59c5c7689802fb194bb5c87ddb08da7edfe8f7131cdccff6",
+      "timestamp_ns": 1278854849974,
+      "entropy_sources": [
+        "time",
+        "pid",
+        "memory"
+      ],
+      "chain_bound": true,
+      "previous_hash": "bcb28748fea207409ba342c84b4a1494b877d81c4023246c36e92925b02aacaf"
+    },
+    "proof_hash": "3b7dbade98721efc",
+    "proof_size_bytes": 1024,
+    "community_id": 0,
+    "n_crystals": 5,
+    "cohesion_rho": 0.9,
+    "manifold_dim": 2,
+    "epsilon": 0.01,
+    "verified": true,
+    "timestamp": "2026-05-02T15:36:04.802010",
+    "proof_metadata": {
+      "proof_type": "COHERENCE_CERTIFICATION",
+      "priority": "high",
+      "context": {
+        "capture_fraction": 0.85,
+        "cohesion_rho": 0.9,
+        "manifold_dimension": 3
+      },
+      "triggers": {
+        "triggered_by": "threshold_crossed",
+        "threshold_value": 0.8
+      },
+      "impact": {
+        "downstream_actions": [
+          "submit_to_octra",
+          "publish_evidence",
+          "enable_steering"
+        ]
+      },
+      "verification": {
+        "expected_capture_range": [
+          0.3,
+          1.0
+        ],
+        "cohesion_consistency": true
+      }
+    },
+    "block_id": 1,
+    "parent_hash": "bcb28748fea207409ba342c84b4a1494b877d81c4023246c36e92925b02aacaf",
+    "content_hash": "928ae350dfa0581ee3e8ff49aa87b9a5ece3873de53f0313d8ad3726e6935666",
+    "root_hash": "410f7e175c1bc692882a39b5d6c4caf1f2dd197a6eca4a9992d0b3276ff591b3",
+    "capture_fraction": 0.85,
+    "aggregation_metadata": {
+      "strategy": "incremental_dynamic",
+      "window_size": 8,
+      "position_in_window": 1,
+      "root_update_policy": "every_block"
+    },
+    "block_hash": "19961bdc06fe574295c389a73ff34eb3027d49c0df7bda4968d44a19f10d6494"
+  }
+}
