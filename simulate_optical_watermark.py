@@ -2,22 +2,69 @@ import argparse
 import numpy as np
 import os
 import hashlib
+import sys
+
+# Try to use real ZEE200 backend if available
+try:
+    sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), 'zee200_integration')))
+    from zee200_backend_real import RealZEE200Bridge
+    HAS_ZEE200 = True
+except ImportError:
+    HAS_ZEE200 = False
+
+def generate_real_zee200_hash():
+    """Gera um hash ZEE200 real integrando a ponte criptográfica"""
+    print("Integrando geração de hash ZEE200 real no circuito...")
+    bridge = RealZEE200Bridge(security_bits=80, post_quantum=True)
+
+    # Criar um dado sintético de comunidade para gerar prova
+    community_data = {
+        'community_id': 1,
+        'crystals': [1, 2, 3],
+        'rho': 0.85
+    }
+    manifold_points = np.random.rand(10, 3)
+    decoder_matrix = np.random.rand(768, 3)
+
+    proof = bridge.generate_capture_proof_real(
+        community_data, manifold_points, decoder_matrix, epsilon=0.01
+    )
+
+    hash_hex = proof['proof_hash']
+    print(f"Hash ZEE200 real gerado: {hash_hex}")
+
+    # Pad to 32 bytes if necessary
+    hash_bytes = bytes.fromhex(hash_hex)
+    if len(hash_bytes) < 32:
+        hash_bytes = hash_bytes.ljust(32, b'\0')
+    elif len(hash_bytes) > 32:
+        hash_bytes = hash_bytes[:32]
+
+    return hash_bytes
 
 def simulate_optical_watermark(hash_file, modulation_depth, output_path):
     print(f"Simulating optical watermark with hash {hash_file}, mod depth {modulation_depth}")
 
-    # Read the proof file (simulate a 32-byte hash)
-    if not os.path.exists(hash_file):
-        print(f"Warning: {hash_file} not found. Creating a random 32-byte hash.")
-        H_bytes = np.random.bytes(32)
+    # Integrar geração de hash ZEE200 real se não houver arquivo ou se possível
+    if HAS_ZEE200:
+        H_bytes = generate_real_zee200_hash()
         os.makedirs(os.path.dirname(hash_file), exist_ok=True)
         with open(hash_file, 'wb') as f:
             f.write(H_bytes)
     else:
-        with open(hash_file, 'rb') as f:
-            H_bytes = f.read(32)
-            if len(H_bytes) < 32:
-                H_bytes = H_bytes.ljust(32, b'\0')
+        # Fallback caso não seja possível instanciar (por falta do C++ backend, etc),
+        # mas mantemos o fallback do código original para debug
+        if not os.path.exists(hash_file):
+            print(f"Warning: {hash_file} not found and ZEE200 not available. Creating a random 32-byte hash.")
+            H_bytes = np.random.bytes(32)
+            os.makedirs(os.path.dirname(hash_file), exist_ok=True)
+            with open(hash_file, 'wb') as f:
+                f.write(H_bytes)
+        else:
+            with open(hash_file, 'rb') as f:
+                H_bytes = f.read(32)
+                if len(H_bytes) < 32:
+                    H_bytes = H_bytes.ljust(32, b'\0')
 
     # Convert to 256 bits
     H_bits = np.unpackbits(np.frombuffer(H_bytes, dtype=np.uint8))
