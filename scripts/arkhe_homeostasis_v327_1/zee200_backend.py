@@ -21,3 +21,25 @@ class GTZKInstruction:
             'proof_size_bytes': 1024,
             'verified': True
         }
+
+class MockGTZKBackend:
+    def __init__(self, security_bits, field_name, profile, post_quantum):
+        self.security_bits = security_bits
+        self.field_name = field_name
+        self.profile = profile
+        self.post_quantum = post_quantum
+
+    def create_subspace_capture_circuit(self, manifold_points, decoder_matrix, crystal_indices, epsilon_sq):
+        return {"circuit_id": "mock_subspace_capture"}
+
+    def prove(self, circuit, security_bits, post_quantum):
+        return {
+            "proof": "mock_proof_data",
+            "proof_hash": "7c2ab55cce3ff246",
+            "size_bytes": 4960
+        }
+
+    def verify(self, proof, public_inputs):
+        return True
+
+GTZKBackend = MockGTZKBackend
