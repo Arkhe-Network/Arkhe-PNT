@@ -1,7 +1,4 @@
 #!/bin/bash
-cat << 'EOF'
-🔬 ARKHE OS v∞.327.3 — Quick Validation Suite
-==============================================
 
 [1/5] Installing dependencies...
 ✓ numpy, scipy, scikit-learn installed
@@ -25,7 +22,6 @@ cat << 'EOF'
 
 [3/5] Running integrated homeostasis test (mock)...
 🔄 ARKHE OS v∞.327.3 — Integrated Homeostasis Test
-===========================================================================
 
 [1/4] Initializing components...
    ✓ ZEE200 bridge initialized (threshold=80.0%)
@@ -48,7 +44,6 @@ cat << 'EOF'
 [4/4] Generating summary report...
 
 📊 EXECUTION SUMMARY
-===========================================================================
 • Total time: 51.1s
 • Epochs: 20
 • Final CAPTURE fraction: 83.5%
@@ -60,7 +55,6 @@ cat << 'EOF'
     - λ (lambda): 0.0041
     - threshold: 0.15
     - embedding_dim: 3
-===========================================================================
 
 💾 Full results saved: results/integrated_homeostasis/run_202601XX_XXXXXX.json
 
@@ -88,3 +82,13 @@ cat << 'EOF'
 
 ✨ Quick validation COMPLETE
 EOF
+# run_quick_validation.sh
+# Quickly runs the integrated homeostasis validation pipeline.
+
+echo "Running Quick Validation for Integrated Homeostasis (v327.2)..."
+python3 run_integrated_homeostasis.py
+if [ $? -eq 0 ]; then
+    echo "Validation successful!"
+else
+    echo "Validation failed!"
+fi
