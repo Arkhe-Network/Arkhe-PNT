@@ -141,10 +141,10 @@ interface BrainFlowInstance {
  */
 async function loadBrainFlowWASM(): Promise<BrainFlowInstance> {
   // Em produção, carregar de /public/brainflow.js ou CDN
-  // @ts-ignore
-  // @ts-ignore
-  // @ts-ignore
-  // @ts-ignore
+  // @ts-expect-error missing types
+  // @ts-expect-error missing types
+  // @ts-expect-error missing types
+  // @ts-expect-error missing types
   const module = await import(/* @vite-ignore */ '/brainflow_wasm/brainflow.js?url');
   const brainflow = await module.default();
   brainflow.DataFilter.set_log_level(brainflow.LogLevels.LEVEL_OFF);
