@@ -97,7 +97,8 @@ class HomeostasisZEE200Bridge:
             name=f'capture_manifold_{community_data["community_id"]}',
             public_inputs=public_inputs,
             private_witness=private_witness,
-            constraints=constraints
+            constraints=constraints,
+            proof_type='monitoring'
         )
 
         # Instanciar gerador de entropia se ainda não existe
@@ -127,6 +128,7 @@ class HomeostasisZEE200Bridge:
             'manifold_dim': int(manifold_dim),
             'epsilon': float(epsilon),
             'verified': True,  # Assumindo que prove() só retorna se sucesso
+            'proof_type': proof.get('proof_type', 'monitoring'),
             'timestamp': None  # Preenchido ao registrar
         }
 
@@ -314,6 +316,7 @@ def spsa_with_adaptive_shock(initial_params, max_epochs=30, capture_threshold=0.
         initial_params['embedding_dim']
     ])
 
+    a, c = 0.4, 0.2  # Hiperparâmetros SPSA
     history = []
     all_proofs = []
 
