@@ -116,9 +116,10 @@ class VerifiableManifoldSteerer:
         }
 
     def steer_with_verification(self, start_intention, end_intention,
-                               n_steps=20, generate_proof=True):
+                               n_steps=20, generate_proof=True,
+                               evaluate_causal_efficacy: bool = True):
         """
-        Executa steering completo com verificação opcional.
+        Executa steering com avaliação opcional de eficácia causal.
         """
         # 1. Projetar intenções para espaço do manifold
         if self.embedding is not None:
@@ -163,6 +164,41 @@ class VerifiableManifoldSteerer:
             },
             'proof': proof
         }
+
+        # Avaliação de eficácia causal se solicitada
+        if evaluate_causal_efficacy:
+            import sys
+            import os
+            sys.path.append(os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', 'arkhe_homeostasis_v327_5'))
+            from causal_efficacy_metrics import CausalEfficacyEvaluator
+
+            if not hasattr(self, '_causal_evaluator'):
+                self._causal_evaluator = CausalEfficacyEvaluator()
+                # Mock baseline states if empty
+                if not self._causal_evaluator.baseline_states:
+                     for _ in range(50):
+                         self._causal_evaluator.record_baseline(np.zeros(len(start_intention)))
+
+            # Mock _last_recorded_state and _get_non_target_communities if missing
+            pre_state = getattr(self, '_last_recorded_state', np.zeros(len(start_intention)))
+            non_target_communities = getattr(self, '_get_non_target_communities', lambda: [])()
+
+            efficacy = self._causal_evaluator.evaluate_steering_impact(
+                pre_state=pre_state,
+                post_state=path_original[-1],
+                steering_trajectory=path_original.tolist(), # Convert to list of arrays
+                target_intention=end_intention,
+                non_target_communities=non_target_communities
+            )
+            result['causal_efficacy'] = efficacy.to_dict()
+
+            # Log de diagnóstico
+            print(f"   🎯 Eficácia causal: {efficacy.overall_efficacy:.3f} "
+                  f"(div={efficacy.trajectory_divergence:.2f}, "
+                  f"coh={efficacy.coherence_retention:.2f}, "
+                  f"eff={efficacy.intention_efficiency:.2f})")
+
+        return result
 
     def _estimate_curvature(self, path):
         """Estima curvatura máxima de uma trajetória."""
