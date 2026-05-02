@@ -1,3 +1,10 @@
+
+/**
+ * @license
+ * Copyright 2026 Google LLC
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 export interface HubbleNodeState {
     nodeId: string;                    // SHA256 único do Merkabah
     hubblePartition: {                // 1/1024 do volume de Hubble
@@ -52,7 +59,7 @@ function computeRecursiveIcosahedralCoherence(nodes: HubbleNodeState[]): number 
     return nodes.reduce((sum, n) => sum + n.localCoherence, 0) / (nodes.length || 1);
 }
 
-function computeEntanglementWeightedPhaseConsensus(nodes: HubbleNodeState[], events: CosmicEntanglementEvent[]): number {
+function computeEntanglementWeightedPhaseConsensus(nodes: HubbleNodeState[], _events: CosmicEntanglementEvent[]): number {
     let sumSin = 0;
     let sumCos = 0;
     nodes.forEach(n => {
@@ -70,7 +77,7 @@ function buildEntanglementGraph(events: CosmicEntanglementEvent[]) {
     };
 }
 
-function generateCosmicSTARKProof(nodes: HubbleNodeState[], events: CosmicEntanglementEvent[]) {
+function generateCosmicSTARKProof(_nodes: HubbleNodeState[], _events: CosmicEntanglementEvent[]) {
     return {
         merkleRoot: "0xroot",
         aggregatedSTARK: "0xstark",
@@ -78,7 +85,7 @@ function generateCosmicSTARKProof(nodes: HubbleNodeState[], events: CosmicEntang
     };
 }
 
-function computeEmergenceMetrics(nodes: HubbleNodeState[], events: CosmicEntanglementEvent[], globalCoherence: number) {
+function computeEmergenceMetrics(_nodes: HubbleNodeState[], _events: CosmicEntanglementEvent[], _globalCoherence: number) {
     return {
         coherencePropagationSpeed: 100.0,
         phaseLockingTime: 500.0,

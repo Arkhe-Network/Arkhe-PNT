@@ -1,3 +1,10 @@
+
+/**
+ * @license
+ * Copyright 2026 Google LLC
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 // arkhe_sync_dashboard.tsx — Dashboard React para visualização de sincronização
 import React, { useEffect, useState, useRef } from 'react';
 
