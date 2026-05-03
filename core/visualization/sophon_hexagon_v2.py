@@ -21,7 +21,10 @@ class SophonHexagonEngine:
     def __init__(self, config: Optional[SophonHexagonConfig] = None,
                  prometheus_url: Optional[str] = None,
                  bidirectional_ui: bool = True,
-                 sophon_api_url: Optional[str] = None):
+                 sophon_api_url: Optional[str] = None,
+                 enable_phasevm_bridge: bool = True,
+                 enable_warmup: bool = True,
+                 warmup_profile: str = 'standard'):
 
         self.config = config or SophonHexagonConfig()
         self.uniform_data = [0.0] * 64
@@ -35,6 +38,23 @@ class SophonHexagonEngine:
             self._bind_ui_callbacks()
         else:
             self.ui = None
+
+        if enable_phasevm_bridge:
+            from core.integration.phasevm_visualization_bridge import PhaseVMVisualizationBridge, WarmupConfig
+
+            warmup_cfg = WarmupConfig(
+                profile=warmup_profile,
+                verbose=True
+            ) if enable_warmup else None
+
+            self.phasevm_bridge = PhaseVMVisualizationBridge(
+                visualization_engine=self,
+                bidirectional_ui=self.ui if bidirectional_ui else None,
+                sophon_api_url=sophon_api_url,
+                warmup_config=warmup_cfg
+            )
+        else:
+            self.phasevm_bridge = None
 
     def _bind_ui_callbacks(self):
         def on_amplitude_change(value):
