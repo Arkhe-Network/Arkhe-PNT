@@ -734,14 +734,12 @@
 - Extended wave propagation to vectorial high-NA regime via Debye-Wolf integral for NA > 0.3.
 - Validated vectorial predictions against experimental mock data from Substrate 85 (PMMA vortex spectrometers) and Substrate 89 (irrotational antennas).
 - Computed goodness-of-fit metrics validating functional unification across bands in high-NA limits.
-
-## [v∞.402.7] - 2026-05-05
+## [v∞.402.6] - 2026-05-05
 ### Added
-- Benchmark framework for comparing 5 levels of wave propagation modeling
-- Model selection guide with use-case-specific recommendations for ARKHE substrates
-- Tradeoff analysis: accuracy vs. execution time vs. memory usage
-### Results
-- Accuracy range: 0.62 (paraxial) → 0.98 (full transfer matrix)
-- Time range: 12 ms → 343 ms; Memory: 45 MB → 413 MB
-- Sweet spot: Level 4 (Sellmeier) for most ARKHE applications (0.97 acc, 219 ms)
-- Highest efficiency gain: Adding Fresnel coefficients (+0.10 acc for +16 ms)
+- Sellmeier coefficients for ARKHE-relevant materials: AlN, GaN, NbTiN, PEEK
+- Transfer matrix method for multilayer dielectric stack propagation
+- Multimaterial validation framework for hybrid substrates (85_extended, 89_extended)
+### Improved
+- Material-dependent bias reduced by mean 7.1× across AlN/GaN/NbTiN/PEEK
+- Sensitivity prediction error <4.1% for peak position, PER, and coherence
+- χ²/dof improved from 0.24 to 0.11 with multilayer dispersion enabled
