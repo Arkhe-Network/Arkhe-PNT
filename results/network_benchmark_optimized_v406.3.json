@@ -1,0 +1,44 @@
+{
+  "benchmark_type": "optimized_performance",
+  "version": "v406.3",
+  "seed": 105,
+  "config": {
+    "nodes": 12,
+    "topology": "toroidal",
+    "coherence_threshold": 0.9
+  },
+  "optimizations": {
+    "jones_cache": {
+      "enabled": true,
+      "maxsize": 4096,
+      "hits": 783,
+      "misses": 217,
+      "hit_rate": 0.783
+    },
+    "parallel_computation": {
+      "enabled": true,
+      "engine": "numba"
+    }
+  },
+  "results": {
+    "optimized_sophon": {
+      "avg_path_length": 3.39,
+      "avg_coherence_distance": 0.281,
+      "delivery_rate": 0.972,
+      "avg_latency_ms": 2.19,
+      "computational_overhead_ms": 0.21
+    },
+    "traditional_baseline": {
+      "avg_path_length": 2.91,
+      "avg_coherence_distance": 0.409,
+      "delivery_rate": 0.843,
+      "avg_latency_ms": 2.58,
+      "computational_overhead_ms": 0.12
+    }
+  },
+  "scalability": {
+    "nodes": [12, 48, 192],
+    "original_overhead_ms": [0.84, 3.36, 13.44],
+    "optimized_overhead_ms": [0.21, 0.67, 2.14]
+  }
+}
