@@ -22,6 +22,20 @@ from core.visualization.bidirectional_ui import BidirectionalUI, UIParameter
 
 logger = logging.getLogger(__name__)
 
+@dataclass
+class WarmupConfig:
+    """Configuration for JIT cache warm-up during initialization."""
+    # Predefined profiles: 'minimal', 'standard', 'comprehensive'
+    profile: str = 'standard'
+    # Custom circuits to add (list of gate name lists)
+    custom_circuits: List[List[str]] = field(default_factory=list)
+    # Maximum time to spend on warm-up (seconds)
+    timeout_seconds: float = 5.0
+    # Prioritize shorter circuits (higher coherence) first
+    prioritize_by_coherence: bool = True
+    # Log warm-up progress
+    verbose: bool = False
+
 class CompilationMode(Enum):
     """Mode for bytecode compilation and parameter mapping."""
     AMPLITUDE = auto()      # |J| → wave amplitude
@@ -69,7 +83,10 @@ class PhaseVMVisualizationBridge:
         visualization_engine: SophonHexagonEngine,
         bidirectional_ui: Optional[BidirectionalUI] = None,
         config: BytecodeToShaderConfig = None,
-        sophon_api_url: Optional[str] = None
+        sophon_api_url: Optional[str] = None,
+        async_compilation: bool = True,
+        num_compiler_threads: int = 2,
+        warmup_config: Optional[WarmupConfig] = None,
     ):
         self.viz = visualization_engine
         self.ui = bidirectional_ui
@@ -80,7 +97,7 @@ class PhaseVMVisualizationBridge:
         self.phasevm = PhaseVM()
 
         # Thread pool for async compilation to prevent render loop blocking
-        self.executor = ThreadPoolExecutor(max_workers=2)
+        self.executor = ThreadPoolExecutor(max_workers=num_compiler_threads) if async_compilation else None
 
         # State tracking
         self.last_jones: Optional[complex] = None
@@ -90,6 +107,66 @@ class PhaseVMVisualizationBridge:
         # Register UI callbacks if available
         if self.ui:
             self._register_ui_callbacks()
+
+        # Execute warm-up cache if configured
+        if warmup_config is not None:
+            self._execute_warmup(warmup_config)
+
+    def _execute_warmup(self, config: WarmupConfig):
+        """Execute JIT cache warm-up during initialization."""
+        if not hasattr(self.phasevm, 'warmup_cache'):
+            logger.warning("PhaseVM version does not support warm-up; skipping")
+            return
+
+        try:
+            # Build warm-up config for Rust
+            try:
+                from phasevm_rs import PyWarmupConfig
+            except ImportError:
+                # If using the pure-python wrapper module instead of direct bindings
+                from phasevm import PyWarmupConfig
+
+            rust_config = PyWarmupConfig()
+            rust_config.timeout_seconds = int(config.timeout_seconds)
+            rust_config.prioritize_by_coherence = config.prioritize_by_coherence
+
+            # Load predefined profile
+            profile_config = PyWarmupConfig.from_profile(config.profile)
+            rust_config.circuits = profile_config.circuits
+
+            # Add custom circuits
+            for circuit in config.custom_circuits:
+                rust_config.add_circuit(circuit)
+
+            # Execute warm-up
+            if config.verbose:
+                logger.info(f"Starting JIT warm-up: profile={config.profile}, "
+                           f"timeout={config.timeout_seconds}s, "
+                           f"circuits={len(rust_config.circuits)}")
+
+            start = time.perf_counter()
+            stats = self.phasevm.warmup_cache(rust_config)
+            elapsed = time.perf_counter() - start
+
+            if config.verbose:
+                logger.info(f"Warm-up complete: {stats.successfully_compiled}/{stats.total_requested} "
+                           f"compiled, {stats.new_cache_entries} new entries, "
+                           f"{stats.elapsed_ms}ms (Python: {elapsed*1000:.1f}ms)")
+
+            # Store stats for monitoring
+            self._warmup_stats = stats.to_dict() if hasattr(stats, 'to_dict') else {
+                'successfully_compiled': stats.successfully_compiled,
+                'new_cache_entries': stats.new_cache_entries,
+                'elapsed_ms': stats.elapsed_ms,
+            }
+
+        except Exception as e:
+            logger.warning(f"Warm-up failed (non-fatal): {e}")
+            self._warmup_stats = {'error': str(e)}
+
+    def get_warmup_stats(self) -> Dict[str, any]:
+        """Return warm-up execution statistics."""
+        return getattr(self, '_warmup_stats', {})
 
     def _register_ui_callbacks(self):
         """Connect UI controls to bytecode generation parameters."""

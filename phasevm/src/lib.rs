@@ -26,6 +26,32 @@ pub struct PhaseVM {
     gate_cache: HashMap<String, [[Complex64; 2]; 2]>,  // 2x2 matrix per gate
 }
 
+use std::time::{Instant, Duration};
+
+/// Configuration for warm-up cache pre-compilation
+#[derive(Debug, Clone, Default)]
+pub struct WarmupConfig {
+    /// List of bytecode sequences to pre-compile
+    pub circuits: Vec<Vec<String>>,
+    /// Maximum time to spend on warm-up (prevents blocking startup)
+    pub timeout_seconds: u64,
+    /// Priority: compile high-coherence circuits first
+    pub prioritize_by_coherence: bool,
+}
+
+/// Statistics for warm-up cache pre-compilation
+#[derive(Debug, Clone, Default)]
+pub struct WarmupStats {
+    pub total_requested: u32,
+    pub successfully_compiled: u32,
+    pub new_cache_entries: u32,
+    pub already_cached: u32,
+    pub compilation_errors: u32,
+    pub timeouts: u32,
+    pub timed_out: bool,
+    pub elapsed_ms: u64,
+}
+
 impl PhaseVM {
     pub fn new() -> Result<Self, PhaseVMError> {
         let mut flag_builder = settings::builder();
@@ -142,6 +168,63 @@ impl PhaseVM {
         self.gate_cache.get(gate)
             .copied()
             .ok_or_else(|| PhaseVMError::UnknownGate(gate.to_string()))
+    }
+
+    /// Pre-compile frequent circuits to populate cache before runtime
+    pub fn warmup_cache(
+        &mut self,
+        config: WarmupConfig,
+    ) -> Result<WarmupStats, PhaseVMError> {
+        let start = Instant::now();
+        let timeout = Duration::from_secs(config.timeout_seconds);
+
+        let mut stats = WarmupStats::default();
+        stats.total_requested = config.circuits.len() as u32;
+
+        let mut circuits = config.circuits;
+        if config.prioritize_by_coherence {
+            circuits.sort_by(|a, b| a.len().cmp(&b.len()));
+        }
+
+        for gates in circuits {
+            if start.elapsed() > timeout {
+                stats.timed_out = true;
+                break;
+            }
+
+            let cache_key = gates.join("|");
+
+            if self.cache.contains_key(&cache_key) {
+                stats.already_cached += 1;
+                continue;
+            }
+
+            match self.compile_circuit(&gates) {
+                Ok(_) => {
+                    stats.successfully_compiled += 1;
+                    stats.new_cache_entries += 1;
+                }
+                Err(_) => {
+                    stats.compilation_errors += 1;
+                }
+            }
+        }
+
+        stats.elapsed_ms = start.elapsed().as_millis() as u64;
+        Ok(stats)
+    }
+
+    pub fn get_warmup_stats(&self) -> Result<WarmupStats, PhaseVMError> {
+        Ok(WarmupStats {
+            total_requested: 0,
+            successfully_compiled: self.cache.len() as u32,
+            new_cache_entries: self.cache.len() as u32,
+            already_cached: 0,
+            compilation_errors: 0,
+            timeouts: 0,
+            timed_out: false,
+            elapsed_ms: 0,
+        })
     }
 }
 
