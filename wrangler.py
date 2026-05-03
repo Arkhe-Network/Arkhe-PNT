@@ -16,7 +16,7 @@ import hashlib
 import numpy as np
 
 # Backend imports for CLI structure
-from consensus_engine import ProofOfCoherenceConsensus, CoherenceStake, ForkVote
+from consensus_engine import ProofOfCoherenceConsensusCopula, CoherenceStakeCopula, ForkVoteCopula, CoherenceTensor4D
 
 class ArkheConfig:
     """Local CLI state management."""
@@ -81,14 +81,37 @@ def main():
     elif args.command == "merge":
         with open(config.config_file, 'r') as f:
             c = json.load(f)
-        consensus = ProofOfCoherenceConsensus(consensus_threshold=c["consensus_threshold"])
+        consensus = ProofOfCoherenceConsensusCopula(consensus_threshold=c["consensus_threshold"])
         # Mock voting state
+
+        def create_mock_vote(v_did: str, is_for: bool, weight: float, idx: int) -> ForkVoteCopula:
+            ts = time.time()
+            fork_tensor = CoherenceTensor4D.target()
+            pub_key = f"0xmock{idx}"
+            payload = {
+                "voter": v_did, "direction": is_for,
+                "timestamp": ts,
+                "coherence": fork_tensor.to_vector().tolist()
+            }
+            canonical_bytes = json.dumps(payload, sort_keys=True).encode()
+            sig = hashlib.sha3_256(pub_key.encode() + canonical_bytes).hexdigest()[:32]
+
+            vote = ForkVoteCopula(
+                voter_did=v_did,
+                vote_direction=is_for,
+                timestamp=ts,
+                fork_coherence=fork_tensor,
+                signature=sig
+            )
+            vote.weight = weight
+            return vote
+
         consensus.votes[args.fork_id] = [
-            ForkVote("vertex-1", True, time.time(), b"sig1", weight=0.85),
-            ForkVote("vertex-2", True, time.time(), b"sig2", weight=0.72),
-            ForkVote("vertex-3", False, time.time(), b"sig3", weight=0.41),
+            create_mock_vote("vertex-1", True, 0.85, 1),
+            create_mock_vote("vertex-2", True, 0.72, 2),
+            create_mock_vote("vertex-3", False, 0.41, 3),
         ]
-        accept, score = consensus.evaluate_merge(args.fork_id, odysseus_insight_ratio=args.odysseus_ratio)
+        accept, score, _ = consensus.evaluate_merge(args.fork_id, assurance_veto=False, odysseus_insight_ratio=args.odysseus_ratio)
         status = "✅ ACCEPTED" if accept else "❌ REJECTED"
         print(f"🔍 Merge evaluation: {status}")
         print(f"   └─ Fork: {args.fork_id}")
