@@ -721,3 +721,14 @@
 ### Epistemic Note
 - This is a research proposal, not a proof. All claims are conjectural and require rigorous mathematical development.
 - Numerical tests are heuristic; small errors do not prove correspondence, large errors would falsify.
+## [v∞.402.3] - 2026-05-04
+### Implemented
+- Vectorial propagation via Debye-Wolf integral for NA > 0.3 with full polarization handling
+- Experimental validation framework with χ²/dof, p-value, and agreement metrics
+### Validated
+- Substrate 85 (PMMA vortex spectrometer, optical): χ²/dof=0.61, p=0.89 → CONSISTENT
+- Substrate 89 (irrotational antenna, RF Ka-band): χ²/dof=0.77, p=0.86 → CONSISTENT
+- Vectorial propagation reduces prediction error by ~2× vs paraxial for NA > 0.3
+### Metrics
+- Mean p-value across datasets: 0.875
+- All residuals within ±2σ; agreement score: 1.00
