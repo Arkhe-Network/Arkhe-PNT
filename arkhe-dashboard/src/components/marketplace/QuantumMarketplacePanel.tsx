@@ -14,6 +14,7 @@ import {quantumEthicalTalentMarketplace} from '@/lib/marketplace/quantumEthicalT
 import {EthicalPrinciple} from '@/types/ethics';
 
 interface __MarketplaceDashboard {
+interface _MarketplaceDashboard {
   activePostings: number;
   registeredTalents: number;
   avgEthicalAlignment: number;

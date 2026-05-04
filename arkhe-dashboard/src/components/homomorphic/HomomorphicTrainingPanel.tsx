@@ -11,6 +11,7 @@
 import {useState, useEffect} from 'react';
 
 interface __TrainingStats {
+interface _TrainingStats {
   federatedQPUs: number;
   avgTrainingLoss: number;
   avgValidationAccuracy: number;

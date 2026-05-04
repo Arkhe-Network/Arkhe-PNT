@@ -13,6 +13,7 @@ import * as consoleTools from './console.js';
 import * as decentralizedTools from './decentralized.js';
 import * as ebpfTools from './ebpf.js';
 import * as emulationTools from './emulation.js';
+import * as epistemologyTools from './epistemology.js';
 import * as evoskillTools from './evoskill.js';
 import * as extensionTools from './extensions.js';
 import * as fortytwoTools from './fortytwo.js';
@@ -21,6 +22,8 @@ import * as gridTools from './grid.js';
 import * as inPageTools from './inPage.js';
 import * as inputTools from './input.js';
 import * as lambdaTools from './lambda_tools.js';
+import * as gnoTools from './gno.js';
+import * as gitnexusTools from './gitnexus.js';
 import * as lighthouseTools from './lighthouse.js';
 import * as logosLibraryTools from './logos_library.js';
 import * as memoryTools from './memory.js';
@@ -44,6 +47,7 @@ import * as spectraTools from './spectra.js';
 import * as storageTools from './storage.js';
 import * as tauTools from './tau.js';
 import type {ToolDefinition} from './ToolDefinition.js';
+import * as tribev2Tools from './tribev2.js';
 import * as urbitTools from './urbit.js';
 
 export const createTools = (args: ParsedArguments) => {
@@ -66,6 +70,7 @@ export const createTools = (args: ParsedArguments) => {
         ...Object.values(scriptTools),
         ...Object.values(snapshotTools),
         ...Object.values(storageTools),
+        ...Object.values(epistemologyTools),
         ...Object.values(evoskillTools),
         ...Object.values(fortytwoTools),
         ...Object.values(gridTools),
@@ -85,7 +90,9 @@ export const createTools = (args: ParsedArguments) => {
         ...Object.values(oasisTools),
         ...Object.values(meshtasticTools),
         ...Object.values(gnoTools),
+        ...Object.values(gitnexusTools),
         ...Object.values(nashTools),
+        ...Object.values(tribev2Tools),
         ...Object.values(urbitTools),
       ];
 

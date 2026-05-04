@@ -7,6 +7,12 @@
 
 
 
+/*
+ * Copyright (c) Arkhe Network. All rights reserved.
+ * Licensed under the MIT License. See LICENSE in the project root for license information.
+ */
+
+
 /**
  * @license
  * Copyright 2026 Google LLC
@@ -162,6 +168,11 @@ async function loadBrainFlowWASM(): Promise<BrainFlowInstance> {
   //
   //
   // @ts-expect-error WASM import is not typed WASM import is not typed
+
+
+
+
+  // @ts-expect-error cannot resolve module but it exists at runtime
   const module = await import(/* @vite-ignore */ '/brainflow_wasm/brainflow.js?url');
   const brainflow = await module.default();
   brainflow.DataFilter.set_log_level(brainflow.LogLevels.LEVEL_OFF);
@@ -266,6 +277,7 @@ async function openEEGStream(config: EEGStreamConfig): Promise<ReadableStreamDef
       while (true) {
         const { value, done } = await reader.read();
         if (done) { break; }
+        if (done) {break;}
 
         buffer += decoder.decode(value, { stream: true });
         const lines = buffer.split('\n');
@@ -306,6 +318,7 @@ async function openEEGStream(config: EEGStreamConfig): Promise<ReadableStreamDef
   };
 
   void void void void void void void void processLoop();
+  processLoop().catch(err => config.onError(err as Error));
   return reader;
 }
 
@@ -684,7 +697,7 @@ const ArkheV288: React.FC = () => {
   const connectEEG = useCallback(async () => {
     try {
       // Solicitar porta serial
-      const port = await (navigator as any).serial.requestPort({
+      const port = await (navigator as unknown as { serial: { requestPort: (opts: { filters: Array<{ usbVendorId: number }> }) => Promise<SerialPort> } }).serial.requestPort({
         filters: [{ usbVendorId: 0x0403 }], // FTDI (OpenBCI)
       });
 
@@ -746,6 +759,7 @@ const ArkheV288: React.FC = () => {
   useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) { return; }
+    if (!canvas) {return;}
     const wg = webgpuRef.current;
     let mounted = true;
 
@@ -757,12 +771,14 @@ const ArkheV288: React.FC = () => {
 
       const adapter = await navigator.gpu.requestAdapter();
       if (!adapter) { return; }
+      if (!adapter) {return;}
       const device = await adapter.requestDevice();
       wg.device = device;
       wg.startTime = performance.now();
 
       const context = canvas!.getContext('webgpu');
       if (!context) { return; }
+      if (!context) {return;}
 
       const presentationFormat = navigator.gpu.getPreferredCanvasFormat();
       context.configure({ device, format: presentationFormat });
@@ -877,6 +893,7 @@ const ArkheV288: React.FC = () => {
 
       function frame() {
         if (!mounted) { return; }
+        if (!mounted) {return;}
         const now = performance.now();
         const t = (now - wg.startTime) * 0.001;
         const frameIdx = wg.frameCount % 2;
@@ -938,11 +955,16 @@ const ArkheV288: React.FC = () => {
 
     // Tentar conectar EEG automaticamente
     void void void void void void void void connectEEG();
+    initWebGPU().catch(console.error);
+
+    // Tentar conectar EEG automaticamente
+    connectEEG().catch(console.error);
 
     return () => {
       mounted = false;
       cancelAnimationFrame(wg.animId);
       void void void void void void void void wg.eegReader?.cancel();
+      wg.eegReader?.cancel().catch(console.error);
     };
   }, [connectEEG]);
 

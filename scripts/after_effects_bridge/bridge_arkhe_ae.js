@@ -2,6 +2,17 @@
 const WebSocket = await import("ws");
 const net = await import("node:net");
 
+/**
+ * @license
+ * Copyright 2026 Google LLC
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+import net from "node:net";
+
+import WebSocket from "ws";
+
+
 const wss = new WebSocket.Server({ port: 8080 });
 const clients = [];
 
@@ -12,6 +23,7 @@ const tcpServer = net.createServer((socket) => {
     socket.on('close', () => {
         const idx = clients.indexOf(socket);
         if (idx > -1) { clients.splice(idx, 1); }
+        if (idx > -1) {clients.splice(idx, 1);}
     });
     socket.on('error', (err) => console.error('Erro AE:', err));
 });
