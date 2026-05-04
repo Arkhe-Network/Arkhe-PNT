@@ -6,6 +6,9 @@
  */
 
 // bridge_arkhe_ae.js
+// License: MIT
+import WebSocket from "ws";
+import net from "node:net";
 import net from "node:net";
 
 import WebSocket from "ws";
