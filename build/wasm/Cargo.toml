@@ -28,3 +28,6 @@ web-sys = { version = "0.3", features = [
 [profile.release]
 opt-level = "s"  # optimize for size
 lto = true
+
+[features]
+zk-async-consensus = []
