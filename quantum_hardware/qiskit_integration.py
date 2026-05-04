@@ -189,8 +189,11 @@ class PennylaneQuantumInterface:
         self.device = qml.device(device_name, wires=wires)
         self.wires = wires
 
-    # @qml.qnode(device=None)  # device será definido em __init__
-    def variational_echo_circuit(
+        # dynamic qnode wrapping in init because qml might not be defined at module level
+        # if PENNYLANE_AVAILABLE is False
+        self.variational_echo_circuit = qml.qnode(self.device)(self._variational_echo_circuit_impl)
+
+    def _variational_echo_circuit_impl(
         self,
         params: np.ndarray,
         gap_input: float,

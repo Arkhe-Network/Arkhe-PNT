@@ -6,7 +6,7 @@ Implementa Gaussian mechanism para agregação segura de atualizações de múlt
 
 import numpy as np
 import torch
-from typing import Dict, List, Optional, Tuple
+from typing import Dict, List, Optional, Tuple, Union
 from dataclasses import dataclass
 import hashlib
 import time
@@ -36,7 +36,7 @@ class FederatedQuantumAggregator:
         )
 
         # Buffer para agregação
-        self.update_buffer: Dict[str, List[torch.Tensor]] = {}
+        self.update_buffer: Dict[int, List[Dict]] = {}
         self.round_counter = 0
 
         # Histórico de agregações para auditoria
@@ -142,7 +142,7 @@ class FederatedQuantumAggregator:
 
         return aggregated
 
-    def get_privacy_accountant(self) -> Dict[str, float]:
+    def get_privacy_accountant(self) -> Dict[str, Union[float, int, str]]:
         """Retorna métricas de privacidade para auditoria."""
         # Cálculo simplificado de privacy budget gasto
         # Em produção: usar privacy accountant do TensorFlow Privacy ou Opacus
