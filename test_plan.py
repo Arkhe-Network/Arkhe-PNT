@@ -1,4 +1,3 @@
-import os
+import sys
 
-print("Directories created:")
-os.system("ls -d core/protocol/delegation core/protocol/cross_cohort")
+print("Need to implement Qiskit/Pennylane integration, PPO model, and differential privacy.")
