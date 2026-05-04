@@ -2,6 +2,11 @@
 #![allow(clippy::new_without_default)]
 
 use wasm_bindgen::prelude::*;
+
+#[cfg(feature = "zk-async-consensus")]
+#[path = "../../zk_honeybadger/zk_honeybadger.rs"]
+pub mod zk_honeybadger;
+
 use serde_wasm_bindgen;
 use arkhe_unified::core::orchestrator::UnifiedOrchestrator;
 use arkhe_unified::core::config::Config;

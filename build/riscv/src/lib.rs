@@ -5,6 +5,11 @@
 
 extern crate alloc;
 
+#[cfg(feature = "federated-riscv-enclaves")]
+#[path = "../../riscv_federated_enclaves/federated_attestation.rs"]
+pub mod federated_attestation;
+
+
 use core::panic::PanicInfo;
 use alloc::boxed::Box;
 

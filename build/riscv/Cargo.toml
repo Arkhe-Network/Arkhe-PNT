@@ -42,3 +42,6 @@ rustflags = [
 # Low-power optimizations
 [profile.release.package."*"]
 opt-level = "z"
+
+[features]
+federated-riscv-enclaves = []
