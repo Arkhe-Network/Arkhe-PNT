@@ -1,0 +1,51 @@
+{
+  "timestamp": "847.635",
+  "scenarios": {
+    "Baseline": {
+      "cirbp_upregulation": 1.6738458770380389,
+      "plv": 1.0,
+      "final_l2_dna": 0.9632520688189852
+    },
+    "Bio-Link 40Hz": {
+      "cirbp_upregulation": 1.6738458770380389,
+      "plv": 1.0,
+      "final_l2_dna": 0.9632520688189852
+    },
+    "Peptide + Bio-Link": {
+      "cirbp_upregulation": 2.956457156634096,
+      "plv": 1.0,
+      "final_l2_dna": 0.9707510000256382
+    },
+    "Whale Level": {
+      "cirbp_upregulation": 3.3839942498327265,
+      "plv": 1.0,
+      "final_l2_dna": 0.9728763636110407
+    }
+  },
+  "predictions": [
+    {
+      "id": "P1",
+      "hypothesis": "Bio-Link 40Hz upregula CIRBP ~2.8x",
+      "test": "RT-qPCR em fibroblastos \u00b1 40Hz"
+    },
+    {
+      "id": "P2",
+      "hypothesis": "PLV entre campo e CaM > 0.8 at 40Hz",
+      "test": "FRET calmodulina em tempo real"
+    },
+    {
+      "id": "P3",
+      "hypothesis": "Pept\u00eddeo + Bio-Link atinge \u03bb2_DNA > 0.99",
+      "test": "Ensaio \u03b3-H2AX comparativo"
+    },
+    {
+      "id": "P4",
+      "hypothesis": "Lag temporal CaM -> CIRBP < 5 min",
+      "test": "Time-lapse imaging CaM/CIRBP"
+    }
+  ],
+  "network_coherence": {
+    "plv_cam_field": 1.0,
+    "max_l2_dna": 0.9728763636110407
+  }
+}

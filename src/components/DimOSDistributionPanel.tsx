@@ -1,5 +1,12 @@
-import React, { useState, useEffect } from 'react';
-import { Cpu, Network, Activity, Shield, Zap, RefreshCw, CheckCircle2, AlertTriangle, Database } from 'lucide-react';
+
+/**
+ * @license
+ * Copyright 2026 Google LLC
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+import { Cpu, Network, Activity, Zap, RefreshCw, CheckCircle2, Database } from 'lucide-react';
+import React, { useState } from 'react';
 
 interface DimOSPanelProps {
   onClose: () => void;
@@ -48,7 +55,7 @@ export default function DimOSDistributionPanel({ onClose }: DimOSPanelProps) {
         clearInterval(interval);
         setIsDeploying(false);
         addLog('DimOS DISTRIBUTION COMPLETE. FLEET SYNCHRONIZED.');
-        
+
         // Final state update
         setFleet(prev => prev.map(node => ({
           ...node,
@@ -62,10 +69,10 @@ export default function DimOSDistributionPanel({ onClose }: DimOSPanelProps) {
       // Update node statuses randomly during deployment
       if (progress < 100) {
         setFleet(prev => prev.map(node => {
-          if (node.status === 'active') return node;
+          if ((node.status as string) === 'active') {return node;}
           if (Math.random() > 0.7) {
              const newStatus = Math.random() > 0.5 ? 'syncing' : 'active';
-             if (newStatus === 'active' && node.status !== 'active') {
+             if (newStatus === 'active' && (node.status as string) !== 'active') {
                  addLog(`NODE ${node.id} GENOME TRANSPLANT SUCCESSFUL.`);
              }
              return {
@@ -84,7 +91,7 @@ export default function DimOSDistributionPanel({ onClose }: DimOSPanelProps) {
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4">
       <div className="w-full max-w-4xl bg-arkhe-card border border-arkhe-cyan/30 rounded-xl shadow-[0_0_30px_rgba(0,255,170,0.1)] overflow-hidden flex flex-col max-h-[90vh]">
-        
+
         {/* Header */}
         <div className="flex items-center justify-between p-4 border-b border-arkhe-cyan/20 bg-arkhe-cyan/5">
           <div className="flex items-center gap-3">
@@ -100,7 +107,7 @@ export default function DimOSDistributionPanel({ onClose }: DimOSPanelProps) {
         </div>
 
         <div className="p-6 grid grid-cols-1 md:grid-cols-3 gap-6 overflow-y-auto">
-          
+
           {/* Control Panel */}
           <div className="md:col-span-1 space-y-6">
             <div className="bg-black/40 border border-arkhe-border p-4 rounded-lg">
@@ -108,7 +115,7 @@ export default function DimOSDistributionPanel({ onClose }: DimOSPanelProps) {
                 <Activity className="w-4 h-4" />
                 Deployment Control
               </h3>
-              
+
               <div className="space-y-4">
                 <div className="flex justify-between text-xs font-mono">
                   <span className="text-arkhe-muted">Target OS:</span>
@@ -127,9 +134,9 @@ export default function DimOSDistributionPanel({ onClose }: DimOSPanelProps) {
                   onClick={initiateDeployment}
                   disabled={isDeploying || deploymentProgress === 100}
                   className={`w-full py-3 mt-4 rounded font-mono text-sm uppercase tracking-widest transition-all ${
-                    isDeploying 
+                    isDeploying
                       ? 'bg-arkhe-cyan/20 text-arkhe-cyan border border-arkhe-cyan/50 cursor-not-allowed'
-                      : deploymentProgress === 100
+                      : Math.round(deploymentProgress) === 100
                         ? 'bg-arkhe-green/20 text-arkhe-green border border-arkhe-green/50 cursor-not-allowed'
                         : 'bg-arkhe-cyan/10 text-arkhe-cyan border border-arkhe-cyan hover:bg-arkhe-cyan/20 hover:shadow-[0_0_15px_rgba(0,255,170,0.3)]'
                   }`}
@@ -161,7 +168,7 @@ export default function DimOSDistributionPanel({ onClose }: DimOSPanelProps) {
                 <span className="text-arkhe-cyan">{Math.round(deploymentProgress)}%</span>
               </div>
               <div className="h-2 bg-arkhe-card rounded-full overflow-hidden border border-arkhe-border">
-                <div 
+                <div
                   className="h-full bg-arkhe-cyan transition-all duration-500 relative"
                   style={{ width: `${deploymentProgress}%` }}
                 >
@@ -178,19 +185,19 @@ export default function DimOSDistributionPanel({ onClose }: DimOSPanelProps) {
                 <Network className="w-4 h-4" />
                 Fleet Topology
               </h3>
-              
+
               <div className="grid grid-cols-2 gap-3">
                 {fleet.map(node => (
                   <div key={node.id} className={`p-3 rounded border text-xs font-mono flex flex-col gap-2 transition-colors ${
-                    node.status === 'active' ? 'bg-arkhe-green/5 border-arkhe-green/30' :
+                    (node.status as string) === 'active' ? 'bg-arkhe-green/5 border-arkhe-green/30' :
                     node.status === 'syncing' ? 'bg-arkhe-cyan/5 border-arkhe-cyan/30' :
                     'bg-arkhe-card border-arkhe-border'
                   }`}>
                     <div className="flex justify-between items-center">
                       <span className="font-bold text-white">{node.id}</span>
                       <span className={`px-2 py-0.5 rounded text-[10px] uppercase ${
-                        node.status === 'active' ? 'bg-arkhe-green/20 text-arkhe-green' :
-                        node.status === 'syncing' ? 'bg-arkhe-cyan/20 text-arkhe-cyan animate-pulse' :
+                        node.status as string === 'active' ? 'bg-arkhe-green/20 text-arkhe-green' :
+                        node.status as string === 'syncing' ? 'bg-arkhe-cyan/20 text-arkhe-cyan animate-pulse' :
                         'bg-zinc-800 text-zinc-400'
                       }`}>
                         {node.status}
@@ -200,7 +207,7 @@ export default function DimOSDistributionPanel({ onClose }: DimOSPanelProps) {
                       <span>Type: {node.type}</span>
                       <span>OS: <span className={node.genomeVersion === 'v2.14.0' ? 'text-arkhe-cyan' : ''}>{node.genomeVersion}</span></span>
                     </div>
-                    {node.status === 'active' && (
+                    {node.status as string === 'active' && (
                       <div className="flex justify-between text-[10px]">
                         <span className="text-arkhe-muted">Coherence:</span>
                         <span className="text-arkhe-green">{(node.coherence * 100).toFixed(2)}%</span>

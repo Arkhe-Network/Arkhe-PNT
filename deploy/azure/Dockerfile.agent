@@ -1,0 +1,10 @@
+FROM python:3.11-slim
+
+WORKDIR /app
+
+COPY arkhe-brain/requirements-azure.txt .
+RUN pip install --no-cache-dir -r requirements-azure.txt
+
+COPY arkhe-brain/pitch_agent.py .
+
+CMD ["python", "pitch_agent.py"]

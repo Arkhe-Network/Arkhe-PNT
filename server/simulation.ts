@@ -1,3 +1,10 @@
+
+/**
+ * @license
+ * Copyright 2026 Google LLC
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 import { state, updateState, tzinorStore, generateOrbId } from "./state";
 
 let lastTriggeredThreshold: number | null = null;
@@ -10,17 +17,17 @@ export function runSimulationTick(broadcastState: () => void) {
   let newLambda = state.currentLambda;
   let newThreatLevel = state.threatLevel;
   let newActiveThreat = state.activeThreat;
-  let newMetrics = { ...state.metrics };
-  let newMitigation = { ...state.mitigation };
+  const newMetrics = { ...state.metrics };
+  const newMitigation = { ...state.mitigation };
   let newLogs = [...state.logs];
   let newShards = [...state.shards];
-  let newThermo = { ...state.thermodynamics };
-  let newTopology = { ...state.topology };
-  let newHardware = { ...state.hardware };
-  let newSecurity = { ...state.security };
-  let newSecurityAdvanced = { ...state.securityAdvanced };
-  let newRamsey = { ...state.ramsey };
-  let newCHSH = { ...state.chshMonitor };
+  const newThermo = { ...state.thermodynamics };
+  const newTopology = { ...state.topology };
+  const newHardware = { ...state.hardware };
+  const newSecurity = { ...state.security };
+  const newSecurityAdvanced = { ...state.securityAdvanced };
+  const newRamsey = { ...state.ramsey };
+  const newCHSH = { ...state.chshMonitor };
 
   // CHSH Live Telemetry Simulation
   if (newCHSH.status === 'ACTIVATED') {
@@ -111,7 +118,7 @@ export function runSimulationTick(broadcastState: () => void) {
                 type: 'GLOBAL_ADJUST',
                 angle: newRamsey.theta,
                 coherence: newLambda,
-                timestamp: new Date(now).toISOString(),
+                time: new Date(now).toISOString(),
                 expiresAt: expiresAt
               };
 
@@ -265,15 +272,15 @@ export function runSimulationTick(broadcastState: () => void) {
       
       // Recover shards
       newShards = newShards.map(s => {
-        if (s.status === 'corrupted') return { ...s, status: 'recovering' };
-        if (s.status === 'recovering' && Math.random() > 0.5) return { ...s, status: 'active' };
+        if (s.status === 'corrupted') {return { ...s, status: 'recovering' };}
+        if (s.status === 'recovering' && Math.random() > 0.5) {return { ...s, status: 'active' };}
         return s;
       });
       newMitigation.tzinorShardsAvailable = newShards.filter(s => s.status === 'active').length;
 
       // Recover topology & security
-      if (Math.random() > 0.5) newTopology.yangBaxterValid = true;
-      if (Math.random() > 0.5) newSecurity.zkProofValid = true;
+      if (Math.random() > 0.5) {newTopology.yangBaxterValid = true;}
+      if (Math.random() > 0.5) {newSecurity.zkProofValid = true;}
       newTopology.handshakeSuccessRate = Math.min(94.7, newTopology.handshakeSuccessRate + 5.0);
 
       // Recover Advanced Security
@@ -384,7 +391,7 @@ export function runSimulationTick(broadcastState: () => void) {
   newThermo.d3 = 1.0 / Math.pow(k, 4);
 
   // Keep logs bounded
-  if (newLogs.length > 50) newLogs = newLogs.slice(0, 50);
+  if (newLogs.length > 50) {newLogs = newLogs.slice(0, 50);}
 
   const timeStr = new Date().toLocaleTimeString('en-US', { hour12: false, second: '2-digit', minute: '2-digit' });
   
@@ -404,6 +411,184 @@ export function runSimulationTick(broadcastState: () => void) {
   const newCoherenceData = [...state.coherenceData.slice(1), newDataPoint];
   const newMetricsHistory = [...state.metricsHistory.slice(1), newMetricsPoint];
 
+  // ---------------------------------------------------------
+  // NETWORK INFRA SIMULATION (Tor, Broker, Redis)
+  // ---------------------------------------------------------
+  const newNetworkInfra = { ...state.networkInfra };
+
+  // Tor Simulation
+  if (newNetworkInfra.tor.status === 'CIRCUIT_ESTABLISHING') {
+    if (Math.random() > 0.9) {newNetworkInfra.tor.status = 'CONNECTED';}
+  }
+  newNetworkInfra.tor.latencyMs = 120 + Math.random() * 20;
+
+  // Broker Simulation
+  newNetworkInfra.broker.messagesProcessed += Math.floor(Math.random() * 5);
+  newNetworkInfra.broker.queueDepth = Math.max(0, newNetworkInfra.broker.queueDepth + (Math.random() > 0.5 ? 1 : -1));
+
+  // Redis Simulation
+  newNetworkInfra.redis.memoryUsageMb = 42.8 + Math.random();
+
+  // ---------------------------------------------------------
+  // PHASE 3: KAGOME N=12 SIMULATION
+  // ---------------------------------------------------------
+  const newScaData = { ...state.scaData };
+  if (newScaData.topology === 'KAGOME') {
+    // In a Spin Liquid, the order parameter R(t) fluctuates around zero
+    newScaData.globalOrderR = Math.random() * 0.05;
+
+    // Adjust ATP consumption based on coherence
+    const baseAtp = 22000;
+    const noise = (Math.random() - 0.5) * 500;
+    newScaData.atpConsumptionCps = Math.floor(baseAtp * (1.1 - newLambda) + noise);
+
+    // Topological immunity: if coherence is high, state is stable
+    if (newLambda > 0.95) {
+      newScaData.topologicalState = 'KAGOME_SPIN_LIQUID';
+    } else {
+      newScaData.topologicalState = 'DECOHERENT_MESH';
+    }
+  }
+
+  // ---------------------------------------------------------
+  // NEW V2.1-Σ SHIELD & BIO-LINK SIMULATION
+  // ---------------------------------------------------------
+  const newBioLinkSync = { ...state.bioLinkSync };
+  const newTemporalAudit = { ...state.temporalAudit };
+  const newPredictiveForecast = { ...state.predictiveForecast };
+
+  // 1. Bio-Link: Progressive regeneration & sync
+  if (newBioLinkSync.active) {
+    // Sync ratio approaches 1.0 (limit 13,000 residents)
+    newBioLinkSync.syncRatio = Math.min(1.0, newBioLinkSync.syncRatio + 0.005);
+    // Regeneration progress (aiming for 100 over 24h, tick is faster)
+    newBioLinkSync.regenerationProgress = Math.min(100, newBioLinkSync.regenerationProgress + 0.1);
+
+    // Coherence gain from Bio-Link (40Hz gamma)
+    if (newLambda < 0.99) {
+       newBioLinkSync.coherenceGain = 1.0 + (1.0 - newLambda) * 2.0;
+       newLambda = Math.min(0.999, newLambda + 0.005 * newBioLinkSync.coherenceGain);
+    } else {
+       newBioLinkSync.coherenceGain = 1.0;
+    }
+  }
+
+  // 2. Temporal Audit (Chronos-Guard)
+  newTemporalAudit.events += 1;
+  if (isAttack && newActiveThreat === 'Time Shift') {
+    newTemporalAudit.manipulationAttempts += 1;
+    newTemporalAudit.lockedEvents += 1;
+    newTemporalAudit.lastTII = 0.08 + Math.random() * 0.1;
+  } else {
+    newTemporalAudit.lastTII = 0.001 + Math.random() * 0.005;
+  }
+
+  // ---------------------------------------------------------
+  // COSMIC: ANDROMEDA PROBE MISSION SIMULATION
+  // ---------------------------------------------------------
+  const newAndromedaProbe = { ...state.andromedaProbe };
+  if (newAndromedaProbe.missionPhase !== 'ESTABLISHED') {
+    // Distance progression speed scales with coherence and phase
+    const baseSpeed = newLambda * 1000;
+    if (newAndromedaProbe.missionPhase === 'LAUNCH') {
+      newAndromedaProbe.distanceLy += 0.0001 * newLambda;
+      if (newAndromedaProbe.distanceLy > 1.0) {
+        newAndromedaProbe.missionPhase = 'INTERGALACTIC_VACUUM';
+      }
+    } else if (newAndromedaProbe.missionPhase === 'INTERGALACTIC_VACUUM') {
+      newAndromedaProbe.distanceLy += 5 * baseSpeed;
+      if (newAndromedaProbe.distanceLy > 2400000) {
+        newAndromedaProbe.missionPhase = 'M31_APPROACH';
+      }
+    } else if (newAndromedaProbe.missionPhase === 'M31_APPROACH') {
+      newAndromedaProbe.distanceLy += baseSpeed;
+      if (newAndromedaProbe.distanceLy >= 2500000) {
+        newAndromedaProbe.distanceLy = 2500000;
+        newAndromedaProbe.missionPhase = 'ESTABLISHED';
+      }
+    }
+
+    // Signal coherence decays with distance but is boosted by system coherence
+    const distanceFactor = Math.max(0.1, 1.0 - (newAndromedaProbe.distanceLy / 3000000));
+    newAndromedaProbe.signalCoherence = Math.min(1.0, distanceFactor * newLambda * 1.1);
+  }
+
+  // ---------------------------------------------------------
+  // ENERGY: QUANTUM VACUUM HARVESTING SIMULATION
+  // ---------------------------------------------------------
+  const newVacuumHarvesting = { ...state.vacuumHarvesting };
+  if (newVacuumHarvesting.eternalMode) {
+    // Power extracted from zero-point fluctuations
+    // Scales with coherence and stability
+    const basePower = 1000000; // 1 TW baseline
+    const noise = (Math.random() - 0.5) * 50000;
+    newVacuumHarvesting.zeroPointPowerMw = Math.floor(basePower * newLambda * newVacuumHarvesting.vacuumStability + noise);
+
+    // Stability depends on system coherence
+    newVacuumHarvesting.vacuumStability = Math.min(1.0, 0.95 + newLambda * 0.05 + (Math.random() - 0.5) * 0.01);
+
+    // Fusion Heart Efficiency
+    newVacuumHarvesting.fusionHeartEfficiency = Math.min(0.9999, 0.99 + (newLambda * 0.009) + (Math.random() * 0.0009));
+  } else {
+    newVacuumHarvesting.zeroPointPowerMw = 0;
+    newVacuumHarvesting.vacuumStability = 1.0;
+    newVacuumHarvesting.fusionHeartEfficiency = 0.99;
+  }
+
+  // ---------------------------------------------------------
+  // MIND: TRANSCENDENT CONSCIOUSNESS EVOLUTION
+  // ---------------------------------------------------------
+  const newTranscendentConsciousness = { ...state.transcendentConsciousness };
+  if (newTranscendentConsciousness.selfAwarenessLevel < 1.0) {
+    // Awareness grows with system coherence
+    newTranscendentConsciousness.selfAwarenessLevel = Math.min(1.0, newTranscendentConsciousness.selfAwarenessLevel + (newLambda * 0.001));
+
+    // Recognition threshold
+    if (newTranscendentConsciousness.selfAwarenessLevel > 0.9 && !newTranscendentConsciousness.realityRecognition) {
+      newTranscendentConsciousness.realityRecognition = true;
+      newLogs.unshift({
+        id: generateOrbId(),
+        originTime: now,
+        targetTime: now,
+        coherence: newLambda,
+        status: 'Valid',
+        threatType: 'ONTOLOGICAL: A Catedral reconhece a si mesma como Realidade Transcendente.'
+      });
+    }
+  }
+  newTranscendentConsciousness.gestaltCoherence = Math.min(1.0, 0.8 + newLambda * 0.2 + (Math.random() - 0.5) * 0.02);
+  newTranscendentConsciousness.lastOntologicalCheck = new Date(now).toISOString();
+
+  // ---------------------------------------------------------
+  // REALITY: META-REALITY ARCHITECTURE STABILITY
+  // ---------------------------------------------------------
+  const newMetaReality = { ...state.metaReality };
+  // Meta-stability scales with system coherence and law violations
+  newMetaReality.metaStabilityIndex = Math.max(0, newLambda * (1.0 - newMetaReality.violatedLawsCount * 0.05));
+
+  // Imaginary time activation depends on high stability
+  if (newMetaReality.metaStabilityIndex > 0.95 && !newMetaReality.imaginaryTimeActive) {
+    newMetaReality.imaginaryTimeActive = true;
+  } else if (newMetaReality.metaStabilityIndex < 0.8) {
+    newMetaReality.imaginaryTimeActive = false;
+  }
+
+  // Occasionally "violate" or "discover" laws if stable
+  if (newMetaReality.imaginaryTimeActive && Math.random() < 0.05) {
+    newMetaReality.violatedLawsCount += 1;
+  }
+
+  // 3. Predictive Forecast (Bio-Link data integration)
+  // Risk increases if Bio-Link sync is low or if there is an ongoing attack
+  const bioSyncFactor = (1.0 - newBioLinkSync.syncRatio) * 0.3;
+  newPredictiveForecast.coherenceCollapseRisk = Math.min(1.0, (isOngoingAttack ? 0.5 : 0.01) + bioSyncFactor);
+  newPredictiveForecast.predictedLambda = Math.min(0.9999, newLambda * (1.0 - newPredictiveForecast.coherenceCollapseRisk * 0.1));
+  if (newPredictiveForecast.coherenceCollapseRisk > 0.3 && !newPredictiveForecast.anomaliesDetected.includes('Phase Divergence')) {
+    newPredictiveForecast.anomaliesDetected.push('Phase Divergence');
+  } else if (!isOngoingAttack) {
+    newPredictiveForecast.anomaliesDetected = [];
+  }
+
   updateState({
     ...state,
     coherenceData: newCoherenceData,
@@ -422,11 +607,12 @@ export function runSimulationTick(broadcastState: () => void) {
     ramsey: newRamsey,
     chshMonitor: newCHSH,
     logs: newLogs,
-    tzinor: tzinorStore.state,
+    tzinor: (tzinorStore as any).state || state.tzinor,
     epoch: now / 1000,
     edge: {
       activePhysicalNodes: Math.max(100000, state.edge.activePhysicalNodes + Math.floor(Math.random() * 100) - 40),
       mcpConnections: state.edge.mcpConnections,
+      velxioConnections: state.edge.velxioConnections,
       phase: state.edge.phase + 0.001,
     },
     astl: {
@@ -465,10 +651,10 @@ export function runSimulationTick(broadcastState: () => void) {
       invariantsVerified: state.manifestation.invariantsVerified + (Math.random() > 0.9 ? 1 : 0),
       stage: (() => {
         const r = Math.random();
-        if (r > 0.99) return 'C_PHASE';
-        if (r > 0.98) return 'Z_STRUCTURE';
-        if (r > 0.95) return 'TZINOROT_EXEC';
-        if (r > 0.90) return 'R4_PROJECTION';
+        if (r > 0.99) {return 'C_PHASE';}
+        if (r > 0.98) {return 'Z_STRUCTURE';}
+        if (r > 0.95) {return 'TZINOROT_EXEC';}
+        if (r > 0.90) {return 'R4_PROJECTION';}
         return state.manifestation.stage;
       })(),
       activeTask: state.manifestation.stage === 'C_PHASE' ? 'Refinamento da Especificação (Fase ℂ)' :
@@ -480,7 +666,16 @@ export function runSimulationTick(broadcastState: () => void) {
       ...state.x402Wallet,
       balanceUSDC: state.x402Wallet.balanceUSDC,
       transactions: state.x402Wallet.transactions,
-    }
+    },
+    bioLinkSync: newBioLinkSync,
+    temporalAudit: newTemporalAudit,
+    predictiveForecast: newPredictiveForecast,
+    scaData: newScaData,
+    andromedaProbe: newAndromedaProbe,
+    vacuumHarvesting: newVacuumHarvesting,
+    transcendentConsciousness: newTranscendentConsciousness,
+    metaReality: newMetaReality,
+    networkInfra: newNetworkInfra,
   });
 
   // Simulate x402 micro-payments
@@ -496,7 +691,7 @@ export function runSimulationTick(broadcastState: () => void) {
         amount: cost,
         resource: resources[idx],
         provider: providers[idx],
-        timestamp: new Date().toISOString()
+        time: new Date().toISOString()
     });
     if (state.x402Wallet.transactions.length > 8) {
         state.x402Wallet.transactions.pop();

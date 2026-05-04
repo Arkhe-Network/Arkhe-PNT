@@ -51,14 +51,15 @@ export class TeknetEdgeAgent extends Agent {
   }
 
   // 6. SQL: Direct SQLite queries via Durable Objects
+  // 15/ Always use tagged templates for SQL to prevent interpolation/injection
   @callable()
-  async queryTelemetry() {
+  async queryTelemetry(limit: number = 10) {
     // Querying the local SQLite database attached to this Durable Object
     const results = await this.sql`
       SELECT node_id, lambda2, timestamp 
       FROM physical_telemetry 
       ORDER BY timestamp DESC 
-      LIMIT 10
+      LIMIT ${limit}
     `;
     return results;
   }

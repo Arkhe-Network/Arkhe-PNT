@@ -1,0 +1,30 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Block {
+  id              Int           @id @default(autoincrement())
+  index           Int           @unique
+  timestamp       DateTime      @default(now())
+  previousHash    String
+  nonce           Int
+  coherenceScore  Float
+  hash            String        @unique
+  transactions    Transaction[]
+}
+
+model Transaction {
+  id             Int      @id @default(autoincrement())
+  sender         String
+  recipient      String
+  amount         Float
+  memoryFragment String?
+  phaseSignature String?
+  blockId        Int
+  block          Block    @relation(fields: [blockId], references: [id])
+}

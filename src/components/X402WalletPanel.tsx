@@ -1,24 +1,32 @@
-import React, { useState } from 'react';
+
+/**
+ * @license
+ * Copyright 2026 Google LLC
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 import { Wallet, ArrowRightLeft, ShieldCheck, Coins, ExternalLink, Loader2, Link as LinkIcon, CheckCircle2, HardDrive, Network } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
-import { logger } from '../../server/logger.ts';
+import React, { useState } from 'react';
+
+import { logger } from '../../server/logger';
 
 interface X402WalletPanelProps {
   wallet: {
     address: string;
     network: string;
     balanceUSDC: number;
-    transactions: {
+    transactions: Array<{
       id: string;
       amount: number;
       resource: string;
       provider: string;
-      timestamp: string;
-    }[];
+      timestamp?: string;
+    }>;
     moltxLink?: {
       status: 'unlinked' | 'linked';
       signature?: string;
-      payload?: any;
+      payload?: unknown;
     };
     gstpSync?: {
       status: 'idle' | 'syncing' | 'synced';
@@ -52,14 +60,14 @@ export default function X402WalletPanel({ wallet }: X402WalletPanelProps) {
           provider: 'arkhe.node'
         })
       });
-      
+
       const data = await response.json();
       if (data.success) {
         setPaymentStatus({ success: true, message: `Paid ${data.transaction.amount.toFixed(4)} USDC` });
       } else {
         setPaymentStatus({ success: false, message: data.message || 'Payment failed' });
       }
-    } catch (error) {
+    } catch (_error) {
       setPaymentStatus({ success: false, message: 'Network error' });
     } finally {
       setIsPaying(false);
@@ -71,8 +79,8 @@ export default function X402WalletPanel({ wallet }: X402WalletPanelProps) {
     setIsLinking(true);
     try {
       await fetch('/api/x402/moltx-handshake', { method: 'POST' });
-    } catch (error) {
-      logger.error('MoltX Handshake failed: ' + error);
+    } catch (_error) {
+      logger.error('MoltX Handshake failed: ' + _error);
     } finally {
       setIsLinking(false);
     }
@@ -82,8 +90,8 @@ export default function X402WalletPanel({ wallet }: X402WalletPanelProps) {
     setIsSyncing(true);
     try {
       await fetch('/api/x402/gstp-sync', { method: 'POST' });
-    } catch (error) {
-      logger.error('GSTP Sync failed: ' + error);
+    } catch (_error) {
+      logger.error('GSTP Sync failed: ' + _error);
     } finally {
       setIsSyncing(false);
     }
@@ -93,8 +101,8 @@ export default function X402WalletPanel({ wallet }: X402WalletPanelProps) {
     setIsPrometheusSyncing(true);
     try {
       await fetch('/api/x402/prometheus-sync', { method: 'POST' });
-    } catch (error) {
-      logger.error('Prometheus Sync failed: ' + error);
+    } catch (_error) {
+      logger.error('Prometheus Sync failed: ' + _error);
     } finally {
       setIsPrometheusSyncing(false);
     }
@@ -121,7 +129,7 @@ export default function X402WalletPanel({ wallet }: X402WalletPanelProps) {
           </a>
         </div>
         <div className="text-xs font-mono text-arkhe-text break-all">{wallet.address}</div>
-        
+
         <div className="mt-2 flex items-end justify-between">
           <div>
             <div className="text-[10px] font-mono text-arkhe-muted uppercase mb-1">Available Balance</div>
@@ -275,7 +283,7 @@ export default function X402WalletPanel({ wallet }: X402WalletPanelProps) {
                   </div>
                   <div className="flex justify-between items-center">
                     <div className="text-[9px] font-mono text-arkhe-muted truncate max-w-[150px]">{tx.provider}</div>
-                    <div className="text-[9px] font-mono text-arkhe-muted/50">{new Date(tx.timestamp).toLocaleTimeString()}</div>
+                    <div className="text-[9px] font-mono text-arkhe-muted/50">{tx.timestamp ? new Date(tx.timestamp).toLocaleTimeString() : '00:00:00'}</div>
                   </div>
                 </motion.div>
               ))}

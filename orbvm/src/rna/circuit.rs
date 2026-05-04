@@ -21,6 +21,10 @@ pub struct RnaCircuit {
     
     /// State variables
     state: HashMap<String, CircuitState>,
+
+    /// Neuro-profile for stochastic resilience
+    /// 0: Neurotypical, 1: ADHD (Jitter), 2: Autistic (Anchor)
+    neuro_profile: u8,
 }
 
 #[derive(Debug, Clone)]
@@ -70,7 +74,39 @@ impl RnaCircuit {
             inputs: vec![],
             outputs: vec![],
             state: HashMap::new(),
+            neuro_profile: 0,
         }
+    }
+
+    /// Set neuro-profile
+    pub fn set_neuro_profile(&mut self, profile: u8) {
+        self.neuro_profile = profile;
+    }
+
+    /// Borrow Jitter (Neuro-Coupling)
+    /// Allows a neurotypical node to borrow stochastic noise from an ADHD/Autistic anchor.
+    pub fn borrow_jitter(&self, neighbor_profile: u8, base_phase: f64) -> f64 {
+        if neighbor_profile > 0 {
+            // Borrowing 50% of the neighbor's resilience
+            self.apply_adhd_jitter(base_phase) * 0.5 + base_phase * 0.5
+        } else {
+            base_phase
+        }
+    }
+
+    /// Apply ADHD Jitter (Stochastic Resilience Layer 1)
+    /// Adds stochastic noise to the phase to prevent deterministic collapse.
+    fn apply_adhd_jitter(&self, phase: f64) -> f64 {
+        // Deterministic noise based on phase bits for simplicity in Rust
+        let noise = (phase.sin() * 1000.0).fract() * 0.2 - 0.1;
+        phase + noise
+    }
+
+    /// Apply Autistic Anchor (Stochastic Resilience Layer 2)
+    /// Increases resistance to global phase dragging by weighting local coherence.
+    fn apply_autistic_anchor(&self, current_phase: f64, target_phase: f64) -> f64 {
+        let alpha = 0.1; // Low dragging coefficient (Anchor effect)
+        current_phase + alpha * (target_phase - current_phase)
     }
     
     /// Add component
@@ -102,12 +138,28 @@ impl RnaCircuit {
             }
         }
         
-        // Propagate through connections
+        // Propagate through connections with Stochastic Resilience
         for conn in &self.connections {
-            if let Some(from_state) = self.state.get(&conn.from) {
+            if let Some(from_state) = self.state.get(&conn.from).cloned() {
                 if from_state.active {
                     if let Some(to_state) = self.state.get_mut(&conn.to) {
                         to_state.concentration += from_state.concentration * conn.weight;
+
+                        // Stochastic Phase Shielding logic
+                        let mut next_phase = from_state.phase;
+                        match self.neuro_profile {
+                            1 => { // ADHD Jitter
+                                next_phase = self.apply_adhd_jitter(next_phase);
+                            },
+                            2 => { // Autistic Anchor
+                                next_phase = self.apply_autistic_anchor(to_state.phase, from_state.phase);
+                            },
+                            _ => { // Neurotypical (standard coupling)
+                                next_phase = from_state.phase;
+                            }
+                        }
+
+                        to_state.phase = next_phase;
                         to_state.active = true;
                     }
                 }

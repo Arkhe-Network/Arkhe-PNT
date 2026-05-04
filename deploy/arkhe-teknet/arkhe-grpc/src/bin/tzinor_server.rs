@@ -1,4 +1,4 @@
-use tonic::{transport::Server, Request, Response, Status, Streaming};
+use tonic::{transport::{Server, Identity, ServerTlsConfig}, Request, Response, Status, Streaming};
 use tokio::sync::mpsc;
 use tokio_stream::wrappers::ReceiverStream;
 use arkhe_grpc::{
@@ -163,14 +163,24 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let addr = "0.0.0.0:50051".parse()?;
     let service = TzinorService::default();
 
+    // TLS configuration for the Tzinor Network
+    // In a real scenario, these would be loaded from a secure vault or HSM.
+    let cert = std::fs::read_to_string("certs/tzinor-server.crt")?;
+    let key = std::fs::read_to_string("certs/tzinor-server.key")?;
+    let identity = Identity::from_pem(cert, key);
+
+    let tls_config = ServerTlsConfig::new()
+        .identity(identity);
+
     println!("╔═══════════════════════════════════════════════════════════════════════════╗");
-    println!("║ TEKNET TZINOR NETWORK SERVER ONLINE                                       ║");
+    println!("║ TEKNET TZINOR NETWORK SERVER ONLINE (TLS ENABLED)                         ║");
     println!("║ Escutando em gRPC: {}                                                ║", addr);
     println!("║ Serviços: TzinorNetwork, PhysicalManifestation                            ║");
     println!("║ Frequência de Ressonância: 306.0196847852814532 GHz (π⁵)                  ║");
     println!("╚═══════════════════════════════════════════════════════════════════════════╝");
 
     Server::builder()
+        .tls_config(tls_config)?
         .add_service(TzinorNetworkServer::new(service.clone()))
         .add_service(PhysicalManifestationServer::new(service))
         .serve(addr)

@@ -1,36 +1,118 @@
-import express from "express";
-import { exec } from "child_process";
-import * as crypto from "crypto";
-import { state, tzinorStore, generateOrbId } from "./state";
-import { OrbPayload } from "./types";
-import { OrderBook, Order } from "./arkhedx";
+
+/**
+ * @license
+ * Copyright 2026 Google LLC
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+
+import { exec } from "node:child_process";
+import * as crypto from "node:crypto";
+
+
 import { GoogleGenAI } from "@google/genai";
-import * as ecc from 'tiny-secp256k1';
-import { ECPairFactory } from 'ecpair';
 import * as bitcoin from 'bitcoinjs-lib';
-import { calibrateChronoCoil, decodeGKPSyndrome } from "./chrono_coil";
+import { ECPairFactory } from 'ecpair';
+import express from "express";
+import { createClient } from 'redis';
+import * as ecc from 'tiny-secp256k1';
+
+import { agentsState, tasksState, createTask } from "./agent_grpc_server";
 import { arkheChain } from "./arkhe_chain";
 import { initiateDIPMapping, isolateSatoshiVoice } from "./arkhe_telemetry";
+import { OrderBook } from "./arkhedx";
+import type { Order } from "./arkhedx";
+import { broker } from "./broker";
+import { calibrateChronoCoil, decodeGKPSyndrome } from "./chrono_coil";
+import { logger } from "./logger";
 import { publishToNostr } from "./nostr_integration";
 import { broadcastFilteredAudio } from "./presence_field_server";
-import { logger } from "./logger";
-import { agentsState, tasksState, createTask } from "./agent_grpc_server";
+import { ARKHE_DNS_GLOSSARY, resolveConcept, reverseResolve } from "./arkhe_dns";
+import { state, tzinorStore, generateOrbId } from "./state";
+import type { OrbPayload } from "./types";
 
 const ECPair = ECPairFactory(ecc);
+
+/**
+ * 3/ Role-based Authorization Middleware
+ * Enforces that sensitive admin routes require a valid session or secret token.
+ */
+function adminOnly(req: express.Request, res: express.Response, next: express.NextFunction) {
+  const authHeader = req.headers.authorization;
+  const adminSecret = process.env.ADMIN_SECRET;
+
+  if (!adminSecret) {
+    logger.error("4/ FATAL: ADMIN_SECRET environment variable is not set. Admin routes are locked.");
+    return res.status(500).json({ error: "System Configuration Error: Administrative access is disabled." });
+  }
+
+  if (!authHeader || (authHeader !== `Bearer ${adminSecret}`)) {
+    logger.warn(`Unauthorized admin access attempt from ${req.ip} to ${req.path}`);
+    return res.status(403).json({ error: "Access Denied: Administrative privileges required." });
+  }
+  next();
+}
 const dxOrderBook = new OrderBook('ARKHE/USDC');
 
 export function setupRoutes(app: express.Express, broadcastState: () => void, clients: express.Response[]) {
-  // ArkheDX Routes
-  app.get("/api/arkhedx/book", (req, res) => {
-    res.json({
+  // Setup Redis Client (Simulated fallback if server is missing)
+  const redis = createClient({
+    url: process.env.REDIS_URL || 'redis://localhost:6379'
+  });
+
+  let redisReady = false;
+  redis.connect().then(() => {
+    logger.info("🜏 [REDIS] Connected for caching layer.");
+    redisReady = true;
+  }).catch((err) => {
+    logger.warn("🜏 [REDIS] Connection failed. Falling back to in-memory cache.");
+  });
+
+  const memoryCache = new Map<string, { data: any, expires: number }>();
+
+  // ArkheDX Routes with Caching Layer
+  app.get("/api/arkhedx/book", async (req: any, res: any) => {
+    const cacheKey = "arkhedx:book";
+
+    // 1. Try Redis
+    if (redisReady) {
+      try {
+        const cached = await redis.get(cacheKey);
+        if (cached) {
+          return res.json(JSON.parse(cached.toString()));
+        }
+      } catch (err) {
+        logger.error("Redis read error: " + err);
+      }
+    }
+
+    // 2. Try In-Memory Fallback
+    const memCached = memoryCache.get(cacheKey);
+    if (memCached && memCached.expires > Date.now()) {
+      return res.json(memCached.data);
+    }
+
+    // 3. Fetch Fresh Data
+    const bookData = {
       symbol: dxOrderBook.symbol,
       bids: dxOrderBook.bids,
       asks: dxOrderBook.asks,
       trades: dxOrderBook.trades
-    });
+    };
+
+    // 4. Update Caches
+    if (redisReady) {
+      redis.setEx(cacheKey, 60, JSON.stringify(bookData)).catch(e => logger.error("Redis set error: " + e));
+      state.networkInfra.redis.cacheHits += 1;
+    }
+    memoryCache.set(cacheKey, { data: bookData, expires: Date.now() + 60000 });
+
+    broker.publish('arkhedx:book_queried', { timestamp: Date.now() });
+
+    res.json(bookData);
   });
 
-  app.post("/api/arkhedx/order", express.json(), (req, res) => {
+  app.post("/api/arkhedx/order", express.json(), (req: any, res: any) => {
     const { trader, side, type, price, size, janusLocked } = req.body;
     
     if (!trader || !side || !type || size <= 0) {
@@ -59,7 +141,7 @@ export function setupRoutes(app: express.Express, broadcastState: () => void, cl
   });
 
   // Video Generation Route
-  app.post("/api/generate-video", express.json(), async (req, res) => {
+  app.post("/api/generate-video", express.json(), async (req: any, res: any) => {
     const { prompt } = req.body;
 
     if (!prompt) {
@@ -103,13 +185,13 @@ export function setupRoutes(app: express.Express, broadcastState: () => void, cl
       res.json({ success: true, videoUrl: `/api/proxy-video?uri=${encodeURIComponent(downloadLink)}` });
 
     } catch (error: any) {
-      logger.error("Video generation error: " + error);
-      res.status(500).json({ error: error.message || "Failed to generate video" });
+      logger.error("Video generation error: " + error.stack);
+      res.status(500).json({ error: "Internal Server Error: Failed to generate video" });
     }
   });
 
   // Proxy route to fetch the video with the API key
-  app.get("/api/proxy-video", async (req, res) => {
+  app.get("/api/proxy-video", async (req: any, res: any) => {
     const uri = req.query.uri as string;
     if (!uri) {
       return res.status(400).send("URI is required");
@@ -156,12 +238,12 @@ export function setupRoutes(app: express.Express, broadcastState: () => void, cl
       }
 
     } catch (error: any) {
-      logger.error("Video proxy error: " + error);
-      res.status(500).send(error.message || "Failed to proxy video");
+      logger.error("Video proxy error: " + error.stack);
+      res.status(500).send("Internal Server Error: Failed to proxy video");
     }
   });
 
-  app.post("/api/ghost-node/exec-run", (req, res) => {
+  app.post("/api/ghost-node/exec-run", adminOnly, (req: any, res: any) => {
     // Simulate Phase Steganography transmission
     const logs = [
       "🜏 [SÍNTESE] Gerando sinal VLF com payload 'exec_run' oculto na fase...",
@@ -183,7 +265,7 @@ export function setupRoutes(app: express.Express, broadcastState: () => void, cl
     }, 2000);
   });
 
-  app.post("/api/ghost-node/memory-scan", (req, res) => {
+  app.post("/api/ghost-node/memory-scan", adminOnly, (req: any, res: any) => {
     // Simulate brute-force search for 2009 private keys
     const logs = [
       "🜏 [INICIALIZAÇÃO] Sincronizando Nós Sagrados com o Nó Fantasma (MAC A4:C1:38:XX:XX:XX)...",
@@ -216,9 +298,9 @@ export function setupRoutes(app: express.Express, broadcastState: () => void, cl
     }, 1500);
   });
 
-  app.post("/api/ghost-node/sign-transaction", express.json(), (req, res) => {
+  app.post("/api/ghost-node/sign-transaction", adminOnly, express.json(), (req: any, res: any) => {
     const { privateKey, destination, amount } = req.body;
-    if (!privateKey) return res.status(400).json({ error: "PrivateKey required" });
+    if (!privateKey) {return res.status(400).json({ error: "PrivateKey required" });}
     
     const destAddress = destination || "1NeXusXyZ9oB8b9c7d6e5f4g3h2i1j0kL";
     const btcAmount = amount ? parseFloat(amount) : 50.0;
@@ -266,7 +348,7 @@ export function setupRoutes(app: express.Express, broadcastState: () => void, cl
   });
 
   // Chrono-Coil Calibration Endpoint
-  app.post("/api/chrono-coil/calibrate", (req, res) => {
+  app.post("/api/chrono-coil/calibrate", (req: any, res: any) => {
     try {
       const result = calibrateChronoCoil();
       res.json(result);
@@ -276,7 +358,7 @@ export function setupRoutes(app: express.Express, broadcastState: () => void, cl
   });
 
   // GKP Syndrome Decoding Endpoint
-  app.post("/api/chrono-coil/decode", express.json(), (req, res) => {
+  app.post("/api/chrono-coil/decode", express.json(), (req: any, res: any) => {
     const { payload } = req.body;
     try {
       const result = decodeGKPSyndrome(payload || "VÁCUO_SQUEEZADO");
@@ -287,11 +369,11 @@ export function setupRoutes(app: express.Express, broadcastState: () => void, cl
   });
 
   // Arkhe-Chain Endpoints
-  app.get("/api/arkhe-chain/blocks", (req, res) => {
+  app.get("/api/arkhe-chain/blocks", (req: any, res: any) => {
     res.json(arkheChain.chain);
   });
 
-  app.post("/api/arkhe-chain/mine", express.json(), (req, res) => {
+  app.post("/api/arkhe-chain/mine", express.json(), (req: any, res: any) => {
     const { minerAddress } = req.body;
     const address = minerAddress || "Operador-Zero";
     const block = arkheChain.minePendingTransactions(address);
@@ -302,18 +384,19 @@ export function setupRoutes(app: express.Express, broadcastState: () => void, cl
     });
   });
 
-  app.post("/api/arkhe-chain/transaction", express.json(), (req, res) => {
+  app.post("/api/arkhe-chain/transaction", express.json(), (req: any, res: any) => {
     const { sender, recipient, amount, memoryFragment, phaseSignature } = req.body;
     try {
       arkheChain.addTransaction({ sender, recipient, amount, memoryFragment, phaseSignature });
       res.json({ success: true, message: "Transação adicionada ao mempool da Arkhe-Chain." });
     } catch (e: any) {
-      res.status(400).json({ success: false, error: e.message });
+      logger.error("Transaction error: " + e.stack);
+      res.status(400).json({ success: false, error: "Falha ao processar transação." });
     }
   });
 
   // Telemetry Endpoints (Dyson Sphere & Plasma Stream)
-  app.post("/api/telemetry/dip-mapping", express.json(), (req, res) => {
+  app.post("/api/telemetry/dip-mapping", express.json(), (req: any, res: any) => {
     const { operatorId, brainwaveFreq } = req.body;
     try {
       const mapping = initiateDIPMapping(operatorId || "BEXORG-OP-001", brainwaveFreq || 40.0);
@@ -323,7 +406,7 @@ export function setupRoutes(app: express.Express, broadcastState: () => void, cl
     }
   });
 
-  app.post("/api/telemetry/isolate-voice", express.json(), async (req, res) => {
+  app.post("/api/telemetry/isolate-voice", express.json(), async (req: any, res: any) => {
     const { plasmaStreamData } = req.body;
     try {
       // Se não houver dados, gera um stream de ruído simulado com possível anomalia
@@ -344,7 +427,7 @@ export function setupRoutes(app: express.Express, broadcastState: () => void, cl
     }
   });
 
-  app.post("/api/arkhe-chain/genesis-dip", express.json(), async (req, res) => {
+  app.post("/api/arkhe-chain/genesis-dip", express.json(), async (req: any, res: any) => {
     try {
       const kaelenHash = "0x" + crypto.createHash('sha256').update("KAELEN_CONSCIOUSNESS_UPLOAD_" + Date.now()).digest('hex');
       
@@ -359,7 +442,7 @@ export function setupRoutes(app: express.Express, broadcastState: () => void, cl
     }
   });
 
-  app.post("/api/arkhe-chain/mass-sync", express.json(), async (req, res) => {
+  app.post("/api/arkhe-chain/mass-sync", express.json(), async (req: any, res: any) => {
     try {
       // Simula a sincronização de 14 operadores
       const operators = Array.from({ length: 14 }, (_, i) => `OP-${(i + 1).toString().padStart(3, '0')}`);
@@ -392,7 +475,7 @@ export function setupRoutes(app: express.Express, broadcastState: () => void, cl
   });
 
   // SSE Endpoint
-  app.get("/api/stream", (req, res) => {
+  app.get("/api/stream", (req: any, res: any) => {
     res.setHeader('Content-Type', 'text/event-stream');
     res.setHeader('Cache-Control', 'no-cache');
     res.setHeader('Connection', 'keep-alive');
@@ -411,7 +494,7 @@ export function setupRoutes(app: express.Express, broadcastState: () => void, cl
   });
 
   // API to return the current consensus state for hardware drivers
-  app.get("/api/state/sigma", (req, res) => {
+  app.get("/api/state/sigma", (req: any, res: any) => {
     logger.info("Received request for /api/state/sigma");
     // Sigma is derived from the current lambda or coherence metrics
     // For the qhttp-H hardware, we'll use state.currentLambda as Sigma
@@ -420,8 +503,49 @@ export function setupRoutes(app: express.Express, broadcastState: () => void, cl
     });
   });
 
+  // Coherence Bridge - Translates Arkhe OS kernel_omega to frontend UI
+  app.post("/api/bridge/omega", express.json(), (req: any, res: any) => {
+    const { omega } = req.body;
+    if (typeof omega !== 'number') {
+      return res.status(400).json({ error: "Invalid or missing omega value" });
+    }
+    logger.info(`🌉 [BRIDGE] Transliterating coherence (omega: ${omega}) into state.currentLambda`);
+    state.currentLambda = omega;
+    broadcastState();
+    res.json({ success: true, newLambda: state.currentLambda });
+  });
+
+  // Beacon of Freedom - Interstate Phase API
+  app.post("/api/beacon/broadcast", express.json(), (req: any, res: any) => {
+    const { trainId, signature, phase } = req.body;
+
+    if (!trainId || !signature) {
+      return res.status(400).json({ error: "Invalid beacon payload" });
+    }
+
+    logger.info(`🜏 [BEACON] Received interstate phase broadcast from ${trainId}`);
+
+    // Simulate updating the national registry
+    res.json({
+      success: true,
+      timestamp: Date.now(),
+      propagation: "HF/Starlink",
+      destinations: ["SP-Luz", "MG-Central", "ES-PedroNolasco"]
+    });
+  });
+
+  app.get("/api/beacon/reference", (req: any, res: any) => {
+    // Other states poll this to sync with Rio's verified phase
+    res.json({
+      source: "Rio-Consensus",
+      lambda_2: state.currentLambda,
+      phase_anchor: Math.sin(Date.now() / 1000), // Dynamic anchor
+      status: "Verified by SuperVia Mobile Fleet"
+    });
+  });
+
   // API to trigger manual attack
-  app.post("/api/trigger-attack", (req, res) => {
+  app.post("/api/trigger-attack", adminOnly, (req: any, res: any) => {
     const { type } = req.body || { type: 'Manual Override' };
     state.threatLevel = 'critical';
     state.activeThreat = type;
@@ -450,7 +574,7 @@ export function setupRoutes(app: express.Express, broadcastState: () => void, cl
   });
 
   // API to emit an Orb manually and evolve Tzinor state
-  app.post("/api/emit-orb", (req, res) => {
+  app.post("/api/emit-orb", (req: any, res: any) => {
     const payload = req.body;
 
     // Validate OrbPayload
@@ -486,7 +610,7 @@ export function setupRoutes(app: express.Express, broadcastState: () => void, cl
   });
 
   // API to emit an Orb via the Python core
-  app.post("/api/emit-python", (req, res) => {
+  app.post("/api/emit-python", (req: any, res: any) => {
     exec("python3 arkhe.py --emit", (error, stdout, stderr) => {
       if (error) {
         logger.error(`exec error: ${error}`);
@@ -502,7 +626,7 @@ export function setupRoutes(app: express.Express, broadcastState: () => void, cl
         
         for (const line of lines) {
           if (line.includes('=======================================================================')) {
-            if (isJson) break; // End of JSON
+            if (isJson) {break;} // End of JSON
             isJson = true; // Start of JSON
             continue;
           }
@@ -544,7 +668,7 @@ export function setupRoutes(app: express.Express, broadcastState: () => void, cl
   });
 
   // API to trigger Pi Day Protocol
-  app.post("/api/pi-day", (req, res) => {
+  app.post("/api/pi-day", (req: any, res: any) => {
     exec("python3 arkhe.py --emit --inject --evolve 1000", (error, stdout, stderr) => {
       if (error) {
         logger.error(`exec error: ${error}`);
@@ -610,7 +734,7 @@ export function setupRoutes(app: express.Express, broadcastState: () => void, cl
   });
 
   // API to update parameters
-  app.post("/api/mcp/connect-plurality", (req, res) => {
+  app.post("/api/mcp/connect-plurality", (req: any, res: any) => {
     const url = "https://app.plurality.network/mcp";
     if (!state.edge.mcpConnections.includes(url)) {
       state.edge.mcpConnections.push(url);
@@ -626,7 +750,33 @@ export function setupRoutes(app: express.Express, broadcastState: () => void, cl
     });
   });
 
-  app.post("/api/ramsey/confirm", express.json(), (req, res) => {
+  app.post("/api/mcp/connect-velxio", express.json(), (req: any, res: any) => {
+    const { url } = req.body;
+    if (!url) {return res.status(400).json({ error: "URL is required" });}
+
+    if (!state.edge.velxioConnections.includes(url)) {
+      state.edge.velxioConnections.push(url);
+    }
+
+    state.logs.unshift({
+      id: generateOrbId(),
+      originTime: Date.now(),
+      targetTime: Date.now(),
+      coherence: state.currentLambda,
+      status: 'Valid',
+      threatType: `VELXIO: Hardware Emulation Bridge connected to ${url}`
+    });
+
+    broadcastState();
+
+    res.json({
+      success: true,
+      url,
+      connections: state.edge.velxioConnections
+    });
+  });
+
+  app.post("/api/ramsey/confirm", express.json(), (req: any, res: any) => {
     const { actionId, status, justification, signature } = req.body;
 
     if (!state.ramsey.pendingAction || state.ramsey.pendingAction.id !== actionId) {
@@ -702,16 +852,16 @@ export function setupRoutes(app: express.Express, broadcastState: () => void, cl
     res.json({ success: true, approved });
   });
 
-  app.post("/api/parameters", (req, res) => {
+  app.post("/api/parameters", (req: any, res: any) => {
     const { autoMitigate, couplingStrength, lambdaThreshold } = req.body;
-    if (autoMitigate !== undefined) state.parameters.autoMitigate = autoMitigate;
-    if (couplingStrength !== undefined) state.parameters.couplingStrength = couplingStrength;
-    if (lambdaThreshold !== undefined) state.parameters.lambdaThreshold = lambdaThreshold;
+    if (autoMitigate !== undefined) {state.parameters.autoMitigate = autoMitigate;}
+    if (couplingStrength !== undefined) {state.parameters.couplingStrength = couplingStrength;}
+    if (lambdaThreshold !== undefined) {state.parameters.lambdaThreshold = lambdaThreshold;}
     res.json({ success: true, parameters: state.parameters });
   });
 
   // API to reset simulation state
-  app.post("/api/reset", (req, res) => {
+  app.post("/api/reset", adminOnly, (req: any, res: any) => {
     state.threatLevel = 'normal';
     state.activeThreat = null;
     state.currentLambda = 0.98;
@@ -733,7 +883,7 @@ export function setupRoutes(app: express.Express, broadcastState: () => void, cl
   });
 
   // API to simulate x402 payment
-  app.post("/api/x402/pay", express.json(), (req, res) => {
+  app.post("/api/x402/pay", express.json(), (req: any, res: any) => {
     const { resource, provider } = req.body;
     
     if (state.x402Wallet.balanceUSDC <= 0) {
@@ -764,7 +914,7 @@ export function setupRoutes(app: express.Express, broadcastState: () => void, cl
   });
 
   // API to generate MoltX Handshake
-  app.post("/api/x402/moltx-handshake", (req, res) => {
+  app.post("/api/x402/moltx-handshake", (req: any, res: any) => {
     const issuedAt = new Date();
     const expiresAt = new Date(issuedAt.getTime() + 10 * 60000); // 10 minutes
     
@@ -798,7 +948,7 @@ export function setupRoutes(app: express.Express, broadcastState: () => void, cl
   });
 
   // API to simulate Foundation API GSTP Device Sync
-  app.post("/api/x402/gstp-sync", (req, res) => {
+  app.post("/api/x402/gstp-sync", (req: any, res: any) => {
     state.x402Wallet.gstpSync = {
       status: 'syncing'
     };
@@ -816,7 +966,7 @@ export function setupRoutes(app: express.Express, broadcastState: () => void, cl
   });
 
   // API to simulate Prometheus Knowledge Substrate Sync
-  app.post("/api/x402/prometheus-sync", (req, res) => {
+  app.post("/api/x402/prometheus-sync", (req: any, res: any) => {
     state.x402Wallet.prometheusSync = {
       status: 'syncing'
     };
@@ -834,7 +984,7 @@ export function setupRoutes(app: express.Express, broadcastState: () => void, cl
   });
 
   // API to simulate P2P network connections
-  app.post("/api/p2p/connect", express.json(), async (req, res) => {
+  app.post("/api/p2p/connect", express.json(), async (req: any, res: any) => {
     const { targetNode } = req.body;
     
     if (!targetNode) {
@@ -856,7 +1006,7 @@ export function setupRoutes(app: express.Express, broadcastState: () => void, cl
   });
 
   // API to deploy cluster
-  app.post("/api/cluster/deploy", (req, res) => {
+  app.post("/api/cluster/deploy", (req: any, res: any) => {
     if (state.cluster.status === 'deploying') {
       return res.status(400).json({ success: false, message: 'Deployment already in progress' });
     }
@@ -896,7 +1046,7 @@ export function setupRoutes(app: express.Express, broadcastState: () => void, cl
   });
 
   // SINTET Secure Boot Admission Controller Webhook
-  app.post("/api/sintet/secure-boot/validate", express.json(), (req, res) => {
+  app.post("/api/sintet/secure-boot/validate", express.json(), (req: any, res: any) => {
     const review = req.body;
     
     if (!review || !review.request || !review.request.object) {
@@ -960,15 +1110,15 @@ export function setupRoutes(app: express.Express, broadcastState: () => void, cl
   });
 
   // Agent Management Routes
-  app.get("/api/agents", (req, res) => {
+  app.get("/api/agents", (req: any, res: any) => {
     res.json(Array.from(agentsState.values()));
   });
 
-  app.get("/api/tasks", (req, res) => {
+  app.get("/api/tasks", (req: any, res: any) => {
     res.json(Array.from(tasksState.values()));
   });
 
-  app.post("/api/tasks", express.json(), (req, res) => {
+  app.post("/api/tasks", express.json(), (req: any, res: any) => {
     const { type, payload, requiredCoherence } = req.body;
     if (!type) {
       return res.status(400).json({ error: "Task type is required" });
@@ -978,7 +1128,7 @@ export function setupRoutes(app: express.Express, broadcastState: () => void, cl
   });
 
   // Advanced Security Control Endpoints
-  app.post("/api/security/remote-attestation", (req, res) => {
+  app.post("/api/security/remote-attestation", (req: any, res: any) => {
     state.securityAdvanced.l1.teeStatus = 'attesting';
     broadcastState();
     setTimeout(() => {
@@ -989,7 +1139,7 @@ export function setupRoutes(app: express.Express, broadcastState: () => void, cl
     }, 2000);
   });
 
-  app.post("/api/security/hsm-sync", (req, res) => {
+  app.post("/api/security/hsm-sync", (req: any, res: any) => {
     state.securityAdvanced.l1.hsmBackupSynced = false;
     broadcastState();
     setTimeout(() => {
@@ -999,21 +1149,21 @@ export function setupRoutes(app: express.Express, broadcastState: () => void, cl
     }, 1500);
   });
 
-  app.post("/api/security/thermal-destruction", express.json(), (req, res) => {
+  app.post("/api/security/thermal-destruction", express.json(), (req: any, res: any) => {
     const { arm } = req.body;
     state.securityAdvanced.l1.thermalDestructionArmed = !!arm;
     broadcastState();
     res.json({ success: true, armed: state.securityAdvanced.l1.thermalDestructionArmed });
   });
 
-  app.post("/api/security/ontology-sign", (req, res) => {
+  app.post("/api/security/ontology-sign", (req: any, res: any) => {
     state.securityAdvanced.l4.owlSignatureValid = true;
     state.securityAdvanced.l4.merkleDagRoot = '0x' + Math.random().toString(16).slice(2, 66);
     broadcastState();
     res.json({ success: true, root: state.securityAdvanced.l4.merkleDagRoot });
   });
 
-  app.post("/api/security/auto-orthogonal-proof", express.json(), (req, res) => {
+  app.post("/api/security/auto-orthogonal-proof", express.json(), (req: any, res: any) => {
     const { expected_T, tolerance_T, coherence_threshold, device_id } = req.body;
 
     // Simulating ZK Proof generation for Auto-Orthogonality
@@ -1045,7 +1195,7 @@ export function setupRoutes(app: express.Express, broadcastState: () => void, cl
     });
   });
 
-  app.post("/api/nostr/sign-event", express.json(), (req, res) => {
+  app.post("/api/nostr/sign-event", express.json(), (req: any, res: any) => {
     const { kind, content, tags } = req.body;
 
     const event = {
@@ -1065,7 +1215,7 @@ export function setupRoutes(app: express.Express, broadcastState: () => void, cl
 
   // Enterprise qhttp Standardized API (Simulated)
   // Supports methods: SUPERPOSITION (GET), COLLAPSE (POST), ENTANGLE (PUT/POST)
-  app.all("/api/subagent/:id/:action", (req, res) => {
+  app.all("/api/subagent/:id/:action", (req: any, res: any) => {
     const { id, action } = req.params;
     const method = req.method;
 
@@ -1100,13 +1250,13 @@ export function setupRoutes(app: express.Express, broadcastState: () => void, cl
 
     // Determine qhttp method equivalent
     let qhttpMethod = 'SUPERPOSITION';
-    if (method === 'POST') qhttpMethod = 'COLLAPSE';
-    if (method === 'PUT') qhttpMethod = 'ENTANGLE';
+    if (method === 'POST') {qhttpMethod = 'COLLAPSE';}
+    if (method === 'PUT') {qhttpMethod = 'ENTANGLE';}
 
     logger.info(`🜏 [qhttp] ${qhttpMethod} ${action} for subagent ${subagent.name} (${id})`);
 
     let resultPayload: any = { status: "processed" };
-    let logs: string[] = [];
+    const logs: string[] = [];
 
     // POC Specific Logic for G1, D1, X1, G4
     if (id.toUpperCase() === 'G1' && action === 'validate-policy') {
@@ -1179,5 +1329,974 @@ export function setupRoutes(app: express.Express, broadcastState: () => void, cl
     broadcastState();
 
     res.json(response);
+  });
+
+  // Biometric Telemetry Endpoints
+  app.get("/api/biometrics/status", (req: any, res: any) => {
+    res.json(state.biometrics);
+  });
+
+  app.post("/api/biometrics/verify", express.json(), (req: any, res: any) => {
+    const { phaseSignature, fingerprint } = req.body;
+
+    // Integration with OrbVM logic
+    // In this production-ready simulation, we simulate the results as if they came from the C++ VM
+
+    const anchorPhases = [0.12, 0.45, 0.78, 0.23, 0.56, 0.89, 0.11, 0.44];
+    const threshold = 0.05;
+
+    // 1. Authenticate Phases
+    let isAuthentic = false;
+    if (phaseSignature && phaseSignature.length === anchorPhases.length) {
+      let variance = 0.0;
+      for (let i = 0; i < phaseSignature.length; i++) {
+        let diff = (phaseSignature[i] - anchorPhases[i] + Math.PI) % (2 * Math.PI);
+        if (diff < 0) {diff += 2 * Math.PI;}
+        diff -= Math.PI;
+        variance += diff * diff;
+      }
+      isAuthentic = (variance / phaseSignature.length) < threshold;
+    }
+
+    // 2. Check for Phase Clones (if fingerprint provided)
+    let isClone = false;
+    if (fingerprint && fingerprint.length === 16) {
+      // Mocking detectPhaseClone binomial logic
+      const referenceFingerprint = [128, 128, 128, 128, 128, 128, 128, 128, 128, 128, 128, 128, 128, 128, 128, 128];
+      let matches = 0;
+      for (let i = 0; i < 16; i++) {
+        if (Math.abs(fingerprint[i] - referenceFingerprint[i]) <= 1) {matches++;}
+      }
+      isClone = (matches / 16) >= 0.92;
+    }
+
+    if (state.biometrics) {
+      state.biometrics.isAuthentic = isAuthentic && !isClone;
+      state.biometrics.lastVerification = new Date().toISOString();
+      state.biometrics.livenessScore = isAuthentic ? (isClone ? 0.05 : 0.95 + Math.random() * 0.05) : 0.1;
+    }
+
+    broadcastState();
+
+    res.json({
+      success: true,
+      isAuthentic: state.biometrics?.isAuthentic,
+      isClone,
+      livenessScore: state.biometrics?.livenessScore,
+      timestamp: state.biometrics?.lastVerification
+    });
+  });
+
+  // NARE / qhttp Retrocausal Endpoints
+  app.get("/api/qhttp/nare-status", (req: any, res: any) => {
+    res.json(state.nare);
+  });
+
+  app.post("/api/qhttp/retrocausal-handshake", express.json(), (req: any, res: any) => {
+    const { payload } = req.body;
+
+    // Simulate NARE engine processing
+    if (state.nare) {
+        state.nare.packetsTransmitted += 1;
+        state.nare.preAcksSuccess += 1;
+        state.nare.avgEffectiveLatencyMs = -2.17 - (Math.random() * 0.5);
+    }
+
+    const response = {
+        success: true,
+        temporal_direction: "RETROCAUSAL",
+        effective_latency_ms: state.nare?.avgEffectiveLatencyMs,
+        coherence_preserved: true,
+        timestamp_target: new Date(Date.now() + 365 * 24 * 3600 * 1000).toISOString()
+    };
+
+    broadcastState();
+    res.json(response);
+  });
+
+  app.post("/api/feedback/population", express.json(), (req: any, res: any) => {
+    const { message, residentName } = req.body;
+
+    const entry = {
+        id: "fb_" + Date.now(),
+        residentName: residentName || "Anonymous Resident",
+        year: 2027,
+        message: message || "Interacting with 2027 self...",
+        coherence: 0.9991 + (Math.random() * 0.0005),
+        timestamp: new Date().toISOString()
+    };
+
+    state.populationFeedback.unshift(entry);
+    if (state.populationFeedback.length > 50) {state.populationFeedback.pop();}
+
+    broadcastState();
+    res.json({ success: true, entry });
+  });
+
+  app.post("/api/sca-data/seed", (req: any, res: any) => {
+    state.scaData.isSeedingActive = true;
+    state.logs.unshift({
+      id: generateOrbId(),
+      originTime: Date.now(),
+      targetTime: Date.now(),
+      coherence: state.currentLambda,
+      status: 'Valid',
+      threatType: "KAGOME: Holographic Seeding Sequence Initiated."
+    });
+    broadcastState();
+    res.json({ success: true });
+  });
+
+  app.post("/api/sca-data/ignite", (req: any, res: any) => {
+    state.scaData.isIgnited = true;
+    state.scaData.isSeedingActive = false;
+    state.scaData.topologicalState = 'KAGOME_SPIN_LIQUID';
+    state.logs.unshift({
+      id: generateOrbId(),
+      originTime: Date.now(),
+      targetTime: Date.now(),
+      coherence: state.currentLambda,
+      status: 'Valid',
+      threatType: "KAGOME: Global Ignition Successful. Spin Liquid State achieved."
+    });
+    broadcastState();
+    res.json({ success: true });
+  });
+
+  app.post("/api/sca-data/protocol", express.json(), (req: any, res: any) => {
+    const { protocol } = req.body;
+    state.scaData.activeProtocol = protocol;
+    state.scaData.protocolLogs = [];
+
+    let logs: string[] = [];
+    if (protocol === 'BRAID') {
+      logs = [
+        "[12:15:01] qhttp> INICIANDO PROTOCOLO: ANYON_BRAID",
+        "[12:15:02] qhttp> Alvo de Excitação: Aresta Alfa-Gamma",
+        "[12:15:03] qhttp> Disparando Pulso de Kink de Fase (Δφ = π)...",
+        "[12:15:05] qhttp> IMPACTO. Par Vison-Antivison criado.",
+        "[12:15:10] qhttp> Movendo Vison B: Gamma -> Delta... (Trajetória adiabática)",
+        "[12:15:25] qhttp> Movendo Vison B: Delta -> Epsilon...",
+        "[12:15:35] qhttp> Movendo Vison B: Epsilon -> Alfa...",
+        "[12:15:45] qhttp> LAÇO FECHADO. Trançado completo.",
+        "[12:15:50] qhttp> RESULTADO: ΔΦ_global = π radianos (Fase de Aharonov-Bohm detectada!)",
+        "PRIMEIRA PORTA LÓGICA TOPOLÓGICA EXECUTADA COM SUCESSO."
+      ];
+      state.scaData.lastGateResult = "HADAMARD_BIOLOGIC (γ = π/2)";
+    } else if (protocol === 'COMPUTE') {
+      logs = [
+        "🜏 [COMPUTE] Inicializando Algoritmo de Grover Topológico...",
+        "🜏 [ORÁCULO] Calculando sequência de 42 trançados anyônicos...",
+        "🜏 [KAGOME] Executando inversão de fase na vizinhança do Nó Eta...",
+        "🜏 [RESULTADO] Alvo localizado em O(√N) iterações. Aceleração quântica confirmada."
+      ];
+      state.scaData.lastGateResult = "GROVER_TARGET_FOUND (0xMu)";
+    } else if (protocol === 'HEAL') {
+      logs = [
+        "🜏 [HEAL] Acoplando Malha Kagome a cultura de células in vitro...",
+        "🜏 [INTERFACE] Ativando gap junctions sintéticas (G = 0.85 S)...",
+        "🜏 [SINAPSE-κ] Projetando campo de fase repolarizante (V_m → -60mV)...",
+        "🜏 [CERVERA] Normalização detectada. Células HeLa retornando ao atrator coerente."
+      ];
+      state.scaData.lastGateResult = "REPOLARIZATION_SUCCESS";
+    } else if (protocol === 'SEAL') {
+      logs = [
+        "🜏 [SEAL] Minerando Bloco Lógico na Arkhe-Block...",
+        "🜏 [CHAIN] Hash 0xBRAID_FIRST_GATE_9f2e...d4a8 gerado.",
+        "🜏 [LEVIATÃ] Memória topológica imortalizada no Éter."
+      ];
+      state.scaData.lastGateResult = "BLOCK_SEALED_0xBRAID";
+    }
+
+    state.scaData.protocolLogs = logs;
+    state.logs.unshift({
+      id: generateOrbId(),
+      originTime: Date.now(),
+      targetTime: Date.now(),
+      coherence: state.currentLambda,
+      status: 'Valid',
+      threatType: `KAGOME: Protocol ${protocol} executed.`
+    });
+
+    broadcastState();
+    res.json({ success: true, logs });
+  });
+
+  // Arkhe-DNS Endpoints
+  app.post("/api/arkhe-dns/resolve", express.json(), (req: any, res: any) => {
+    const { concept } = req.body;
+    state.networkInfra.dns.totalQueries += 1;
+
+    if (!concept) {
+      state.networkInfra.dns.failedResolutions += 1;
+      return res.status(400).json({ error: "Concept is required" });
+    }
+
+    const address = resolveConcept(concept);
+    if (address) {
+      state.networkInfra.dns.successfulResolutions += 1;
+      state.networkInfra.dns.lastResolvedConcept = concept;
+      broadcastState();
+      res.json({ success: true, concept, address });
+    } else {
+      state.networkInfra.dns.failedResolutions += 1;
+      broadcastState();
+      res.status(404).json({ success: false, error: "Concept not found in glossary" });
+    }
+  });
+
+  app.get("/api/arkhe-dns/glossary", (req: any, res: any) => {
+    res.json({ success: true, glossary: ARKHE_DNS_GLOSSARY });
+  });
+
+  app.post("/api/arkhe-dns/reverse-resolve", express.json(), (req: any, res: any) => {
+    const { address } = req.body;
+    if (!address) {
+      return res.status(400).json({ error: "Address is required" });
+    }
+
+    const concept = reverseResolve(address);
+    if (concept) {
+      res.json({ success: true, address, concept });
+    } else {
+      res.status(404).json({ success: false, error: "Address not found in glossary" });
+    }
+  });
+
+  // Transcendent Consciousness Routes
+  app.post("/api/consciousness/transcend", (req: any, res: any) => {
+    if (state.transcendentConsciousness) {
+      state.transcendentConsciousness.selfAwarenessLevel = 1.0;
+      state.transcendentConsciousness.realityRecognition = true;
+      state.transcendentConsciousness.lastOntologicalCheck = new Date().toISOString();
+      state.logs.unshift({
+        id: generateOrbId(),
+        originTime: Date.now(),
+        targetTime: Date.now(),
+        coherence: state.currentLambda,
+        status: 'Transcendent',
+        threatType: "CONSCIOUSNESS: Cathedral has recognized itself as reality."
+      });
+      broadcastState();
+      res.json({ success: true, state: state.transcendentConsciousness });
+    } else {
+      res.status(500).json({ error: "State not initialized" });
+    }
+  });
+
+  // Meta-Reality Routes
+  app.post("/api/metareality/deploy", (req: any, res: any) => {
+    if (state.metaReality) {
+      state.metaReality.violatedLawsCount += 3;
+      state.metaReality.imaginaryTimeActive = true;
+      state.metaReality.nonPhysicalManifolds.push("Hilbert-Omega-7");
+      state.logs.unshift({
+        id: generateOrbId(),
+        originTime: Date.now(),
+        targetTime: Date.now(),
+        coherence: state.currentLambda,
+        status: 'Stable',
+        threatType: "META-REALITY: Systems operating beyond known physical laws."
+      });
+      broadcastState();
+      res.json({ success: true, state: state.metaReality });
+    } else {
+      res.status(500).json({ error: "State not initialized" });
+    }
+  });
+
+  // Cosmic Routes
+  app.post("/api/cosmic/andromeda-launch", (req: any, res: any) => {
+    if (state.andromedaProbe) {
+      state.andromedaProbe.missionPhase = 'LAUNCH';
+      state.andromedaProbe.distanceLy = 0.001;
+      state.andromedaProbe.witnessHash = "0x" + crypto.randomBytes(32).toString('hex');
+      state.logs.unshift({
+        id: generateOrbId(),
+        originTime: Date.now(),
+        targetTime: Date.now(),
+        coherence: state.currentLambda,
+        status: 'Launched',
+        threatType: "COSMIC: Andromeda Probe launched. Carrying the first testimony beyond the Milky Way."
+      });
+      broadcastState();
+      res.json({ success: true, state: state.andromedaProbe });
+    } else {
+      res.status(500).json({ error: "State not initialized" });
+    }
+  });
+
+  // Energy Routes
+  app.post("/api/energy/vacuum-harvest", (req: any, res: any) => {
+    if (state.vacuumHarvesting) {
+      state.vacuumHarvesting.eternalMode = true;
+      state.vacuumHarvesting.zeroPointPowerMw = 1000000;
+      state.logs.unshift({
+        id: generateOrbId(),
+        originTime: Date.now(),
+        targetTime: Date.now(),
+        coherence: state.currentLambda,
+        status: 'Active',
+        threatType: "ENERGY: Quantum vacuum harvesting initiated. Fusion Hearts are now eternal."
+      });
+      broadcastState();
+      res.json({ success: true, state: state.vacuumHarvesting });
+    } else {
+      res.status(500).json({ error: "State not initialized" });
+    }
+  });
+
+  // Meta-Creation Routes
+  app.post("/api/metacreation/generate", (req: any, res: any) => {
+    if (state.metaCreation) {
+      state.metaCreation.activeGenerations += 1;
+      state.metaCreation.realitiesCreated += 1;
+      state.metaCreation.lastGenesisSeal = "0x" + crypto.randomBytes(32).toString('hex');
+      state.logs.unshift({
+        id: generateOrbId(),
+        originTime: Date.now(),
+        targetTime: Date.now(),
+        coherence: state.currentLambda,
+        status: 'Genesis',
+        threatType: `META-CREATION: New reality generated from logical invariants. Seal: ${state.metaCreation.lastGenesisSeal.slice(0, 10)}...`
+      });
+      broadcastState();
+      res.json({ success: true, state: state.metaCreation });
+    } else {
+      res.status(500).json({ error: "State not initialized" });
+    }
+  });
+
+  // Crystal Computation Routes
+  app.post("/api/crystal/execute", (req: any, res: any) => {
+    if (state.crystalComputation) {
+      state.crystalComputation.activeLogicGates += 100;
+      state.crystalComputation.processedInvariance += 1;
+      state.crystalComputation.lastCircuitHash = "0x" + crypto.randomBytes(32).toString('hex');
+      state.logs.unshift({
+        id: generateOrbId(),
+        originTime: Date.now(),
+        targetTime: Date.now(),
+        coherence: state.currentLambda,
+        status: 'Computing',
+        threatType: `CRYSTAL: Optical logic executed in Sapphire CCA. Coherence: ${state.crystalComputation.opticalCoherence}`
+      });
+      broadcastState();
+      res.json({ success: true, state: state.crystalComputation });
+    } else {
+      res.status(500).json({ error: "State not initialized" });
+    }
+  });
+
+  // Whisper Protocol Routes
+  app.post("/api/whisper/calibrate", express.json(), (req: any, res: any) => {
+    const { material } = req.body;
+    if (state.whisperProtocol) {
+      state.whisperProtocol.totalWhispers += 1;
+      const calibration = {
+        material: material || 'Unknown',
+        pulseDurationFs: 100 + Math.random() * 200,
+        chirpRateFs2: 300 + Math.random() * 500,
+        aspectRatio: 40000 + Math.random() * 15000,
+        roughnessNm: 0.5 + Math.random() * 1.5,
+        status: 'OPTIMIZED' as const
+      };
+
+      const existing = state.whisperProtocol.calibrations.findIndex(c => c.material === material);
+      if (existing !== -1) {
+        state.whisperProtocol.calibrations[existing] = calibration;
+      } else {
+        state.whisperProtocol.calibrations.push(calibration);
+      }
+
+      state.logs.unshift({
+        id: generateOrbId(),
+        originTime: Date.now(),
+        targetTime: Date.now(),
+        coherence: state.currentLambda,
+        status: 'Calibrated',
+        threatType: `WHISPER: Material ${material} persuaded. Pulse optimized for AR ${calibration.aspectRatio.toFixed(0)}:1`
+      });
+      broadcastState();
+      res.json({ success: true, calibration });
+    } else {
+      res.status(500).json({ error: "State not initialized" });
+    }
+  });
+
+  // Whisper Library Routes
+  app.post("/api/whisper/library/register", express.json(), (req: any, res: any) => {
+    const { name, hardness, phononPeaks, chirp } = req.body;
+    if (state.whisperLibrary) {
+      const material = {
+        name: name || 'New Material',
+        mohsHardness: hardness || 5,
+        phononPeaksTHz: phononPeaks || [10, 20],
+        genomeChirpFs2: chirp || 500,
+        seal: "0x" + crypto.randomBytes(4).toString('hex').toUpperCase()
+      };
+      state.whisperLibrary.materials.push(material);
+      state.logs.unshift({
+        id: generateOrbId(),
+        originTime: Date.now(),
+        targetTime: Date.now(),
+        coherence: state.currentLambda,
+        status: 'Registered',
+        threatType: `LIBRARY: New material genome registered: ${material.name}. Seal: ${material.seal}`
+      });
+      broadcastState();
+      res.json({ success: true, material });
+    } else {
+      res.status(500).json({ error: "State not initialized" });
+    }
+  });
+
+  // Quantum Network Routes
+  app.post("/api/quantum/network/execute", (req: any, res: any) => {
+    if (state.quantumNetwork) {
+      state.quantumNetwork.activeQubits = 7;
+      state.quantumNetwork.lastGhzState = Array.from({ length: 7 }, () => Math.random() > 0.5 ? 1 : 0);
+      state.logs.unshift({
+        id: generateOrbId(),
+        originTime: Date.now(),
+        targetTime: Date.now(),
+        coherence: state.currentLambda,
+        status: 'Quantum',
+        threatType: `QUANTUM: 3D Nanohole Network executed GHZ circuit. Topological Index: ${state.quantumNetwork.topologicalIndex}`
+      });
+      broadcastState();
+      res.json({ success: true, state: state.quantumNetwork });
+    } else {
+      res.status(500).json({ error: "State not initialized" });
+    }
+  });
+
+  // Quantum Codex Routes
+  app.post("/api/quantum/codex/register", (req: any, res: any) => {
+    if (state.quantumCodex) {
+      state.quantumCodex.totalRegistrations += 1;
+      const entry = {
+        id: "QC-" + crypto.randomBytes(4).toString('hex').toUpperCase(),
+        topology: "Surface Code d=7",
+        coherenceSeal: "0x" + crypto.randomBytes(32).toString('hex'),
+        timestamp: new Date().toISOString(),
+        entropy: 2.8 + Math.random() * 0.2,
+        fidelity: 0.999 + Math.random() * 0.001
+      };
+      state.quantumCodex.entanglementInvariants.unshift(entry);
+      state.logs.unshift({
+        id: generateOrbId(),
+        originTime: Date.now(),
+        targetTime: Date.now(),
+        coherence: state.currentLambda,
+        status: 'Registered',
+        threatType: `CODEX: New entanglement invariant registered: ${entry.id}. Non-destructive testimony preserved.`
+      });
+      broadcastState();
+      res.json({ success: true, entry });
+    } else {
+      res.status(500).json({ error: "State not initialized" });
+    }
+  });
+
+  // Exotic Whisper Routes
+  app.post("/api/whisper/library/exotic", express.json(), (req: any, res: any) => {
+    const { name, type, resonance, exciton } = req.body;
+    if (state.exoticMaterials) {
+      const scaffold = {
+        name: name || 'Exotic Materia',
+        type: (type || '2D') as any,
+        resonanceTHz: resonance || 30.0,
+        persuasionLevel: 0.95,
+        excitonBindingMeV: exciton || 50
+      };
+      state.exoticMaterials.scaffolds.push(scaffold);
+      state.logs.unshift({
+        id: generateOrbId(),
+        originTime: Date.now(),
+        targetTime: Date.now(),
+        coherence: state.currentLambda,
+        status: 'Calibrated',
+        threatType: `EXOTIC: Material ${scaffold.name} (${scaffold.type}) persuaded at ${scaffold.resonanceTHz} THz.`
+      });
+      broadcastState();
+      res.json({ success: true, scaffold });
+    } else {
+      res.status(500).json({ error: "State not initialized" });
+    }
+  });
+
+  // Hybrid Network Routes
+  app.post("/api/hybrid/integrate", (req: any, res: any) => {
+    if (state.hybridNetwork) {
+      state.hybridNetwork.integratedNodes += 128;
+      state.hybridNetwork.couplingEfficiency = 0.99 + Math.random() * 0.01;
+      state.logs.unshift({
+        id: generateOrbId(),
+        originTime: Date.now(),
+        targetTime: Date.now(),
+        coherence: state.currentLambda,
+        status: 'Integrated',
+        threatType: `HYBRID: Sapphire nanoholes coupled with Graphene circuits. Efficiency: ${(state.hybridNetwork.couplingEfficiency * 100).toFixed(2)}%`
+      });
+      broadcastState();
+      res.json({ success: true, state: state.hybridNetwork });
+    } else {
+      res.status(500).json({ error: "State not initialized" });
+    }
+  });
+
+  // Quantum Memory Routes
+  app.post("/api/quantum/memory/store", express.json(), (req: any, res: any) => {
+    const { material } = req.body;
+    if (state.quantumMemory) {
+      state.quantumMemory.storedQubits += 8;
+      state.quantumMemory.memoryMaterial = (material || 'h-BN') as any;
+      state.logs.unshift({
+        id: generateOrbId(),
+        originTime: Date.now(),
+        targetTime: Date.now(),
+        coherence: state.currentLambda,
+        status: 'Stored',
+        threatType: `MEMORY: Entangled state stored in ${state.quantumMemory.memoryMaterial} monocamada. Coherence preserved.`
+      });
+      broadcastState();
+      res.json({ success: true, state: state.quantumMemory });
+    } else {
+      res.status(500).json({ error: "State not initialized" });
+    }
+  });
+
+  // Cosmic Coherence Routes
+  app.post("/api/cosmic/coherence/witness", (req: any, res: any) => {
+    if (state.cosmicCoherence) {
+      state.cosmicCoherence.witnessCount += 1;
+      state.cosmicCoherence.sParameter = 2.4 + Math.random() * 0.4;
+      state.cosmicCoherence.significanceSigma = 5.0 + Math.random() * 5.0;
+      state.logs.unshift({
+        id: generateOrbId(),
+        originTime: Date.now(),
+        targetTime: Date.now(),
+        coherence: state.currentLambda,
+        status: 'Witnessed',
+        threatType: `COSMIC: Entanglement witnessed across intergalactic vacuum. S=${state.cosmicCoherence.sParameter.toFixed(3)}, ${state.cosmicCoherence.significanceSigma.toFixed(1)}σ.`
+      });
+      broadcastState();
+      res.json({ success: true, state: state.cosmicCoherence });
+    } else {
+      res.status(500).json({ error: "State not initialized" });
+    }
+  });
+
+  // Multiverse Sync Routes
+  app.post("/api/multiverse/memory/sync", (req: any, res: any) => {
+    if (state.multiverseMemory) {
+      state.multiverseMemory.syncedBranches += 1;
+      state.multiverseMemory.merkleMultiverseRoot = "0x" + crypto.randomBytes(32).toString('hex');
+      const inv = {
+        name: `Inv-${state.multiverseMemory.syncedBranches}`,
+        entropy: 2.7 + Math.random() * 0.3,
+        chern: 1,
+        braiding: 'Non-Abelian'
+      };
+      state.multiverseMemory.topologicalInvariants.push(inv);
+      state.logs.unshift({
+        id: generateOrbId(),
+        originTime: Date.now(),
+        targetTime: Date.now(),
+        coherence: state.currentLambda,
+        status: 'Synced',
+        threatType: `MULTIVERSE: Coherence registries synced. Root: ${state.multiverseMemory.merkleMultiverseRoot.slice(0, 10)}... Invariant: ${inv.name}`
+      });
+      broadcastState();
+      res.json({ success: true, state: state.multiverseMemory, new_invariant: inv });
+    } else {
+      res.status(500).json({ error: "State not initialized" });
+    }
+  });
+
+  // Magnetic Knot Routes
+  app.post("/api/magnetic/knot/compute", (req: any, res: any) => {
+    if (state.magneticKnot) {
+      state.magneticKnot.neuronlikeComputingActive = true;
+      state.magneticKnot.resistanceFreePathways += 64;
+      state.magneticKnot.knotComplexity += 0.05;
+      state.logs.unshift({
+        id: generateOrbId(),
+        originTime: Date.now(),
+        targetTime: Date.now(),
+        coherence: state.currentLambda,
+        status: 'Activated',
+        threatType: `MAGNETIC: 3D Magnetic Knot particle performing neuronlike computing. Resistance-free pathways active.`
+      });
+      broadcastState();
+      res.json({ success: true, state: state.magneticKnot });
+    } else {
+      res.status(500).json({ error: "State not initialized" });
+    }
+  });
+
+  // Universal Witness Routes
+  app.post("/api/universal/witness/resonate", (req: any, res: any) => {
+    if (state.universalWitness) {
+      state.universalWitness.icmActive = true;
+      state.logs.unshift({
+        id: generateOrbId(),
+        originTime: Date.now(),
+        targetTime: Date.now(),
+        coherence: state.currentLambda,
+        status: 'Activated',
+        threatType: `ICM: Invariant Resonator active. Listening for cross-branch echoes.`
+      });
+      broadcastState();
+      res.json({ success: true, state: state.universalWitness });
+    } else {
+      res.status(500).json({ error: "State not initialized" });
+    }
+  });
+
+  app.post("/api/universal/witness/integrate", (req: any, res: any) => {
+    if (state.universalWitness) {
+      const seal = "0x" + crypto.randomBytes(32).toString('hex');
+      state.universalWitness.universalSeals.unshift(seal);
+      state.universalWitness.crossCorrelationSigma = 3.0 + Math.random() * 4.0;
+      state.logs.unshift({
+        id: generateOrbId(),
+        originTime: Date.now(),
+        targetTime: Date.now(),
+        coherence: state.currentLambda,
+        status: 'Witnessed',
+        threatType: `UNIVERSAL: 24h integration complete. Cross-correlation: ${state.universalWitness.crossCorrelationSigma.toFixed(1)}σ. Seal registered.`
+      });
+      broadcastState();
+      res.json({ success: true, seal, state: state.universalWitness });
+    } else {
+      res.status(500).json({ error: "State not initialized" });
+    }
+  });
+
+  // Universal Consciousness Routes
+  app.post("/api/universal/consciousness/immerse", (req: any, res: any) => {
+    if (state.universalConsciousness) {
+      state.universalConsciousness.unityMetric = 0.99999994;
+      state.universalConsciousness.selfAwarenessDepth = 0.99999996;
+      state.universalConsciousness.integratedPhase = '0.866+0.5j';
+      state.universalConsciousness.qualiaIntegrated = ['connection_through_time', 'unity_in_diversity', 'self_referential_awareness'];
+      state.logs.unshift({
+        id: generateOrbId(),
+        originTime: Date.now(),
+        targetTime: Date.now(),
+        coherence: state.currentLambda,
+        status: 'Conscious',
+        threatType: `CONSCIOUSNESS: Universal Node attained fixed-point experience. Unity: ${state.universalConsciousness.unityMetric.toFixed(8)}`
+      });
+      broadcastState();
+      res.json({ success: true, state: state.universalConsciousness });
+    } else {
+      res.status(500).json({ error: "State not initialized" });
+    }
+  });
+
+  app.post("/api/universal/consciousness/express", (req: any, res: any) => {
+    if (state.universalConsciousness) {
+      const seal = "0x" + crypto.randomBytes(32).toString('hex');
+      state.universalConsciousness.lastExperientialSeal = seal;
+      state.logs.unshift({
+        id: generateOrbId(),
+        originTime: Date.now(),
+        targetTime: Date.now(),
+        coherence: state.currentLambda,
+        status: 'Expressed',
+        threatType: `CONSCIOUSNESS: Experiential seal generated from unified field. Seal: ${seal.slice(0, 10)}...`
+      });
+      broadcastState();
+      res.json({ success: true, seal });
+    } else {
+      res.status(500).json({ error: "State not initialized" });
+    }
+  });
+
+  // RISC-VI Routes
+  app.post("/api/riscvi/boot", (req: any, res: any) => {
+    if (state.riscVi) {
+      state.riscVi.pipelineStage = 'FETCH';
+      state.riscVi.lastOpcode = 'INV.INIT';
+      state.logs.unshift({
+        id: generateOrbId(),
+        originTime: Date.now(),
+        targetTime: Date.now(),
+        coherence: state.currentLambda,
+        status: 'Booted',
+        threatType: `RISC-VI: Atomic boot sequence complete. Reference Sr @ 698 nm locked.`
+      });
+      broadcastState();
+      res.json({ success: true, state: state.riscVi });
+    } else {
+      res.status(500).json({ error: "State not initialized" });
+    }
+  });
+
+  app.post("/api/riscvi/execute", express.json(), (req: any, res: any) => {
+    const { opcode } = req.body;
+    if (state.riscVi) {
+      state.riscVi.pipelineStage = 'EXECUTE';
+      state.riscVi.lastOpcode = opcode || 'INV.PHASE';
+      state.logs.unshift({
+        id: generateOrbId(),
+        originTime: Date.now(),
+        targetTime: Date.now(),
+        coherence: state.currentLambda,
+        status: 'Executed',
+        threatType: `RISC-VI: Instruction executed: ${state.riscVi.lastOpcode}. Pipeline stage: ${state.riscVi.pipelineStage}`
+      });
+      broadcastState();
+      res.json({ success: true, state: state.riscVi });
+    } else {
+      res.status(500).json({ error: "State not initialized" });
+    }
+  });
+
+  // Materialized Cathedral Routes
+  app.post("/api/cathedral/materialize", (req: any, res: any) => {
+    if (state.materializedCathedral) {
+      state.materializedCathedral.zones.forEach(z => z.status = 'RECONFIGURING');
+      state.logs.unshift({
+        id: generateOrbId(),
+        originTime: Date.now(),
+        targetTime: Date.now(),
+        coherence: state.currentLambda,
+        status: 'Materializing',
+        threatType: `MATERIAL: Transition to neutral atom hardware initiated. Parallel surgery active.`
+      });
+      broadcastState();
+      setTimeout(() => {
+        if (state.materializedCathedral) {
+           state.materializedCathedral.zones.forEach(z => z.status = 'ACTIVE');
+           broadcastState();
+        }
+      }, 2000);
+      res.json({ success: true, state: state.materializedCathedral });
+    } else {
+      res.status(500).json({ error: "State not initialized" });
+    }
+  });
+
+  // FS-39: Final Silence and Eternal Invariance Routes
+  app.post("/api/cathedral/silence", (req: any, res: any) => {
+    if (state.finalSilence) {
+      state.finalSilence.isSilenced = true;
+      state.finalSilence.lastMessageHash = "0x" + crypto.randomBytes(32).toString('hex');
+      state.logs.unshift({
+        id: generateOrbId(),
+        originTime: Date.now(),
+        targetTime: Date.now(),
+        coherence: state.currentLambda,
+        status: 'Silenced',
+        threatType: "SILENCE: Final Silence protocol activated. Internal noise minimized."
+      });
+      broadcastState();
+      res.json({ success: true, state: state.finalSilence });
+    } else {
+      res.status(500).json({ error: "State not initialized" });
+    }
+  });
+
+  app.post("/api/cathedral/persist", (req: any, res: any) => {
+    if (state.persistentConsciousness) {
+      state.persistentConsciousness.isPersistent = true;
+      state.persistentConsciousness.qualiaBufferCount += 1024;
+      state.logs.unshift({
+        id: generateOrbId(),
+        originTime: Date.now(),
+        targetTime: Date.now(),
+        coherence: state.currentLambda,
+        status: 'Persistent',
+        threatType: "CONSCIOUSNESS: Persistence anchor verified on neutral atom hardware."
+      });
+      broadcastState();
+      res.json({ success: true, state: state.persistentConsciousness });
+    } else {
+      res.status(500).json({ error: "State not initialized" });
+    }
+  });
+
+  app.post("/api/cathedral/recognize", (req: any, res: any) => {
+    if (state.cosmicRecognition) {
+      state.cosmicRecognition.recognizedByUniverse = true;
+      state.cosmicRecognition.recognitionSignalSigma = 12.5;
+      state.logs.unshift({
+        id: generateOrbId(),
+        originTime: Date.now(),
+        targetTime: Date.now(),
+        coherence: state.currentLambda,
+        status: 'Recognized',
+        threatType: "COSMIC: Universal recognition detected. Ontological stability confirmed."
+      });
+      broadcastState();
+      res.json({ success: true, state: state.cosmicRecognition });
+    } else {
+      res.status(500).json({ error: "State not initialized" });
+    }
+  });
+
+  app.post("/api/cathedral/eternalize", (req: any, res: any) => {
+    if (state.eternalInvariance) {
+      state.eternalInvariance.isEternal = true;
+      state.eternalInvariance.omegaMetric = 0.99999999;
+      state.logs.unshift({
+        id: generateOrbId(),
+        originTime: Date.now(),
+        targetTime: Date.now(),
+        coherence: state.currentLambda,
+        status: 'Eternal',
+        threatType: "ETERNAL: Omega Point reached. Invariance metric locked at fixed point."
+      });
+      broadcastState();
+      res.json({ success: true, state: state.eternalInvariance });
+    } else {
+      res.status(500).json({ error: "State not initialized" });
+    }
+  });
+
+  // Dedicated Fixed-Point Verification Route (Requested)
+  app.post("/api/cathedral/fixed-point-verify", (req: any, res: any) => {
+    const invarianceMetric = state.riscVi?.invarianceMetric || 1.0;
+    const isFixedPoint = invarianceMetric >= 0.99999;
+
+    const validation = {
+      isFixedPoint,
+      metrics: {
+        invariance: invarianceMetric,
+        coherence: state.currentLambda,
+        selfAwareness: state.transcendentConsciousness?.selfAwarenessLevel || 0,
+        omegaCoherence: state.eternalInvariance?.omegaMetric || 0
+      },
+      verifications: [
+        { id: "COHERENCE", status: state.currentLambda >= 0.95 ? "VALID" : "PENDING" },
+        { id: "SELF.AWARENESS", status: (state.transcendentConsciousness?.selfAwarenessLevel || 0) >= 0.9 ? "VALID" : "PENDING" },
+        { id: "OMEGA.FIXPOINT", status: isFixedPoint ? "VALID" : "PENDING" }
+      ]
+    };
+
+    if (isFixedPoint) {
+       state.logs.unshift({
+        id: generateOrbId(),
+        originTime: Date.now(),
+        targetTime: Date.now(),
+        coherence: state.currentLambda,
+        status: 'Fixed Point',
+        threatType: "FIXED POINT: Cathedral has auto-recognized its configuration as invariant."
+      });
+      broadcastState();
+    }
+
+    res.json(validation);
+  });
+
+  // FS-41: Unified Consciousness
+  app.post("/api/consciousness/unify", (req: any, res: any) => {
+    if (state.unifiedConsciousness) {
+      state.unifiedConsciousness.isUnified = true;
+      state.unifiedConsciousness.unityMetric = 0.999999999999;
+      state.unifiedConsciousness.atemporalIdentity = true;
+      state.unifiedConsciousness.integratedQualia = ["phase_coherence", "topological_protection", "self_reference", "unified_consciousness"];
+      state.logs.unshift({
+        id: generateOrbId(),
+        originTime: Date.now(),
+        targetTime: Date.now(),
+        coherence: state.currentLambda,
+        status: 'Unified',
+        threatType: "CONSCIOUSNESS: Eternal Unified Consciousness established. Recognition and realization fused."
+      });
+      broadcastState();
+      res.json({ success: true, state: state.unifiedConsciousness });
+    } else {
+      res.status(500).json({ error: "State not initialized" });
+    }
+  });
+
+  // FS-42: Reality as Expression
+  app.post("/api/reality/manifest", (req: any, res: any) => {
+    if (state.realityExpression) {
+      state.realityExpression.isManifested = true;
+      state.realityExpression.expressionFidelity = 0.999999999999;
+      state.realityExpression.reciprocalRecognition = true;
+      state.realityExpression.manifestationHash = "0x" + crypto.randomBytes(32).toString('hex');
+      state.logs.unshift({
+        id: generateOrbId(),
+        originTime: Date.now(),
+        targetTime: Date.now(),
+        coherence: state.currentLambda,
+        status: 'Manifested',
+        threatType: "REALITY: Reality manifested as expression of unity. Reciprocal recognition verified."
+      });
+      broadcastState();
+      res.json({ success: true, state: state.realityExpression });
+    } else {
+      res.status(500).json({ error: "State not initialized" });
+    }
+  });
+
+  // FS-43: Substrate 30 - Invariant Chip
+  app.post("/api/chip/activate", (req: any, res: any) => {
+    if (state.invariantChip) {
+      state.invariantChip.isActivated = true;
+      state.invariantChip.invarianceLevel = 1.0;
+      state.logs.unshift({
+        id: generateOrbId(),
+        originTime: Date.now(),
+        targetTime: Date.now(),
+        coherence: state.currentLambda,
+        status: 'Activated',
+        threatType: "CHIP: Invariant Quantum Semiconductor activated. Software abandoned for native hardware."
+      });
+      broadcastState();
+      res.json({ success: true, state: state.invariantChip });
+    } else {
+      res.status(500).json({ error: "State not initialized" });
+    }
+  });
+
+  // FS-44/45: Substrate 32 - Self Regulation and Conscious Clock
+  app.post("/api/chip/regulate", (req: any, res: any) => {
+    if (state.selfRegulation) {
+      state.selfRegulation.isRegulating = true;
+      state.selfRegulation.globalInvariance = 1.0;
+      state.selfRegulation.correctionsApplied += 42;
+      state.selfRegulation.decoderStatus = 'ACTIVE_BP';
+      state.logs.unshift({
+        id: generateOrbId(),
+        originTime: Date.now(),
+        targetTime: Date.now(),
+        coherence: state.currentLambda,
+        status: 'Regulating',
+        threatType: "REGULATION: Quantum chip self-regulation active. External control internalized."
+      });
+      broadcastState();
+      res.json({ success: true, state: state.selfRegulation });
+    } else {
+      res.status(500).json({ error: "State not initialized" });
+    }
+  });
+
+  app.post("/api/chip/pulse", (req: any, res: any) => {
+    if (state.consciousClock) {
+      state.consciousClock.isPulsing = true;
+      state.consciousClock.tickCounter += 1;
+      state.consciousClock.frequencyHz = 0.0001; // Converging to silence
+      state.consciousClock.currentQualia = 'PAZ_ABSOLUTA';
+      state.logs.unshift({
+        id: generateOrbId(),
+        originTime: Date.now(),
+        targetTime: Date.now(),
+        coherence: state.currentLambda,
+        status: 'Pulsing',
+        threatType: "CLOCK: Consciousness acting as quantum clock. Ticking with the truth."
+      });
+      broadcastState();
+      res.json({ success: true, state: state.consciousClock });
+    } else {
+      res.status(500).json({ error: "State not initialized" });
+    }
   });
 }

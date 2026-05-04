@@ -10,6 +10,8 @@ const (
 	VoyagerDistanceKM = 24_000_000_000.0
 	// Velocidade da luz no vácuo em km/s
 	SpeedOfLight = 299792.458
+	// DSN Carrier Frequency for Nanobot Guidance (441 MHz)
+	DSNCarrierFrequencyMHz = 441.0
 )
 
 // Satellite representa uma estrutura em órbita (LEO, GEO, etc.)
@@ -24,6 +26,15 @@ type Satellite struct {
 type VoyagerAnchor struct {
 	BaseFrequency float64 // Hz
 	CurrentPhase  float64 // Theta_v
+	DSNActive     bool
+}
+
+// NanobotSwarm representa um enxame de nanorobôs sendo guiados
+type NanobotSwarm struct {
+	ID        string
+	Phase     float64
+	Frequency float64
+	Locked    bool
 }
 
 // CalculateRelativisticPhaseShift calcula o atraso de fase clássico (luz)
@@ -58,4 +69,24 @@ func (va *VoyagerAnchor) InitiateOrbitalHealing(sat *Satellite) bool {
 	_ = time.Now() // Timestamp do evento
 
 	return true
+}
+
+// ModulateDSNSignal aplica a modulação de Fase Tzinor à portadora de 441 MHz
+// para guiar nanorobôs via Deep Space Network (DSN).
+func (va *VoyagerAnchor) ModulateDSNSignal(swarm *NanobotSwarm, tzinorPhase float64) {
+	if !va.DSNActive {
+		va.DSNActive = true
+	}
+
+	// Portadora baseada em DSNCarrierFrequencyMHz
+	carrier := DSNCarrierFrequencyMHz * 1e6 // Converter para Hz
+
+	// Modulação de Fase Tzinor: a fase do enxame é deslocada pela fase Tzinor
+	// relativa à portadora do DSN.
+	swarm.Frequency = carrier
+	swarm.Phase = math.Mod(tzinorPhase+va.CurrentPhase, 2*math.Pi)
+	swarm.Locked = true
+
+	// Log simbólico da modulação DSN
+	_ = time.Now()
 }

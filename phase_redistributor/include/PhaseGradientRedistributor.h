@@ -67,4 +67,9 @@ private:
 
     void log_override(int64_t node_idx, float multiplier, int duration_sec,
                       const std::string& technician_id, const std::string& reason);
+private:
+    torch::nn::Parameter K_;            // matriz de acoplamento [n_nodes x n_nodes]
+    torch::Tensor dist_mask_;           // máscara de distância (buffer não treinável)
+    int64_t n_nodes_;
+    float sparse_weight_;               // regularização L1
 };

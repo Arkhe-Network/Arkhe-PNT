@@ -22,7 +22,7 @@ impl Compiler {
 
     pub fn compile(&self, program: &Program) -> String {
         let mut output = String::new();
-        
+
         output.push_str(";; ARKHE(N) COMPILED BYTECODE\n");
         output.push_str(&format!(";; TARGET: {:?}\n\n", self.target_name()));
 
@@ -43,7 +43,7 @@ impl Compiler {
 
     fn compile_function(&self, func: &Function) -> String {
         let mut asm = String::new();
-        
+
         if func.is_retro {
             asm.push_str(&format!("@RETRO_ENTRY {}\n", func.name));
             asm.push_str("  OP_PHASE_LOCK  ;; Lock Kuramoto oscillator\n");
@@ -59,7 +59,7 @@ impl Compiler {
             asm.push_str("  OP_COLLAPSE    ;; Interferometric collapse\n");
         }
         asm.push_str("  RET\n\n");
-        
+
         asm
     }
 
@@ -128,12 +128,43 @@ impl Compiler {
                 asm.push_str("  ;; ZK-STARK Proof Generation (Phase Transition)\n");
                 asm.push_str("  ;; Reference: server/circuits/water_balance.circom & ebpf_integrity.circom\n");
                 asm.push_str("  OP_ZK_PROVE_BEGIN\n");
-                
+
                 // Compile the inner expression which defines the logic to be proven
                 asm.push_str(&self.compile_expr(inner_expr));
-                
+
                 asm.push_str("  OP_ZK_PROVE_END\n");
                 asm.push_str("  OP_EMIT_NULLIFIER ;; Prevent replay attacks\n");
+                asm
+            },
+            Expr::SheetGet => {
+                "  OP_FD_SHEET_GET\n".to_string()
+            },
+            Expr::SheetSet(target) => {
+                let mut asm = self.compile_expr(target);
+                asm.push_str("  OP_FD_SHEET_SET\n");
+                asm
+            },
+            Expr::SheetJump(target, state) => {
+                let mut asm = self.compile_expr(target);
+                asm.push_str(&self.compile_expr(state));
+                asm.push_str("  OP_FD_SHEET_JUMP\n");
+                asm
+            },
+            Expr::SheetProbe(target) => {
+                let mut asm = self.compile_expr(target);
+                asm.push_str("  OP_FD_SHEET_PROBE\n");
+                asm
+            },
+            Expr::ArkheVerify(rho, sigma) => {
+                let mut asm = self.compile_expr(rho);
+                asm.push_str(&self.compile_expr(sigma));
+                asm.push_str("  OP_ARKHE_VERIFY\n");
+                asm
+            },
+            Expr::QnetFiber(photon, length) => {
+                let mut asm = self.compile_expr(photon);
+                asm.push_str(&self.compile_expr(length));
+                asm.push_str("  OP_QNET_FIBER\n");
                 asm
             },
         }

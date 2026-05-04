@@ -1,0 +1,9 @@
+{
+  "synapse_id": "847.765",
+  "wavelength_nm": 1550.12,
+  "power_dbm": 3.5,
+  "pre_ack_window_ns": 15,
+  "phi_coupling": 0.61803398875,
+  "eta_correction": 0.45,
+  "modulation": "PAM4_BIO_PHASE"
+}

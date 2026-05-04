@@ -1,7 +1,17 @@
+
+/**
+ * @license
+ * Copyright 2026 Google LLC
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
+
 import * as grpc from '@grpc/grpc-js';
 import * as protoLoader from '@grpc/proto-loader';
-import path from 'path';
-import { fileURLToPath } from 'url';
+
+
 import { logger } from './logger';
 
 const __filename = fileURLToPath(import.meta.url);
@@ -90,16 +100,16 @@ export function startAgentGrpcServer() {
       call.on('end', () => {
         if (agentId) {
           const agent = agentsState.get(agentId);
-          if (agent) agent.status = 'OFFLINE';
+          if (agent) {agent.status = 'OFFLINE';}
         }
         call.end();
       });
 
       // Periodically send tasks to the agent
       const interval = setInterval(() => {
-        if (!agentId) return;
+        if (!agentId) {return;}
         const agent = agentsState.get(agentId);
-        if (!agent || agent.status !== 'TASK_IDLE') return;
+        if (!agent || agent.status !== 'TASK_IDLE') {return;}
 
         // Find a pending task for this agent
         for (const [taskId, task] of tasksState.entries()) {
@@ -137,7 +147,7 @@ export function startAgentGrpcServer() {
 }
 
 // Helper to create a task
-export function createTask(type: string, payload: any, requiredCoherence: number = 0.8) {
+export function createTask(type: string, payload: any, requiredCoherence = 0.8) {
   const taskId = `task_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`;
   tasksState.set(taskId, {
     id: taskId,

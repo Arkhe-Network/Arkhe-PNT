@@ -1,4 +1,12 @@
+
+/**
+ * @license
+ * Copyright 2026 Google LLC
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 import { finalizeEvent, generateSecretKey, getPublicKey, Relay } from 'nostr-tools';
+
 import { logger } from './logger';
 
 // Arkhe Constellation Relays (using public relays for the simulation)

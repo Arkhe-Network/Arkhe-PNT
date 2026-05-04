@@ -1,0 +1,20 @@
+{
+  "title": "Arkhe(n) Real-Time Coherence λ₂",
+  "datasource": "ArkheChain-Telemetry",
+  "panels": [
+    {
+      "id": 1,
+      "title": "Global Coherence λ₂",
+      "type": "timeseries",
+      "targets": [{"expr": "arkhe_global_lambda2"}],
+      "thresholds": [{"value": 0.847, "color": "red"}]
+    },
+    {
+      "id": 2,
+      "title": "Node-T1 Local Coherence",
+      "type": "gauge",
+      "targets": [{"expr": "arkhe_node_t1_lambda2"}]
+    }
+  ],
+  "synapse_id": "847.815"
+}

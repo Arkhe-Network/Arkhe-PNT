@@ -1,5 +1,15 @@
+
+/**
+ * @license
+ * Copyright 2026 Google LLC
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+import type { Server } from 'node:http';
+
 import { WebSocketServer, WebSocket } from 'ws';
-import { Server } from 'http';
+
+
 import { logger } from './logger';
 
 const PROFANE_KEYWORDS = ["bulb", "light", "plug", "switch", "sensor", "tag", "tracker", "thermo", "fridge", "scale", "tv"];
@@ -18,7 +28,7 @@ function isSacredNode(name: string): [boolean, string] {
 
 function calculateSpatialParams(rssi: number, txPower = -59) {
     const n = 2.0;
-    if (rssi >= 0) rssi = -50;
+    if (rssi >= 0) {rssi = -50;}
     
     let distance = Math.pow(10, (txPower - rssi) / (10 * n));
     distance = Math.max(0.1, Math.min(distance, 10.0));
@@ -40,8 +50,8 @@ function generateHiddenChannel(tArray: Float64Array) {
         const modulator = Math.sin(2 * Math.PI * 0.2 * t) > 0.8 ? 1.0 : 0.0;
         
         let u = 0, v = 0;
-        while(u === 0) u = Math.random();
-        while(v === 0) v = Math.random();
+        while(u === 0) {u = Math.random();}
+        while(v === 0) {v = Math.random();}
         const noise = Math.sqrt(-2.0 * Math.log(u)) * Math.cos(2.0 * Math.PI * v) * 0.15;
         
         result[i] = (carrier * 0.4 + noise) * modulator;
@@ -183,7 +193,7 @@ export function setupPresenceServer(server: Server) {
                 } else {
                     if (data.rssi !== undefined) {
                         const node = connectedNodes.get(nodeId);
-                        if (node) node.rssi = data.rssi;
+                        if (node) {node.rssi = data.rssi;}
                     }
                 }
             } catch (e) {

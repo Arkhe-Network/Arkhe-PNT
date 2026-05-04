@@ -1,0 +1,16 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "HLML Proof Witness Log",
+  "type": "array",
+  "items": {
+    "type": "object",
+    "properties": {
+      "name": { "type": "string" },
+      "input_type": { "type": "string" },
+      "output_type": { "type": "string" },
+      "status": { "enum": ["GREEN", "YELLOW", "RED"] },
+      "tactic_used": { "type": "string" }
+    },
+    "required": ["name", "input_type", "output_type", "status", "tactic_used"]
+  }
+}

@@ -123,6 +123,9 @@ class StochasticResilience:
             diff = theta[j] - theta[i]
             coupling_term[i] += self.local_coupling[i] * K_ij_eff_i * np.sin(diff)
             coupling_term[j] += self.local_coupling[j] * K_ij_eff_j * np.sin(-diff)
+            diff = theta[j] - theta[i]
+            coupling_term[i] += self.local_coupling[i] * K_ij * np.sin(diff)
+            coupling_term[j] += self.local_coupling[j] * K_ij * np.sin(-diff)
 
         return coupling_term
 
@@ -143,6 +146,7 @@ class StochasticResilience:
             # Aplicar overrides no modelo de campo médio
             multipliers = np.array([self.node_overrides.get(i, 1.0) for i in range(self.N)])
             network_term = self.local_coupling * self.global_coupling * R * np.sin(Phi - theta) * multipliers
+            network_term = self.local_coupling * self.global_coupling * R * np.sin(Phi - theta)
 
         # Ataque externo (Orb-1 tentando impor fase 0)
         external_term = K_ext * np.sin(0.0 - theta)

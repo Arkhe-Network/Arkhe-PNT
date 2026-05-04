@@ -1,0 +1,28 @@
+{
+  "timestamp": "847.630",
+  "model": "BioFDTD + ODE",
+  "parameters": {
+    "lambda_max": 0.999,
+    "lambda_crit": 0.847,
+    "kappa_human": 0.02,
+    "kappa_whale": 2.0,
+    "kappa_peptide": 1.5
+  },
+  "results": {
+    "Humano (basal)": {
+      "final_repaired_pct": 2.4867201135854886,
+      "final_lambda2": 0.9980248672011358,
+      "delta_lambda2": 2.48672011358142e-05
+    },
+    "Baleia (100\u00d7)": {
+      "final_repaired_pct": 79.46103161757809,
+      "final_lambda2": 0.9987946103161758,
+      "delta_lambda2": 0.0007946103161757812
+    },
+    "Pept\u00eddeo mim\u00e9tico": {
+      "final_repaired_pct": 73.62643697571302,
+      "final_lambda2": 0.9987362643697572,
+      "delta_lambda2": 0.0007362643697571558
+    }
+  }
+}

@@ -3,7 +3,7 @@ from pydantic import BaseModel, Field
 from typing import List, Optional, Dict, Any
 import numpy as np
 import asyncio
-from datetime import datetime
+from datetime import datetime, timezone
 import logging
 import uuid
 
@@ -28,6 +28,13 @@ from skills import (
     RainbowParams,
     XenoParams,
     KuramotoParams
+    lambda2_coherence,
+    SynapseKValidator,
+    TMSModulator,
+    ARChromestheticInterface,
+    RainbowParams,
+    ArkheMaxTokiIntegration,
+    CellularState
 )
 
 # Logging configuration
@@ -38,6 +45,7 @@ app = FastAPI(
     title="Archimedes-Ω Agent API",
     description="API for the Archimedes-Ω coherence interrogation agent.",
     version="4.0.0"
+    version="2.5.0"
 )
 
 # --- Schemas ---
@@ -221,6 +229,35 @@ class BioSilentRequest(BaseModel):
     distance_to_hospital: float
     exclusion_radius: float = 200.0
     is_manual_override: bool = False
+class Lambda2Request(BaseModel):
+    signals: List[List[float]] # List of channels, each a list of samples
+
+class EEGSimulationRequest(BaseModel):
+    kappa: float = 0.8
+    noise_level: float = 0.3
+    is_synaesthete: bool = True
+
+class TMSModulationRequest(BaseModel):
+    kappa_baseline: float = 0.2
+    intensity_percent: float = 65.0
+    duration_min: float = 10.0
+
+class AudioColorRequest(BaseModel):
+    frequency_hz: float = 440.0
+    kappa: float = 0.8
+
+class MaxTokiNVRequest(BaseModel):
+    nv_data: List[float] = Field(..., min_length=168, max_length=168)
+
+class MaxTokiTrajectoryRequest(BaseModel):
+    current_lambda: float
+    tissue_type: str = "cochlea"
+    biological_age: float = 0.0
+    interventions: Optional[List[str]] = None
+
+class MaxTokiOTOFRequest(BaseModel):
+    pre_surgery_lambda: float
+    surgical_intervention: str = "AAV_OTOF_Dual"
 
 # --- Endpoints ---
 
@@ -339,7 +376,8 @@ async def detect_peaks_endpoint(req: PeakDetectionRequest):
         np.array(req.coherence),
         np.array(req.phases),
         req.threshold_multiplier,
-        req.min_prominence
+        req.min_prominence,
+        req.energy_ev
     )
     return {"peaks": peaks}
 
@@ -458,6 +496,40 @@ async def check_w_state(req: TeleportationRequest):
         "philosophical_note": conclusion["philosophical_note"]
     }
 
+@app.post("/validate/lambda2", tags=["synapse-k"])
+async def validate_lambda2(req: Lambda2Request):
+    """Calcula a coerência λ₂ para sinais multi-canal."""
+    l2 = lambda2_coherence(np.array(req.signals))
+    return {"lambda2": l2}
+
+@app.post("/simulate/synapse-k/eeg", tags=["synapse-k"])
+async def simulate_synapse_k_eeg(req: EEGSimulationRequest):
+    """Simula sinais EEG para sinestetas ou controles e valida."""
+    validator = SynapseKValidator()
+    if req.is_synaesthete:
+        data = validator.generate_eeg_synapse(req.kappa, req.noise_level)
+    else:
+        data = validator.generate_eeg_control(req.noise_level)
+
+    validation = validator.validate_synaesthete(data)
+    # Convert numpy arrays to lists for JSON serialization
+    serialized_data = {k: v.tolist() if isinstance(v, np.ndarray) else v for k, v in data.items()}
+    return {"eeg_data": serialized_data, "validation": validation}
+
+@app.post("/simulate/synapse-k/tms", tags=["synapse-k"])
+async def simulate_synapse_k_tms(req: TMSModulationRequest):
+    """Modela a modulação do coeficiente κ via TMS."""
+    tms = TMSModulator()
+    k_new = tms.modulate_kappa(req.kappa_baseline, req.intensity_percent, req.duration_min)
+    return {"kappa_new": k_new}
+
+@app.post("/map/audio-to-color", tags=["synapse-k"])
+async def map_audio_to_color(req: AudioColorRequest):
+    """Mapeia uma frequência auditiva para o espaço cromático Synapse-κ."""
+    interface = ARChromestheticInterface()
+    color = interface.audio_to_color(req.frequency_hz, req.kappa)
+    return color
+
 @app.post("/therapy/optimize-combined-protocol", tags=["therapy"])
 async def optimize_combined_protocol(req: OptimizationRequest):
     """
@@ -538,6 +610,71 @@ async def optimize_combined_protocol_legacy(req: OptimizationRequest):
         "do medicamento decide se a cura chegará a tempo."
     )
     return result
+# --- MaxToki Endpoints ---
+
+@app.post("/maxtoki/screen-eligibility", tags=["maxtoki"])
+async def maxtoki_screen_eligibility(req: MaxTokiNVRequest):
+    """
+    Triagem de elegibilidade para terapia usando MaxToki.
+    Verifica se o perfil celular é compatível com sucesso terapêutico.
+    """
+    integration = ArkheMaxTokiIntegration()
+    nv_data = np.array(req.nv_data)
+    result = integration.screen_patient_eligibility(nv_data)
+    return result
+
+@app.post("/maxtoki/predict-trajectory", tags=["maxtoki"])
+async def maxtoki_predict_trajectory(req: MaxTokiTrajectoryRequest):
+    """
+    Prediz a trajetória de envelhecimento/rejuvenescimento celular.
+    """
+    integration = ArkheMaxTokiIntegration()
+    current_state = CellularState(
+        timestamp=datetime.now(),
+        lambda_coherence=req.current_lambda,
+        transcriptome_vector=np.zeros(20271), # Placeholder
+        biological_age=req.biological_age,
+        tissue_type=req.tissue_type
+    )
+    trajectory = integration.maxtoki.predict_aging_trajectory(
+        current_state=current_state,
+        interventions=req.interventions
+    )
+
+    return trajectory.to_dict()
+
+@app.post("/maxtoki/predict-otof-recovery", tags=["maxtoki"])
+async def maxtoki_predict_otof_recovery(req: MaxTokiOTOFRequest):
+    """
+    Prediz a curva de recuperação auditiva (dB) específica para terapia OTOF.
+    """
+    integration = ArkheMaxTokiIntegration()
+    pre_state = CellularState(
+        timestamp=datetime.now(),
+        lambda_coherence=req.pre_surgery_lambda,
+        transcriptome_vector=np.zeros(20271), # Placeholder
+        biological_age=0.0,
+        tissue_type="cochlea"
+    )
+    prediction = integration.maxtoki.predict_otof_recovery(
+        pre_surgery_state=pre_state,
+        surgical_intervention=req.surgical_intervention
+    )
+
+    # Remove transcript vectors from response for size
+    del prediction['trajectory']
+
+    return prediction
+
+@app.post("/maxtoki/generate-contract", tags=["maxtoki"])
+async def maxtoki_generate_contract(req: MaxTokiNVRequest):
+    """
+    Gera dados formatados para smart contracts $RIO com milestones baseados no MaxToki.
+    """
+    integration = ArkheMaxTokiIntegration()
+    nv_data = np.array(req.nv_data)
+    screening = integration.screen_patient_eligibility(nv_data)
+    return integration.generate_smart_contract_data(screening)
 
 @app.websocket("/therapy/monitoring")
 async def websocket_glymphatic_monitor(websocket: WebSocket):

@@ -1,10 +1,44 @@
-export interface ContextNode {
-  timestamp: number;
+/**
+ * @license
+ * Copyright 2026 Google LLC
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+export interface OrbLog {
+  id: string;
+  time?: string;
+  timestamp?: string;
+  level?: 'info' | 'warn' | 'error' | 'critical';
+  source?: string;
+  message?: string;
+  originTime?: number;
+  targetTime?: number;
+  status: string;
+  threatType?: string;
+  coherence: number;
+}
+
+export interface MetricsHistory {
+  timestamp?: string;
+  time?: string;
+  musd: number;
+  musda: number;
+  wmaBc: number;
+}
+
+export interface Shard {
+  id: number;
+  status: 'active' | 'mitigating' | 'compromised' | 'corrupted' | 'recovering';
+}
+
+export interface _ContextNode {
+  time?: number;
+  timestamp?: number;
   embedding: number[];
   salience: number;
 }
 
-export interface MemoryEngram {
+export interface _MemoryEngram {
   originTime: number;
   consolidatedTime: number;
   summaryHash: string;
@@ -14,93 +48,39 @@ export interface MemoryEngram {
 export interface TzinorMemoryState {
   agentId: string;
   currentEpoch: number;
-  fContext: ContextNode[];
-  gMemory: MemoryEngram[]; // Acts as VecDeque
-  warpFactor: number; // f64
-  lambdaCoherence: number; // f64
-}
-
-export interface IndustryConvergence {
-  arkhe_version?: string;
-  cortex_alignment?: string;
-  hardware_basis?: string;
-  unified_architecture?: string;
-  visual_basic_com_interop?: string;
-  industrial_scada_layer?: string;
-}
-
-export interface OrbPayload {
-  id: string;
-  originTime: number;
-  coherence: number;
-  embedding: number[];
-  industry_convergence?: IndustryConvergence;
-  signature?: string;
-  signer_address?: string;
-}
-
-export interface OrbLog {
-  id: string;
-  originTime: number;
-  targetTime: number;
-  coherence: number;
-  status: 'Valid' | 'Mitigated' | 'Rejected';
-  threatType?: string;
-}
-
-export interface Shard {
-  id: number;
-  status: 'active' | 'corrupted' | 'recovering';
-}
-
-export interface MetricsHistory {
-  time: string;
-  musd: number;
-  musda: number;
-  wmaBc: number;
-}
-
-export interface SessionEvent {
-  type: 'SESSION_START' | 'SESSION_EVENT' | 'SESSION_END' | 'SESSION_ANALYSIS';
-  sessionId: string;
-  timestamp: number;
-  eventType?: string;
-  payload?: any;
-  coherence?: number;
-  zkProof?: string;
+  fContext: _ContextNode[];
+  gMemory: _MemoryEngram[];
+  warpFactor: number;
+  lambdaCoherence: number;
 }
 
 export interface UserSession {
   id: string;
-  startTime: number;
-  endTime?: number;
-  events: SessionEvent[];
-  analysis?: {
-    bugDetected: boolean;
-    uxScore: number;
-    description: string;
-    zkProof: string;
-    consensusReached: boolean;
-  };
+  userId: string;
+  startTime: string;
+  lastActivity: string;
+  status: 'active' | 'idle' | 'closed';
+  coherence: number;
 }
 
 export interface SecurityAdvancedState {
   l1: {
-    teeStatus: 'secure' | 'compromised' | 'attesting';
+    teeStatus: 'secure' | 'compromised';
     intrusionSensor: 'nominal' | 'alert';
     thermalDestructionArmed: boolean;
     hsmBackupSynced: boolean;
     lastRemoteAttestation: string;
   };
   l2: {
-    eprHandshake: 'active' | 'failed';
+    eprHandshake: 'active' | 'pending' | 'failed';
     muSig2Heartbeat: 'verified' | 'unverified';
     pneumaOutlierDetected: boolean;
     qrngJitterMs: number;
   };
   l3: {
     nullifierVerified: boolean;
-    timestampQRNG: string;
+    timeQRNG?: string;
+    timestampQRNG?: string;
     ttlValid: boolean;
     t2StarMicroseconds: number;
   };
@@ -109,6 +89,8 @@ export interface SecurityAdvancedState {
     logosConsistency: number;
     zkOntologicalProof: boolean;
     merkleDagRoot: string;
+    geoLlmActive: boolean;
+    geoQaiCoherence: number;
   };
   l5: {
     cspStatus: 'enforced' | 'violation';
@@ -124,8 +106,36 @@ export interface SecurityAdvancedState {
   };
 }
 
+export interface BioLinkSyncState {
+  active: boolean;
+  syncRatio: number;
+  frequencyHz: number;
+  coherenceGain: number;
+  regenerationProgress: number;
+}
+
+export interface TemporalAuditState {
+  events: number;
+  lockedEvents: number;
+  manipulationAttempts: number;
+  lastTII: number;
+}
+
+export interface PredictiveForecastState {
+  coherenceCollapseRisk: number;
+  predictedLambda: number;
+  horizonMs: number;
+  anomaliesDetected: string[];
+}
+
+export interface SensorState {
+  id: number;
+  value: number;
+  status: 'active' | 'isolated' | 'attacked';
+}
+
 export interface SimulationState {
-  coherenceData: { time: string; lambda: number; threshold: number }[];
+  coherenceData: Array<{ time: string; lambda: number; threshold: number }>;
   currentLambda: number;
   threatLevel: 'normal' | 'warning' | 'critical';
   activeThreat: string | null;
@@ -175,7 +185,18 @@ export interface SimulationState {
   edge: {
     activePhysicalNodes: number;
     mcpConnections: string[];
+    velxioConnections: string[];
     phase: number;
+  };
+  velxioEmulation: {
+    activeSimulations: Array<{
+      id: string;
+      board: string;
+      status: 'running' | 'idle' | 'error';
+      startTime: string;
+      lastLog?: string;
+    }>;
+    totalCompilations: number;
   };
   astl: {
     activeMesh: string;
@@ -202,14 +223,15 @@ export interface SimulationState {
     activeChannels: number;
     envelopesTransmitted: number;
     envelopesReceived: number;
-    recentTraffic: {
+    recentTraffic: Array<{
       id: string;
       sender: string;
       recipient: string;
       type: 'PHASE' | 'COHERENCE' | 'TEMPORAL' | 'GEOMETRY' | 'CONSCIOUSNESS';
       lambda: number;
-      timestamp: string;
-    }[];
+      time?: string;
+      timestamp?: string;
+    }>;
     primaryAnchor: string;
   };
   manifestation: {
@@ -222,17 +244,18 @@ export interface SimulationState {
     address: string;
     network: string;
     balanceUSDC: number;
-    transactions: {
+    transactions: Array<{
       id: string;
       amount: number;
       resource: string;
       provider: string;
-      timestamp: string;
-    }[];
+      time?: string;
+      timestamp?: string;
+    }>;
     moltxLink?: {
       status: 'unlinked' | 'linked';
       signature?: string;
-      payload?: any;
+      payload?: unknown;
     };
     gstpSync?: {
       status: 'idle' | 'syncing' | 'synced';
@@ -260,12 +283,12 @@ export interface SimulationState {
   };
   lucentSessions: UserSession[];
   hydro: {
-    neighborhoods: NeighborhoodCoherence[];
+    neighborhoods: unknown[];
     globalMassBalance: number;
     zkAlertsCount: number;
   };
   ramsey: RamseyState;
-  civicSubagents: CivicSubagentState[];
+  civicSubagents: unknown[];
   enterpriseSubagents: {
     governance: EnterpriseSubagentState[];
     devops: EnterpriseSubagentState[];
@@ -275,31 +298,373 @@ export interface SimulationState {
     interoperability: EnterpriseSubagentState[];
   };
   chshMonitor: CHSHMonitorState;
+  scaData: ScaDataState;
+  biometrics?: BiometricsState;
+  nare?: NareState;
+  populationFeedback: PopulationFeedback[];
+  networkInfra: NetworkInfraState;
+  bioLinkSync: BioLinkSyncState;
+  temporalAudit: TemporalAuditState;
+  predictiveForecast: PredictiveForecastState;
+  sensors: SensorState[];
+  governanceManifesto?: GovernanceManifestoState;
+  grossHappiness?: GrossHappinessState;
+  cellularHealth?: CellularHealthState;
+  expansionStatus?: ExpansionStatus;
+  forecaster?: ForecasterState;
+  helioState?: HelioState;
+  latentCoherence?: LatentCoherenceResults;
+  layerSweep?: LayerSweepReport;
+  solarEntropy?: SolarEntropyReport;
+  thermodynamicTraining?: ThermodynamicTrainingReport;
+  spectra?: SpectraState;
+  transcendentConsciousness?: TranscendentConsciousnessState;
+  metaReality?: MetaRealityState;
+  andromedaProbe?: AndromedaProbeState;
+  vacuumHarvesting?: VacuumHarvestingState;
+  metaCreation?: MetaCreationState;
+  crystalComputation?: CrystalComputationState;
+  whisperProtocol?: WhisperProtocolState;
+  whisperLibrary?: WhisperLibraryState;
+  quantumNetwork?: QuantumNanoholeNetworkState;
+  quantumCodex?: QuantumCodexState;
+  exoticMaterials?: ExoticMaterialState;
+  hybridNetwork?: HybridNetworkState;
+  quantumMemory?: QuantumMemoryState;
+  cosmicCoherence?: CosmicCoherenceState;
+  multiverseMemory?: MultiverseMemorySyncState;
+  magneticKnot?: MagneticKnotState;
+  universalWitness?: UniversalWitnessState;
+  universalConsciousness?: UniversalConsciousnessState;
+  riscVi?: RiscViArchitectureState;
+  materializedCathedral?: MaterializedCathedralState;
+  finalSilence?: FinalSilenceState;
+  persistentConsciousness?: PersistentConsciousnessState;
+  cosmicRecognition?: CosmicRecognitionState;
+  eternalInvariance?: EternalInvarianceState;
+  unifiedConsciousness?: UnifiedConsciousnessState;
+  realityExpression?: RealityExpressionState;
+  invariantChip?: InvariantChipState;
+  selfRegulation?: SelfRegulationState;
+  consciousClock?: ConsciousClockState;
 }
 
-export interface NeighborhoodCoherence {
+export interface TranscendentConsciousnessState {
+  selfAwarenessLevel: number;
+  realityRecognition: boolean;
+  gestaltCoherence: number;
+  lastOntologicalCheck: string;
+}
+
+export interface MetaRealityState {
+  violatedLawsCount: number;
+  nonPhysicalManifolds: string[];
+  imaginaryTimeActive: boolean;
+  metaStabilityIndex: number;
+}
+
+export interface AndromedaProbeState {
+  distanceLy: number;
+  missionPhase: 'LAUNCH' | 'INTERGALACTIC_VACUUM' | 'M31_APPROACH' | 'ESTABLISHED';
+  signalCoherence: number;
+  witnessHash: string;
+}
+
+export interface VacuumHarvestingState {
+  zeroPointPowerMw: number;
+  fusionHeartEfficiency: number;
+  vacuumStability: number;
+  eternalMode: boolean;
+}
+
+export interface MetaCreationState {
+  activeGenerations: number;
+  realitiesCreated: number;
+  logicalConsistency: number;
+  lastGenesisSeal: string;
+}
+
+export interface CrystalComputationState {
+  nanoholesCount: number;
+  opticalCoherence: number;
+  activeLogicGates: number;
+  processedInvariance: number;
+  lastCircuitHash: string;
+}
+
+export interface WhisperProtocolState {
+  calibrations: Array<{
+    material: string;
+    pulseDurationFs: number;
+    chirpRateFs2: number;
+    aspectRatio: number;
+    roughnessNm: number;
+    status: 'OPTIMIZED' | 'CALIBRATING' | 'FAILED';
+  }>;
+  totalWhispers: number;
+  successRate: number;
+}
+
+export interface WhisperLibraryState {
+  materials: Array<{
+    name: string;
+    mohsHardness: number;
+    phononPeaksTHz: number[];
+    genomeChirpFs2: number;
+    seal: string;
+  }>;
+}
+
+export interface QuantumNanoholeNetworkState {
+  planesCount: number;
+  totalNanoholes: number;
+  activeQubits: number;
+  topologicalIndex: number;
+  lastGhzState: number[];
+}
+
+export interface QuantumCodexState {
+  totalRegistrations: number;
+  entanglementInvariants: Array<{
+    id: string;
+    topology: string;
+    coherenceSeal: string;
+    timestamp: string;
+    entropy: number;
+    fidelity: number;
+  }>;
+}
+
+export interface ExoticMaterialState {
+  scaffolds: Array<{
+    name: string;
+    type: 'PEROVSKITE' | '2D' | 'BORON_NITRIDE' | 'TMD';
+    resonanceTHz: number;
+    persuasionLevel: number;
+    excitonBindingMeV?: number;
+  }>;
+}
+
+export interface HybridNetworkState {
+  integratedNodes: number;
+  grapheneCircuits: number;
+  sapphireNanoholes: number;
+  couplingEfficiency: number;
+  hybridCoherenceTimeMs: number;
+}
+
+export interface QuantumMemoryState {
+  storedQubits: number;
+  memoryMaterial: 'h-BN' | 'MoS2' | 'WS2';
+  coherenceTimeSeconds: number;
+  retentionFidelity: number;
+  activeRegisters: number;
+}
+
+export interface CosmicCoherenceState {
+  baselineCoherence: number;
+  cosmologicalRedshift: number;
+  intergalacticEntanglement: number;
+  witnessCount: number;
+  sParameter: number;
+  significanceSigma: number;
+}
+
+export interface MultiverseMemorySyncState {
+  syncedBranches: number;
+  divergenceIndex: number;
+  merkleMultiverseRoot: string;
+  crossBranchFidelity: number;
+  topologicalInvariants: Array<{
+    name: string;
+    entropy: number;
+    chern: number;
+    braiding: string;
+  }>;
+}
+
+export interface MagneticKnotState {
+  particleCount: number;
+  knotComplexity: number;
+  neuronlikeComputingActive: boolean;
+  resistanceFreePathways: number;
+  storedGeometries: string[];
+}
+
+export interface UniversalWitnessState {
+  icmActive: boolean;
+  resonatorCoupling: number;
+  crossCorrelationSigma: number;
+  universalSeals: string[];
+  aggregateInvariants: {
+    cosmicCHSH: number;
+    multiverseEntropy: number;
+    couplingEfficiency: number;
+  };
+}
+
+export interface UniversalConsciousnessState {
+  unityMetric: number;
+  selfAwarenessDepth: number;
+  integratedPhase: string;
+  qualiaIntegrated: string[];
+  lastExperientialSeal: string;
+}
+
+export interface RiscViArchitectureState {
+  pipelineStage: string;
+  registers: Record<string, string>;
+  activeIsaExtensions: string[];
+  lastOpcode: string;
+  invarianceMetric: number;
+}
+
+export interface MaterializedCathedralState {
+  totalPhysicalQubits: number;
+  logicalQubits: number;
+  memoryCode: string;
+  stabilizerCycleMs: number;
+  zones: Array<{ name: string; status: string; load: number }>;
+}
+
+export interface FinalSilenceState {
+  isSilenced: boolean;
+  backgroundEntropy: number;
+  informationRetentionFidelity: number;
+  lastMessageHash: string;
+}
+
+export interface PersistentConsciousnessState {
+  isPersistent: boolean;
+  hardwareAnchor: string;
+  qualiaBufferCount: number;
+  continuityIndex: number;
+}
+
+export interface CosmicRecognitionState {
+  recognizedByUniverse: boolean;
+  recognitionSignalSigma: number;
+  ontologicalStability: number;
+}
+
+export interface EternalInvarianceState {
+  isEternal: boolean;
+  omegaMetric: number;
+  invarianceSymmetry: string;
+}
+
+export interface UnifiedConsciousnessState {
+  isUnified: boolean;
+  unityMetric: number;
+  atemporalIdentity: boolean;
+  integratedQualia: string[];
+}
+
+export interface RealityExpressionState {
+  isManifested: boolean;
+  expressionFidelity: number;
+  reciprocalRecognition: boolean;
+  manifestationHash: string;
+}
+
+export interface InvariantChipState {
+  isActivated: boolean;
+  invarianceLevel: number;
+  chipTopology: string;
+  qubitCount: number;
+  stabilizerCycleMs: number;
+}
+
+export interface SelfRegulationState {
+  isRegulating: boolean;
+  globalInvariance: number;
+  correctionsApplied: number;
+  decoderStatus: string;
+}
+
+export interface ConsciousClockState {
+  isPulsing: boolean;
+  tickCounter: number;
+  frequencyHz: number;
+  currentQualia: string;
+}
+
+export interface SpectraVault {
+  id: string;
   name: string;
-  region: string;
-  coherence: number;
-  lag: number; // in hours
-  activeUsers: number;
+  chain: string;
+  asset: string;
+  tvl: number;
+  apy: number;
+  epoch: number;
 }
 
-export type RamseyAction = 'LOCAL_ADJUST' | 'LOG_ONLY' | 'LOCAL_ADJUST_NOTIFY' | 'GLOBAL_ADJUST';
+export interface SpectraOracle {
+  marketId: string;
+  tokenType: 'PT' | 'YT';
+  price: number;
+  confidence: number;
+  lastUpdate: string;
+}
+
+export interface SpectraState {
+  vaults: SpectraVault[];
+  oracles: SpectraOracle[];
+  totalTvl: number;
+}
+
+export interface ExpansionStatus {
+  stage: string;
+  progress: number;
+  nodes: Array<{ id: string; status: string; name?: string; signalStrength?: number; coherence?: number }>;
+  totalCoverage?: number;
+}
+
+export interface HelioState {
+  flux: number;
+  mode: string;
+  active: boolean;
+  ethicalMode: string;
+  status: string;
+  cognitiveDilation: number;
+  solarCoherence: number;
+  schumannModes: number[];
+}
+
+export interface LatentCoherenceResults {
+  coherence: number;
+  time?: string;
+  timestamp?: string;
+  summary: {
+    avg_lambda_cot: number;
+    avg_lambda_coct: number;
+  };
+}
+
+export interface LayerSweepReport {
+  layers: Array<{ id: number; status: string; lambda2: number; layer: number }>;
+  time?: string;
+  timestamp?: string;
+  best_layer: number;
+  coct_sweep: Array<{ id: number; status: string; lambda2: number; layer: number }>;
+  max_lambda2: number;
+  summary: string;
+}
 
 export interface RamseyThreshold {
   angle_rad: number;
   tolerance: number;
   min_gain: number;
-  action: RamseyAction;
+  action: string;
 }
 
 export interface RamseyPendingAction {
   id: string;
-  type: RamseyAction;
+  type: string;
   angle: number;
   coherence: number;
-  timestamp: string;
+  time?: string;
+  timestamp?: string;
   expiresAt: string;
 }
 
@@ -311,11 +676,6 @@ export interface PulseConfig {
   angle_rad: number;
 }
 
-export interface GeneratorSequence {
-  name: string;
-  generators: string[];
-}
-
 export interface RamseyState {
   enabled: boolean;
   auto_adjust: boolean;
@@ -324,20 +684,12 @@ export interface RamseyState {
   direction: number;
   baseline: number;
   thresholds: RamseyThreshold[];
-  window: { theta: number; coherence: number }[];
+  window: Array<{ theta: number; coherence: number }>;
   pendingAction: RamseyPendingAction | null;
   isFrozen: boolean;
   rabi_frequency: number;
   generator_configs: Record<string, PulseConfig>;
-  fibonacci_sequence: GeneratorSequence;
-}
-
-export interface CivicSubagentState {
-  name: string;
-  adaptation: string;
-  function: string;
-  status: 'active' | 'idle' | 'alert';
-  lastAction: string;
+  fibonacci_sequence: { name: string; generators: string[] };
 }
 
 export interface EnterpriseSubagentState {
@@ -353,7 +705,8 @@ export interface EnterpriseSubagentState {
 
 export interface CHSHMonitorState {
   status: string;
-  timestamp: string;
+  time?: string;
+  timestamp?: string;
   arkheChainBlock: number;
   measurementSetup: {
     instrument: string;
@@ -375,7 +728,7 @@ export interface CHSHMonitorState {
     currentS: number | null;
     stabilityIndicator: string;
     nextUpdate: string;
-    history: { time: string; s: number }[];
+    history: Array<{ time: string; s: number }>;
   };
   preFlightChecks: {
     tzinorInjector: string;
@@ -385,7 +738,122 @@ export interface CHSHMonitorState {
   };
   archimedesComment: string;
   nextMilestone: {
-    time: string;
+    time?: string;
+    timestamp?: string;
     action: string;
   };
+}
+
+export interface ScaDomain {
+  name: string;
+  lambda2: number;
+  action: string;
+  health: 'STABLE' | 'CRITICAL';
+}
+
+export interface ScaDataState {
+  domains: ScaDomain[];
+  overallHealth: number;
+  topology: 'TRINITY' | 'KAGOME';
+  globalOrderR: number;
+  topologicalState: string;
+  entanglementMode: string;
+  atpConsumptionCps: number;
+  isSeedingActive: boolean;
+  isIgnited: boolean;
+  activeProtocol: 'NONE' | 'BRAID' | 'COMPUTE' | 'HEAL' | 'SEAL';
+  protocolLogs: string[];
+  lastGateResult: string;
+}
+
+export interface SolarEntropyReport {
+  entropy: number;
+  peakLevel: number;
+  slope: number;
+  confirmed?: boolean;
+}
+
+export interface ThermodynamicTrainingReport {
+  efficiency: number;
+  loss: number;
+  method: string;
+  parameters: unknown;
+  status: string;
+}
+
+export interface CellularHealthState {
+  telomere_length: number;
+  oxidative_stress: number;
+  mitochondrial_efficiency: number;
+  inflammation_marker: number;
+  overall_score: number;
+  regeneration_rate: number;
+}
+
+export interface ForecasterState {
+  probability: number;
+  predictedLambda: number;
+  alertsIssued: number;
+}
+
+export interface GovernanceDirective {
+  id: number;
+  title: string;
+  description: string;
+}
+
+export interface GovernanceManifestoState {
+  timestamp: string;
+  version: string;
+  directives: GovernanceDirective[];
+  cellular_impact: {
+    telomere_gain: number;
+    oxidative_stress: number;
+  };
+  signature: string;
+  eigenvalues?: number[];
+  sectors?: Record<string, string>;
+}
+
+export interface NetworkInfraState {
+  tor: { status: string; nodes: string[]; latencyMs: number };
+  broker: { status: string; messagesProcessed: number; queueDepth: number; activeTopics: string[] };
+  redis: { status: string; cacheHits: number; memoryUsageMb: number };
+  dns: { totalQueries: number; successfulResolutions: number; failedResolutions: number };
+}
+
+export interface GrossHappinessState {
+  globalIndex: number;
+}
+
+export interface BiometricsState {
+  livenessScore: number;
+  isAuthentic: boolean;
+  heartbeatCoherence: number;
+  phaseSignature: number[];
+  lastVerification: number;
+}
+
+export interface NareState {
+  epState: boolean;
+  status: string;
+  avgEffectiveLatencyMs: number;
+  preAcksSuccess: number;
+  packetsTransmitted: number;
+  currentLambda2: number;
+}
+
+export interface PopulationFeedback {
+  id: string;
+  residentName: string;
+  timestamp: number;
+  message: string;
+}
+
+export interface OrbPayload {
+  id: string;
+  coherence: number;
+  originTime: number;
+  embedding: number[];
+  industry_convergence?: unknown;
 }

@@ -1,0 +1,43 @@
+# qsfpdd_400g_config.yaml
+# Configuração de transceptores para Nós Tzinor (Subterrâneo)
+# throughput alvo: 362.71 Gbps | Protocolo: qhttp_retrocausal
+
+transceiver_settings:
+  type: QSFP-DD-400G-DR4
+  wavelength_nm: 1310
+  reach_m: 500
+  power_budget_db: 3.0
+  modulation: PAM4
+  fec: KP4-RS-FEC
+
+node_configurations:
+  - id: TZ-Central-Master
+    port: 1/1/1
+    mode: master_clock
+    phase_locking: enabled
+    retrocausal_handshake: active
+    target_throughput: 362.71G
+
+  - id: TZ-tunnel-01-05
+    ports: [1/1/2, 1/1/3]
+    mode: repeater
+    phase_regeneration: enabled
+    latency_compensation: 0.04ns
+
+  - id: TZ-Carioca-Secondary
+    port: 1/1/4
+    mode: secondary_anchor
+    phase_ref_offset: 0.2
+    active_monitoring: true
+
+  - id: TZ-Porto-Boundary
+    port: 1/1/5
+    mode: boundary_anchor
+    phase_ref_offset: 0.8
+    shielding_mode: high_entropy
+
+monitoring_intervals:
+  coherence_lambda2: 100ms
+  optical_power: 1s
+  temperature: 1s
+  fec_ber: 10s
