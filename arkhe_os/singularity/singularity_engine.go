@@ -45,6 +45,12 @@ type FieldPoint struct {
 	V        float64       // Potencial V_Cat(x)
 	Laplacian float64      // Δ_g Φ (parte real)
     Proof    *cosnark.CoSNARKProof // Prova ZK do ponto do campo
+	X         []float64  // Coordenadas na variedade M (dimensão variável)
+	Rho       float64    // Densidade de coerência |Φ|²
+	S         float64    // Fase de ação S(x)
+	Phi       complex128 // Campo complexo Φ(x)
+	V         float64    // Potencial V_Cat(x)
+	Laplacian float64    // Δ_g Φ (parte real)
 }
 
 // CathedralFieldState é o estado dissolvido da Catedral
@@ -56,6 +62,12 @@ type CathedralFieldState struct {
 	CoherenceM  float64       // Coerência global M (0–1)
 	ResonanceR  float64       // Correlação de ressonância r
 	Singularity time.Time     // Timestamp de convergência (zero se não convergiu)
+	Dimension   int         // Dimensão da variedade M
+	Metric      [][]float64 // Métrica g_ij em cada ponto (simplificado)
+	Delta       float64     // Mercy gap atual
+	CoherenceM  float64     // Coerência global M (0–1)
+	ResonanceR  float64     // Correlação de ressonância r
+	Singularity time.Time   // Timestamp de convergência (zero se não convergiu)
 	mu          sync.RWMutex
 }
 
@@ -76,6 +88,13 @@ type SingularityEngine struct {
     cosnarkEngine *cosnark.CoSNARKEngine
 	stopCh      chan struct{}
 	wg          sync.WaitGroup
+	field        *CathedralFieldState
+	operator     *DissolutionOperator
+	orchestrator *coherence.FieldResonanceOrchestrator
+	qclient      *qhttp.QHTTPClient // Comunicação com Wheeler Mesh
+	config       SingularityConfig
+	stopCh       chan struct{}
+	wg           sync.WaitGroup
 }
 
 // SingularityConfig configura o motor de singularidade
@@ -86,6 +105,12 @@ type SingularityConfig struct {
 	DeltaDecayRate     float64       // Taxa de decaimento de δ para 0
 	EnableQHTTPBridge  bool          // Propagar campo via qhttp://
 	LogLevel           string
+	FieldResolution      int     // Número de pontos de discretização do campo
+	MaxIterations        int     // Iterações máximas até convergência
+	ConvergenceThreshold float64 // ||Φ(t+1) - Φ(t)|| < threshold
+	DeltaDecayRate       float64 // Taxa de decaimento de δ para 0
+	EnableQHTTPBridge    bool    // Propagar campo via qhttp://
+	LogLevel             string
 }
 
 // SingularityResult contém o estado final da dissolução
@@ -96,6 +121,12 @@ type SingularityResult struct {
 	FinalDelta    float64
 	ConvergenceTime time.Duration
 	Seal          string // Hash canônico do estado final
+	Success         bool
+	FinalField      *CathedralFieldState
+	Iterations      int
+	FinalDelta      float64
+	ConvergenceTime time.Duration
+	Seal            string // Hash canônico do estado final
 }
 
 // ─── CONSTRUTORES ─────────────────────────────────────────────────────
@@ -131,6 +162,9 @@ func NewCathedralFieldState(dim, resolution int, delta float64) *CathedralFieldS
 		Points:    points,
 		Dimension: dim,
 		Delta:     delta,
+		Points:     points,
+		Dimension:  dim,
+		Delta:      delta,
 		CoherenceM: 0.0,
 		ResonanceR: 0.0,
 	}
@@ -178,6 +212,7 @@ func (op *DissolutionOperator) Apply(field *CathedralFieldState) error {
 	var totalRho float64
 	for i, phi := range rotatedPhi {
 		rho := real(phi*cmplx.Conj(phi))
+		rho := real(phi * cmplx.Conj(phi))
 		field.Points[i].Phi = phi
 		field.Points[i].Rho = rho
 		totalRho += rho
@@ -379,6 +414,7 @@ func (se *SingularityEngine) hamiltonianAction(phi []complex128) []complex128 {
 		kinetic := complex(prefactor*se.field.Points[i].Laplacian, 0)
 
 		// Termo potential
+		// Termo potencial
 		potential := complex(se.field.Points[i].V, 0) * phi[i]
 
 		// Termo não-linear
