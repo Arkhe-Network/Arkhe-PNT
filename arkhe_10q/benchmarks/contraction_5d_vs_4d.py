@@ -76,7 +76,7 @@ class ContractionBenchmark:
                 form_dim = self.form_dims_5d[k] if dim == 5 else self.form_dims_4d[k]
 
                 # Gerar dados de teste
-                omega = torch.randn(batch_size, form_dim, dtype=torch.float32)
+                omega = torch.randn(batch_size, form_dim, dtype=torch.float64)
 
                 # Mover para dispositivo
                 if device.startswith('xla'):

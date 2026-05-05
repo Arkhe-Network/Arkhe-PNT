@@ -36,7 +36,7 @@ testpaths = ["tests"]
 python_files = "test_*.py"
 python_classes = "Test*"
 python_functions = "test_*"
-addopts = "-v --cov=arkhe_10q --cov-report=term-missing"
+addopts = "-v"
 
 [tool.mypy]
 python_version = "3.10"
