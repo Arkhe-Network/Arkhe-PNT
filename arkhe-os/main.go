@@ -68,5 +68,17 @@ func main() {
 	// Sleep briefly to ensure async operations complete if any
 	time.Sleep(100 * time.Millisecond)
 
+
+
+
+
+	// 174
+
+	InitSubstrate170()
+	InitSubstrate171()
+
+
+	InitSubstrate174()
+
 	fmt.Println("\nARKHE OS Initialization Complete.")
 }

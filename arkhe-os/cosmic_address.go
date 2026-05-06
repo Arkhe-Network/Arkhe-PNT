@@ -19,6 +19,8 @@ type CosmicAddress [CosmicAddressLen]byte
 func NewCosmicAddress(scale CosmicScale, coherence, resonance float64, branchAngle float32, branchPhase float32, branchIndex uint32, nodeName string) CosmicAddress {
 	var addr CosmicAddress
 	// prefixo: 0xARK
+	addr[0] = 0x04 // 0100
+	addr[1] = 0x12 // 0001 0010
 	addr[0] = 0x04  // 0100
 	addr[1] = 0x12  // 0001 0010
 
@@ -211,4 +213,13 @@ func (ce *CosmologyEngine) SetupAddressing() *CosmicSubnetManager {
 		sm.AssignNode(id)
 	}
 	return sm
+}
+
+func (ce *CosmologyEngine) RoutePacket(packet []byte, destAddr CosmicAddress) error {
+	// 1. Encontrar o nó local que melhor case com o prefixo destino
+	// 2. Verificar canais de teleportação diretos (mesmo ramo)
+	// 3. Se não houver, encaminhar para o gateway de ramo mais próximo
+	// (implementação simplificada)
+	fmt.Printf("Routing packet of size %d to %s\n", len(packet), destAddr.String())
+	return nil
 }
