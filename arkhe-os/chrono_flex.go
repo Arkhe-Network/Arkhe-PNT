@@ -1,5 +1,5 @@
 // chrono_flex.go — Substrato 176: Temporal Flexibility Engine
-package arkhe
+package main
 
 import (
 	"context"

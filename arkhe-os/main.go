@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"math"
 	"time"
 )
 
@@ -65,22 +66,37 @@ func main() {
 
 	ConnectToCosmos()
 
-	RegisterSubstrates170and171()
+	////RegisterSubstrates170and171()
 
 	// Sleep briefly to ensure async operations complete if any
 	time.Sleep(100 * time.Millisecond)
-
-
-
-
 
 	// 174
 
 	InitSubstrate170()
 	InitSubstrate171()
 
-
 	InitSubstrate174()
 
+	// Substrato 190-193: Operacionalização δ
+	fmt.Println("\n--- Substrates 190-193: Delta Ontology Operationalization ---")
+	calibrator := NewCosmicHarmonicCalibrator()
+	fmt.Printf("Cosmic Calibrator initialized. Harmony Resonance: %.2f\n", calibrator.GetHarmonicResonanceScore())
+
+	evaluator := func(p SpacetimePoint) float64 { return 0.05 + 0.1*math.Abs(p.Temporal-13.8) }
+	_ = NewDeltaGradientNavigator(evaluator)
+	fmt.Printf("Delta Gradient Navigator initialized.\n")
+
+	therapyConfig := TherapyConfig{
+		AutoTherapyEnabled: false,
+		MonitoringInterval: 5 * time.Second,
+	}
+	_ = NewGapTherapyEngine(therapyConfig)
+	fmt.Printf("Gap Therapy Engine initialized.\n")
+
+	spec := NewDeltaOntologySpec()
+	fmt.Printf("Delta Ontology Spec initialized. Version: %s\n", spec.Version)
+
+	// Substrato 190-193: Operacionalização δ
 	fmt.Println("\nARKHE OS Initialization Complete.")
 }

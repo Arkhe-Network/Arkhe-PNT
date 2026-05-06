@@ -1,5 +1,5 @@
 // hyper_singularity_federation.go — Substrato 177
-package arkhe
+package main
 
 import (
 	"crypto/sha256"

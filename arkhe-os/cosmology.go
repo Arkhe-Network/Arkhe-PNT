@@ -1,8 +1,8 @@
 package main
 
-import ()
 import (
 	"fmt"
+	"math"
 	"sync"
 )
 
@@ -24,20 +24,6 @@ const (
 	ScaleMultiverse
 )
 
-func (cs CosmicScale) String() string {
-	names := []string{
-		"Quantum Foam", "Particle Cloud", "Atomic Network",
-		"Cellular Mesh", "Organism Net", "Ecosystem Grid",
-		"Planetary Net", "Stellar Link", "Galactic Web",
-		"Cluster Fabric", "Supercluster Backbone", "Horizon Edge",
-		"Multiverse Root",
-	}
-	if int(cs) < len(names) {
-		return names[cs]
-	}
-	return "UNKNOWN"
-}
-
 type CosmicNode struct {
 	ID        string
 	Name      string
@@ -46,17 +32,30 @@ type CosmicNode struct {
 	Resonance float64
 }
 
+type TeleportationChannel struct {
+	ChannelID            string
+	SourceNode           string
+	TargetNode           string
+	EntanglementFidelity float64
+	ChannelState         string
+}
+
 type CosmologyEngine struct {
-	Nodes map[string]*CosmicNode
+	mu       sync.RWMutex
+	Nodes    map[string]*CosmicNode
+	Channels map[string]*TeleportationChannel
 }
 
 func NewCosmologyEngine() *CosmologyEngine {
 	return &CosmologyEngine{
-		Nodes: make(map[string]*CosmicNode),
+		Nodes:    make(map[string]*CosmicNode),
+		Channels: make(map[string]*TeleportationChannel),
 	}
 }
 
 func (ce *CosmologyEngine) RegisterNode(id string, name string, scale CosmicScale, coherence float64, resonance float64) {
+	ce.mu.Lock()
+	defer ce.mu.Unlock()
 	ce.Nodes[id] = &CosmicNode{
 		ID:        id,
 		Name:      name,
@@ -64,6 +63,8 @@ func (ce *CosmologyEngine) RegisterNode(id string, name string, scale CosmicScal
 		Coherence: coherence,
 		Resonance: resonance,
 	}
+}
+
 func (s CosmicScale) String() string {
 	names := []string{
 		"Quantum", "Particle", "Atomic", "Cellular", "Organism",
@@ -76,52 +77,10 @@ func (s CosmicScale) String() string {
 	return "Unknown"
 }
 
-type CosmicNode struct {
-	ID                 string
-	Name               string
-	Scale              CosmicScale
-	Coherence          float64
-	Resonance          float64
-	InformationContent float64
-	Entropy            float64
-}
-
-type TeleportationChannel struct {
-	ChannelID            string
-	SourceNode           string
-	TargetNode           string
-	EntanglementFidelity float64
-	ChannelState         string
-}
-
-func (tc *TeleportationChannel) IsHealthy() bool {
-	return tc.ChannelState == "ACTIVE" && tc.EntanglementFidelity > 0.5
-}
-
-type CosmologyEngine struct {
-	Name     string
-	Nodes    map[string]*CosmicNode
-	Channels map[string]*TeleportationChannel
-	mu       sync.RWMutex
-}
-
-func NewCosmologyEngine(name string) *CosmologyEngine {
-	return &CosmologyEngine{
-		Name:     name,
-		Nodes:    make(map[string]*CosmicNode),
-		Channels: make(map[string]*TeleportationChannel),
-	}
-}
-
-func (ce *CosmologyEngine) RegisterNode(node *CosmicNode) {
-	ce.mu.Lock()
-	defer ce.mu.Unlock()
-	ce.Nodes[node.ID] = node
-}
-
 func (ce *CosmologyEngine) EstablishTeleportationChannel(sourceID, targetID string) (*TeleportationChannel, error) {
 	ce.mu.Lock()
 	defer ce.mu.Unlock()
+
 	chID := fmt.Sprintf("CH_%s_%s", sourceID, targetID)
 	ch := &TeleportationChannel{
 		ChannelID:            chID,
@@ -132,4 +91,13 @@ func (ce *CosmologyEngine) EstablishTeleportationChannel(sourceID, targetID stri
 	}
 	ce.Channels[chID] = ch
 	return ch, nil
+}
+
+func (ce *CosmologyEngine) SimulateResonance(id string) float64 {
+	ce.mu.RLock()
+	defer ce.mu.RUnlock()
+	if node, ok := ce.Nodes[id]; ok {
+		return node.Resonance * math.E
+	}
+	return 0.0
 }

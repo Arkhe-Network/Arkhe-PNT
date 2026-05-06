@@ -1,0 +1,12 @@
+feat: Implement Substrates 190-193 (Delta Ontology Operationalization)
+
+This commit implements the Cosmic Harmonic Calibrator, Delta Gradient
+Navigator, Gap Therapy Engine, and Delta Ontology Canonical Spec in Go
+within the `arkhe-os` Ferris-Compiler edition.
+
+- Adds `arkhe_190_193.go` containing all structs, interfaces and spec.
+- Modifies `main.go` to initialize the substrates.
+- Removes duplicate implementations (`routing.go`, `arkhe_170_171.go`)
+  that were causing "redeclared in this block" compilation failures.
+- Fixes `cosmology.go` by removing invalid struct fields and duplicate
+  definitions that prevented the build from passing.
