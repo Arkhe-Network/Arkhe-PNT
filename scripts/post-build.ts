@@ -96,9 +96,7 @@ function copyDevToolsDescriptionFiles() {
     'third_party',
     'issue-descriptions',
   );
-  if (fs.existsSync(sourceDir)) {
-      fs.cpSync(sourceDir, destDir, {recursive: true});
-  }
+  if (fs.existsSync(sourceDir)) { fs.cpSync(sourceDir, destDir, {recursive: true}); }
 }
 
 main();
