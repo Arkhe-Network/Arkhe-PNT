@@ -7,8 +7,9 @@ import "os"
 type LFIRNodeType string
 
 const (
-	LFIRNodeTypeModule    LFIRNodeType = "LFIRNodeTypeModule"
 	LFIRNodeTypeModule    LFIRNodeType = "LFIRModule"
+	LFIRNodeTypeDependency LFIRNodeType = "LFIRDependency"
+	LFIRNodeTypeProperty LFIRNodeType = "LFIRProperty"
 	LFIROperation LFIRNodeType = "LFIROperation"
 	LFIRType      LFIRNodeType = "LFIRType"
 	LFIRMetadata  LFIRNodeType = "LFIRMetadata"
@@ -22,9 +23,6 @@ type LFIRNode struct {
 	Attributes map[string]interface{}
 }
 
-func NewLFIRNode(nodeType LFIRNodeType, name, context string) *LFIRNode {
-	return &LFIRNode{
-		ID:         name + "_" + context,
 // NewLFIRNode creates a new LFIR node.
 func NewLFIRNode(nodeType LFIRNodeType, name string, sourceLang string) *LFIRNode {
 	return &LFIRNode{
@@ -50,13 +48,6 @@ type LFIRGraph struct {
     Metrics   LFIRMetrics
 }
 
-type LFIRMetrics struct {
-    CoherenceScore float64
-    NodeCount int
-    EdgeCount int
-	Metrics   LFIRMetrics
-}
-
 // NewLFIRGraph creates a new LFIR graph.
 func NewLFIRGraph() *LFIRGraph {
 	return &LFIRGraph{
@@ -77,7 +68,6 @@ func (g *LFIRGraph) Link(parentID, childID string) {
 }
 
 func (g *LFIRGraph) ToJSONFile(filepath string) error {
-    return nil
 	data, err := json.MarshalIndent(g, "", "  ")
 	if err != nil {
 		return err
