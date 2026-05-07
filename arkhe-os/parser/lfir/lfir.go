@@ -1,11 +1,14 @@
 package lfir
 
-// Stub for parser/lfir
+import "encoding/json"
+import "os"
+
 // LFIRNodeType is the type of a node in the Lingua Franca Intermediate Representation.
 type LFIRNodeType string
 
 const (
 	LFIRNodeTypeModule    LFIRNodeType = "LFIRNodeTypeModule"
+	LFIRNodeTypeModule    LFIRNodeType = "LFIRModule"
 	LFIROperation LFIRNodeType = "LFIROperation"
 	LFIRType      LFIRNodeType = "LFIRType"
 	LFIRMetadata  LFIRNodeType = "LFIRMetadata"
@@ -15,17 +18,28 @@ type LFIRNode struct {
 	ID         string
 	Type       LFIRNodeType
 	Name       string
-	Namespace  string
+	SourceLang  string
 	Attributes map[string]interface{}
 }
 
 func NewLFIRNode(nodeType LFIRNodeType, name, context string) *LFIRNode {
 	return &LFIRNode{
 		ID:         name + "_" + context,
+// NewLFIRNode creates a new LFIR node.
+func NewLFIRNode(nodeType LFIRNodeType, name string, sourceLang string) *LFIRNode {
+	return &LFIRNode{
+		ID:         name + "_" + string(nodeType),
 		Type:       nodeType,
 		Name:       name,
+		SourceLang: sourceLang,
 		Attributes: make(map[string]interface{}),
 	}
+}
+
+type LFIRMetrics struct {
+	CoherenceScore float64
+	NodeCount      int
+	EdgeCount      int
 }
 
 // LFIRGraph represents the full intermediate representation.
@@ -40,6 +54,7 @@ type LFIRMetrics struct {
     CoherenceScore float64
     NodeCount int
     EdgeCount int
+	Metrics   LFIRMetrics
 }
 
 // NewLFIRGraph creates a new LFIR graph.
@@ -51,6 +66,7 @@ func NewLFIRGraph() *LFIRGraph {
 	}
 }
 
+// AddNode adds a node to the graph.
 func (g *LFIRGraph) AddNode(node *LFIRNode) {
 	g.Nodes[node.ID] = node
 }
@@ -62,4 +78,9 @@ func (g *LFIRGraph) Link(parentID, childID string) {
 
 func (g *LFIRGraph) ToJSONFile(filepath string) error {
     return nil
+	data, err := json.MarshalIndent(g, "", "  ")
+	if err != nil {
+		return err
+	}
+	return os.WriteFile(filepath, data, 0644)
 }
