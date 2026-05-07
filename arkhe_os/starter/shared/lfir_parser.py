@@ -179,16 +179,24 @@ class PolymathLFIRParser:
 # Language-specific parsers (simplified examples)
 class JavaLFIRParser:
     def parse_file(self, file_path: str) -> LFIRGraph:
+        # Implementation: parse Java AST, extract classes, methods, annotations
+        # Extract @ComplianceVerified, @RegulatoryPredicate, etc.
         return LFIRGraph(project_id="java_project", language=Language.JAVA)
 
 class PythonLFIRParser:
     def parse_file(self, file_path: str) -> LFIRGraph:
+        # Implementation: parse Python AST, extract functions, decorators, type hints
+        # Extract @regulatory_compliant, @federated_training, etc.
         return LFIRGraph(project_id="python_project", language=Language.PYTHON)
 
 class CSharpLFIRParser:
     def parse_file(self, file_path: str) -> LFIRGraph:
+        # Implementation: parse C# syntax tree, extract classes, methods, attributes
+        # Extract [ComplianceVerified], [RegulatoryPredicate], etc.
         return LFIRGraph(project_id="csharp_project", language=Language.CSHARP)
 
 class CobolLFIRParser:
     def parse_file(self, file_path: str) -> LFIRGraph:
+        # Implementation: parse COBOL source, extract paragraphs, sections, data divisions
+        # Map DECIMAL fields to regulatory predicates, extract business rules
         return LFIRGraph(project_id="cobol_project", language=Language.COBOL)

@@ -10,6 +10,8 @@ import hashlib
 import json
 from datetime import datetime
 from pathlib import Path
+
+# Assume LFIRGraph is imported from the other module
 from arkhe_os.starter.shared.lfir_parser import LFIRGraph
 
 class Jurisdiction(Enum):
@@ -97,6 +99,8 @@ class ZincPlusProver:
         Returns:
             Hash do proof gerado (para referência em auditoria)
         """
+        # Em produção: chamar binary Zinc+ com circuit + witness + public inputs
+        # Aqui: simular proof hash baseado em inputs
         proof_input = json.dumps({
             "circuit": circuit_path,
             "witness_hash": hashlib.sha256(json.dumps(witness).encode()).hexdigest(),
@@ -106,6 +110,8 @@ class ZincPlusProver:
 
     def verify_proof(self, proof_hash: str, circuit_path: str, public_inputs: Dict) -> bool:
         """Verifica proof ZK (simulado)."""
+        # Em produção: chamar verificador Zinc+
+        # Aqui: verificar consistência do hash
         expected = hashlib.sha256(
             json.dumps({
                 "circuit": circuit_path,
@@ -163,11 +169,13 @@ class ComplianceValidator:
         Returns:
             ComplianceVerificationResult com resultados da verificação
         """
+        # Selecionar predicados a verificar
         if predicates_to_check is None:
             predicates_to_check = list(self.predicate_registry.keys())
         if jurisdictions is None:
             jurisdictions = list(Jurisdiction)
 
+        # Avaliar cada predicado por jurisdição
         jurisdiction_results = {}
         zk_circuits_used = []
 
@@ -176,12 +184,17 @@ class ComplianceValidator:
                 continue
             predicate = self.predicate_registry[pred_id]
 
+            # Filtrar por jurisdições relevantes
             relevant_jurisdictions = [j for j in jurisdictions if j in predicate.jurisdictions]
             if not relevant_jurisdictions:
                 continue
 
             evaluation_result = self._evaluate_predicate(predicate, lfir_graph, relevant_jurisdictions)
 
+            # Avaliar predicado (simulado - em produção: compilar UCS → avaliar)
+            evaluation_result = self._evaluate_predicate(predicate, lfir_graph, relevant_jurisdictions)
+
+            # Atualizar resultados por jurisdição
             for jur in relevant_jurisdictions:
                 status = evaluation_result.get(jur, VerificationStatus.UNVERIFIED)
                 jurisdiction_results[jur] = status
@@ -191,6 +204,14 @@ class ComplianceValidator:
 
         zk_proof_hash = None
         if generate_zk_proof and zk_circuits_used:
+            # Coletar circuitos Zinc+ se proof for solicitado
+            if generate_zk_proof and predicate.zinc_circuit_path:
+                zk_circuits_used.append(predicate.zinc_circuit_path)
+
+        # Gerar proof ZK agregado se solicitado
+        zk_proof_hash = None
+        if generate_zk_proof and zk_circuits_used:
+            # Preparar witness e public inputs para proof agregado
             witness = {
                 "artifact_lfir": lfir_graph.to_dict(),
                 "predicate_evaluations": {
@@ -206,12 +227,17 @@ class ComplianceValidator:
                 "jurisdictions": [j.value for j in jurisdictions],
                 "coherence_score": lfir_graph.global_coherence
             }
+            # Usar primeiro circuito como proxy (em produção: circuito agregado)
             zk_proof_hash = self.zinc_prover.generate_proof(
                 zk_circuits_used[0], witness, public_inputs
             )
 
         coherence_score = lfir_graph.compute_global_coherence()
 
+        # Calcular coerência final do artefato
+        coherence_score = lfir_graph.compute_global_coherence()
+
+        # Criar resultado
         result = ComplianceVerificationResult(
             verification_id=hashlib.sha256(
                 f"{artifact_id}:{datetime.now().isoformat()}".encode()
@@ -228,6 +254,7 @@ class ComplianceValidator:
             }
         )
 
+        # Registrar no histórico
         self.verification_history.append(result)
 
         return result
@@ -243,6 +270,12 @@ class ComplianceValidator:
         """
         results = {}
         for jur in jurisdictions:
+
+        Em produção: compilar expressão UCS → avaliar contra nós/arestas do LFIR.
+        """
+        results = {}
+        for jur in jurisdictions:
+            # Simular avaliação baseada em tags regulatórias nos nós
             matching_nodes = [
                 node for node in lfir_graph.nodes.values()
                 if jur.value in node.regulatory_tags
@@ -250,6 +283,10 @@ class ComplianceValidator:
             if matching_nodes:
                 results[jur] = VerificationStatus.COMPLIANT
             else:
+                # Se há nós com tag da jurisdição, considerar compliant (simplificado)
+                results[jur] = VerificationStatus.COMPLIANT
+            else:
+                # Caso contrário, verificar se predicado é aplicável
                 if predicate.parameters.get("optional_for_" + jur.value, False):
                     results[jur] = VerificationStatus.PARTIAL
                 else:
@@ -259,6 +296,7 @@ class ComplianceValidator:
     def generate_audit_report(self, verification_result: ComplianceVerificationResult) -> Dict:
         """Gera relatório de auditoria para submissão regulatória."""
         report = verification_result.to_regulatory_report()
+        # Adicionar metadata de auditoria
         report["audit_metadata"] = {
             "validator_version": "300-B.1.0",
             "zinc_plus_version": "1.0.0-beta",
