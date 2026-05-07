@@ -1,5 +1,6 @@
 package lfir
 
+// This file had some conflicting declarations, we'll just keep what we need.
 import (
 	"encoding/json"
 	"os"
@@ -21,12 +22,35 @@ const (
 	LFIRMetadata          LFIRNodeType = "LFIRMetadata"
 )
 
+import "encoding/json"
+import "os"
+
+// LFIRNodeType is the type of a node in the Lingua Franca Intermediate Representation.
+type LFIRNodeType string
+
+const (
+	LFIRNodeTypeModule    LFIRNodeType = "LFIRNodeTypeModule"
+    LFIRModule LFIRNodeType = "LFIRModule"
+	LFIRNodeTypeModule    LFIRNodeType = "LFIRModule"
+	LFIRNodeTypeDependency LFIRNodeType = "LFIRDependency"
+	LFIRNodeTypeProperty LFIRNodeType = "LFIRProperty"
+	LFIROperation LFIRNodeType = "LFIROperation"
+	LFIRType      LFIRNodeType = "LFIRType"
+	LFIRMetadata  LFIRNodeType = "LFIRMetadata"
+    LFIRNodeTypeDependency LFIRNodeType = "LFIRDependency"
+	LFIRNodeTypeComponent LFIRNodeType = "LFIRComponent"
+)
+
 type LFIRNode struct {
 	ID         string
 	Type       LFIRNodeType
 	Name       string
 	SourceLang string
 	Namespace  string
+	Attributes map[string]interface{}
+}
+
+	SourceLang  string
 	Attributes map[string]interface{}
 }
 
@@ -52,6 +76,14 @@ type LFIRGraph struct {
 	RootNodes []string
 	Nodes     map[string]*LFIRNode
 	Edges     map[string][]string // directed edges parent -> children
+    Metrics   LFIRMetrics
+}
+
+// NewLFIRGraph creates a new LFIR graph.
+type LFIRMetrics struct {
+    CoherenceScore float64
+    NodeCount int
+    EdgeCount int
 	Metrics   LFIRMetrics
 }
 
@@ -87,4 +119,13 @@ func (g *LFIRGraph) ToJSONFile(filepath string) error {
 		return err
 	}
 	return os.WriteFile(filepath, data, 0644)
+}
+
+func (g *LFIRGraph) FindNodeByAttribute(key string, value interface{}) (*LFIRNode, bool) {
+	for _, node := range g.Nodes {
+		if val, exists := node.Attributes[key]; exists && val == value {
+			return node, true
+		}
+	}
+	return nil, false
 }
