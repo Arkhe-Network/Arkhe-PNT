@@ -1,61 +1,54 @@
 package lfir
 
-// Stub for parser/lfir
+import (
+	"encoding/json"
+	"os"
+)
+
 // LFIRNodeType is the type of a node in the Lingua Franca Intermediate Representation.
 type LFIRNodeType string
 
 const (
-	LFIRModule    LFIRNodeType = "LFIRModule"
-	LFIROperation LFIRNodeType = "LFIROperation"
-	LFIRType      LFIRNodeType = "LFIRType"
-	LFIRMetadata  LFIRNodeType = "LFIRMetadata"
-)
-
-// LFIRNode represents a node in the intermediate representation graph.
-type LFIRNodeType int
-
-const (
-	LFIRModule LFIRNodeType = iota
-	LFIRType
-	LFIRMetadata
-	LFIROperation
+	LFIRNodeTypeModule    LFIRNodeType = "LFIRModule"
+	LFIRNodeTypeOperation LFIRNodeType = "LFIROperation"
+	LFIRNodeTypeType      LFIRNodeType = "LFIRType"
+	LFIRNodeTypeMetadata  LFIRNodeType = "LFIRMetadata"
+	LFIRNodeTypeCall      LFIRNodeType = "LFIRCall"
+	LFIRNodeTypeExpr      LFIRNodeType = "LFIRExpr"
 )
 
 type LFIRNode struct {
 	ID         string
 	Type       LFIRNodeType
 	Name       string
+	SourceLang string
 	Namespace  string
 	Attributes map[string]interface{}
 }
 
-// NewLFIRNode creates a new LFIR node.
-func NewLFIRNode(nodeType LFIRNodeType, name string, namespace string) *LFIRNode {
+func NewLFIRNode(nodeType LFIRNodeType, name string, sourceLang string) *LFIRNode {
 	return &LFIRNode{
-		ID:         name + "_" + string(nodeType), // Simple ID generation
+		ID:         name + "_" + string(nodeType),
 		Type:       nodeType,
 		Name:       name,
-		Namespace:  namespace,
-	Attributes map[string]interface{}
-}
-
-func NewLFIRNode(nodeType LFIRNodeType, name, context string) *LFIRNode {
-	return &LFIRNode{
-		ID:         name + "_" + context,
-		Type:       nodeType,
-		Name:       name,
+		SourceLang: sourceLang,
 		Attributes: make(map[string]interface{}),
 	}
 }
 
-// LFIRGraph represents the full intermediate representation.
+type LFIRMetrics struct {
+	CoherenceScore float64
+	NodeCount      int
+	EdgeCount      int
+}
+
 type LFIRGraph struct {
 	RootNodes []string
 	Nodes     map[string]*LFIRNode
 	Edges     map[string][]string // directed edges parent -> children
+	Metrics   LFIRMetrics
 }
 
-// NewLFIRGraph creates a new LFIR graph.
 func NewLFIRGraph() *LFIRGraph {
 	return &LFIRGraph{
 		RootNodes: make([]string, 0),
@@ -64,25 +57,27 @@ func NewLFIRGraph() *LFIRGraph {
 	}
 }
 
-// AddNode adds a node to the graph.
-type LFIRGraph struct {
-	Nodes     map[string]*LFIRNode
-	Edges     map[string][]string
-	RootNodes []string
-}
-
-func NewLFIRGraph() *LFIRGraph {
-	return &LFIRGraph{
-		Nodes: make(map[string]*LFIRNode),
-		Edges: make(map[string][]string),
-	}
-}
-
 func (g *LFIRGraph) AddNode(node *LFIRNode) {
 	g.Nodes[node.ID] = node
 }
 
-// Link links a parent node to a child node.
 func (g *LFIRGraph) Link(parentID, childID string) {
 	g.Edges[parentID] = append(g.Edges[parentID], childID)
+}
+
+func (g *LFIRGraph) ToJSONFile(path string) error {
+	b, err := json.MarshalIndent(g, "", "  ")
+	if err != nil {
+		return err
+	}
+	return os.WriteFile(path, b, 0644)
+}
+
+func (g *LFIRGraph) FindNodeByAttribute(key string, val interface{}) (*LFIRNode, bool) {
+	for _, n := range g.Nodes {
+		if v, ok := n.Attributes[key]; ok && v == val {
+			return n, true
+		}
+	}
+	return nil, false
 }
