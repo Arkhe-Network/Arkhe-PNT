@@ -100,14 +100,6 @@ func (g *LFIRGraph) Link(parentID, childID string) {
 	g.Edges[parentID] = append(g.Edges[parentID], childID)
 }
 
-func (g *LFIRGraph) ToJSONFile(path string) error {
-	b, err := json.MarshalIndent(g, "", "  ")
-	if err != nil {
-		return err
-	}
-	return os.WriteFile(path, b, 0644)
-}
-
 func (g *LFIRGraph) FindNodeByAttribute(key string, val interface{}) (*LFIRNode, bool) {
 	for _, n := range g.Nodes {
 		if v, ok := n.Attributes[key]; ok && v == val {
@@ -115,6 +107,8 @@ func (g *LFIRGraph) FindNodeByAttribute(key string, val interface{}) (*LFIRNode,
 		}
 	}
 	return nil, false
+}
+
 func (g *LFIRGraph) ToJSONFile(filepath string) error {
 	data, err := json.MarshalIndent(g, "", "  ")
 	if err != nil {
