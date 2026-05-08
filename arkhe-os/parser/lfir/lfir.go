@@ -9,14 +9,16 @@ import (
 type LFIRNodeType string
 
 const (
-	LFIRNodeTypeModule     LFIRNodeType = "LFIRModule"
-	LFIRNodeTypeOperation  LFIRNodeType = "LFIROperation"
-	LFIRNodeTypeType       LFIRNodeType = "LFIRType"
-	LFIRNodeTypeMetadata   LFIRNodeType = "LFIRMetadata"
-	LFIRNodeTypeCall       LFIRNodeType = "LFIRCall"
-	LFIRNodeTypeExpr       LFIRNodeType = "LFIRExpr"
-	LFIRNodeTypeDependency LFIRNodeType = "LFIRDependency"
-	LFIRNodeTypeProperty   LFIRNodeType = "LFIRProperty"
+	NodeTypeSystem        LFIRNodeType = "LFIRNodeTypeSystem"
+	LFIRNodeTypeModule    LFIRNodeType = "LFIRModule"
+	LFIRNodeTypeOperation LFIRNodeType = "LFIROperation"
+	LFIRNodeTypeType      LFIRNodeType = "LFIRType"
+	LFIRNodeTypeMetadata  LFIRNodeType = "LFIRMetadata"
+	LFIRNodeTypeCall      LFIRNodeType = "LFIRCall"
+	LFIRNodeTypeExpr      LFIRNodeType = "LFIRExpr"
+	LFIROperation         LFIRNodeType = "LFIROperation"
+	LFIRType              LFIRNodeType = "LFIRType"
+	LFIRMetadata          LFIRNodeType = "LFIRMetadata"
 )
 
 type LFIREdge struct {
@@ -26,13 +28,18 @@ type LFIREdge struct {
 	Type   string
 }
 
-type LFIRMetrics struct {
-	CoherenceScore     float64
-	SemanticDensity    float64
-	AccessibilityScore float64
-	NodeCount          int
-	EdgeCount          int
-}
+const (
+	LFIRNodeTypeModule    LFIRNodeType = "LFIRNodeTypeModule"
+    LFIRModule LFIRNodeType = "LFIRModule"
+	LFIRNodeTypeModule    LFIRNodeType = "LFIRModule"
+	LFIRNodeTypeDependency LFIRNodeType = "LFIRDependency"
+	LFIRNodeTypeProperty LFIRNodeType = "LFIRProperty"
+	LFIROperation LFIRNodeType = "LFIROperation"
+	LFIRType      LFIRNodeType = "LFIRType"
+	LFIRMetadata  LFIRNodeType = "LFIRMetadata"
+    LFIRNodeTypeDependency LFIRNodeType = "LFIRDependency"
+	LFIRNodeTypeComponent LFIRNodeType = "LFIRComponent"
+)
 
 type LFIRNode struct {
 	ID         string
@@ -79,18 +86,27 @@ func (g *LFIRGraph) Link(parentID, childID string) {
 	g.Edges = append(g.Edges, &LFIREdge{Source: parentID, Target: childID})
 }
 
-func (g *LFIRGraph) ToJSONFile(path string) error {
-	b, err := json.MarshalIndent(g, "", "  ")
-	if err != nil {
-		return err
-	}
-	return os.WriteFile(path, b, 0644)
-}
-
 func (g *LFIRGraph) FindNodeByAttribute(key string, val interface{}) (*LFIRNode, bool) {
 	for _, n := range g.Nodes {
 		if v, ok := n.Attributes[key]; ok && v == val {
 			return n, true
+		}
+	}
+	return nil, false
+}
+
+func (g *LFIRGraph) ToJSONFile(filepath string) error {
+	data, err := json.MarshalIndent(g, "", "  ")
+	if err != nil {
+		return err
+	}
+	return os.WriteFile(filepath, data, 0644)
+}
+
+func (g *LFIRGraph) FindNodeByAttribute(key string, value interface{}) (*LFIRNode, bool) {
+	for _, node := range g.Nodes {
+		if val, exists := node.Attributes[key]; exists && val == value {
+			return node, true
 		}
 	}
 	return nil, false
