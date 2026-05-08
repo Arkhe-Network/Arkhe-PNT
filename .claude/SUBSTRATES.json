@@ -14,6 +14,12 @@
       "location": "agi/system32/runtime/quantum/"
     },
     {
+      "id": 322,
+      "name": "AGI Memory Architecture",
+      "status": "active",
+      "location": "agi/system32/memory/"
+    },
+    {
       "id": 324.1,
       "name": "Advanced GLSL Shader for WORMHOLE.agi",
       "status": "active",
