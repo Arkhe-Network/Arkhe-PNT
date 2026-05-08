@@ -33,7 +33,7 @@ const PRISM_GLYPH_CLASS =
 
 interface Message {
   role: 'user' | 'assistant';
-    content: string;
+  content: string;
 }
 
 interface BonsaiPrismPanelProps {
@@ -52,9 +52,11 @@ export default function BonsaiPrismPanel({ onClose }: BonsaiPrismPanelProps) {
 
   // Refs
   const workerRef = useRef<Worker | null>(null);
-  const ritualRef = useRef<any>(null);
-  const canvasRef = useRef<HTMLCanvasElement | null>(null);
-    const chronicle = useRef(new ChronicleVault()).current;
+
+
+  const ritualRef = useRef<CrystallizationRitual | null>(null);
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+  const chronicle = useRef(new ChronicleVault()).current;
 
   // Inicialização do Worker e Chronique
   useEffect(() => {

@@ -21,6 +21,7 @@ export default function ArkheGridSimulator({ onClose }: ArkheGridSimulatorProps)
   const requestRef = useRef<number | undefined>(undefined);
   
 
+
   // Physics state
   const N = 8;
   const phasesRef = useRef<number[]>(Array(N).fill(0).map(() => Math.random() * Math.PI * 2));

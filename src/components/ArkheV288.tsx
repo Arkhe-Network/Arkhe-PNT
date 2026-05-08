@@ -96,6 +96,8 @@ declare global {
 
 // License: MIT
 import React, { useEffect, useRef, useState, useCallback } from 'react';
+declare const GPUShaderStage: any;
+declare const GPUBufferUsage: any;
 
 // ═══════════════════════════════════════════════════════════════════════════════
 // CONSTANTES CHRONO-COIL
@@ -248,8 +250,8 @@ async function loadBrainFlowWASM(): Promise<BrainFlowInstance> {
 
 
   //  cannot resolve module but it exists at runtime
-  const module = { default: () => ({ DataFilter: { set_log_level: () => {}, perform_bandpass: () => [], get_psd_welch: () => [] }, LogLevels: { LEVEL_OFF: 0 } }) };
-  const brainflow: any = await module.default();
+  const module = await import(/* @vite-ignore */ '/brainflow_wasm/brainflow.js?url' as any);
+  const brainflow = await module.default();
   brainflow.DataFilter.set_log_level(brainflow.LogLevels.LEVEL_OFF);
   return brainflow;
 }
@@ -856,7 +858,7 @@ const ArkheV288: React.FC = () => {
       if (!context) {return;}
 
       const presentationFormat = navigator.gpu.getPreferredCanvasFormat();
-      context.configure({ device, format: presentationFormat });
+      (context as any).configure({ device, format: presentationFormat });
 
       // Buffers (idêntico ao v∞.283.2)
       const cellBytes = 5 * 4;
@@ -1004,7 +1006,7 @@ const ArkheV288: React.FC = () => {
         cp.end();
 
         // RENDER
-        const tex = context!.getCurrentTexture().createView();
+        const tex = (context as any).getCurrentTexture().createView();
         const rp = encoder.beginRenderPass({
           colorAttachments: [{
             view: tex,
