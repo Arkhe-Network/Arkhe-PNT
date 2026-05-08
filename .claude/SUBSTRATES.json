@@ -75,9 +75,9 @@
     },
     {
       "id": 5003,
-      "name": "Cross-Platform .agi Extension Handler",
+      "name": "AGI Interface",
       "status": "active",
-      "location": "arkhe-agi-handler/"
+      "location": "agi/system32/nexus/"
     }
   ]
 }
