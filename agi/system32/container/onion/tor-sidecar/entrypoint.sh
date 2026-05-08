@@ -5,7 +5,7 @@ set -e
 echo "🧅 Iniciando Tor sidecar para AGI.onion..."
 
 # Verificar permissões de diretórios
-for dir in /home/tor/tor/data /home/tor/tor/keys /home/tor/tor/onion; do
+for dir in /home/tor/tor/{data,keys,onion}; do
     if [ ! -d "$dir" ]; then
         mkdir -p "$dir"
         chown tor:tor "$dir"

@@ -17,7 +17,7 @@ fi
 exec python3 -c "
 from rcp_v2_engine import RetrocausalChannel8Bit
 from omni_core import OmniCore
-import os
+import os, time
 
 channel = RetrocausalChannel8Bit()
 print(f'✅ RCP v2.0 operacional — Fidelidade base: {channel.transmit_byte(0xA7)[1]:.1%}')

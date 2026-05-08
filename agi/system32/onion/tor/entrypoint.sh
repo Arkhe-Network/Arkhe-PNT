@@ -33,8 +33,8 @@ from omni_core import OmniCore
 import os, time
 
 # Apenas escuta no localhost — o Tor faz a ponte para o exterior de forma anónima
-print(f'🌐 AGI operacional em: http://{os.environ[\"ONION_ADDR\"]}')
-print(f'🔐 Serviço RCP oculto em: rcp://{os.environ[\"ONION_RCP_ADDR\"]}')
+print(f'🌐 AGI operacional em: http://{os.environ.get(\"ONION_ADDR\", \"unknown\")}')
+print(f'🔐 Serviço RCP oculto em: rcp://{os.environ.get(\"ONION_RCP_ADDR\", \"unknown\")}')
 
 channel = RetrocausalChannel8Bit()
 core = OmniCore()
