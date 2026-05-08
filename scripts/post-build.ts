@@ -48,21 +48,21 @@ export const LOCAL_FETCH_PATTERN = './locales/@LOCALE@.json';`;
   );
   fs.mkdirSync(codeMirrorDir, {recursive: true});
   const codeMirrorFile = path.join(codeMirrorDir, 'codemirror.next.js');
-  const codeMirrorContent = `export default {
-    cssStreamParser: async () => ({
-        startState: () => ({})
-    }),
-    StringStream: class {
-        constructor() { this.pos = 0; }
-    },
-    css: {
-        cssLanguage: {
-            parser: {
-                parse: () => ({ topNode: { getChild: () => null } })
-            }
+  const codeMirrorContent = `
+export const cssStreamParser = async () => ({
+    startState: () => ({})
+});
+export class StringStream {
+    constructor() { this.pos = 0; }
+}
+export const css = {
+    cssLanguage: {
+        parser: {
+            parse: () => ({ topNode: { getChild: () => null } })
         }
     }
-}`;
+};
+`;
   writeFile(codeMirrorFile, codeMirrorContent);
 
   // Create codemirror mode mocks
@@ -135,7 +135,8 @@ export const ExperimentName = {
   TIMELINE_SHOW_POST_MESSAGE_EVENTS: 'timeline-show-postmessage-events',
   TIMELINE_DEBUG_MODE: 'timeline-debug-mode',
 }
-  `;
+export const getRemoteBase = () => null;
+`;
   writeFile(runtimeFile, runtimeContent);
 
   copyDevToolsDescriptionFiles();
@@ -155,5 +156,20 @@ function copyDevToolsDescriptionFiles() {
   );
   if (fs.existsSync(sourceDir)) { fs.cpSync(sourceDir, destDir, {recursive: true}); }
 }
+
+
+  const thirdPartySrcDir = path.join(BUILD_DIR, 'src', 'third_party');
+  fs.mkdirSync(thirdPartySrcDir, {recursive: true});
+
+  // Re-export the bundle logic from original index.ts
+  const originalThirdPartySrc = path.join(process.cwd(), 'src', 'third_party', 'index.ts');
+  const originalThirdPartyContent = fs.readFileSync(originalThirdPartySrc, 'utf8');
+  let compiledContent = originalThirdPartyContent.replace(/import 'core-js\/[^']+'\n/g, '');
+  // Let rollup resolve the real path instead of relative to the generated index.ts
+  compiledContent = compiledContent.replace(/export \* as DevTools from '\.\.\/\.\.\/node_modules\/chrome-devtools-frontend\/mcp\/mcp\.ts';/, "export * as DevTools from '../../../node_modules/chrome-devtools-frontend/mcp/mcp.js';");
+  writeFile(path.join(thirdPartySrcDir, 'index.ts'), compiledContent);
+
+  const devtoolsFormatterWorkerFile = path.join(thirdPartySrcDir, 'devtools-formatter-worker.js');
+  writeFile(devtoolsFormatterWorkerFile, "export {};\n");
 
 main();
