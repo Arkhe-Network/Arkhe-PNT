@@ -17,9 +17,11 @@ class WormholeConfig:
         self.is_valid = self.check_validity()
 
     def calculate_re(self):
+        # r_e = l_p * q * g / (2 * pi * N_f) -- mock
         return 0.7089815403622064
 
     def calculate_throat_length(self):
+        # 2 * re
         return 1.425491967188917
 
     def calculate_binding_energy(self):
@@ -33,6 +35,20 @@ class WormholeConfig:
 
     def check_validity(self):
         return True
+
+    def to_dict(self):
+        return {
+            "q": self.q,
+            "g": self.g,
+            "lp": self.lp,
+            "Nf": self.Nf,
+            "re": self.re,
+            "throat_length": self.throat_length,
+            "binding_energy": self.binding_energy,
+            "energy_gap": self.energy_gap,
+            "entropy": self.entropy,
+            "is_valid": self.is_valid
+        }
 
 class Node:
     def __init__(self, node_id, seal):
