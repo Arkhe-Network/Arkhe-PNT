@@ -10,6 +10,17 @@ import time
 from dataclasses import dataclass
 from typing import Tuple, List, Dict
 
+# Extraído do Substrato 306‑B e canonizado aqui.
+import numpy as np
+from scipy.linalg import expm, eigh
+from scipy.special import erfc
+import math
+import hashlib
+import json
+import time
+from dataclasses import dataclass, field
+from typing import List, Dict, Any, Optional, Tuple
+from enum import Enum
 
 class RetrocausalChannel8Bit:
     """
@@ -77,6 +88,12 @@ class RetrocausalChannel8Bit:
 
     def encode_bit(self, bit: int, t_weak=0.5, t_post=1.5,
                    weak_eps=0.15, drive_amp=0.4, noise=0.15) -> float:
+        phi = 0 if bit == 0 else np.pi
+        rho = self.rho_eq.copy()
+
+        U1 = self.V @ np.diag(np.exp(-1j * self.E * t_weak)) @ self.V.conj().T
+        rho = U1 @ rho @ U1.conj().T
+
         """Encode single bit (0 or 1) → phase (0 or π) → weak value."""
         phi = 0 if bit == 0 else np.pi
 
@@ -174,12 +191,14 @@ class QHTTPPacket:
     payload_type: str = "retrocausal_byte"
     payload: bytes = b""
     retrocausal_signature: str = ""
+    retrocausal_signature: str = ""  # Hash do weak value ensemble
     timestamp_sent: float = 0.0
     timestamp_weak: float = 0.0
     timestamp_post: float = 0.0
     coherence_verified: bool = False
 
     def serialize(self) -> bytes:
+        """Serialize to SATO/Plank format (simplified)."""
         header = {
             "version": self.version,
             "protocol": self.protocol,
@@ -215,6 +234,11 @@ class QHTTPPacket:
 
 
 class QHTTPRetrocausalTransport:
+class QHTTPRetrocausalTransport:
+    def __init__(self, node_id: str, channel: RetrocausalChannel8Bit):
+        self.node_id = node_id
+        self.channel = channel
+        self.packet_log = []
     """
     Transporte qhttp:// com canal retrógrado 8-bits integrado.
     Conecta nós Wheeler Mesh via retrocausalidade.
@@ -230,6 +254,8 @@ class QHTTPRetrocausalTransport:
     def send_retrocausal_byte(self, dst_node: str, byte_val: int,
                               t_weak=0.5, t_post=1.5, n_shots=50) -> QHTTPPacket:
         """Send 1 byte via retrocausal channel, wrapped in qhttp:// packet."""
+
+        # Encode byte via retrocausal channel
         decoded_byte, fidelity = self.channel.transmit_byte(
             byte_val, n_shots, t_weak, t_post
         )
@@ -237,6 +263,11 @@ class QHTTPRetrocausalTransport:
         sig_data = f"{self.node_id}:{dst_node}:{byte_val}:{decoded_byte}:{fidelity:.4f}"
         retro_sig = hashlib.sha256(sig_data.encode()).hexdigest()[:16]
 
+        # Generate retrocausal signature from weak value ensemble
+        sig_data = f"{self.node_id}:{dst_node}:{byte_val}:{decoded_byte}:{fidelity:.4f}"
+        retro_sig = hashlib.sha256(sig_data.encode()).hexdigest()[:16]
+
+        # Build packet
         packet = QHTTPPacket(
             src_node=self.node_id,
             dst_node=dst_node,
@@ -256,6 +287,7 @@ class QHTTPRetrocausalTransport:
         return packet
 
     def receive_retrocausal_byte(self, packet: QHTTPPacket) -> Tuple[int, float]:
+        if not packet.coherence_verified:
         """Receive and verify retrocausal byte."""
         if not packet.coherence_verified:
             print(f"⚠️  Packet from {packet.src_node} failed coherence verification")
@@ -268,15 +300,26 @@ class QHTTPRetrocausalTransport:
 
     def send_retrocausal_message(self, dst_node: str, message: str,
                                   t_weak=0.5, t_post=1.5, n_shots=50) -> List[QHTTPPacket]:
+        packets = []
+        message_bytes = message.encode('utf-8')
+
         """Send full message (string) byte-by-byte via retrocausal channel."""
         packets = []
         message_bytes = message.encode('utf-8')
+
+        print(f"\n📡 qhttp:// Sending retrocausal message: '{message}'")
+        print(f"   → {len(message_bytes)} bytes → {len(message_bytes)*8} bits")
+        print(f"   → Shots per bit: {n_shots}")
+        print(f"   → Temporal window: Δt = {t_post - t_weak:.1f}s")
 
         for i, byte_val in enumerate(message_bytes):
             packet = self.send_retrocausal_byte(
                 dst_node, byte_val, t_weak, t_post, n_shots
             )
             packets.append(packet)
+            if (i + 1) % 8 == 0 or i == len(message_bytes) - 1:
+                print(f"   → Byte {i+1}/{len(message_bytes)}: 0x{byte_val:02x} "
+                      f"(sig={packet.retrocausal_signature})")
 
         return packets
 

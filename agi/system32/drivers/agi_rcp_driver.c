@@ -18,6 +18,9 @@ struct rcp_transmit_args {
     unsigned char payload;
     double t_weak;
     double t_post;
+    char src[32], dst[32];
+    unsigned char payload;
+    double t_weak, t_post;
     int n_shots;
     unsigned char decoded;
     double fidelity;
@@ -58,6 +61,9 @@ static long rcp_ioctl(struct file *file, unsigned int cmd, unsigned long arg) {
         default:
             return -EINVAL;
     }
+static long rcp_ioctl(struct file *file, unsigned int cmd, unsigned long arg) {
+    // Em produção: encaminhar para o Python bridge ou diretamente para o HWA
+    // Aqui mantemos o stub para o device existente.
     return 0;
 }
 
@@ -88,3 +94,16 @@ module_exit(rcp_exit);
 MODULE_LICENSE("GPL");
 MODULE_AUTHOR("ARKHE OS Architect");
 MODULE_DESCRIPTION("Retrocausal Channel 8-Bit Driver — Substrate 315");
+static int __init agi_rcp_driver_init(void) {
+    misc_register(&rcp_misc_dev);
+    return 0;
+}
+
+static void __exit agi_rcp_driver_exit(void) {
+    misc_deregister(&rcp_misc_dev);
+}
+
+module_init(agi_rcp_driver_init);
+module_exit(agi_rcp_driver_exit);
+module_misc_device(rcp_misc_dev);
+MODULE_LICENSE("GPL");
