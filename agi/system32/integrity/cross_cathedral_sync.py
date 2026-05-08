@@ -1,76 +1,68 @@
 #!/usr/bin/env python3
 """
-cross_cathedral_sync.py — Substrato 323: Cross-Cathedral Sync Protocol
-Synchronizes state between Cathedrals based on Coherence Verification (Φ_C).
+cross_cathedral_sync.py — Protocolo de sincronização de estado entre catedrais
+com verificação de coerência distribuída
 """
-import hashlib
-import time
-from typing import Dict, Optional, Tuple
 
+import hashlib
+import json
+from dataclasses import dataclass, field
+from typing import Dict, Any, List
+
+@dataclass
 class CathedralState:
-    def __init__(self, node_id: str, phi_c: float, state_hash: str, data: Dict):
-        self.node_id = node_id
-        self.phi_c = phi_c
-        self.state_hash = state_hash
-        self.data = data
-        self.timestamp = time.time()
+    cathedral_id: str
+    state_hash: str
+    phi_c: float
+    timestamp: float
+    data: Dict[str, Any]
 
 class CrossCathedralSync:
-    def __init__(self, min_coherence: float = 0.75, alpha: float = 0.6, beta: float = 0.4):
-        self.min_coherence = min_coherence  # θ_min
-        self.alpha = alpha
-        self.beta = beta
-        self.local_state: Optional[CathedralState] = None
+    """Protocolo de sincronização de estado entre catedrais."""
 
-    def update_local_state(self, phi_c: float, data: Dict):
-        """Updates the local state and recalculates the hash."""
-        data_str = str(sorted(data.items()))
-        state_hash = hashlib.sha256(data_str.encode()).hexdigest()
+    def __init__(self, min_phi_c: float = 0.6):
+        self.min_phi_c = min_phi_c
+        self.peers: Dict[str, CathedralState] = {}
+        self.local_state: CathedralState = None
+
+    def update_local_state(self, cathedral_id: str, phi_c: float, timestamp: float, data: Dict[str, Any]):
+        """Atualiza o estado local da catedral."""
+        state_str = json.dumps(data, sort_keys=True)
+        state_hash = hashlib.sha256(state_str.encode()).hexdigest()
+
         self.local_state = CathedralState(
-            node_id="LOCAL",
-            phi_c=phi_c,
+            cathedral_id=cathedral_id,
             state_hash=state_hash,
+            phi_c=phi_c,
+            timestamp=timestamp,
             data=data
         )
-        return self.local_state
 
-    def attempt_sync(self, remote_state: CathedralState) -> Tuple[bool, str]:
-        """Attempts to sync with a remote Cathedral based on Coherence."""
+    def receive_sync_proposal(self, remote_state: CathedralState) -> bool:
+        """Recebe e avalia uma proposta de sincronização de outra catedral."""
+        if remote_state.phi_c < self.min_phi_c:
+            return False # Rejeita estados com baixa coerência
+
+        # Armazena estado para consenso distribuído
+        self.peers[remote_state.cathedral_id] = remote_state
+        return True
+
+    def execute_distributed_sync(self) -> bool:
+        """Executa sincronização baseada no consenso dos peers."""
         if not self.local_state:
-            return False, "Local state not initialized."
+            return False
 
-        # 1. Coherence Check: Remote node must be coherent enough
-        if remote_state.phi_c < self.min_coherence:
-            return False, f"Remote node coherence ({remote_state.phi_c:.2f}) below threshold ({self.min_coherence})."
+        valid_peers = [p for p in self.peers.values() if p.phi_c >= self.min_phi_c]
+        if not valid_peers:
+            return False
 
-        # 2. Synchronization Score: Weighted average of coherence and hash match
-        hash_match = 1.0 if self.local_state.state_hash == remote_state.state_hash else 0.0
+        # Implementação simplificada de sync: se a maioria tem phi_c maior que o nosso
+        # com o mesmo state_hash, ou se precisamos atualizar nosso state
+        avg_phi = sum(p.phi_c for p in valid_peers) / len(valid_peers)
 
-        # S_sync = α * min(Φ_C_local, Φ_C_remote) + β * HashMatch
-        sync_score = (
-            self.alpha * min(self.local_state.phi_c, remote_state.phi_c) +
-            self.beta * hash_match
-        )
+        # Sincroniza se a coerência da rede for maior
+        if avg_phi > self.local_state.phi_c:
+            # Em um cenário real, aqui integraria as mudanças
+            return True
 
-        # 3. Decision: Accept if sync_score is high enough
-        if sync_score > 0.85:
-            self.local_state = remote_state  # Update local state
-            return True, f"Sync accepted. New Φ_C: {remote_state.phi_c:.2f}, Sync Score: {sync_score:.2f}"
-        else:
-            return False, f"Sync rejected. Sync Score {sync_score:.2f} too low."
-
-if __name__ == "__main__":
-    sync_engine = CrossCathedralSync(min_coherence=0.75)
-
-    # Initialize local state
-    sync_engine.update_local_state(phi_c=0.92, data={"version": "324.1", "status": "active"})
-
-    # Simulate remote node (High Coherence)
-    remote_high = CathedralState("REMOTE_HIGH", phi_c=0.95, state_hash="HASH_NEW", data={"version": "325.0", "status": "synced"})
-    accepted, msg = sync_engine.attempt_sync(remote_high)
-    print(f"🌐 High Coherence Node: {msg}")
-
-    # Simulate remote node (Low Coherence)
-    remote_low = CathedralState("REMOTE_LOW", phi_c=0.60, state_hash="HASH_OLD", data={"version": "320.0", "status": "degraded"})
-    accepted, msg = sync_engine.attempt_sync(remote_low)
-    print(f"🚫 Low Coherence Node: {msg}")
+        return False

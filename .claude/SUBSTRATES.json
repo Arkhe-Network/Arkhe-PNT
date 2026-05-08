@@ -54,6 +54,12 @@
       "name": "Qiskit Quantum Entanglement Channel",
       "status": "active",
       "location": "arkhe_os/federation_protocol/quantum/"
+    },
+    {
+      "id": 342,
+      "name": "Covert DNS Transport & Coherence-Driven Resilience",
+      "status": "active",
+      "location": "agi/system32/tee/"
     }
   ]
 }
