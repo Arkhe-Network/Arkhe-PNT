@@ -1,5 +1,5 @@
 {
-  "version": "v1.0.0",
+  "version": "v1.1.0",
   "substrates": [
     {
       "id": 300,
@@ -18,6 +18,12 @@
       "name": "Agent Context & Operational Integrity",
       "status": "active",
       "location": "agi/system32/integrity/"
+    },
+    {
+      "id": 334,
+      "name": "Neuro-Symbolic & Quantum-Coherent Inference Engine",
+      "status": "active",
+      "location": "agi/system32/inference/"
     }
   ]
 }
