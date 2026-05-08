@@ -234,6 +234,10 @@ class QHTTPPacket:
 
 
 class QHTTPRetrocausalTransport:
+    def __init__(self, node_id: str, channel: RetrocausalChannel8Bit):
+        self.node_id = node_id
+        self.channel = channel
+        self.packet_log = []
     """
     Transporte qhttp:// com canal retrógrado 8-bits integrado.
     Conecta nós Wheeler Mesh via retrocausalidade.
