@@ -1,5 +1,5 @@
 {
-  "version": "v1.2.0",
+  "version": "v1.2.1",
   "substrates": [
     {
       "id": 300,
@@ -72,6 +72,12 @@
       "name": "Windows Compatibility for *.agi Extension",
       "status": "active",
       "location": "agi/system32/windows/"
+    },
+    {
+      "id": 5003,
+      "name": "Cross-Platform .agi Extension Handler",
+      "status": "active",
+      "location": "arkhe-agi-handler/"
     }
   ]
 }
