@@ -2079,7 +2079,7 @@
     },
     {
       "id": 344,
-      "name": "Reputation Oracle (Φ-REP)",
+      "name": "Reputation Oracle (\u03a6-REP)",
       "status": "active",
       "location": "agi/system32/reputation/"
     },
@@ -30051,7 +30051,7 @@
     },
     {
       "id": 5006,
-      "name": "KYM — Know Your Machine",
+      "name": "KYM \u2014 Know Your Machine",
       "status": "active",
       "location": "agi/system32/kym/"
     },
@@ -30084,6 +30084,12 @@
       "name": "Sovereign Pip Package Integration",
       "status": "Canonized",
       "location": "agi/system32/pip_sovereign/"
+    },
+    {
+      "id": 5028,
+      "name": "Sovereign NGINX Reverse Proxy & API Gateway",
+      "status": "active",
+      "location": "agi/system32/nginx/"
     }
   ]
 }
