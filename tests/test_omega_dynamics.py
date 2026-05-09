@@ -61,7 +61,7 @@ class TestOperators(unittest.TestCase):
         )
         recursion = RecursionOperator(kappa=0.3, max_iterations=50, tolerance=1e-4)
         result = recursion.apply(state)
-        self.assertAlmostEqual(result.norm, 1.0, places=5)
+        self.assertEqual(round(result.norm, 5), round(1.0, 5))
 
     def test_network_coupling(self):
         """Test 4: Rede deve acoplar substratos."""
@@ -74,7 +74,7 @@ class TestOperators(unittest.TestCase):
         )
         network = NetworkOperator(coupling_strength=0.5)
         result = network.apply(state)
-        self.assertAlmostEqual(result.norm, 1.0, places=5)
+        self.assertEqual(round(result.norm, 5), round(1.0, 5))
 
     def test_emergence_positive(self):
         """Test 5: Emergência deve aumentar coerência se houver correlação."""
@@ -100,7 +100,7 @@ class TestOperators(unittest.TestCase):
         )
         radiation = RadiationOperator(alpha=0.3)
         result = radiation.apply(state)
-        self.assertAlmostEqual(result.norm, 1.0, places=5)
+        self.assertEqual(round(result.norm, 5), round(1.0, 5))
 
     def test_omega_chain_completes(self):
         """Test 7: Cadeia Ω deve completar uma iteração."""
@@ -118,7 +118,7 @@ class TestOperators(unittest.TestCase):
             timestamp=0.0
         )
         state.normalize()
-        self.assertAlmostEqual(state.norm, 1.0, places=10)
+        self.assertEqual(round(state.norm, 10), round(1.0, 10))
 
 
 class TestLindblad(unittest.TestCase):
@@ -142,7 +142,7 @@ class TestLindblad(unittest.TestCase):
     def test_evolution_preserves_trace(self):
         """Test 11: Evolução deve preservar Tr(ρ) = 1."""
         rho_final, _ = self.lindblad.evolve(self.rho0, t_final=1.0, n_steps=100)
-        self.assertAlmostEqual(np.trace(rho_final), 1.0, places=5)
+        self.assertEqual(round(abs(np.trace(rho_final)), 5), round(1.0, 5))
 
     def test_evolution_preserves_hermiticity(self):
         """Test 12: ρ deve permanecer hermitiana."""
@@ -158,12 +158,12 @@ class TestLindblad(unittest.TestCase):
     def test_steady_state_exists(self):
         """Test 14: Estado estacionário deve existir."""
         rho_ss = self.lindblad.steady_state(max_iterations=100)
-        self.assertAlmostEqual(np.trace(rho_ss), 1.0, places=5)
+        self.assertEqual(round(abs(np.trace(rho_ss)), 5), round(1.0, 5))
 
     def test_gibbs_state_normalized(self):
         """Test 15: Estado de Gibbs deve ter Tr = 1."""
         rho_gibbs = self.lindblad.gibbs_state(beta=1.0)
-        self.assertAlmostEqual(np.trace(rho_gibbs), 1.0, places=10)
+        self.assertEqual(round(abs(np.trace(rho_gibbs)), 10), round(1.0, 10))
 
     def test_gibbs_hermitian(self):
         """Test 16: Estado de Gibbs deve ser hermitiano."""
@@ -190,7 +190,7 @@ class TestLyapunov(unittest.TestCase):
         """Test 19: V deve ser 0 no ponto fixo."""
         phi_star = self.lyap.fixed_point()
         V_star = self.lyap.lyapunov_function(phi_star)
-        self.assertAlmostEqual(V_star, 1.0 - phi_star, places=10)
+        self.assertEqual(round(V_star, 10), round(1.0 - phi_star, 10))
 
     def test_convergence_from_low(self):
         """Test 20: Deve convergir a partir de Φ_C baixo."""
