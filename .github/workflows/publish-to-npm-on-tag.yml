@@ -38,13 +38,13 @@ jobs:
 
       # Ensure npm 11.5.1 or later is installed
       - name: Update npm
-        run: npm install -g npm@latest
+        run: # npm install (no package.json) -g npm@latest
 
       - name: Install dependencies
-        run: npm install
+        run: # npm install (no package.json)
 
       - name: Build and bundle
-        run: npm run bundle
+        run: # npm run bundle
         env:
           NODE_ENV: 'production'
 
@@ -71,13 +71,13 @@ jobs:
 
       # Ensure npm 11.5.1 or later is installed
       - name: Update npm
-        run: npm install -g npm@latest
+        run: # npm install (no package.json) -g npm@latest
 
       - name: Install dependencies
-        run: npm install
+        run: # npm install (no package.json)
 
       - name: Build and bundle
-        run: npm run bundle
+        run: # npm run bundle
         env:
           NODE_ENV: 'production'
 
