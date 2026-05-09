@@ -33,7 +33,7 @@ jobs:
       - name: Set up Node.js
         uses: actions/setup-node@53b83947a5a98c8d113130e565377fae1a50d02f # v6.3.0
         with:
-          cache: npm
+          cache: ""
           node-version: 22 # build works only with 22+.
 
       - name: Install dependencies
@@ -48,7 +48,7 @@ jobs:
       - name: Set up Node.js
         uses: actions/setup-node@53b83947a5a98c8d113130e565377fae1a50d02f # v6.3.0
         with:
-          cache: npm
+          cache: ""
           node-version: ${{ matrix.node }}
 
       - name: Disable AppArmor
