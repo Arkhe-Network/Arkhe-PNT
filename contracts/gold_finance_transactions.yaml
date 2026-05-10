@@ -1,0 +1,62 @@
+# contracts/gold_finance_transactions.yaml
+asyncapi: '2.6.0'
+id: 'urn:arkhe:gold:finance:transactions:v2.1'
+info:
+  title: Arkhe Gold - Finance Transactions
+  version: '2.1.0'
+  description: |
+    Contract for curated financial transaction data.
+    Coherence SLA: λ₂ ≥ 0.95, Freshness < 5min, Quality ≥ 99.9%
+  x-arkhe-metadata:
+    domain: finance
+    layer: gold
+    owner: finance-domain@arkhe.io
+    coherence_target: 0.95
+    freshness_sla_seconds: 300
+    quality_threshold: 0.999
+    update_frequency: realtime
+
+channels:
+  finance/transactions/curated:
+    description: High-coherence transaction stream
+    subscribe:
+      message:
+        $ref: '#/components/messages/TransactionCurated'
+
+components:
+  messages:
+    TransactionCurated:
+      name: TransactionCurated
+      contentType: application/x-parquet
+      payload:
+        $ref: '#/components/schemas/TransactionRecord'
+
+  schemas:
+    TransactionRecord:
+      type: object
+      properties:
+        transaction_id:
+          type: string
+          format: uuid
+        account_id:
+          type: string
+          pattern: '^ACC-[0-9]{8}$'
+        amount_usd:
+          type: number
+          minimum: 0
+        status:
+          type: string
+          enum: [PENDING, SETTLED, FAILED, REVERSED]
+        event_timestamp:
+          type: string
+          format: date-time
+        lambda2_score:
+          type: number
+          minimum: 0
+          maximum: 1
+
+      required:
+        - transaction_id
+        - account_id
+        - amount_usd
+        - event_timestamp

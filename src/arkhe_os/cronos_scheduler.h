@@ -15,6 +15,12 @@ typedef struct cronos_thread {
     double natural_freq;
     double lambda_alloc;
     arkhe_phase_t phase;
+
+    // Temporal & Phase Properties
+    double lambda_alloc;       // Coherence at the time of thread creation
+    arkhe_phase_t phase;       // Current internal phase of the thread
+    double natural_freq;       // ω_i (Natural frequency of the task)
+
     thread_state_t state;
     struct cronos_thread* next;
     struct cronos_thread* prev;
