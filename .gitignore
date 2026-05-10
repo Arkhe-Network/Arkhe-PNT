@@ -136,7 +136,7 @@ debug/
 # 🌌 ARKHE SPECIFIC
 # ============================================================
 .arkhe/
-arkhe-*/
+$# arkhe-*/
 !arkhe-core/
 !arkhe-os/
 substrates/legacy/
