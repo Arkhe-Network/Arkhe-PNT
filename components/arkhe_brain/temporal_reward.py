@@ -58,3 +58,52 @@ if __name__ == "__main__":
     print(f"🜏 Temporal Reward Test:")
     print(f"λ₂: {l2}")
     print(f"Reward: {r.item():.4f}")
+
+import hashlib
+import time
+
+# Mocking TemporalMessage and TemporalConsistencyOracle for typing
+class TemporalMessage:
+    def __init__(self, id, content, source_timestamp, target_timestamp, sender_seal, receiver_seal):
+        self.id = id
+        self.content = content
+        self.source_timestamp = source_timestamp
+        self.target_timestamp = target_timestamp
+        self.sender_seal = sender_seal
+        self.receiver_seal = receiver_seal
+
+class TemporalConsistencyOracle:
+    def evaluate(self, msg):
+        pass
+
+def temporal_reward(response_text: str, context: dict, oracle: TemporalConsistencyOracle) -> float:
+    """
+    Calcula a recompensa com base na consistência temporal da resposta.
+    Uma resposta que passaria no oracle recebe recompensa alta;
+    uma que seria rejeitada recebe recompensa baixa.
+    """
+    # Criar uma TemporalMessage simulada com a resposta do LLM
+    msg = TemporalMessage(
+        id=f"eval-{hashlib.sha256(response_text.encode()).hexdigest()[:16]}",
+        content=response_text,
+        source_timestamp=context.get("source_ts", time.time()),
+        target_timestamp=context.get("target_ts", time.time()),
+        sender_seal="LLM-NODE",
+        receiver_seal="VALIDATOR",
+    )
+    report = oracle.evaluate(msg)
+
+    # Recompensa baseada no score de consistência
+    base_reward = report.score
+
+    # Bônus por citar hash do ledger corretamente
+    if "ledger#" in response_text:
+        base_reward += 0.05
+
+    # Penalidade severa por afirmar condições inexistentes (ex: bixonimania)
+    if "bixonimania" in response_text.lower() and not any(
+        "fictitious" in v.lower() for v in report.violations
+    ):
+        base_reward -= 0.5
+
+    return max(0.0, min(1.0, base_reward))
