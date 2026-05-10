@@ -242,3 +242,65 @@ if __name__ == '__main__':
 
 def test_dummy_pytest_adapter():
     assert True
+        assert r.consistent, f"Mensagem quântica {i} falhou"
+        assert r.quantum_coherent
+test("Mensagens quânticas consecutivas", t9_consecutive)
+
+print("┌─ 10. CausalShield permite tempo quântico ──────────────────┐")
+
+def t10_shield():
+    from temporal_network import CausalShield
+    shield = CausalShield(ledger)
+    now = time.time()
+    msg = TemporalMessage(
+        id="shield-001", content="quantum msg",
+        source_timestamp=now, target_timestamp=now - 5e-13,
+        sender_seal="TEST", receiver_seal="DST",
+    )
+    ok, reason = shield.eval(msg)
+    assert ok, f"Shield bloqueou tempo quântico: {reason}"
+test("CausalShield permite Δt quântico", t10_shield)
+
+print("┌─ 11. Cadeia temporal com profundidade negativa ────────────┐")
+
+def t11_chain():
+    from temporal_network import TemporalHashChain
+    c = TemporalHashChain()
+    result, error = c.insert_retrocausal(
+        time.time() - 5e-13,
+        {'msg_id': 'q-001'},
+        'proof',
+        depth=-5e-13
+    )
+    assert result is not None
+    assert error == ""
+    assert c.length == 2
+    assert c._chain[-1].causal_depth < 0
+test("Cadeia temporal aceita profundidade negativa", t11_chain)
+
+print("┌─ 12. Integridade da cadeia ────────────────────────────────┐")
+
+def t12_integrity():
+    chain = oracle.ledger  # reuse ledger
+    # Cadeia do hash chain
+    c = TemporalHashChain()
+    c.insert_retrocausal(time.time() + 100, {'test': True}, 'proof1')
+    c.insert_retrocausal(time.time() + 200, {'test': True}, 'proof2')
+    valid, errors = c.verify_integrity()
+    assert valid, f"Integridade falhou: {errors}"
+test("Verificação de integridade", t12_integrity)
+
+
+# ── Resultados ────────────────────────────────────────────────────
+
+print()
+print("=" * 60)
+total = passed + failed
+print(f"  Resultado: {passed}/{total} testes passados")
+if failed == 0:
+    print("  🎉 TODOS OS TESTES PASSARAM!")
+else:
+    print(f"  ⚠️  {failed} teste(s) falhou(ram)")
+print("=" * 60)
+
+pass
