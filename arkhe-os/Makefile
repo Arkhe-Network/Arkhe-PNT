@@ -14,3 +14,6 @@ clean:
 	$(MAKE) -C kernel clean
 	$(MAKE) -C userspace clean
 	$(MAKE) -C tests clean
+clean:
+	$(MAKE) -C kernel clean
+	$(MAKE) -C userspace clean
