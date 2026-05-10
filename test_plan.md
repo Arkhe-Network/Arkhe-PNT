@@ -1,12 +1,18 @@
-1. **Understand the Objective**: The goal is to add C# and C++ frontend parsers and backend generators to the "Polymath Parser". This involves using the `github.com/smacker/go-tree-sitter` library and its respective language grammars to extract Abstract Syntax Trees (ASTs) for C# and C++, converting them to a unified Lingua Franca Intermediate Representation (LFIR), and generating idiomatic code for the two target languages.
+1. **Criar a abstração matemática e lógica da Álgebra de Heyting no Oracle:**
+   - Criar arquivo `components/agi/system32/temporal/heyting_oracle.py`.
+   - Implementar uma classe `HeytingConsistencyOracle` (podendo herdar de `TemporalConsistencyOracle`) que defina as operações lógicas sobre mensagens temporais.
+   - **Forcing ($\Rightarrow$):** Implementar $p \Rightarrow q$ de forma eficiente. Em vez de avaliar "todos os futuros" enumerando-os exaustivamente, usar uma busca em profundidade limitada (`max_depth`) no grafo causal (`self._has_causal_path`) ou uma abordagem baseada em ancestrais conhecidos no `ledger`.
+   - **Pseudocomplemento ($\neg p$):** Implementar $\neg p = p \Rightarrow \bot$. Para evitar loops infinitos com mensagens complexas, adicionar verificações de dependência circular e um limite estrito de recursão. Definir o que é "$\bot$" no contexto do Oracle (ex: uma mensagem que sempre falha nos checks de consistência).
 
-2. **Files to Update**:
-    - Based on the exploration, the parser system exists in two main locations: `arkhe_os/parser/polymath.go` and `arkhe_os/transcompiler/polymath_parser.go`.
-    - Looking at the tests running, both seem to be valid, but I'll apply the C# and C++ frontends and backends logic to both of them. Actually, wait. Let me double check if `arkhe_os/parser/polymath.go` has a `go.mod`. Yes, it does. `arkhe_os/transcompiler` also has a `go.mod`. I should update both to ensure consistency across the codebase. I just updated both.
-    - Let's double check `arkhe_os/parser/polymath.go` and `arkhe_os/transcompiler/polymath_parser.go` are the only places that need the `registerAdditionalLanguages` call.
+2. **Criar o arquivo de prova em Coq (`heyting_consistency.v`):**
+   - Criar `components/layer_4_meta/proofs/heyting_consistency.v`.
+   - Axiomatizar o contexto temporal (mensagens, futuros).
+   - Axiomatizar o `Estimator` como um functor (mapeando a categoria de estados temporais/mensagens).
+   - Definir de maneira rigorosa a relação de *forcing* ($p \Vdash q$).
+   - Provar propriedades básicas (ex: preservação da consistência) de forma a satisfazer as exigências de verificação mecanizada.
 
-3. **Pre-commit Steps**:
-   - I will call `pre_commit_instructions` to find out what verification steps are needed before submission.
+3. **Pre-commit checks**
+   - Executar os pre-commit checks para garantir que não haja regressões, validando a integridade das modificações.
 
-4. **Submission**:
-   - Create a commit and submit via `submit` tool.
+4. **Submissão:**
+   - Efetuar o `submit` das mudanças.
