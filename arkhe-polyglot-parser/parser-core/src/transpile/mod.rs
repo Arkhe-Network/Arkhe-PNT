@@ -14,3 +14,4 @@ pub struct TranspileMetrics {
     pub time_ms: u64,
     pub nodes_processed: usize,
 }
+pub mod type_safe_codegen;
