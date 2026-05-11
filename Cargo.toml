@@ -1,7 +1,8 @@
 [workspace]
 resolver = "2"
 members = [
-    # --- Existing previously ---
+    "oracle-server",
+    "substrate-9010",
     "arkhe-enterprise",
     "arkhe-qart/substrate-6072",
     "substrate-6071",
@@ -15,6 +16,7 @@ members = [
     "substrate-9010",
     "substrate-aws-orbital",
     "cmd/arkhe",
+    "substrate-9110"
 ]
 
 [workspace.dependencies]
