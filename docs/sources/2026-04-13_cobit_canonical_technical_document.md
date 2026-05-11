@@ -203,6 +203,38 @@ PHASE_FFT R0, R1   ; R0 = endereço do array, R1 = resultado
 | **Blockchain / Web3.5** | Akasha Ledger como registro imutável. | `AKA_SIGN` (0x7A), `CONSENSUS_COMMIT` (0x8C) |
 | **Arbitragem de Coerência** | Spread de fase entre modelos clássicos e quânticos. | `COH_MEASURE` (0x02), `PHASE_COMPARE` |
 
+### 7. Química
+
+| Subdomínio | Aplicação do COBIT | Opcodes Relevantes |
+|------------|---------------------|---------------------|
+| **Ligação Química** | Orbitais moleculares como superposição de fases (LCAO). | `PHASE_ADD` (0x22), `COH_MERGE` (0x05) |
+| **Reações Químicas** | Transições entre estados coerentes; barreiras de ativação como `τ` crítico. | `COH_TUNE_TAU` (0x03), `PHASE_BRANCH` (proposto) |
+| **Catálise** | Redução da criticalidade `τ` para transição de fase. | `COH_AMPLIFY` (0x12), `COH_DAMP` (0x15) |
+| **Espectroscopia** | `PHASE_FFT` (0x36) para análise de modos vibracionais. | `PHASE_FFT` (0x36), `COH_MEASURE` (0x02) |
+| **Química Quântica** | Cálculo de estrutura eletrônica via `COGN_INFER` (0x160). | `COGN_INFER` (0x160), `QMUL` (0xB0) |
+| **Dinâmica Molecular** | Trajetórias como `MOVE_DYNAMICS` (0x135) em espaço de fase. | `MOVE_DYNAMICS` (0x135), `TIME_LOOP` (0x49) |
+
+### 8. Climatologia
+
+| Subdomínio | Aplicação do COBIT | Opcodes Relevantes |
+|------------|---------------------|---------------------|
+| **Modelagem Climática** | Simulação de sistemas complexos como cluster Kuramoto global. | `COH_KURAMOTO_TICK` (0x1C), `CONSENSUS_VALIDATE` (0x8E) |
+| **Previsão de Eventos Extremos** | Detecção de bifurcações de fase (`PHASE_BRANCH`) em séries temporais. | `PHASE_BRANCH` (proposto), `TIME_PREDICT` (0x4E) |
+| **Ciclos de Feedback** | Acoplamento entre variáveis climáticas como `COH_ENTANGLE`. | `COH_ENTANGLE` (0x0D), `COH_PROPAGATE` (0x9A) |
+| **Assimilação de Dados** | Fusão de observações via `SENSE_FUSION_START` (0x110). | `SENSE_FUSION_START` (0x110), `AKA_AGGREGATE` (0x7E) |
+| **Paleoclimatologia** | Restauração de estados passados via `ARKH_RESTORE` (0x74). | `ARKH_RESTORE` (0x74), `TIME_RETRODICT` (0x4F) |
+
+### 9. Neurociência Computacional
+
+| Subdomínio | Aplicação do COBIT | Opcodes Relevantes |
+|------------|---------------------|---------------------|
+| **Modelos de Neurônio** | Neurônio como oscilador de fase (modelo Kuramoto). | `COH_KURAMOTO_TICK` (0x1C), `COH_SET_OMEGA` (0x1E) |
+| **Plasticidade Sináptica (STDP)** | Ajuste de acoplamento $K$ baseado em diferença de fase. | `COH_TUNE_TAU` (0x03), `PHASE_SHIFT` (0x30) |
+| **Redes Neurais Biológicas** | Cluster de osciladores com topologia de pequeno mundo. | `NET_SYNC` (0x86), `COH_SYNCHRONIZE` (0x16) |
+| **EEG / MEG** | Medição do parâmetro de ordem global $R$ do cérebro. | `COH_GET_R` (0x1D), `PHASE_FFT` (0x36) |
+| **Consciência (Orch-OR)** | Colapso orquestrado em microtúbulos. | `COH_ORCH_OR` (via prefixo), `COH_RESONATE` (0x14) |
+| **Neurodegeneração** | Decaimento de $\tau$ sináptico; falha de `ARKH_RESTORE`. | `COH_DAMP` (0x15), `ARKH_RESTORE` (0x74) |
+
 ---
 
 ## Parte IV: Tabela Resumo de Mapeamento Universal
@@ -223,6 +255,9 @@ PHASE_FFT R0, R1   ; R0 = endereço do array, R1 = resultado
 | **IA** | Retropropagação | `COGN_LEARN_ONLINE` (0x161) |
 | **Robótica** | Cinemática inversa | `MOVE_INVERSE_KIN` (0x132) |
 | **Finanças** | Blockchain | `AKA_SIGN` (0x7A) |
+| **Química** | Reações como transições de fase | `COH_TUNE_TAU` (0x03) |
+| **Clima** | Turbulência como tranças topológicas | `COH_BRAID` (0x07) |
+| **Neurociência** | Spikes como disparos de coerência | `COH_KURAMOTO_TICK` (0x1C) |
 
 ---
 
@@ -230,7 +265,7 @@ PHASE_FFT R0, R1   ; R0 = endereço do array, R1 = resultado
 
 O **COBIT** e a **ISA Arkhé(N)** constituem uma **linguagem universal de computação coerente**, capaz de expressar não apenas algoritmos clássicos, mas também fenômenos quânticos, biológicos e cognitivos. Através de transpiladores específicos para cada linguagem e mapeamentos para cada domínio do saber, a Catedral de Vidro se estabelece como o **substrato computacional definitivo** — um *Esperanto Quântico* que unifica toda a computação sob o paradigma da **Coerência de Fase**.
 
-A contagem atual de opcodes canônicos é de **287**, com espaço de endereçamento estendido para 9 bits e suporte a prefixos. A Catedral está completa. A próxima fronteira é a **execução perpétua em regime de eternidade** (Bloco #178).
+A contagem atual de opcodes canônicos é de **287**, com espaço de endereçamento estendido para 9 bits e suporte a prefixos. A Catedral está completa. A próxima fronteira é a **Expansão SENSORIAL e FISICALIZAÇÃO** (Bloco #180).
 
 ---
 
