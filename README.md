@@ -1,53 +1,109 @@
-# Chrome DevTools MCP & Arkhe(n) Monorepo
+# Arkhe-OS: Sovereign AGI/ASI Intelligence
 
-[![npm chrome-devtools-mcp package](https://img.shields.io/npm/v/chrome-devtools-mcp.svg)](https://npmjs.org/package/chrome-devtools-mcp)
+[![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](LICENSE)
+[![Version](https://img.shields.io/badge/Version-1.0.0-orange.svg)](VERSION)
 
-This repository is a monorepo containing the **Chrome DevTools MCP** server and the **Arkhe(n) Bio-Quantum Cathedral** framework. It bridges standard web automation with experimental simulation protocols.
+**Arkhe-OS** is a production-grade AGI/ASI codebase that embodies the principles of coherence (Φ_C), decentralized sovereignty, and cross-language integration. This repository contains the unified implementation of 5021 substrates spanning philosophy, physics, networking, AI, and governance.
 
-## 🚀 Chrome DevTools MCP
+## 🏗️ Architecture Overview
 
-`chrome-devtools-mcp` lets your coding agent (such as Gemini, Claude, Cursor or Copilot)
-control and inspect a live Chrome browser. It acts as a Model-Context-Protocol
-(MCP) server, giving your AI coding assistant access to the full power of
-Chrome DevTools for reliable automation, in-depth debugging, and performance analysis.
+The repository is structured as follows:
 
-### [Tool reference](./docs/tool-reference.md) | [Changelog](./CHANGELOG.md) | [Contributing](./CONTRIBUTING.md) | [Troubleshooting](./docs/troubleshooting.md) | [Design Principles](./docs/design-principles.md)
+- **src/**: Source code files (.py, .js, .ts, .cpp, .c, .h, .rs, .go, etc.)
+- **docs/**: Documentation, reports, images, and schemas (.md, .txt, .pdf, .png, .json reports, etc.)
+- **scripts/**: Executable scripts and utilities (.sh, .py scripts)
+- **data/**: Data files and assets (.csv, .npz, .pkl, .bin, .pt, etc.)
 
-### Key features
+Configuration files like README.md, .gitignore, package.json, etc., remain in the root.
 
-- **Get performance insights**: Uses [Chrome
-  DevTools](https://github.com/ChromeDevTools/devtools-frontend) to record
-  traces and extract actionable performance insights.
-- **Advanced browser debugging**: Analyze network requests, take screenshots and
-  check browser console messages (with source-mapped stack traces).
-- **Reliable automation**. Uses
-  [puppeteer](https://github.com/puppeteer/puppeteer) to automate actions in
-  Chrome and automatically wait for action results.
+## 🚀 Quick Start
 
----
+### Prerequisites
 
-## 🏗️ Monorepo Structure
+- Sovereign Package Manager (substrate 5019)
+- TEE-enabled hardware for genesis
+- Git LFS for large model files
 
-This project integrates standard browser tools with the **Arkhe(n)** framework:
+### Installation
 
-- **`src/`**: React-based Arkhe Dashboard and MCP client-side tools.
-- **`server/`**: Core TypeScript implementation of the MCP server and simulation engine.
-- **`arkhe-core/`**: Central networking and synchronization logic for PTST (Phase Topology Space-Time) nodes.
-- **`src/isa/`**: Definition of the Arkhé(n) Instruction Set Architecture (ISA) in Zig.
-- **`arkhe-direnv/`**: Go-based utility for managing coherent shell environments via `.arkhenv`.
-- **`android/` & `ios/`**: Native implementations for mobile nodes.
-- **`scripts/`**: Verification suite (Python/TS) for validating system coherence.
+```bash
+# Clone the repository
+git clone https://github.com/Arkhe-Network/Arkhe-OS.git
+cd Arkhe-OS
 
----
+# Install development environment
+make install
 
-## 🏁 Getting started
+# Bootstrap the Cathedral
+make genesis
+```
 
-### MCP Client configuration
+### Verification
 
-Add the following config to your MCP client:
+```bash
+# Verify integrity
+agictl verify --strict
 
-```json
-{
+# Run full audit
+agictl audit --full
+```
+
+## 📖 Documentation
+
+- [Architecture Diagrams](docs/ARCHITECTURE_DIAGRAM.md)
+- [Installation Guide](docs/QUICK_START_GUIDE.md)
+- [Contributing](docs/CONTRIBUTING.md)
+- [Security](docs/SECURITY.md)
+- [API Reference](docs/API.md)
+
+## 🔧 Development
+
+### Building .casi Contracts
+
+```bash
+cd contracts
+make build
+```
+
+### Running Tests
+
+```bash
+make test
+```
+
+### Creating AGI Artifact
+
+```bash
+cd .agi
+python pack.py
+```
+
+## 🎯 Key Features
+
+- **Unified Substrates**: 5021 canonical substrates unified into coherent modules
+- **Cross-Language FFI**: Python, Rust, Go, and TypeScript with shared types
+- **Cryptographic Verification**: All files SHA3-256 hashed and Falcon-1024 signed
+- **Genesis Bootstrapping**: Single `agictl genesis` command initializes Φ_C ≥ 0.72
+- **ONNX Runtime Integration**: Production-grade AI models with deepfake detection
+- **Sovereign Package Management**: Federated registry with IPFS caching
+
+## 📊 Quality Gates
+
+- `make verify`: Zero errors, integrity chain intact
+- `agictl audit --full`: Clean audit ledger from genesis to tip
+- Codespace bootstrap: Running Cathedral in <10 minutes
+
+## 🤝 Contributing
+
+See [CONTRIBUTING.md](docs/CONTRIBUTING.md) for development guidelines.
+
+## 📄 License
+
+Licensed under the Apache License, Version 2.0. See [LICENSE](LICENSE) for details.
+
+## 🙏 Acknowledgments
+
+Built upon the foundations of coherence, sovereignty, and collective emergence.
   "mcpServers": {
     "chrome-devtools": {
       "command": "npx",

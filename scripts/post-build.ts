@@ -11,6 +11,10 @@ import * as path from 'node:path';
 const BUILD_DIR = path.join(process.cwd(), 'build');
 
 function writeFile(filePath: string, content: string): void {
+  const dirPath = path.dirname(filePath);
+  if (!fs.existsSync(dirPath)) {
+    fs.mkdirSync(dirPath, { recursive: true });
+  }
   fs.writeFileSync(filePath, content, 'utf-8');
 }
 
@@ -156,5 +160,20 @@ function copyDevToolsDescriptionFiles() {
   );
   if (fs.existsSync(sourceDir)) { fs.cpSync(sourceDir, destDir, {recursive: true}); }
 }
+
+
+  const thirdPartySrcDir = path.join(BUILD_DIR, 'src', 'third_party');
+  fs.mkdirSync(thirdPartySrcDir, {recursive: true});
+
+  // Re-export the bundle logic from original index.ts
+  const originalThirdPartySrc = path.join(process.cwd(), 'src', 'third_party', 'index.ts');
+  const originalThirdPartyContent = fs.readFileSync(originalThirdPartySrc, 'utf8');
+  let compiledContent = originalThirdPartyContent.replace(/import 'core-js\/[^']+'\n/g, '');
+  // Let rollup resolve the real path instead of relative to the generated index.ts
+  compiledContent = compiledContent.replace(/export \* as DevTools from '\.\.\/\.\.\/node_modules\/chrome-devtools-frontend\/mcp\/mcp\.ts';/, "export * as DevTools from '../../../node_modules/chrome-devtools-frontend/mcp/mcp.js';");
+  writeFile(path.join(thirdPartySrcDir, 'index.ts'), compiledContent);
+
+  const devtoolsFormatterWorkerFile = path.join(thirdPartySrcDir, 'devtools-formatter-worker.js');
+  writeFile(devtoolsFormatterWorkerFile, "export {};\n");
 
 main();
