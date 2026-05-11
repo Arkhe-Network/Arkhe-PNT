@@ -1,16 +1,23 @@
-1. ZK Circuit
-   - Implement `Plonky2Circuit` in `arkhe-qart/substrate-6072/src/provenance/zk_circuit.rs`.
-2. Conectar x402_pix_bridge.rs ao módulo Pix Go
-   - Atualizar `arkhe-qart/substrate-6072/src/compensation/x402_pix_bridge.rs` com bridge usando `reqwest` para `http://localhost:8080/v1/pix/x402/payment-verify`.
-3. Implementar Escrow em Solidity
-   - Criar `contracts/Escrow.sol` ou `arkhe-qart/substrate-6072/src/compensation/escrow.rs` dependendo do target, mas pedido disse Solidity. Adicionar na pasta `contracts/`.
-4. Integrar modelo CLIP real via tch (Torch)
-   - Em `arkhe-qart/substrate-6072/src/fingerprint/perceptual.rs`, usar `tch::CModule` para carregar o modelo CLIP de `arkhe-qart/data/style_models/clip_vit_l14.pt`.
-5. Implementar entropy_auction e trend_detector
-   - Adicionar código base em `arkhe-qart/substrate-6072/src/oracle/entropy_auction.rs` e `trend_detector.rs`.
-6. Benchmarks do probability_model
-   - Implementar `arkhe-qart/scripts/benchmark_influence.py` ou benchmarking nativo Rust.
-7. Testes de integração com substrate-6064
-   - Atualizar `arkhe-qart/tests/integration/test_qart_continental.rs` para testar bridge/modelo.
-8. Complete pre-commit steps to ensure proper testing, verification, review, and reflection are done.
-9. Finalize.
+1.  **Create the Substrato 6065 Directory:**
+    - I've created the directory `substrate-6065/` to hold the new module for the Neural Cartography Engine.
+2.  **Initialize the Rust Workspace & Dependencies:**
+    - I added a `Cargo.toml` file to `substrate-6065` according to the provided specification, including dependencies like `tch` (optional), `ndarray`, `serde`, `serde_json`, `petgraph`, `thiserror`, and `arkhe-temporal`. Note that since the user requested `arkhe-temporal = { path = "../substrate-6064/temporal" }`, I've scaffolded a basic `arkhe-temporal` crate in `../substrate-6064/temporal` to allow compilation to succeed, as there was no such file locally.
+3.  **Implement the Connectome (`connectome.rs`):**
+    - The `Synapse` and `NeuronId` structs and the `Connectome` struct have been defined to store graph connections. Added split, merge and pruning skeletons.
+4.  **Implement the Mapper (`mapper.rs`):**
+    - Added the logic to extract weights from the (stubbed) `ContinentalMind` network layers into the `Connectome`.
+5.  **Implement the Proofreader (`proofreader.rs`):**
+    - Added the `Proofreader` to simulate NEURD-like proofreading: detecting splits and merges and pruning weak synapses.
+6.  **Implement Cell Types and Wiring Rules (`cell_types.rs`, `wiring_rules.rs`):**
+    - Added stub representations for functionally typing cells (`ET`, `IT`, `Basket`, `Martinotti`) and establishing/extracting wiring rules.
+7.  **Implement Invariants and Temporal Anchor (`invariants.rs`, `temporal_anchor.rs`):**
+    - Provided skeleton functions/structs representing invariant detection and logging to `TemporalChain`.
+8.  **Implement the Cartographer (`cartographer.rs`):**
+    - Created the `NeuralCartographer` structure that integrates all the above to produce a wired `Connectome`.
+9.  **Compile and verify the correctness of the code:**
+    - Rust's `cargo check` passed after I solved the E0382 borrow checker error in `proofreader.rs` where I had to pass iterations by reference.
+10. **Write Tests:**
+    - Include a test suite using Cargo's standard `cargo test` framework.
+11. **Complete pre commit steps:**
+    - Complete pre-commit steps to ensure proper testing, verification, review, and reflection are done.
+12. **Submit the changes.**
