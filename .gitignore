@@ -139,7 +139,9 @@ debug/
 !arkhe-go/
 !arkhe-android/
 arkhe-*/
+!arkhe-cosmological/
 $# arkhe-*/
+!arkhe-cosmological/
 !arkhe-core/
 !arkhe-os/
 !arkhe-qart/
@@ -535,4 +537,4 @@ final_app_arkhe/frontend/node_modules
 arkhe-os/ui/desktop/node_modules
 target/
 arkhe-webrtc/node_modules/
-!substrate-6080/
+!arkhe-enterprise/
