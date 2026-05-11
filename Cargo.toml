@@ -1,9 +1,42 @@
 [workspace]
 resolver = "2"
 members = [
-    "arkhe-enterprise",
+    # Real crates (already exist)
+    "substrate-6064",
     "arkhe-qart/substrate-6072",
+
+    # Stubs (created via the script above)
+    "bootloader",
+    "kernel",
+    "substrate-6065",
     "substrate-6071",
+    "substrate-6073",
+    "substrate-6080",
     "substrate-6090",
-    "substrate-6091"
+    "substrate-6091",
+    "substrate-6095",
+    "substrate-9000",
+    "substrate-9001",
+    "substrate-9002",
+    "substrate-9010",
+    "substrate-9020",
+    "substrate-9100",
+    "substrate-9110",
+    "bindings/python",
+    "bindings/wasm",
+    "bindings/cli",
+    "scripts",
 ]
+
+[workspace.dependencies]
+tokio = { version = "1.38", features = ["full"] }
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+
+[workspace.features]
+full = [
+    "substrate-6080/full",
+    "substrate-6090/full",
+    "substrate-6091/full",
+]
+simulation = ["substrate-9001/sim", "substrate-6064/sim-test"]
