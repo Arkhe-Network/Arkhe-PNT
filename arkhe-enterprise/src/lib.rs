@@ -167,7 +167,6 @@ impl EnterpriseOrchestrator {
             qip_engine: None,
             qart_engine: None,
             financial_validator: None,
-            _nanophotonic_engine: None,
             grpc_server: None,
             rest_server: None,
             launched: false,
