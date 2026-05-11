@@ -40,6 +40,7 @@ style-models = []
 sim-test = []
 
 [dependencies]
+anyhow = "1.0"
 # === ARKHE Ecosystem ===
 # arkhe-core = { path = "../../arkhe-core", optional = true }
 # arkhe-temporal = { path = "../../arkhe-temporal", optional = true }
@@ -65,7 +66,7 @@ ark-ff = { version = "0.4.0", optional = true }
 ark-poly = { version = "0.4.0", optional = true }
 ark-std = { version = "0.4.0", optional = true }
 merlin = { version = "3.0.0", optional = true }
-# plonky2 = { version = "0.70.0", optional = true }
+plonky2 = { version = "1.1.0" }
 bulletproofs = { version = "4.0.0", optional = true }
 # pedersen = { version = "0.3.0", optional = true }
 
@@ -81,7 +82,7 @@ half = "2.4"
 ndarray = { version = "0.15.6", optional = true }
 num-traits = "0.2.18"
 statrs = "0.16.1"
-tch = { version = "0.14.0", optional = true } # PyTorch bindings
+tch = { version = "0.19.0", optional = true } # PyTorch bindings
 candle-core = { version = "0.3.0", optional = true }
 linfa = { version = "0.7.0", optional = true }
 
@@ -91,7 +92,7 @@ hound = { version = "3.5.0", optional = true } # WAV reading
 rustfft = "6.0.0"
 
 # === Communication ===
-reqwest = { version = "0.12.0", features = ["rustls-tls"], optional = true }
+reqwest = { version = "0.12.0", features = ["rustls-tls", "json"], optional = true }
 tonic = { version = "0.12.0", optional = true }
 prost = "0.12.6"
 
@@ -99,3 +100,7 @@ prost = "0.12.6"
 petgraph = "0.6.4"
 ordered-float = "4.4.0"
 hashbrown = "0.14.5"
+
+[[test]]
+name = "test_qart_continental"
+path = "../tests/integration/test_qart_continental.rs"
