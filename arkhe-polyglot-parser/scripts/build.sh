@@ -1,6 +1,5 @@
 #!/bin/bash
 # ARKHE P³ — Build Script
-
 set -e
 
 echo "═══════════════════════════════════════════════════"
@@ -38,6 +37,11 @@ echo "[4/5] Gerando bindings Node.js..."
 # 5. Testes
 echo "[5/5] Executando testes..."
 cargo test --release 2>&1 | tail -30
+echo "[0/5] Gerando gramáticas Lark..."
+./scripts/build_grammar.sh
+
+echo "[1/5] Construindo core Rust..."
+cargo build --release 2>&1 | tail -20
 
 echo ""
 echo "═══════════════════════════════════════════════════"
@@ -47,3 +51,4 @@ echo "    • libpolyglot_parser.a (static)"
 echo "    • libpolyglot_parser.so (shared)"
 echo "    • polyglot_parser.wasm (web)"
 echo "  ═══════════════════════════════════════════════"
+echo "═══════════════════════════════════════════════════"

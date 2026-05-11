@@ -73,3 +73,4 @@ impl PolyglotParserWasm {
         serde_wasm_bindgen::to_value(&langs).unwrap()
     }
 }
+// wasm bindings
