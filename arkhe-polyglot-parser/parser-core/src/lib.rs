@@ -212,7 +212,7 @@ impl PolyglotParser {
     pub fn register_language(
         &mut self,
         name: &str,
-        grammar_data: &[u8],
+        _grammar_data: &[u8],
         plugin_path: Option<&str>,
     ) -> Result<(), String> {
         if let Some(path) = plugin_path {
@@ -291,7 +291,7 @@ impl PolyglotParser {
     pub fn transpile(
         &mut self,
         source: &str,
-        from_language: Option<&str>,
+        _from_language: Option<&str>,
         to_language: &str,
     ) -> Result<TranspileResult, String> {
         // 1. Parse para UAST
@@ -319,8 +319,8 @@ impl PolyglotParser {
     /// Análise cross-language: detecta padrões e anti-patterns
     pub fn analyze_cross_language(
         &self,
-        source: &str,
-        language: &str,
+        _source: &str,
+        _language: &str,
     ) -> semantic::semantic_oracle::SemanticReport {
         semantic::semantic_oracle::SemanticReport::default()
     }
@@ -328,8 +328,8 @@ impl PolyglotParser {
     /// Computa diff temporal entre duas versões do código
     pub fn temporal_diff(
         &self,
-        old_version: &str,
-        new_version: &str,
+        _old_version: &str,
+        _new_version: &str,
     ) -> Option<temporal::temporal_code_graph::CodeDelta> {
         None
     }
