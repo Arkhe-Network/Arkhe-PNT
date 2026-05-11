@@ -18,7 +18,9 @@ export default function ArkheGridSimulator({ onClose }: ArkheGridSimulatorProps)
   const [coherence, setCoherence] = useState(0);
 
   const canvasRef = useRef<HTMLCanvasElement>(null);
-  const requestRef = useRef<number>(0);
+  const requestRef = useRef<number | undefined>(undefined);
+  
+
 
   // Physics state
   const N = 8;

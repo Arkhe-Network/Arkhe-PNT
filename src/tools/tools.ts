@@ -13,9 +13,11 @@ import * as consoleTools from './console.js';
 import * as decentralizedTools from './decentralized.js';
 import * as ebpfTools from './ebpf.js';
 import * as emulationTools from './emulation.js';
+import * as epistemologyTools from './epistemology.js';
 import * as evoskillTools from './evoskill.js';
 import * as extensionTools from './extensions.js';
 import * as fortytwoTools from './fortytwo.js';
+import * as gitnexusTools from './gitnexus.js';
 import * as gnoTools from './gno.js';
 import * as gridTools from './grid.js';
 import * as inPageTools from './inPage.js';
@@ -67,6 +69,7 @@ export const createTools = (args: ParsedArguments) => {
         ...Object.values(scriptTools),
         ...Object.values(snapshotTools),
         ...Object.values(storageTools),
+        ...Object.values(epistemologyTools),
         ...Object.values(evoskillTools),
         ...Object.values(fortytwoTools),
         ...Object.values(gridTools),
@@ -86,6 +89,7 @@ export const createTools = (args: ParsedArguments) => {
         ...Object.values(oasisTools),
         ...Object.values(meshtasticTools),
         ...Object.values(gnoTools),
+        ...Object.values(gitnexusTools),
         ...Object.values(nashTools),
         ...Object.values(tribev2Tools),
         ...Object.values(urbitTools),

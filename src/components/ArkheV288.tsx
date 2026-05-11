@@ -1,3 +1,87 @@
+
+declare global {
+  interface GPUBufferUsage {
+    STORAGE: number;
+    COPY_SRC: number;
+    COPY_DST: number;
+    UNIFORM: number;
+  }
+  interface GPUShaderStage {
+    COMPUTE: number;
+    FRAGMENT: number;
+  }
+  var GPUBufferUsage: GPUBufferUsage;
+  var GPUShaderStage: GPUShaderStage;
+}
+
+declare global {
+  interface GPUBufferUsage {
+    STORAGE: number;
+    COPY_SRC: number;
+    COPY_DST: number;
+    UNIFORM: number;
+  }
+  interface GPUShaderStage {
+    COMPUTE: number;
+    FRAGMENT: number;
+  }
+  var GPUBufferUsage: GPUBufferUsage;
+  var GPUShaderStage: GPUShaderStage;
+}
+
+declare global {
+  interface GPUBufferUsage {
+    STORAGE: number;
+    COPY_SRC: number;
+    COPY_DST: number;
+    UNIFORM: number;
+  }
+  interface GPUShaderStage {
+    COMPUTE: number;
+    FRAGMENT: number;
+  }
+  var GPUBufferUsage: GPUBufferUsage;
+  var GPUShaderStage: GPUShaderStage;
+}
+
+declare global {
+  interface GPUBufferUsage {
+    STORAGE: number;
+    COPY_SRC: number;
+    COPY_DST: number;
+    UNIFORM: number;
+  }
+  interface GPUShaderStage {
+    COMPUTE: number;
+    FRAGMENT: number;
+  }
+  var GPUBufferUsage: GPUBufferUsage;
+  var GPUShaderStage: GPUShaderStage;
+}
+
+declare global {
+  interface GPUBufferUsage {
+    STORAGE: number;
+    COPY_SRC: number;
+    COPY_DST: number;
+    UNIFORM: number;
+  }
+  interface GPUShaderStage {
+    COMPUTE: number;
+    FRAGMENT: number;
+  }
+  var GPUBufferUsage: GPUBufferUsage;
+  var GPUShaderStage: GPUShaderStage;
+}
+
+/**
+ * @license
+ * Copyright 2026 Google LLC
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+
+
 /*
  * Copyright (c) Arkhe Network. All rights reserved.
  * Licensed under the MIT License. See LICENSE in the project root for license information.
@@ -10,7 +94,10 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+// License: MIT
 import React, { useEffect, useRef, useState, useCallback } from 'react';
+declare const GPUShaderStage: any;
+declare const GPUBufferUsage: any;
 
 // ═══════════════════════════════════════════════════════════════════════════════
 // CONSTANTES CHRONO-COIL
@@ -153,12 +240,17 @@ interface BrainFlowInstance {
  */
 async function loadBrainFlowWASM(): Promise<BrainFlowInstance> {
   // Em produção, carregar de /public/brainflow.js ou CDN
+  //
+  //
+  //
+  //
+  //  WASM import is not typed WASM import is not typed
 
 
 
 
-  // @ts-expect-error cannot resolve module but it exists at runtime
-  const module = await import(/* @vite-ignore */ '/brainflow_wasm/brainflow.js?url');
+  //  cannot resolve module but it exists at runtime
+  const module = await import(/* @vite-ignore */ '/brainflow_wasm/brainflow.js?url' as any);
   const brainflow = await module.default();
   brainflow.DataFilter.set_log_level(brainflow.LogLevels.LEVEL_OFF);
   return brainflow;
@@ -166,18 +258,18 @@ async function loadBrainFlowWASM(): Promise<BrainFlowInstance> {
 
 /**
  * Processa amostras EEG brutas em bandas de potência.
- * @param samples Array de amostras (canal 0, FP1)
+ * @param _samples Array de amostras (canal 0, FP1)
  * @param samplingRate Taxa de amostragem (Hz)
  * @param brainflow Instância BrainFlow WASM
  */
 function processEEGToBands(
-  samples: Float32Array,
+  _samples: Float32Array,
   samplingRate: number,
   brainflow: BrainFlowInstance
 ): EEGBands {
   // Aplicar bandpass 0.5–100 Hz
   const filtered = brainflow.DataFilter.perform_bandpass(
-    samples, samplingRate, 50.25, 49.75, 4, 1 // butterworth
+    _samples, samplingRate, 50.25, 49.75, 4, 1 // butterworth
   );
 
   // Calcular PSD via Welch
@@ -261,6 +353,7 @@ async function openEEGStream(config: EEGStreamConfig): Promise<ReadableStreamDef
     try {
       while (true) {
         const { value, done } = await reader.read();
+        if (done) { break; }
         if (done) {break;}
 
         buffer += decoder.decode(value, { stream: true });
@@ -301,6 +394,7 @@ async function openEEGStream(config: EEGStreamConfig): Promise<ReadableStreamDef
     }
   };
 
+  void void void void void void void void processLoop();
   processLoop().catch(err => config.onError(err as Error));
   return reader;
 }
@@ -741,6 +835,7 @@ const ArkheV288: React.FC = () => {
   // ─── INICIALIZAR WEBGPU ───
   useEffect(() => {
     const canvas = canvasRef.current;
+    if (!canvas) { return; }
     if (!canvas) {return;}
     const wg = webgpuRef.current;
     let mounted = true;
@@ -752,16 +847,18 @@ const ArkheV288: React.FC = () => {
       }
 
       const adapter = await navigator.gpu.requestAdapter();
+      if (!adapter) { return; }
       if (!adapter) {return;}
       const device = await adapter.requestDevice();
       wg.device = device;
       wg.startTime = performance.now();
 
-      const context = canvas!.getContext('webgpu');
+      const context = canvas!.getContext("webgpu") as any;
+      if (!context) { return; }
       if (!context) {return;}
 
       const presentationFormat = navigator.gpu.getPreferredCanvasFormat();
-      context.configure({ device, format: presentationFormat });
+      (context as any).configure({ device, format: presentationFormat });
 
       // Buffers (idêntico ao v∞.283.2)
       const cellBytes = 5 * 4;
@@ -872,6 +969,7 @@ const ArkheV288: React.FC = () => {
       let framesSinceUpdate = 0;
 
       function frame() {
+        if (!mounted) { return; }
         if (!mounted) {return;}
         const now = performance.now();
         const t = (now - wg.startTime) * 0.001;
@@ -908,7 +1006,7 @@ const ArkheV288: React.FC = () => {
         cp.end();
 
         // RENDER
-        const tex = context!.getCurrentTexture().createView();
+        const tex = (context as any).getCurrentTexture().createView();
         const rp = encoder.beginRenderPass({
           colorAttachments: [{
             view: tex,
@@ -930,6 +1028,10 @@ const ArkheV288: React.FC = () => {
       wg.animId = requestAnimationFrame(frame);
     }
 
+    void void void void void void void void initWebGPU();
+
+    // Tentar conectar EEG automaticamente
+    void void void void void void void void connectEEG();
     initWebGPU().catch(console.error);
 
     // Tentar conectar EEG automaticamente
@@ -938,6 +1040,7 @@ const ArkheV288: React.FC = () => {
     return () => {
       mounted = false;
       cancelAnimationFrame(wg.animId);
+      void void void void void void void void wg.eegReader?.cancel();
       wg.eegReader?.cancel().catch(console.error);
     };
   }, [connectEEG]);

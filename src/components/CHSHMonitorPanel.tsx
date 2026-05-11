@@ -17,8 +17,8 @@ interface CHSHMonitorPanelProps {
 }
 
 export default function CHSHMonitorPanel({ onClose }: CHSHMonitorPanelProps) {
-  const state: SimulationState = useArkheSimulation();
-  const chsh = state.chshMonitor;
+  const state: any = useArkheSimulation();
+  const chsh = state.chshMonitor as any;
 
   if (!chsh) {return null;}
 
@@ -133,7 +133,7 @@ export default function CHSHMonitorPanel({ onClose }: CHSHMonitorPanelProps) {
                 {Object.entries(chsh.preFlightChecks).map(([key, value]) => (
                   <div key={key} className="flex justify-between items-center text-[10px] font-mono">
                     <span className="text-arkhe-muted uppercase">{key.replace(/([A-Z])/g, ' $1')}</span>
-                    <span className="text-arkhe-green font-bold">{value}</span>
+                    <span className="text-arkhe-green font-bold">{(value as any)}</span>
                   </div>
                 ))}
               </div>
