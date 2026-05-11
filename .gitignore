@@ -139,7 +139,9 @@ debug/
 !arkhe-go/
 !arkhe-android/
 arkhe-*/
+!arkhe-cosmological/
 $# arkhe-*/
+!arkhe-cosmological/
 !arkhe-core/
 !arkhe-os/
 !arkhe-qart/
