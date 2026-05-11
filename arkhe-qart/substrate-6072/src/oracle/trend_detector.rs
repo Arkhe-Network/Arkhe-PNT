@@ -1,25 +1,35 @@
+use crate::temporal::art_block::ArtBlockRegistry;
+use crate::types::StyleEmbedding;
+use crate::errors::QArtError;
+
+/// Detecta tendências estilísticas a partir dos embeddings recentes.
 pub struct TrendDetector {
-    pub alpha: f64,
-    pub ewma_score: f64,
-    pub threshold: f64,
+    window_blocks: usize,
 }
 
 impl TrendDetector {
-    pub fn new(alpha: f64, threshold: f64) -> Self {
-        TrendDetector {
-            alpha,
-            ewma_score: 0.0,
-            threshold,
+    pub fn new(window_blocks: usize) -> Self {
+        Self { window_blocks }
+    }
+
+    /// Calcula o embedding médio da janela temporal e retorna a direção de movimento.
+    pub fn detect_trend(
+        &self,
+        registry: &ArtBlockRegistry,
+        current_block: u64,
+    ) -> Result<StyleEmbedding, QArtError> {
+        let start = current_block.saturating_sub(self.window_blocks as u64);
+        let blocks = registry.query_blocks_between(start, current_block)?;
+        if blocks.is_empty() { return Err(QArtError::InfluenceError("no data".into())); }
+
+        let dim = blocks[0].fingerprint.style_embedding.dim;
+        let mut avg = vec![0.0f32; dim];
+        for block in &blocks {
+            for (i, &v) in block.fingerprint.style_embedding.vector.iter().enumerate() {
+                avg[i] += v;
+            }
         }
-    }
-
-    // Exponential Weighted Moving Average for smooth trend detection
-    pub fn update(&mut self, new_score: f64) -> bool {
-        self.ewma_score = self.alpha * new_score + (1.0 - self.alpha) * self.ewma_score;
-        self.is_trending()
-    }
-
-    pub fn is_trending(&self) -> bool {
-        self.ewma_score > self.threshold
+        for v in &mut avg { *v /= blocks.len() as f32; }
+        Ok(StyleEmbedding { dim, vector: avg })
     }
 }
