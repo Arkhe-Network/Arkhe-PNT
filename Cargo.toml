@@ -5,7 +5,14 @@ members = [
     "substrate-9010",
     "arkhe-enterprise",
     "arkhe-qart/substrate-6072",
+
+    # Stubs (created via the script above)
+    "bootloader",
+    "kernel",
+    "substrate-6065",
     "substrate-6071",
+    "substrate-6073",
+    "substrate-6080",
     "substrate-6090",
     "substrate-6091",
     "substrate-9001",
