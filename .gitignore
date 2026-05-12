@@ -533,3 +533,6 @@ app_arkhe/frontend/node_modules
 final_app_arkhe/frontend/node_modules
 arkhe-os/ui/desktop/node_modules
 arkhe-webrtc/node_modules/
+
+# Override to allow arkhe-qip for QIP + ORCID + Entropy + Light Sculptor + IGHA
+!arkhe-qip/
