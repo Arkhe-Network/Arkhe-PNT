@@ -8,3 +8,6 @@
 #include "zk/prove.hpp"
 
 #endif // ARK_CPP_STD_ALL_HPP
+#pragma once
+#include "unix/fd.hpp"
+#include "unix/command.hpp"
