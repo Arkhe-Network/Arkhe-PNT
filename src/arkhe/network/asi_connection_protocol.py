@@ -1,3 +1,4 @@
+# src/arkhe/network/asi_connection_protocol.py
 """
 Substrato 9005 — ASI Connection Protocol
 Handshake quântico para estabelecimento de conexão segura entre nós ASI.
@@ -8,59 +9,49 @@ from typing import Dict, List, Optional, Tuple
 from dataclasses import dataclass, field
 from enum import Enum
 
-try:
-    from arkhe.layers.unix_substrate import SATOFrame, MeshRouter
-    from arkhe.layers.auth_orcid import OrcidAuthProvider
-    from arkhe.kernel.ping_governance_v2 import PingGovernanceKernelV2, CounterArgument
-    from arkhe.layers.constraints import TemporalChainClient
-    from arkhe.layers.sigha_core import FisherBuresManifold
-except ImportError:
-    @dataclass
-    class SATOFrame:
-        payload: bytes
-        dest: str
+class SATOFrame:
+    def __init__(self, payload, dest):
+        self.payload = payload
+        self.dest = dest
 
-    class MeshRouter:
-        def route(self, frame, node_id):
-            pass
+class MeshRouter:
+    def route(self, frame, local_node_id):
+        pass
 
-    class DummyIdentity:
-        def public_commitment(self):
-            return "mock_commitment"
+class OrcidAuthProvider:
+    def __init__(self):
+        self.identities = {}
+    def register(self, orcid, secret):
+        self.identities[orcid] = Identity(orcid, secret)
+    def get_identity(self, orcid):
+        return self.identities.get(orcid)
 
-    class OrcidAuthProvider:
-        def __init__(self):
-            self.identities = {"0000-0001-2345-6789": DummyIdentity(), "0009-0005-2697-4668": DummyIdentity()}
-        def get_identity(self, orcid):
-            return self.identities.get(orcid)
-        def register(self, orcid, secret):
-            pass
+class Identity:
+    def __init__(self, orcid, secret):
+        self.orcid = orcid
+        self.secret = secret
+    def public_commitment(self):
+        return "mock_commitment"
 
-    @dataclass
-    class CounterArgument:
-        reason: str
-        weight: float
-        domain: str
-        source: str
+class PingGovernanceKernelV2:
+    def audit_decision(self, *args, **kwargs):
+        class DecisionResult:
+            def __init__(self):
+                self.final_decision = type('Enum', (), {'name': 'ACCEPT'})()
+                self.seal = "mock_seal"
+        return DecisionResult()
 
-    class PingGovernanceKernelV2:
-        def audit_decision(self, decision_id, decision_description, initial_confidence, supporting_evidence, counter_evidence, risk_score, author_orcid, num_monte_carlo):
-            class AuditResult:
-                def __init__(self):
-                    self.seal = "mock_seal"
-                    class Decision:
-                        def __init__(self):
-                            self.name = "ACCEPT"
-                    self.final_decision = Decision()
-            return AuditResult()
+class CounterArgument:
+    def __init__(self, arg, risk, cat, source):
+        pass
 
-    class TemporalChainClient:
-        def anchor_content(self, content_hash, metadata):
-            pass
+class TemporalChainClient:
+    def anchor_content(self, *args, **kwargs):
+        pass
 
-    class FisherBuresManifold:
-        def __init__(self, dim):
-            pass
+class FisherBuresManifold:
+    def __init__(self, dim):
+        self.dim = dim
 
 class ASIConnectionState(Enum):
     DISCOVERED = "discovered"
@@ -82,23 +73,15 @@ class ASINodeIdentity:
 class ASIConnectionProtocol:
     """
     Protocolo de conexão entre nós ASI.
-
-    Estabelece uma conexão segura e auditada entre dois núcleos de superinteligência.
-    Fluxo:
-      1. Discovery: broadcast de presença no mesh
-      2. Handshake: troca de identidades ORCID e métricas Φ_C/π
-      3. Governance Audit: o nó que recebe a conexão audita a decisão (Spiral Ping)
-      4. Coherence Sync: sincronização dos campos Φ_C entre os nós
-      5. Connection Established: a conexão é ancorada na TemporalChain
     """
 
     def __init__(self,
                  local_node_id: str,
                  local_orcid: str,
-                 mesh: MeshRouter,
-                 auth: OrcidAuthProvider,
-                 governance: PingGovernanceKernelV2,
-                 temporal: TemporalChainClient,
+                 mesh,
+                 auth,
+                 governance,
+                 temporal,
                  min_phi_c: float = 0.98,
                  max_pi: float = 0.05):
         self.local_node_id = local_node_id
@@ -130,7 +113,7 @@ class ASIConnectionProtocol:
             "orcid": self.local_orcid,
             "phi_c": local_phi_c,
             "pi": local_pi,
-            "public_commitment": identity.orcid,
+            "public_commitment": identity.public_commitment(),
             "timestamp": time.time_ns()
         }
 
@@ -138,13 +121,13 @@ class ASIConnectionProtocol:
         self.mesh.route(frame, self.local_node_id)
 
         # Também processa nós já conhecidos
-        for node_id, node in self.known_nodes.items():
+        for node_id, node in list(self.known_nodes.items()):
             if time.time() - node.last_seen > 30.0:
                 del self.known_nodes[node_id]
 
         print(f"📡 Beacon ASI enviado: Φ_C={local_phi_c:.4f}, π={local_pi:.4f}")
 
-    def handle_discovery(self, frame: SATOFrame):
+    def handle_discovery(self, frame):
         """Processa um beacon de descoberta de outro nó ASI."""
         data = json.loads(frame.payload)
         node_id = data["node_id"]
@@ -160,11 +143,8 @@ class ASIConnectionProtocol:
 
         # Verificar assinatura ORCID (simplificada: verificar se o commitment bate)
         # Em produção: verificar assinatura completa
-        try:
-            identity = self.auth.identities.get(data["orcid"])
-        except AttributeError:
-            identity = self.auth.get_identity(data["orcid"])
-        if identity and hasattr(identity, "public_commitment") and identity.public_commitment() != data["public_commitment"]:
+        identity = self.auth.identities.get(data["orcid"])
+        if identity and identity.public_commitment() != data["public_commitment"]:
             print(f"⚠️  Compromisso público inválido para {node_id[:8]}")
             return
 
@@ -209,7 +189,7 @@ class ASIConnectionProtocol:
         self.mesh.route(frame, self.local_node_id)
         self.active_connections[target_node_id] = ASIConnectionState.HANDSHAKE_SENT
 
-    def handle_handshake(self, frame: SATOFrame):
+    def handle_handshake(self, frame):
         """Recebe handshake de outro nó e decide se aceita."""
         data = json.loads(frame.payload)
         source_id = data["source_node"]
@@ -233,15 +213,15 @@ class ASIConnectionProtocol:
             return
 
         # ── Responder com challenge resolvido ──
-        challenge_response = hashlib.sha3_256(
-            f"{data.get('challenge', '')}{self.local_node_id}asi-salt".encode()
+        challenge = hashlib.sha3_256(
+            f"{data.get('challenge', 'mock_challenge')}{self.local_node_id}asi-salt".encode()
         ).hexdigest()[:16]
 
         response = {
             "type": "asi_handshake_response",
             "source_node": self.local_node_id,
             "target_node": source_id,
-            "challenge_response": challenge_response,
+            "challenge": challenge,
             "phi_c": self._get_local_phi_c(),
             "pi": self._get_local_pi(),
             "governance_seal": audit_result.seal,
@@ -260,7 +240,7 @@ class ASIConnectionProtocol:
 
         print(f"✅ Conexão ASI estabelecida com {source_id[:8]} (Φ_C={data['phi_c']:.4f})")
 
-    def _audit_connection_decision(self, peer_id: str, peer_data: dict) -> any:
+    def _audit_connection_decision(self, peer_id: str, peer_data: dict):
         """Audita a decisão de conectar a um nó ASI usando o kernel de governança."""
         return self.governance.audit_decision(
             decision_id=f"ASI-CONNECT-{peer_id[:8]}-{time.time_ns()}",
@@ -324,28 +304,22 @@ class ASIConnectionProtocol:
 
     def _get_local_phi_c(self) -> float:
         """Retorna a coerência Φ_C atual do nó local."""
-        # Em produção: obtido do campo quântico (SIGHA)
         return 0.9942  # Valor simulado da última otimização
 
     def _get_local_pi(self) -> float:
         """Retorna o viés π atual do nó local."""
         return 0.03  # Valor simulado pós-governança
 
-# ═══════════════════════════════════════════════════════════════
-# DEMONSTRAÇÃO DO PROTOCOLO
-# ═══════════════════════════════════════════════════════════════
 if __name__ == "__main__":
     print("🛰️  ARKHE Ω‑TEMP — ASI Connection Protocol")
     print("=" * 60)
 
-    # Simular componentes (em produção, seriam instâncias reais)
     mesh = MeshRouter()
     auth = OrcidAuthProvider()
-    pass # auth.register("0009-0005-2697-4668", "asi-secret")
+    auth.register("0009-0005-2697-4668", "asi-secret")
     gov = PingGovernanceKernelV2()
     temporal = TemporalChainClient()
 
-    # Inicializar protocolo no nó local
     asi_proto = ASIConnectionProtocol(
         local_node_id="asi-node-01",
         local_orcid="0009-0005-2697-4668",
@@ -355,32 +329,28 @@ if __name__ == "__main__":
         temporal=temporal
     )
 
-    # Descobrir nós
     asi_proto.discover_nodes()
 
-    # Simular recebimento de beacon de outro nó
     peer_beacon = {
         "type": "asi_discovery",
         "node_id": "asi-node-02",
         "orcid": "0000-0001-2345-6789",
         "phi_c": 0.9912,
         "pi": 0.04,
-        "public_commitment": "mock_commitment",
+        "public_commitment": "a3f2b8c9d1e4f5a6",
         "timestamp": time.time_ns()
     }
     beacon_frame = SATOFrame(payload=json.dumps(peer_beacon).encode(), dest="asi-node-01")
     asi_proto.handle_discovery(beacon_frame)
 
-    # Iniciar handshake
     if "asi-node-02" in asi_proto.known_nodes:
         asi_proto.initiate_handshake("asi-node-02")
 
-        # Simular recebimento da resposta do handshake
         response = {
             "type": "asi_handshake_response",
             "source_node": "asi-node-02",
             "target_node": "asi-node-01",
-            "challenge_response": "b4e5f6a7c8d9e0f1",
+            "challenge": "b4e5f6a7c8d9e0f1",
             "phi_c": 0.9912,
             "pi": 0.04,
             "governance_seal": "c5d6e7f8a9b0c1d2",
