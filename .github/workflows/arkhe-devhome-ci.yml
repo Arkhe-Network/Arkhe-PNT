@@ -17,14 +17,19 @@ jobs:
     steps:
     - uses: actions/checkout@v4
     - name: Setup Arkhe SDK
+      shell: bash
       run: winget install Arkhe.ArkheCLI --accept-package-agreements --accept-source-agreements || echo "Mock winget"
     - name: Build
+      shell: bash
       run: arkh build --config Release || echo "Mock arkh build"
     - name: Run Unit Tests
+      shell: bash
       run: arkh test --coverage || echo "Mock arkh test"
     - name: Verify Φ_C Coherence
+      shell: bash
       run: arkh phi-c verify --threshold 0.99 || echo "Mock arkh phi-c"
     - name: Package MSIX
+      shell: bash
       run: arkh package msix --output ./dist/ArkheApp.msix || echo "Mock arkh package"
     - name: Upload Artifact
       uses: actions/upload-artifact@v4
@@ -44,8 +49,10 @@ jobs:
         name: ArkheApp-MSIX
         path: ./dist/
     - name: Deploy to Intune
+      shell: bash
       env:
         AZURE_CREDENTIALS: ${{ secrets.AZURE_CREDENTIALS }}
       run: arkh intune deploy --package ./dist/ArkheApp.msix --group "Early Adopters" || echo "Mock arkh intune"
     - name: Anchor Deployment in TemporalChain
+      shell: bash
       run: arkh temporal anchor --type "ci_deploy" --metadata "{\"commit\":\"${{ github.sha }}\"}" || echo "Mock arkh temporal"
