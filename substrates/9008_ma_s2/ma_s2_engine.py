@@ -1,12 +1,11 @@
 #!/usr/bin/env python3
+# substrates/9008_ma_s2/ma_s2_engine.py
 """
 MA‑S2 Compliance Engine – Substrato 9008
 Integra os 4 domínios do padrão MA‑S2 no runtime da Catedral.
 """
 
-import hashlib
-import json
-import time
+import hashlib, json, time, asyncio
 from typing import Dict, List, Optional
 from dataclasses import dataclass
 
@@ -27,8 +26,7 @@ class MA_S2_Engine:
         self.guardian = guardian      # GuardianAttractor (CVS + APM)
         self.inventory = inventory    # TemporalChain SBOM (INV)
         self.orchestrator = orchestrator  # Fleet orchestrator (ARO)
-        self.last_scan_results: Dict[str, List] = {}
-        self.reports: List[MA_S2_Report] = []
+        self.last_scan_results = {}
 
     # ─── CVS: Escaneamento contínuo ────────────────────────────────
     async def continuous_vulnerability_scan(self, artifact_hash: str):
@@ -36,7 +34,7 @@ class MA_S2_Engine:
         findings = await self.guardian.scan_artifact(artifact_hash)
 
         for f in findings:
-            # CVS‑0.2: Classificação EPSS + KEV (já feita no Guardian)
+            # CVS‑0.2: Classificação EPSS + KEV
             f.enrich_with_epss_kev()
             # CVS‑0.4: Escalada automática
             if f.is_critical():
@@ -44,22 +42,12 @@ class MA_S2_Engine:
 
         self.last_scan_results[artifact_hash] = findings
         # CVS‑0.5: Registrar SLA no TemporalChain
-        seal = await self.temporal.anchor_event("cvs_scan_complete", {
+        await self.temporal.anchor_event("cvs_scan_complete", {
             "artifact": artifact_hash,
             "findings": len(findings),
             "critical": sum(1 for f in findings if f.is_critical()),
             "timestamp": time.time()
         })
-
-        self.reports.append(MA_S2_Report(
-            vendor="ARKHE",
-            domain="CVS",
-            control_id="CVS-0.1–0.5",
-            status="compliant",
-            evidence=hashlib.sha3_256(str([f.to_dict() for f in findings]).encode()).hexdigest()[:16],
-            temporal_anchor=seal
-        ))
-        return findings
 
     # ─── APM: Modelagem de caminhos de ataque ──────────────────────
     async def attack_path_modeling(self, service_map: Dict):
@@ -69,7 +57,6 @@ class MA_S2_Engine:
         for path in paths:
             # APM‑1.3: Triage contextual
             priority = self.guardian.compute_contextual_priority(path)
-            path.risk_score = priority
             # APM‑1.2: Simulação adversarial AI (já embutida no Guardian)
             # APM‑1.4: Integração com MITRE ATT&CK (via ThreatDatabase)
             await self.temporal.anchor_event("apm_path_modeled", {
@@ -77,20 +64,6 @@ class MA_S2_Engine:
                 "risk_score": priority,
                 "timestamp": time.time()
             })
-
-        seal = await self.temporal.anchor_event("apm_complete", {
-            "paths_modeled": len(paths),
-            "timestamp": time.time()
-        })
-
-        self.reports.append(MA_S2_Report(
-            vendor="ARKHE",
-            domain="APM",
-            control_id="APM-1.1–1.4",
-            status="compliant",
-            evidence=hashlib.sha3_256(str([p.to_dict() for p in paths]).encode()).hexdigest()[:16],
-            temporal_anchor=seal
-        ))
         return paths
 
     # ─── INV: Inventário e SBOM imutáveis ───────────────────────────
@@ -98,23 +71,13 @@ class MA_S2_Engine:
         """INV‑2.1: Gera SBOM no formato CycloneDX e ancora na TemporalChain."""
         sbom = await self.inventory.build_sbom(release_id)
         sbom_hash = hashlib.sha3_256(sbom.encode()).hexdigest()
-        seal = await self.temporal.anchor_event("sbom_anchored", {
+        await self.temporal.anchor_event("sbom_anchored", {
             "release": release_id,
             "hash": sbom_hash,
             "timestamp": time.time()
         })
         # INV‑2.2: Reconciliação contínua
-        import asyncio
         asyncio.create_task(self.inventory.reconcile_runtime(release_id))
-
-        self.reports.append(MA_S2_Report(
-            vendor="ARKHE",
-            domain="INV",
-            control_id="INV-2.1–2.5",
-            status="compliant",
-            evidence=sbom_hash[:16],
-            temporal_anchor=seal
-        ))
         return sbom_hash
 
     # ─── ARO: Orquestração autônoma de remediação ─────────────────
@@ -126,7 +89,7 @@ class MA_S2_Engine:
             # ARO‑3.3: Respeita janelas de mudança por ambiente
             respect_change_windows=True
         )
-        seal = await self.temporal.anchor_event("aro_patch_deployed", {
+        await self.temporal.anchor_event("aro_patch_deployed", {
             "vulnerability": vulnerability_id,
             "release": patched_release,
             "deployment_id": deployment_id,
@@ -134,33 +97,3 @@ class MA_S2_Engine:
         })
         # ARO‑3.4: Supressão com auditoria automática
         await self.orchestrator.suppress_with_audit(vulnerability_id, deployment_id)
-
-        self.reports.append(MA_S2_Report(
-            vendor="ARKHE",
-            domain="ARO",
-            control_id="ARO-3.1–3.6",
-            status="compliant",
-            evidence=deployment_id,
-            temporal_anchor=seal
-        ))
-        return deployment_id
-
-    def generate_compliance_report(self) -> Dict:
-        """Gera relatório consolidado de conformidade MA‑S2."""
-        domain_status = {}
-        for r in self.reports:
-            domain_status[r.domain] = r.status
-
-        all_compliant = all(s == "compliant" for s in domain_status.values())
-
-        return {
-            "standard": "MA-S2",
-            "substrate": "9008",
-            "vendor": "ARKHE-Cathedral",
-            "assessment_date": time.time(),
-            "domains": domain_status,
-            "overall_status": "compliant" if all_compliant else "partial",
-            "controls_tested": len(self.reports),
-            "temporal_seal": self.temporal.current_seal,
-            "chain_integrity": self.temporal.verify_chain()
-        }
