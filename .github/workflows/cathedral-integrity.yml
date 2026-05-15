@@ -47,10 +47,23 @@ jobs:
         with:
           vs-version: '17.0'  # VS 2022
 
-      - name: 📦 Install Windows SDK
+      - name: Install Windows SDK (resilient)
+        shell: pwsh
         run: |
-          # Instalar Windows SDK para signtool
-          choco install windows-sdk-10.0 --version=10.0.22621.0 -y || echo "Mock install"
+          # Impede que erros não-terminantes quebrem o script
+          $ErrorActionPreference = 'Continue'
+
+          Write-Host "Attempting choco install windows-sdk-10.0..."
+          choco install windows-sdk-10.0 -y --no-progress --limit-output
+
+          if ($LASTEXITCODE -ne 0) {
+              Write-Host "##[warning] choco install failed with exit code $LASTEXITCODE. Assuming SDK is already present or not required."
+          } else {
+              Write-Host "Windows SDK installed successfully."
+          }
+
+          # Garante que o script sempre termina com código 0 (sucesso)
+          exit 0
 
       - name: 🔨 Build Cathedral driver
         run: |
