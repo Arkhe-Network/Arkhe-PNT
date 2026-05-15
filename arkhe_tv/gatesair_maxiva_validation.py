@@ -20,7 +20,7 @@ async def validate_gatesair_integration(host: str, username: str, password: str,
                                         temporal_chain=None) -> List[MaxivaValidationResult]:
     """Executa bateria de validação contra GatesAir Maxiva."""
     results = []
-    from arkhe_tv.gatesair_maxiva_connectivity import GatesAirMaxivaConnectivity, MaxivaConnectionParams
+    from gatesair_maxiva_connectivity import GatesAirMaxivaConnectivity, MaxivaConnectionParams
 
     params = MaxivaConnectionParams(host=host, username=username, password=password)
     async with GatesAirMaxivaConnectivity(params, temporal_chain) as conn:
