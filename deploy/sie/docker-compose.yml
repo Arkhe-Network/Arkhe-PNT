@@ -1,0 +1,46 @@
+version: "3.8"
+services:
+  sie:
+    image: superlinked/sie:latest
+    container_name: sie-server
+    ports:
+      - "9080:9080"
+    environment:
+      - SIE_LOG_LEVEL=info
+      - SIE_MAX_MODELS=10
+      - SIE_GPU_MEMORY_FRACTION=0.85
+      - SIE_DEFAULT_ENGINE=auto
+    volumes:
+      - sie_models:/models
+      - ./config/sie_config.yaml:/app/config.yaml:ro
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [gpu]
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9080/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  arkhe-sie-bridge:
+    build:
+      context: ../../arkhe_sie
+      dockerfile: Dockerfile
+    container_name: arkhe-sie-bridge
+    ports:
+      - "8052:8052"
+    environment:
+      - SIE_ENDPOINT=http://sie:9080
+      - TEMPORAL_CHAIN_ENDPOINT=http://temporal-chain:8051
+      - GUARDIAN_ENDPOINT=http://guardian:8050
+      - PHI_C_THRESHOLD=0.95
+    depends_on:
+      sie:
+        condition: service_healthy
+
+volumes:
+  sie_models:
