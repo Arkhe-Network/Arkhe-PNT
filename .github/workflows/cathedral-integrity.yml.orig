@@ -54,7 +54,6 @@ jobs:
           choco install windows-sdk-10.0 -y || echo "Mock install"
 
       - name: 🔨 Build Cathedral driver
-        shell: bash
         run: |
           msbuild catedral/Cathedral.sln /p:Configuration=Release /p:Platform=x64 /t:Rebuild || echo "Mock build"
           Write-Host "✅ Driver built: catedral/x64/Release/catedral.sys"
