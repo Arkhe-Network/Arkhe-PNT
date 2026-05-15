@@ -1,21 +1,30 @@
 import pytest
 import asyncio
-from unittest.mock import MagicMock
+from hardware.emitter_integration.quantum_dot_controller import QuantumDotHardwareController, HardwareConfig
+from tests.field.quantum_correlation_validator import QuantumCorrelationValidator
+from security.hybrid_pqc_quantum_signer import HybridPQCQuantumSigner, SignatureMode
 
-def test_decree(capsys):
-    import substrato_191_quantum_fiber
-    substrato_191_quantum_fiber.decree()
-    captured = capsys.readouterr()
-    assert "SUBSTRATO_191: QUANTUM_FIBER_OPTIMIZATION" in captured.out
-    assert "EPR Clock Sync:" in captured.out
-    assert "CANONICAL SEAL: a1b2c3d4e5f6a7b8c9d0e1f2a3b4c5d6e7f8a9b0c1d2e3f4a5b6c7d8e9f0" in captured.out
+@pytest.mark.asyncio
+async def test_hardware_integration():
+    config = HardwareConfig(device_serial="TEST-001")
+    controller = QuantumDotHardwareController(config)
+    await controller.connect_hardware()
+    result = await controller.emit_polarized_batch(10, ["rectilinear"])
+    assert result["success"] is True
+    assert result["photons_emitted"] == 10
 
-def test_optimize_fiber_span():
-    import substrato_191_quantum_fiber
-    result = asyncio.run(substrato_191_quantum_fiber.optimize_fiber_span("SPAN-TEST"))
+@pytest.mark.asyncio
+async def test_epr_validation():
+    validator = QuantumCorrelationValidator({}, {})
+    result = await validator.run_bell_test(pair_count=1000)
+    assert result.total_pairs_measured == 1000
+    assert result.s_parameter > 2.0
 
-    assert result["span_id"] == "SPAN-TEST"
-    assert "new_osnr_target" in result
-    assert "fec_scheme" in result
-    assert "clock_offset_correction_ps" in result
-    assert "dithering_amplitude" in result
+@pytest.mark.asyncio
+async def test_hybrid_signer():
+    signer = HybridPQCQuantumSigner(pqc_algorithm="ML-DSA-65")
+    message = b"test message"
+    result = await signer.sign_message(message, {}, SignatureMode.HYBRID_PARALLEL)
+    assert result.success is True
+    assert result.pqc_signature_hex is not None
+    assert result.quantum_witness_hash is not None
