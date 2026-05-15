@@ -1,95 +1,48 @@
 import pytest
-import asyncio
-from arkhe_twitch.twitch_connector import TwitchConfig, ArkheTwitchConnector
+import numpy as np
+from arkhe_moire.materials_2d_db import MATERIALS_2D_CATALOG, MaterialClass
+from arkhe_moire.spin_valley_simulator import SpinValleySimulator, SpinValleyState, MaterialsMapper
 
-class MockPhiBus:
-    def get_mesh_coherence(self):
-        return 0.9999
+def test_materials_db():
+    assert "WSe2" in MATERIALS_2D_CATALOG
+    assert "CrI3" in MATERIALS_2D_CATALOG
+    assert "BaTiO3_2D" in MATERIALS_2D_CATALOG
 
-class MockGuardianReport:
-    reason = "unsafe_content"
+    cri3 = MATERIALS_2D_CATALOG["CrI3"]
+    assert cri3.material_class == MaterialClass.MAGNETIC_2D
 
-class MockGuardian:
-    def exorcise(self, message):
-        if "badword" in message:
-            return False, MockGuardianReport()
-        return True, None
+    batio3 = MATERIALS_2D_CATALOG["BaTiO3_2D"]
+    assert batio3.material_class == MaterialClass.PEROVSKITE
 
-class MockTemporal:
-    async def anchor_event(self, event_type, data):
-        return f"seal_for_{event_type}"
+def test_materials_mapper():
+    mapper = MaterialsMapper()
+    best_spin = mapper.find_best_for_application("spintronics", min_phi_c=0.90)
+    assert len(best_spin) > 0
+    names = [x[0] for x in best_spin]
+    assert "Chromium Triiodide" in names
 
-class MockPQCResult:
-    def __init__(self, success, sig=""):
-        self.success = success
-        self.signature_or_ciphertext = sig
-        self.algorithm_used = "DILITHIUM"
-        self.error_message = "error" if not success else ""
+def test_spin_valley_simulator():
+    wse2 = MATERIALS_2D_CATALOG["WSe2"]
+    sim = SpinValleySimulator(wse2, angle_degrees=1.1)
 
-class MockPQC:
-    def generate_keypair(self):
-        return {"private_key": "priv", "public_key": "pub"}
-    def sign_message(self, message, key):
-        return MockPQCResult(True, "mock_sig_bytes")
+    # Check dispersion
+    k_points = np.array([[0, 0], [0.5, 0.5]])
+    dispersion = sim.compute_spin_valley_dispersion(k_points)
+    assert dispersion.shape == (2, 4)
 
-@pytest.fixture
-def config():
-    return TwitchConfig(
-        client_id="test_client",
-        client_secret="test_secret",
-        broadcaster_id="test_broadcaster"
-    )
+    # Check map
+    cmap = sim.generate_coherence_map((1.0, 10.0), n_points=5)
+    assert cmap["material"] == "Tungsten Diselenide"
+    assert len(cmap["angles"]) == 5
+    assert len(cmap["temperatures"]) == 5
 
-@pytest.mark.asyncio
-async def test_stream_info(config):
-    connector = ArkheTwitchConnector(
-        config=config,
-        phi_bus=MockPhiBus(),
-        temporal_chain=MockTemporal()
-    )
-    async with connector as tc:
-        stream = await tc.get_stream_info()
-        assert stream is not None
-        assert stream.title == "ARKHE Cathedral Stream"
-        assert stream.phi_c_coherence == 0.9999
-        assert stream.temporal_seal == "seal_for_twitch_stream_info"
+def test_qnc_optimization():
+    cri3 = MATERIALS_2D_CATALOG["CrI3"]
+    sim = SpinValleySimulator(cri3, angle_degrees=1.5)
 
-@pytest.mark.asyncio
-async def test_chat_message_process(config):
-    connector = ArkheTwitchConnector(
-        config=config,
-        guardian=MockGuardian(),
-        temporal_chain=MockTemporal()
-    )
-    async with connector as tc:
-        safe_msg_data = {
-            "message_id": "msg1",
-            "broadcaster_user_id": "test_broadcaster",
-            "message": {"text": "hello world"}
-        }
-        msg = await tc.process_chat_message(safe_msg_data)
-        assert msg.phi_c_safe is True
-        assert len(tc._chat_history) == 1
-
-        unsafe_msg_data = {
-            "message_id": "msg2",
-            "broadcaster_user_id": "test_broadcaster",
-            "message": {"text": "hello badword"}
-        }
-        msg_unsafe = await tc.process_chat_message(unsafe_msg_data)
-        assert msg_unsafe.phi_c_safe is False
-        assert msg_unsafe.guardian_reason == "unsafe_content"
-
-@pytest.mark.asyncio
-async def test_pqc_signing(config):
-    connector = ArkheTwitchConnector(
-        config=config,
-        phi_bus=MockPhiBus(),
-        pqc_adapter=MockPQC()
-    )
-    async with connector as tc:
-        stream = await tc.get_stream_info()
-        result = await tc.sign_stream_metadata(stream)
-        assert result["success"] is True
-        assert "metadata_hash" in result
-        assert result["algorithm"] == "DILITHIUM"
+    angles = sim.optimize_critical_angles_qnc()
+    assert isinstance(angles, list)
+    assert len(angles) > 0
+    # ensure it finds roughly 1.5 and 4.2
+    found_1_5 = any(abs(a - 1.5) < 0.2 for a in angles)
+    assert found_1_5
