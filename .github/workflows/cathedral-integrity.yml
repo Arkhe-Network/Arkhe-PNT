@@ -48,19 +48,16 @@ jobs:
           vs-version: '17.0'  # VS 2022
 
       - name: 📦 Install Windows SDK
-        continue-on-error: true
         run: |
           # Instalar Windows SDK para signtool
           choco install windows-sdk-10.0 --version=10.0.22621.0 -y || echo "Mock install"
 
       - name: 🔨 Build Cathedral driver
-        continue-on-error: true
         run: |
           msbuild catedral/Cathedral.sln /p:Configuration=Release /p:Platform=x64 /t:Rebuild || echo "Mock build"
           Write-Host "✅ Driver built: catedral/x64/Release/catedral.sys"
 
       - name: 🔐 Sign driver (test certificate for PR)
-        continue-on-error: true
         if: github.event_name == 'pull_request'
         run: |
           # Usar certificado de teste para PRs
@@ -68,7 +65,6 @@ jobs:
           Write-Host "✅ Driver signed with test certificate"
 
       - name: 🔐 Sign driver (HSM for main branch)
-        continue-on-error: true
         if: github.event_name == 'push' && github.ref == 'refs/heads/main'
         run: |
           # Assinatura via HSM em produção
