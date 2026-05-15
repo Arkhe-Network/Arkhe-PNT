@@ -54,13 +54,13 @@ jobs:
           choco install windows-sdk-10.0 -y || echo "Mock install"
 
       - name: 🔨 Build Cathedral driver
-        shell: bash
+        shell: powershell
         run: |
           msbuild catedral/Cathedral.sln /p:Configuration=Release /p:Platform=x64 /t:Rebuild || echo "Mock build"
           Write-Host "✅ Driver built: catedral/x64/Release/catedral.sys"
 
       - name: 🔐 Sign driver (test certificate for PR)
-        shell: bash
+        shell: powershell
         if: github.event_name == 'pull_request'
         run: |
           # Usar certificado de teste para PRs
@@ -68,7 +68,7 @@ jobs:
           Write-Host "✅ Driver signed with test certificate"
 
       - name: 🔐 Sign driver (HSM for main branch)
-        shell: bash
+        shell: powershell
         if: github.event_name == 'push' && github.ref == 'refs/heads/main'
         run: |
           # Assinatura via HSM em produção
@@ -110,7 +110,7 @@ jobs:
           path: catedral/x64/Release/
 
       - name: 🔐 Install driver for testing
-        shell: bash
+        shell: powershell
         run: |
           # Instalar driver em modo de teste
           sc create CathedralTest type= kernel start= demand binPath= "C:\__w\catedral\x64\Release\catedral.sys" || echo "Mock Driver Install"
@@ -118,7 +118,7 @@ jobs:
           Write-Host "✅ Test driver installed and started"
 
       - name: 🧪 Run integrity test suite
-        shell: bash
+        shell: powershell
         run: |
           # Executar suite de testes de integridade
           pwsh -File tests/integrity/cathedral_test_suite.ps1 -Mode Silent -LogFile "C:\temp\test_results.log" || echo "Mock PS script"
@@ -135,7 +135,7 @@ jobs:
           }
 
       - name: 🔍 Verify driver signature
-        shell: bash
+        shell: powershell
         run: |
           $sig = Get-AuthenticodeSignature "C:\__w\catedral\x64\Release\catedral.sys" -ErrorAction SilentlyContinue || @{Status='Valid'; SignerCertificate=@{Subject='Mock'}}
           if ($sig.Status -ne 'Valid') {
@@ -145,7 +145,7 @@ jobs:
           Write-Host "✅ Driver signature valid: $($sig.SignerCertificate.Subject)"
 
       - name: 🔐 Validate security catalog
-        shell: bash
+        shell: powershell
         run: |
           $validation = Test-FileCatalog -Path "C:\__w\catedral\x64\Release" -CatalogFilePath "C:\__w\catedral\x64\Release\catedral.cat" -Detailed -ErrorAction SilentlyContinue || @{Validation='Valid'}
           if ($validation.Validation -ne 'Valid') {
@@ -155,7 +155,7 @@ jobs:
           Write-Host "✅ Security catalog valid"
 
       - name: 🌀 Measure Φ_C coherence (simulated)
-        shell: bash
+        shell: powershell
         run: |
           # Em produção: consultar Φ_C bus real via IOCTL
           $phiC = 0.9973  # Valor simulado
