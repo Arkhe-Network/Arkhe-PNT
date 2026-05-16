@@ -141,7 +141,38 @@ class ExpandedHealingOrchestrator:
         self.config_db = config_db
         self._action_handlers: Dict[ExpandedHealingAction, Callable] = {}
         self._healing_history: List[Dict] = []
+        self._circuit_breakers_state = {}  # service_name -> {"state": "closed"|"open"|"half-open", "failures": 0}
         self._register_expanded_handlers()
+
+    async def _request_multi_agent_consensus(self, action: ExpandedHealingAction, anomaly_alert: Dict) -> bool:
+        """
+        Solicita consenso multi-agente (via barramento) antes de executar ações destrutivas.
+        Ações destrutivas precisam de aprovação de instâncias adicionais do Sentinel.
+        """
+        destructive_actions = {
+            ExpandedHealingAction.RESTART_SERVICE,
+            ExpandedHealingAction.ISOLATE_PROCESS,
+            ExpandedHealingAction.TRIGGER_FAILOVER,
+            ExpandedHealingAction.APPLY_SECURITY_PATCH,
+            ExpandedHealingAction.REVOKE_SESSIONS
+        }
+
+        if action not in destructive_actions:
+            return True  # Ações seguras passam direto
+
+        logger.info(f"🤝 Solicitando consenso multi-agente para ação destrutiva: {action.value}")
+
+        # Simula barramento: publica pedido de consenso e aguarda respostas
+        if self.phi_bus:
+            await self.phi_bus.publish_metric("healing_consensus_request", {
+                "action": action.value,
+                "alert_id": anomaly_alert.get("alert_id", "unknown")
+            })
+
+        await asyncio.sleep(0.5)  # Simula tempo de rede
+        # Mock: Assume que a malha aprovou a ação
+        logger.info(f"✅ Consenso multi-agente alcançado para {action.value}")
+        return True
 
     def _register_expanded_handlers(self):
         """Registra handlers para todas as 15+ ações."""
@@ -225,9 +256,20 @@ class ExpandedHealingOrchestrator:
         return True
 
     async def _activate_circuit_breaker(self, anomaly_alert: Dict) -> bool:
-        """Ativa circuit breaker para serviço afetado."""
+        """Ativa circuit breaker distribuído (cross-service) para o serviço afetado."""
         service = anomaly_alert.get("executable_path", "unknown")
-        logger.info(f"🔌 Ativando circuit breaker para: {service}")
+        logger.info(f"🔌 Ativando circuit breaker (Estado: OPEN) para: {service}")
+
+        # Atualiza estado interno
+        self._circuit_breakers_state[service] = {"state": "open", "opened_at": time.time()}
+
+        # Notifica serviços dependentes via barramento
+        if self.phi_bus:
+            await self.phi_bus.publish_metric("circuit_breaker_state_changed", {
+                "service": service,
+                "new_state": "open",
+                "reason": "Anomaly threshold reached"
+            })
 
         # Mock: em produção, atualizar config do circuit breaker
         await asyncio.sleep(0.15)

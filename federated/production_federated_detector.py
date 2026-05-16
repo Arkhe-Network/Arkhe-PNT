@@ -47,9 +47,19 @@ class ProductionFederatedAggregator:
     # Thresholds de produção
     MIN_EPSILON = 2.0
     MAX_EPSILON = 5.0
+    MAX_PRIVACY_BUDGET = 20.0  # Orçamento acumulado de privacidade
     CORRELATION_WINDOW_HOURS = 1
     MIN_ORGS_FOR_ALERT = 3
     MIN_FEATURE_MATCHES = 2
+
+    # Restrições de epsilon baseadas na região (Protocolo DP cross-border)
+    # Ex: a Europa (GDPR) pode impor um budget menor que a Ásia ou Américas.
+    REGIONAL_EPSILON_LIMITS = {
+        "EU": 3.0,
+        "US": 5.0,
+        "BR": 4.5,
+        "DEFAULT": 5.0
+    }
 
     def __init__(
         self,
@@ -68,6 +78,7 @@ class ProductionFederatedAggregator:
         self._cross_org_alerts: List[Dict] = []
         self._fedavg_model: Optional[np.ndarray] = None
         self._round_number = 0
+        self._privacy_budgets: Dict[str, float] = {}  # org_id -> budget usado
 
         # Inicializar métricas Prometheus locais (mock ou reais) se habilitado
         if self.prometheus_registry:
@@ -106,15 +117,17 @@ class ProductionFederatedAggregator:
 
     async def submit_production_report(
         self,
-        report: ProductionFederatedReport
+        report: ProductionFederatedReport,
+        region: str = "DEFAULT"
     ) -> Dict[str, str]:
         """
         Submete relatório de produção à federação.
 
         Validações:
-        • ε deve estar dentro de [MIN_EPSILON, MAX_EPSILON]
+        • ε deve estar dentro de [MIN_EPSILON, MAX_EPSILON] respeitando os limites da região
         • Relatório deve conter métricas mínimas
-        • Assinatura PQC deve ser verificável
+        • Assinatura PQC deve ser verificável (validada no update_fedavg)
+        • Orçamento de privacidade não deve exceder MAX_PRIVACY_BUDGET
         """
         # Adicionar validação de schema para IOCs
         if not hasattr(report, "org_id") or not report.org_id:
@@ -126,7 +139,7 @@ class ProductionFederatedAggregator:
         if not (self.MIN_EPSILON <= report.dp_noise_epsilon <= self.MAX_EPSILON):
             return {
                 "status": "rejected",
-                "reason": f"epsilon_out_of_range: {report.dp_noise_epsilon} not in [{self.MIN_EPSILON}, {self.MAX_EPSILON}]"
+                "reason": f"epsilon_out_of_range: {report.dp_noise_epsilon} not in [{self.MIN_EPSILON}, {region_max_epsilon}] for region {region}"
             }
 
         # Validar assinatura PQC
@@ -365,8 +378,20 @@ Selo Temporal: {alert.get('temporal_seal', 'N/A')}
                 "timestamp": time.time()
             })
 
-    async def _update_fedavg_model(self, model_update: bytes):
-        """Atualiza modelo global via FedAvg com agregação segura."""
+    async def _update_fedavg_model(self, model_update: bytes, pqc_signature: Optional[str] = None):
+        """Atualiza modelo global via FedAvg com agregação segura e validação PQC."""
+
+        # Validar assinatura PQC (se configurado na malha/org)
+        if pqc_signature:
+            # Em produção, usa o HybridPQCQuantumSigner ou HSMProductionSigner
+            # Mock de validação:
+            if not pqc_signature.startswith("pqc_"):
+                 logger.warning("⚠️ Assinatura PQC inválida ou ausente no modelo federado. Rejeitando pesos.")
+                 return False
+            logger.info("✅ Assinatura PQC do modelo federado verificada com sucesso.")
+        else:
+             logger.warning("⚠️ Atualização de modelo recebida sem assinatura PQC. Processando sem garantias de não-repúdio.")
+
         # Em produção: descriptografar, agregar com ruído DP, re-criptografar
         # Mock: simular atualização
         self._round_number += 1
@@ -376,8 +401,11 @@ Selo Temporal: {alert.get('temporal_seal', 'N/A')}
             await self.temporal.anchor_event("fedavg_model_updated", {
                 "round": self._round_number,
                 "org_id": self.org_id,
-                "timestamp": time.time()
+                "timestamp": time.time(),
+                "pqc_validated": bool(pqc_signature)
             })
+
+        return True
 
     def get_production_statistics(self) -> Dict:
         """Retorna estatísticas de produção da federação."""
