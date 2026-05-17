@@ -63,8 +63,6 @@ public:
 
     std::string serialize_state_json() const;
     static State deserialize_state_json(const std::string& json);
-    std::string serialize_state_msgpack() const;
-    static State deserialize_state_msgpack(const std::string& data);
 
     static void install_seccomp_filter();
     static void create_sandbox_dir(const std::filesystem::path& sandbox_root);
@@ -90,4 +88,4 @@ private:
     std::string compute_sha3_hex(const std::string& input) const;
 };
 
-}
+} // namespace arkhe::secure
