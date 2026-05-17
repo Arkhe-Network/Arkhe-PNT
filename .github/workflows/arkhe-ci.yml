@@ -21,13 +21,13 @@ jobs:
       - name: Install linters
         run: pip install black isort flake8 mypy
       - name: Black format check
-        run: black --check --diff arkhe/ || true
+        run: black --check --diff arkhe/
       - name: isort check
-        run: isort --check-only --profile black arkhe/ || true
+        run: isort --check-only --profile black arkhe/
       - name: Flake8 lint
-        run: flake8 arkhe/ --max-line-length 120 --extend-ignore E203,W503 || true
+        run: flake8 arkhe/ --max-line-length 120 --extend-ignore E203,W503
       - name: MyPy type check
-        run: mypy arkhe/ --ignore-missing-imports || true
+        run: mypy arkhe/ --ignore-missing-imports
 
   # ── Test Matrix ───────────────────────────────
   test:
@@ -51,7 +51,7 @@ jobs:
           pip install poetry==$POETRY_VERSION
           poetry install --with dev
       - name: Run unit tests with coverage
-        run: poetry run pytest tests/ --cov=arkhe --cov-report=xml --junitxml=test-results.xml || true
+        run: poetry run pytest tests/ --cov=arkhe --cov-report=xml --junitxml=test-results.xml
       - name: Upload coverage to Codecov
         uses: codecov/codecov-action@v4
         with:
@@ -67,9 +67,9 @@ jobs:
       - name: Install security tools
         run: pip install bandit safety
       - name: Bandit static analysis
-        run: bandit -r arkhe/ -ll -f json -o bandit-report.json || true
+        run: bandit -r arkhe/ -ll -f json -o bandit-report.json
       - name: Safety dependency check
-        run: safety check --file=requirements.txt --json > safety-report.json || true
+        run: safety check --file=poetry.lock --json > safety-report.json
       - name: Upload security reports
         uses: actions/upload-artifact@v4
         with:
@@ -88,8 +88,8 @@ jobs:
         with: { python-version: "3.12" }
       - name: Run ArchUnit architecture tests
         run: |
-          pip install -e . || true
-          python -m arkhe.substrate_209.archunit_sentinel || true
+          pip install -e .
+          python -m arkhe.substrate_209.archunit_sentinel
 
   # ── Build Installer (Windows) ─────────────────
   build-installer:
@@ -109,7 +109,7 @@ jobs:
           python -m arkhe.substrate_214.installer_cathedral \
             --app-name "ARKHE OS" \
             --version ${{ github.ref_name }} \
-            --output dist/ || true
+            --output dist/
       - name: Upload installer
         uses: actions/upload-artifact@v4
         with:
@@ -128,8 +128,8 @@ jobs:
         run: |
           curl -X POST https://arkhe-cathedral.internal/api/deploy/canary \
             -H "Authorization: Bearer ${{ secrets.ARKHE_DEPLOY_TOKEN }}" \
-            -d '{"service":"arkhe-core","version":"${{ github.sha }}"}' || true
+            -d '{"service":"arkhe-core","version":"${{ github.sha }}"}'
       - name: Monitor canary health (Φ_C > 0.95)
         run: |
           sleep 30
-          curl -s https://arkhe-cathedral.internal/health | jq '.phi_c >= 0.95' || true
+          curl -s https://arkhe-cathedral.internal/health | jq '.phi_c >= 0.95'
