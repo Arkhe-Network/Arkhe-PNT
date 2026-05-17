@@ -115,8 +115,8 @@ jobs:
         shell: powershell
         run: |
           # Instalar driver em modo de teste
-          $ErrorActionPreference = 'Continue'; sc create CathedralTest type= kernel start= demand binPath= "C:\__w\catedral\x64\Release\catedral.sys"; if ($LASTEXITCODE -ne 0) { Write-Host "Mock Driver Install"; exit 0 }
-          $ErrorActionPreference = 'Continue'; sc start CathedralTest; if ($LASTEXITCODE -ne 0) { Write-Host "Mock Driver Start"; exit 0 }
+          $ErrorActionPreference = 'Continue'; sc.exe create CathedralTest type= kernel start= demand binPath= "C:\__w\catedral\x64\Release\catedral.sys"; if ($LASTEXITCODE -ne 0) { Write-Host "Mock Driver Install"; exit 0 }
+          $ErrorActionPreference = 'Continue'; sc.exe start CathedralTest; if ($LASTEXITCODE -ne 0) { Write-Host "Mock Driver Start"; exit 0 }
           Write-Host "✅ Test driver installed and started"
 
       - name: 🧪 Run integrity test suite
@@ -129,7 +129,7 @@ jobs:
           $results = Get-Content "integrity_results.json" -ErrorAction SilentlyContinue | ConvertFrom-Json; if (!$?) { $results = @{Passed=1; Tests=@(1)} }
           $passRate = 100
 
-          Write-Host "📊 Test Results: $($results.Passed)/$($results.Tests.Count) passed (${passRate}%)"
+          Write-Host "📊 Test Results: $($results.Passed)/$($results.Tests.Count) passed ($passRate`%)"
 
           if ($passRate -lt $env:REQUIRED_TEST_PASS_RATE) {
             Write-Error "❌ Test pass rate below threshold: $passRate -lt $env:REQUIRED_TEST_PASS_RATE"
