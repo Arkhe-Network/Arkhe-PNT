@@ -84,7 +84,7 @@ class PQCSigner:
 
     @classmethod
     def sign(cls, message, key_label='substrate_signer'):
-        payload = f'{message}:{key_label}:{time.time()}'
+        payload = f'{message}:{key_label}'
         return hmac.new(cls.SECRET_KEY, payload.encode(), hashlib.sha3_256).hexdigest()
 
     @classmethod
