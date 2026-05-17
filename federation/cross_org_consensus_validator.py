@@ -254,7 +254,7 @@ class CrossOrgConsensusValidator:
 
     async def _finalize_consensus(self, consensus_id: str):
         """Finaliza processo de consenso e calcula resultado."""
-        pending = self._pending_validations.get(consensus_id)
+        pending = self._pending_validations.pop(consensus_id, None)
         if not pending:
             return
 
@@ -332,7 +332,6 @@ class CrossOrgConsensusValidator:
 
         # Armazenar histórico
         self._consensus_history.append(result)
-        self._pending_validations.pop(consensus_id, None)
 
         # Notificar distribuição se aprovado
         if outcome == ConsensusOutcome.APPROVED:
