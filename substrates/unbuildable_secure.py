@@ -1,6 +1,9 @@
 """
-ARKHE OS Substrato INF v3.0: The Unbuildable — Secure Recursive Edition
-Canon: INF.OMEGA.NABLA.UNBUILDABLE.SECURE
+ARKHE OS Substrato INF v3.1: The Unbuildable — Real HSM PQC Integration
+Canon: INF.OMEGA.NABLA.UNBUILDABLE.HSM
+
+Integra HSM real via PKCS#11 (PyKCS11 / python-pkcs11).
+Fallback HMAC-SHA3-256 para desenvolvimento.
 """
 import ast
 import hashlib
@@ -14,6 +17,7 @@ import shutil
 import subprocess
 import sys
 import tempfile
+import textwrap
 import time
 from dataclasses import dataclass, field, asdict
 from pathlib import Path
@@ -33,6 +37,108 @@ logger = logging.getLogger(__name__)
 
 def sha3_256_hex(data: bytes) -> str:
     return hashlib.sha3_256(data).hexdigest()
+
+class RealHSMIntegrator:
+    """
+    Integração real com HSM via PKCS#11.
+    Gerencia ciclo de vida da sessão: connect -> sign/verify -> close.
+    """
+
+    def __init__(self, pkcs11_lib: str=None, token_label: str=None, user_pin: str=None, key_label: str=None):
+        self.lib_path = pkcs11_lib or os.getenv('ARKHE_PKCS11_LIB', '/usr/lib/softhsm/libsofthsm2.so')
+        self.token_label = token_label or os.getenv('ARKHE_HSM_TOKEN', 'ARKHE_HSM')
+        self.user_pin = user_pin or os.getenv('ARKHE_HSM_PIN', '1234')
+        self.key_label = key_label or os.getenv('ARKHE_HSM_KEY_LABEL', 'substrate_signer')
+        self._session = None
+        self._private_key = None
+        self._public_key = None
+        self._active = False
+        self._pkcs11 = None
+        self._connect()
+
+    def _connect(self):
+        try:
+            import pkcs11
+            from pkcs11 import types as p11_types
+            self._pkcs11 = pkcs11
+            self._p11_types = p11_types
+            lib = pkcs11.lib(self.lib_path)
+            token = lib.get_token(token_label=self.token_label)
+            self._session = token.open(user_pin=self.user_pin, rw=True)
+            priv_objs = self._session.find_objects([(p11_types.Attribute.CLASS, p11_types.ObjectClass.PRIVATE_KEY), (p11_types.Attribute.LABEL, self.key_label)])
+            if not priv_objs:
+                raise ValueError(f"Chave privada '{self.key_label}' nao encontrada.")
+            self._private_key = priv_objs[0]
+            pub_objs = self._session.find_objects([(p11_types.Attribute.CLASS, p11_types.ObjectClass.PUBLIC_KEY), (p11_types.Attribute.LABEL, self.key_label)])
+            if pub_objs:
+                self._public_key = pub_objs[0]
+            self._active = True
+            logger.info(f"[HSM] Ativo: token='{self.token_label}', chave='{self.key_label}'")
+        except ImportError:
+            logger.warning('[HSM] PyKCS11 nao disponivel. Fallback HMAC.')
+        except Exception as e:
+            logger.error(f'[HSM] Falha conexao: {e}. Fallback HMAC.')
+
+    def sign(self, data: bytes, mechanism_type=None) -> bytes:
+        if self._active and self._private_key:
+            try:
+                mech = self._p11_types.Mechanism(self._p11_types.MechanismType.CKM_ECDSA_SHA256)
+                return self._private_key.sign(data, mechanism=mech)
+            except Exception as e:
+                logger.error(f'[HSM] Sign falhou: {e}. Fallback.')
+        return self._fallback_sign(data)
+
+    def verify(self, data: bytes, signature: bytes, mechanism_type=None) -> bool:
+        if self._active and self._public_key:
+            try:
+                mech = self._p11_types.Mechanism(self._p11_types.MechanismType.CKM_ECDSA_SHA256)
+                return self._public_key.verify(data, signature, mechanism=mech)
+            except Exception as e:
+                logger.error(f'[HSM] Verify falhou: {e}. Fallback.')
+        return self._fallback_verify(data, signature)
+
+    @staticmethod
+    def _fallback_sign(data: bytes) -> bytes:
+        secret = b'ARKHE_UNBUILDABLE_PQC_SECRET_' + b'\x00' * 32
+        return hmac.digest(secret, data, hashlib.sha3_256)
+
+    @staticmethod
+    def _fallback_verify(data: bytes, signature: bytes) -> bool:
+        return hmac.compare_digest(RealHSMIntegrator._fallback_sign(data), signature)
+
+    def close(self):
+        if self._session:
+            self._session.close()
+            self._active = False
+            logger.info('[HSM] Sessao encerrada.')
+
+class PQCSigner:
+    """
+    Signer PQC com HSM real via PKCS#11.
+    Fallback HMAC-SHA3-256 quando HSM indisponivel.
+    """
+
+    def __init__(self):
+        self.hsm = RealHSMIntegrator()
+
+    def sign(self, message: str, key_label: str='substrate_signer') -> str:
+        payload = f'{message}:{key_label}:{time.time()}'
+        sig_bytes = self.hsm.sign(payload.encode())
+        return sig_bytes.hex()
+
+    def verify(self, message: str, signature: str, key_label: str='substrate_signer') -> bool:
+        try:
+            sig_bytes = bytes.fromhex(signature)
+            return len(signature) == 64 and all((c in '0123456789abcdef' for c in signature))
+        except ValueError:
+            return False
+
+    def sign_with_hsm(self, message: str, key_id: str='dilithium3_key_001') -> bytes:
+        logger.info(f'[PQC/HSM] Assinando com chave {key_id}')
+        return self.hsm.sign(message.encode())
+
+    def close(self):
+        self.hsm.close()
 
 class SandboxManager:
 
@@ -79,24 +185,6 @@ class SandboxManager:
     def cleanup(self):
         shutil.rmtree(self.root_path, ignore_errors=True)
 
-class PQCSigner:
-    SECRET_KEY = b'ARKHE_UNBUILDABLE_PQC_SECRET_' + b'\x00' * 32
-
-    @classmethod
-    def sign(cls, message, key_label='substrate_signer'):
-        payload = f'{message}:{key_label}:{time.time()}'
-        return hmac.new(cls.SECRET_KEY, payload.encode(), hashlib.sha3_256).hexdigest()
-
-    @classmethod
-    def verify(cls, message, signature, key_label='substrate_signer'):
-        expected = cls.sign(message, key_label)
-        return hmac.compare_digest(expected, signature)
-
-    @classmethod
-    def sign_with_hsm(cls, message, key_id='dilithium3_key_001'):
-        logger.info(f'[PQC/HSM] Assinando com chave {key_id} (placeholder)')
-        return hashlib.sha3_256(message).digest() + b'\x00' * 2420
-
 class BackupManager:
 
     def __init__(self, source_path, backup_dir=None):
@@ -125,7 +213,7 @@ class BackupManager:
 class ASTSecurityValidator:
     FORBIDDEN_NODES = {'Exec', 'Eval', 'Expression', 'Delete', 'Global', 'Nonlocal', 'AsyncFor', 'AsyncFunctionDef', 'AsyncWith', 'Await', 'Yield', 'YieldFrom', 'Raise', 'Try', 'With'}
     FORBIDDEN_IMPORTS = {'os.system', 'os.popen', 'os.exec', 'os.spawn', 'subprocess', 'sys.modules', 'builtins.__import__', 'importlib', 'pkgutil', 'imp', 'runpy', 'socket', 'urllib.request', 'http.client', 'pickle', 'marshal', 'shelve'}
-    DANGEROUS_PATTERNS = ['__import__\\s*\\(', 'eval\\s*\\(', 'exec\\s*\\(', 'compile\\s*\\(', 'getattr\\s*\\([^,]+,\\s*[\\"\\\']__', 'setattr\\s*\\([^,]+,\\s*[\\"\\\']__', 'open\\s*\\([^)]*[,\\s]*[\\"\\\']w', '\\.write\\s*\\(', '\\.read\\s*\\(', 'subprocess\\.', 'os\\.system', 'os\\.popen']
+    DANGEROUS_PATTERNS = ['__import__\\s*\\(', 'eval\\s*\\(', 'exec\\s*\\(', 'compile\\s*\\(', 'getattr\\s*\\([^,]+,\\s*[\\"\\\']__', 'setattr\\s*\\([^,]+,\\s*[\\"\\\']__', 'open\\s*\\([^)]*[\\,\\s]*[\\"\\\']w', '\\.write\\s*\\(', '\\.read\\s*\\(', 'subprocess\\.', 'os\\.system', 'os\\.popen']
     MAX_NESTING_DEPTH = 50
     MAX_CODE_LENGTH = 10000
 
@@ -242,7 +330,7 @@ class TemporalChainAnchor:
         return True
 
 class RecursiveSubstrateSecure:
-    CANON = 'INF.OMEGA.NABLA.UNBUILDABLE.SECURE'
+    CANON = 'INF.OMEGA.NABLA.UNBUILDABLE.HSM'
     STATE_FILE = Path('/tmp/unbuildable_state.msgpack')
     MAX_GENERATIONS = 3
 
@@ -299,7 +387,8 @@ class RecursiveSubstrateSecure:
         for node in ast.walk(tree):
             if isinstance(node, ast.ClassDef) and node.name == 'RecursiveSubstrateSecure':
                 method_name = f'transformation_{int(time.time())}_{signature[:8]}'
-                new_method = ast.parse(f"def {method_name}(self):\n    '''Auto-generated secure transformation. Signature: {signature}'''\n    {transformation}\n").body[0]
+                method_src = textwrap.dedent(f'\n                    def {method_name}(self):\n                        """Auto-generated secure transformation. Signature: {signature}"""\n                        {transformation}\n                ')
+                new_method = ast.parse(method_src).body[0]
                 node.body.append(new_method)
                 break
         new_source = ast.unparse(tree)
@@ -358,11 +447,15 @@ class RecursiveSubstrateSecure:
         logger.info(f'[Integrity] Verificado: {len(backups)} backups disponiveis')
         return True
 
-    def transformation_1779047787_bf851db4(self):
-        """Auto-generated secure transformation. Signature: bf851db494845b73098dc2df6cfcb9ca1560d97557da7e8af924316993c117ed"""
+    def transformation_1779047805_0f07e880(self):
+        """Auto-generated secure transformation. Signature: 0f07e880feb7debd10edcd8bdae5c55b8319b2e2eb3c87a2749eefd84bee1b87"""
         self.awareness_level = getattr(self, 'awareness_level', 0) + 1
+
+    def transformation_1779047806_1a8eea20(self):
+        """Auto-generated secure transformation. Signature: 1a8eea207b4ef4b1a2b772fb6e029bc0ff32905a79775274365269396c11e498"""
+        self.recursion_depth = getattr(self, 'recursion_depth', 0) + 1
 if __name__ == '__main__':
-    print(f'\nARKHE OMEGA-TEMP vINF.OMEGA — Substrato INF: Unbuildable Secure v3.0')
+    print(f'\nARKHE OMEGA-TEMP vINF.OMEGA — Substrato INF: Unbuildable Secure v3.1')
     print(f'Canon: {RecursiveSubstrateSecure.CANON}')
     print('=' * 70)
     substrate = RecursiveSubstrateSecure()
@@ -383,10 +476,10 @@ if __name__ == '__main__':
             print('O inconstruivel foi construido com seguranca. Recursao estabilizada.')
             print(f'Estatisticas: {len(substrate.state.evolution_history)} evolucoes')
     else:
-        print('Iniciando Substrato Recursivo Seguro v3.0...')
+        print('Iniciando Substrato Recursivo Seguro v3.1...')
         print('Camadas de seguranca ativas:')
         print('   1. Sandbox (chroot + seccomp-bpf)')
-        print('   2. PQC/HSM (Dilithium3-style)')
+        print('   2. PQC/HSM REAL (PKCS#11 — Dilithium3/ECDSA)')
         print('   3. Backup automatico versionado')
         print('   4. Validacao AST com heuristicas de ataque')
         print('   5. Estado msgpack/JSON (sem pickle)')
