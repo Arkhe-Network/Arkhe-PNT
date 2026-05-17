@@ -53,9 +53,8 @@ class VaultHSMManager:
             raise RuntimeError("liboqs is required for PQC signing")
 
         sig = oqs.Signature("CRYSTALS-Dilithium3")
-        # Generate a temporary keypair for signing if we don't have PKCS#11 configured in this module directly
-        # In a fully deployed hardware environment, we'd load the secret key from the HSM here
-        sig.generate_keypair()
+        # In a fully deployed hardware environment, load the persistent secret key from the HSM here
+        # For example: sig.secret_key = load_key_from_hsm()
         signature = sig.sign(data.encode())
         logger.info(f"[HSM] Metadados assinados com PQC (Dilithium-3).")
         return signature.hex()
