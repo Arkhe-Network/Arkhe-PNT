@@ -47,6 +47,8 @@ with open(BOOT_DIR / "initrd.img", "wb") as f:
     f.write(b"ARKHE_INITRD_PLACEHOLDER")
 with open(BOOT_DIR / "boot.cat", "wb") as f:
     f.write(b"")
+with open(BOOT_DIR / "isolinux.bin", "wb") as f:
+    f.write(b"ARKHE_ISOLINUX_BIN_PLACEHOLDER")
 
 # 3. Manifesto canônico
 manifest = {
@@ -65,7 +67,7 @@ print("💿 Gerando Arkhe-OS.iso...")
 iso_name = "Arkhe-OS.iso"
 subprocess.run([
     "genisoimage", "-o", iso_name,
-    "-b", "boot/isolinux.cfg",
+    "-b", "boot/isolinux.bin",
     "-c", "boot/boot.cat",
     "-no-emul-boot", "-boot-load-size", "4", "-boot-info-table",
     "-J", "-R", "-V", "ARKHE_OS",
